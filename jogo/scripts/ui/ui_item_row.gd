@@ -11,6 +11,8 @@ var count: int = 0
 var index: int = 0
 var selected: bool = false
 var equipped: bool = false
+## Small badge after the name ("EM MÃOS", "VESTIDA").
+var tag_text: String = ""
 var hovered: bool = false
 
 func _init(owner_list, id: String, amount: int, row_index: int) -> void:
@@ -87,14 +89,14 @@ func _draw() -> void:
 	var name_width: float = cols[0] - name_x - 6
 	var name_color: Color = UiStyle.TEXT if (selected or hovered) else Color("dcd9cf")
 	var tag_width: float = 0.0
-	if equipped:
-		tag_width = medium.get_string_size("EM MÃOS", HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x + 10
+	if tag_text != "":
+		tag_width = medium.get_string_size(tag_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x + 10
 	var shown := fit(regular, str(data.get("name", item_id)), 14, name_width - tag_width)
 	draw_string(regular, Vector2(name_x, baseline), shown, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, name_color)
-	if equipped:
+	if tag_text != "":
 		var tx: float = name_x + regular.get_string_size(shown, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x + 7
 		draw_rect(Rect2(tx, size.y * 0.5 - 7, tag_width - 4, 14), Color(0.86, 0.72, 0.40, 0.22))
-		draw_string(medium, Vector2(tx + 3, size.y * 0.5 + 4), "EM MÃOS", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, UiStyle.ACCENT)
+		draw_string(medium, Vector2(tx + 3, size.y * 0.5 + 4), tag_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, UiStyle.ACCENT)
 	var cat: Array = UiStyle.category(str(data.get("tag", "")))
 	draw_string(regular, Vector2(cols[0], baseline), fit(regular, cat[0], 13, cols[1] - cols[0] - 4), HORIZONTAL_ALIGNMENT_LEFT, -1, 13, cat[1])
 	draw_string(medium, Vector2(cols[1], baseline), str(count), HORIZONTAL_ALIGNMENT_RIGHT, cols[2] - cols[1] - 8, 13, UiStyle.TEXT)
