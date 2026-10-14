@@ -4,6 +4,9 @@ class_name InventoryData
 signal changed
 const CAPACITY: float = 18.0
 const COMFORT: float = 11.0
+## Limits of this adventurer (Força changes them; see CharacterSheet).
+var capacity: float = CAPACITY
+var comfort: float = COMFORT
 var stacks: Dictionary = {}
 var equipped: String = ""
 
@@ -20,7 +23,7 @@ func add(id: String, amount: int = 1) -> int:
  if not Items.DATA.has(id) or amount <= 0:
   return 0
  var unit: float = Items.info(id)["weight"]
- var fit: int = maxi(0, int(floor((CAPACITY - weight() + 0.0001) / unit)))
+ var fit: int = maxi(0, int(floor((capacity - weight() + 0.0001) / unit)))
  var accepted: int = mini(amount, fit)
  if accepted > 0:
   stacks[id] = count(id) + accepted
@@ -75,7 +78,7 @@ func restore(data: Dictionary) -> bool:
    return false
   candidate[id] = n
   total += n * float(Items.info(id)["weight"])
- if total > CAPACITY + 0.001:
+ if total > capacity + 0.001:
   return false
  var next_equipped: String = str(data.get("equipped", ""))
  if next_equipped != "" and (not candidate.has(next_equipped) or not Items.info(next_equipped).has("damage")):
