@@ -112,6 +112,18 @@ func run(target) -> void:
 			corrupt = e
 	if corrupt:
 		check(is_equal_approx(corrupt.maximum_health, 65.0 * 1.3), "Monstros do 2º andar têm mais vida")
+		var xp_before: float = game.sheet.path_xp(["espadas", "espada_reta"])
+		corrupt.position = p.position + Vector3(1.2, 0, 0)
+		corrupt.aggro = true
+		game.inventory.equip("sword")
+		p.cooldown = 0
+		p.attack_timer = 0
+		p.attack_wait = 0
+		p.stamina = p.max_stamina
+		p.facing = Vector3.RIGHT
+		p.attack()
+		game.resolve_player_attack()
+		check(game.sheet.path_xp(["espadas", "espada_reta"]) > xp_before, "Golpe no labirinto ensina proficiência")
 	var kinds: Dictionary = {}
 	for e in game.enemies:
 		kinds[e.kind] = true
@@ -141,6 +153,7 @@ func run(target) -> void:
 	check(game.save_game(false), "Save do labirinto é gravado")
 	var raw = JSON.parse_string(FileAccess.get_file_as_string(game.save_path))
 	check(raw["version"] == 2 and raw["seed"] == 777 and raw["floor"] == 2 and raw["floors"].has("1"), "Save guarda semente, andar e o estado do 1º andar")
+	check(raw.has("sheet") and game.sheet.enabled, "Save do labirinto guarda o aventureiro")
 	game.inventory.remove("gema", 2)
 	game.floor_states.clear()
 	check(game.load_game() and game.inventory.count("gema") == 2 and game.floor_states.has(1), "Carregar restaura mochila e andares visitados")
@@ -165,6 +178,7 @@ func run(target) -> void:
 	check(game.ended and not FileAccess.file_exists(game.save_path), "Morte encerra a expedição e apaga o save da expedição")
 	var known = JSON.parse_string(FileAccess.get_file_as_string(game.knowledge_path))
 	check(known is Dictionary and int(known["seed"]) == 777 and known["knowledge"]["1"].size() == known_cells, "Conhecimento e semente ficam guardados depois da morte")
+	check(not known.has("sheet"), "Proficiências não sobrevivem à morte: o próximo aventureiro começa do zero")
 	var labels: Array = []
 	for b in game.ui.end_buttons.get_children():
 		labels.append(b.text)
