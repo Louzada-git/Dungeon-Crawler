@@ -1,5 +1,20 @@
 # Dungepm — As Cisternas
 
+## Novo: armas (14/10/2026)
+
+Nove armas novas, ainda com modelo provisório de blocos:
+
+- **Adaga:** rápida e barata; dano ×2,5 em monstro desprevenido (que ainda não te viu).
+- **Katana:** corte rápido num arco estreito, até 2 alvos.
+- **Montante:** duas mãos, arco largo, até 4 alvos e empurra; lento e cansativo.
+- **Machado de guerra:** o monstro sangra 5 por segundo durante 5 s.
+- **Maça de flanges:** atordoa quase 1 s e empurra; dano ×1,5 nos blindados (brutamontes, guardiões, chefe).
+- **Martelo de guerra:** pancada no chão à frente que acerta todos na área.
+- **Alabarda:** estocada longa que atravessa o primeiro inimigo.
+- **Arco curto e besta:** ataque à distância com flechas e virotes. O que fica preso num monstro volta com os pertences dele; metade do que erra fica no chão para recolher.
+
+As armas aparecem nos baús, mais nos de tesouro, nos covis e no relicário do chefe. Para testar todas de uma vez: **Esc → Arsenal de teste** coloca um baú com todas as armas e munição ao seu lado. É uma ferramenta de desenvolvimento e sai antes do lançamento.
+
 ## Novo: o labirinto (13/10/2026)
 
 Cada expedição gera um labirinto a partir de uma semente. O 1º andar tem 10 salas; cada andar seguinte é maior (20, 40, 60…).
