@@ -41,11 +41,17 @@ var attack_recovery: float = 0.0
 var step_time: float = 0.0
 var aggro: bool = false
 var alive: bool = true
+var armored: bool = false
+var bleed_time: float = 0.0
+var bleed_dps: float = 0.0
+## Ammunition stuck in this monster; it drops with its belongings.
+var stuck: Dictionary = {}
 
 func _ready() -> void:
 	stats = EnemyTypes.info(kind)
 	heavy = kind == "guardiao"
 	boss = stats.get("boss", false)
+	armored = stats.get("armored", false)
 	var scaling: Dictionary = LabyrinthGenerator.scaling(level)
 	damage_scale = scaling["damage"]
 	speed = float(stats.get("speed", 2.6))
@@ -97,6 +103,9 @@ func display_name() -> String:
 func _physics_process(delta: float) -> void:
 	if not alive or game.player.health <= 0:
 		return
+	tick_bleed(delta)
+	if not alive:
+		return
 	var player = game.player
 	var distance: float = global_position.distance_to(player.global_position)
 	if distance > SLEEP_DISTANCE and not aggro:
@@ -104,7 +113,8 @@ func _physics_process(delta: float) -> void:
 		return
 	visible = distance < 20 and game.clear_line(player.global_position, global_position)
 	health_label.visible = not boss and (aggro or health < maximum_health)
-	health_label.text = "%s  %d" % [display_name(), ceil(health)]
+	health_label.text = "%s  %d%s" % [display_name(), ceil(health), "  · sangrando" if bleed_time > 0 else ""]
+	health_label.modulate = Color("ff8f7a") if bleed_time > 0 else Color("ecb9a7")
 	cooldown = maxf(0, cooldown - delta)
 	stagger = maxf(0, stagger - delta)
 	memory = maxf(0, memory - delta)
@@ -201,15 +211,19 @@ func _strike(player) -> void:
 	slamming = false
 	cooldown = 1.2 if not enraged else 0.85
 
-func receive_damage(amount: float, direction: Vector3 = Vector3.ZERO) -> void:
+## hit: optional "stagger" (seconds) and "knockback" (weapon force; 3 is the base).
+func receive_damage(amount: float, direction: Vector3 = Vector3.ZERO, hit: Dictionary = {}) -> void:
 	if not alive:
 		return
 	health -= amount
 	# Bosses flinch briefly instead of being stun-locked.
-	stagger = 0.25 if not boss else 0.06
-	impulse = direction.normalized() * float(stats.get("knockback", 3.0))
+	if boss:
+		stagger = 0.12 if hit.has("stagger") else 0.06
+	else:
+		stagger = float(hit.get("stagger", 0.25))
+	impulse = direction.normalized() * float(stats.get("knockback", 3.0)) * float(hit.get("knockback", 3.0)) / 3.0
 	if animator.has_animation("hit") and not (boss and windup > 0):
-		animator.play("hit", 0.04, animator.get_animation("hit").length / 0.25)
+		animator.play("hit", 0.04, animator.get_animation("hit").length / maxf(0.25, minf(stagger, 0.6)))
 	if not boss:
 		windup = 0
 		telegraph.visible = false
@@ -223,12 +237,35 @@ func receive_damage(amount: float, direction: Vector3 = Vector3.ZERO) -> void:
 		game.message("%s se enfurece!" % display_name(), 3)
 		game.camera_impact(0.12)
 	if health <= 0:
-		alive = false
-		collision_layer = 0
-		collision_mask = 0
-		health_label.visible = false
-		telegraph.visible = false
-		if slam_ring:
-			slam_ring.visible = false
-		Visuals.play(animator, "die", false)
-		game.enemy_defeated(self)
+		_die()
+
+func apply_bleed(dps: float, time: float) -> void:
+	if not alive:
+		return
+	bleed_dps = maxf(bleed_dps, dps)
+	bleed_time = maxf(bleed_time, time)
+
+func tick_bleed(delta: float) -> void:
+	if bleed_time <= 0 or not alive:
+		return
+	var step: float = minf(delta, bleed_time)
+	bleed_time -= step
+	health -= bleed_dps * step
+	if bleed_time <= 0:
+		bleed_dps = 0
+	if health <= 0:
+		_die()
+
+func _die() -> void:
+	if not alive:
+		return
+	alive = false
+	bleed_time = 0
+	collision_layer = 0
+	collision_mask = 0
+	health_label.visible = false
+	telegraph.visible = false
+	if slam_ring:
+		slam_ring.visible = false
+	Visuals.play(animator, "die", false)
+	game.enemy_defeated(self)
