@@ -45,6 +45,11 @@ func equip(id: String) -> bool:
  changed.emit()
  return true
 
+func unequip() -> void:
+ if equipped != "":
+  equipped = ""
+  changed.emit()
+
 func transfer_from(source: Dictionary, id: String, requested: int) -> int:
  var accepted: int = add(id, mini(int(source.get(id, 0)), requested))
  if accepted > 0:
