@@ -44,6 +44,8 @@ var alive: bool = true
 var armored: bool = false
 var bleed_time: float = 0.0
 var bleed_dps: float = 0.0
+## Proficiency path of the weapon that opened the wound (bleeding damage teaches it).
+var bleed_path: Array = []
 ## Ammunition stuck in this monster; it drops with its belongings.
 var stuck: Dictionary = {}
 
@@ -239,9 +241,10 @@ func receive_damage(amount: float, direction: Vector3 = Vector3.ZERO, hit: Dicti
 	if health <= 0:
 		_die()
 
-func apply_bleed(dps: float, time: float) -> void:
+func apply_bleed(dps: float, time: float, path: Array = []) -> void:
 	if not alive:
 		return
+	bleed_path = path
 	bleed_dps = maxf(bleed_dps, dps)
 	bleed_time = maxf(bleed_time, time)
 
@@ -250,7 +253,9 @@ func tick_bleed(delta: float) -> void:
 		return
 	var step: float = minf(delta, bleed_time)
 	bleed_time -= step
+	var dealt: float = minf(bleed_dps * step, maxf(0.0, health))
 	health -= bleed_dps * step
+	game.sheet.award_damage(self, dealt, bleed_path)
 	if bleed_time <= 0:
 		bleed_dps = 0
 	if health <= 0:
