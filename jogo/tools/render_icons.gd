@@ -20,12 +20,19 @@ const FRAMING = {
 }
 const ALIASES = {"weapon-sword": "espada", "weapon-spear": "lanca", "pot": "vaso", "potion": "bandagem", "rocks": "rochas", "coin": "moeda", "key": "selo"}
 
-## Every catalog item plus the two container kinds: [id, model, tint].
+## Every catalog item plus the two container kinds: [id, model name, framing].
+## Items use Visuals.item_model (made-for-it .glb, block model or shared model);
+## "icon_view" in the item data overrides the framing.
 func entries() -> Array:
-	var out: Array = [["container_chest", "bau", ""], ["container_sack", "saco", ""]]
+	var out: Array = [["container_chest", "bau", FRAMING["bau"]], ["container_sack", "saco", FRAMING["saco"]]]
 	for id in Items.DATA:
 		var data: Dictionary = Items.DATA[id]
-		out.append([id, ALIASES.get(data["model"], data["model"]), str(data.get("tint", ""))])
+		var model: String = ALIASES.get(data["model"], data["model"])
+		var framing: Array = FRAMING.get(model, [Vector3(0, 0, -45), 1.06, 35.0] if data.get("tag", "") in ["ARMA", "MUNICAO"] else [Vector3.ZERO, 1.2, 30.0])
+		if data.has("icon_view"):
+			var v: Dictionary = data["icon_view"]
+			framing = [Vector3(v["rot"][0], v["rot"][1], v["rot"][2]), float(v.get("margin", 1.06)), float(v.get("pitch", 35.0))]
+		out.append([id, model, framing])
 	return out
 
 func _initialize() -> void:
@@ -42,7 +49,7 @@ func mesh_bounds(node: Node, acc: Array) -> void:
 func render_all() -> void:
 	for item in entries():
 		var id: String = item[0]
-		var framing: Array = FRAMING.get(item[1], [Vector3.ZERO, 1.2, 30.0])
+		var framing: Array = item[2]
 		var entry: Array = [item[1], framing[0], framing[1], framing[2]]
 		var viewport := SubViewport.new()
 		viewport.size = Vector2i(SIZE, SIZE)
@@ -72,10 +79,8 @@ func render_all() -> void:
 		viewport.add_child(rim)
 		var holder := Node3D.new()
 		viewport.add_child(holder)
-		var model: Node3D = load("res://assets/originais/%s.glb" % entry[0]).instantiate()
+		var model: Node3D = Visuals.item_model(id) if Items.DATA.has(id) else load("res://assets/originais/%s.glb" % entry[0]).instantiate()
 		holder.add_child(model)
-		if item[2] != "":
-			Visuals.tint(model, Color(item[2]))
 		holder.rotation_degrees = entry[1]
 		var camera := Camera3D.new()
 		camera.projection = Camera3D.PROJECTION_ORTHOGONAL
