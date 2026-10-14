@@ -245,8 +245,8 @@ func _switch_to(entry: Dictionary) -> void:
 
 func update_bars() -> void:
 	var weight: float = game.inventory.weight()
-	weight_label.text = "%s / %s kg" % [UiStyle.fmt(weight), UiStyle.fmt(InventoryData.CAPACITY, 0)]
-	weight_label.add_theme_color_override("font_color", UiStyle.TEXT if weight <= InventoryData.COMFORT else UiStyle.WARN)
+	weight_label.text = "%s / %s kg" % [UiStyle.fmt(weight), UiStyle.fmt(game.inventory.capacity, 0)]
+	weight_label.add_theme_color_override("font_color", UiStyle.TEXT if weight <= game.inventory.comfort else UiStyle.WARN)
 	weight_meter.queue_redraw()
 	var target: Dictionary = loot if is_open else game.nearest_container()
 	if target.is_empty():
@@ -269,10 +269,10 @@ func _draw_weight() -> void:
 	var r := Rect2(Vector2.ZERO, weight_meter.size)
 	weight_meter.draw_rect(r, Color(0.13, 0.13, 0.12, 0.95))
 	var weight: float = game.inventory.weight()
-	var ratio: float = clampf(weight / InventoryData.CAPACITY, 0.0, 1.0)
-	var color: Color = UiStyle.GOOD if weight <= InventoryData.COMFORT else (UiStyle.WARN if weight <= 15.0 else UiStyle.BAD)
+	var ratio: float = clampf(weight / game.inventory.capacity, 0.0, 1.0)
+	var color: Color = UiStyle.GOOD if weight <= game.inventory.comfort else (UiStyle.WARN if weight <= lerpf(game.inventory.comfort, game.inventory.capacity, 0.57) else UiStyle.BAD)
 	weight_meter.draw_rect(Rect2(0, 0, r.size.x * ratio, r.size.y), color)
-	var comfort_x: float = r.size.x * InventoryData.COMFORT / InventoryData.CAPACITY
+	var comfort_x: float = r.size.x * game.inventory.comfort / game.inventory.capacity
 	weight_meter.draw_rect(Rect2(comfort_x, -2, 1, r.size.y + 4), Color(1, 1, 1, 0.65))
 	weight_meter.draw_rect(r, Color(0, 0, 0, 0.7), false, 1.0)
 
@@ -311,7 +311,7 @@ func _refresh_buttons() -> void:
 		for key in items:
 			count += int(items[key])
 			w += float(Items.info(key).get("weight", 0.0)) * int(items[key])
-		loot_detail.text = "Aqui: %d %s, %s kg  ·  livre na mochila: %s kg" % [count, "item" if count == 1 else "itens", UiStyle.fmt(w), UiStyle.fmt(InventoryData.CAPACITY - game.inventory.weight())]
+		loot_detail.text = "Aqui: %d %s, %s kg  ·  livre na mochila: %s kg" % [count, "item" if count == 1 else "itens", UiStyle.fmt(w), UiStyle.fmt(game.inventory.capacity - game.inventory.weight())]
 
 func _use_label(id: String) -> String:
 	if Items.info(id).has("damage"):
