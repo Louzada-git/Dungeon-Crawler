@@ -40,7 +40,8 @@ A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrint
 | `systems/save_system.gd` | Save JSON (versão 2), validação, estado por andar e conhecimento. |
 | `systems/labyrinth_generator.gd` | Gera um andar por semente e o valida (alcance, chefe, selo, ids). |
 | `systems/projectile.gd` | Flechas e virotes em voo: paredes, monstros atravessados, munição presa e recuperável. |
-| `proficiency_tree.gd` | Leitura da árvore de proficiências. |
+| `proficiency_tree.gd` | Leitura de `proficiencias.json`: atributos, curva, ramos e habilidades. |
+| `character_sheet.gd` | O aventureiro da run: atributos, experiência por ramo, domínio das armas, habilidades desbloqueadas e efeitos dos atributos. |
 | `systems/game_camera.gd`, `systems/aim_marker.gd`, `systems/input_setup.gd` | Câmera, marcador de mira, teclas. |
 | `ui.gd` + `ui/` | HUD: um arquivo por painel (ver comentários no topo de cada um). |
 
@@ -52,6 +53,16 @@ A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrint
 - **Animação:** `animacao` é o nome desejado; enquanto o personagem não a tiver, `DungeonPlayer.attack_animation` usa a mais próxima.
 - Especificação para modelos e animações: `../arte/ARMAS_ESPEC.md`.
 
+## Atributos e proficiências
+
+- **Atributos** (Força, Vigor, Agilidade, Destreza) são escolhidos no início de cada run (painel "Novo aventureiro"). Mudam carga, vida, fôlego, esquiva e passo, e definem o potencial de cada ramo: velocidade de aprendizado (0,6 + 0,08 × atributo) e nível máximo (10 + 4 × atributo).
+- **Experiência** vem do dano causado (o monstro inteiro vale o seu `xp` em `inimigos.json`, +25% por andar), de escapar de golpes esquivando e de tratar ferimentos. A experiência de um golpe se divide entre os ramos do caminho da arma (Espadas › Katana) sem contar duas vezes.
+- **Domínio** de uma arma = nível que a soma da experiência do caminho alcança. Por isso armas de um ou dois ramos evoluem no mesmo ritmo, e praticar uma espada ajuda as outras pela raiz. Cada nível de domínio dá +2% de dano e −1% de fôlego.
+- **Habilidades** (`perks`) destravam por nível de ramo e mudam os números da arma (`CharacterSheet.weapon_stats`).
+- **Anti-repetição:** acima de 3 + 4 × andar do monstro, a experiência cai pela metade a cada 1,5 nível.
+- **Morte:** o save da run (com o aventureiro) é apagado; o conhecimento não guarda proficiências.
+- Simulação do ritmo com o código real: `godot --headless --path jogo -s res://tests/progression_sim.gd`.
+
 ## Testes e ferramentas
 
 - `tests/runtime_test.gd`: suíte no mundo fixo. `godot --headless --path jogo -- --test`.
@@ -59,6 +70,7 @@ A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrint
 - `tests/generator_check.gd`: gera muitos andares e aponta problemas. `godot --headless --path jogo -s res://tests/generator_check.gd -- 60 4`.
 - `tests/labyrinth_capture.gd`: capturas do labirinto (precisa de tela).
 - `tests/weapons_capture.gd`: armas em mãos e em uso (precisa de tela).
+- `tests/proficiency_capture.gd`: criação de personagem, janela de proficiências e aviso de nível (precisa de tela).
 - `tests/hud_capture.gd`: capturas do HUD para revisão (precisa de tela).
 - `tools/render_icons.gd`: gera os ícones dos itens a partir dos modelos.
 
