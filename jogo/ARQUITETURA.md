@@ -43,6 +43,7 @@ A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrint
 | `proficiency_tree.gd` | Leitura de `proficiencias.json`: atributos, curva, ramos e habilidades. |
 | `character_sheet.gd` | O aventureiro da run: atributos, experiência por ramo, domínio das armas, habilidades desbloqueadas e efeitos dos atributos. |
 | `systems/game_camera.gd`, `systems/aim_marker.gd`, `systems/input_setup.gd` | Câmera, marcador de mira, teclas. |
+| `systems/psx_filter.gd` | Filtro de PlayStation: pós-processamento, materiais com vértices presos à grade e texto do mundo nítido. |
 | `ui.gd` + `ui/` | HUD: um arquivo por painel (ver comentários no topo de cada um). |
 
 ## Armas
@@ -92,6 +93,14 @@ A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrint
 - **Gerador:** `LabyrinthGenerator._roll_lock` sorteia fechaduras com um gerador próprio, então ligar ou ajustar fechaduras não muda o resto do andar de uma semente. Tesouro 80%, covil 40%, suprimentos 25%, combate 15%; o relicário do chefe nunca. Dificuldade 1 + (andar − 1) / 2, +1 no tesouro, ±1, entre 1 e 4.
 - **Animações opcionais:** quando o personagem tiver `soco`, `bloqueio`, `furtivo` ou `furtivo_andar`, o jogo usa; até lá, ataque, guarda e caminhada normais.
 
+## Filtro PSX
+
+- **Pós-processamento** (`PsxFilter.POST_SHADER`) num `CanvasLayer` de camada 0, abaixo do HUD (camada 1): a imagem é tirada em blocos de cerca de 300 linhas (`LINES`; 3 px numa janela de 900), cada bloco é a média dos seus pixels, e a cor cai para 15 bits (`COLOR_LEVELS` = 32 por canal) com pontilhado ordenado 4×4.
+- **Materiais:** todo `StandardMaterial3D` opaco e iluminado vira um `ShaderMaterial` (`SURFACE_SHADER`) com a mesma cor, textura, cor de vértice, rugosidade, metal e emissão, textura lida sem suavização e vértices presos à mesma grade de 300 linhas (o tremido do PS1). A troca acontece quando o nó entra na árvore (`node_added`, adiada para o fim do quadro); lotes de `MultiMeshInstance3D` recebem uma cópia da malha. Materiais transparentes, sem sombra (anéis, chamas) e com `no_depth_test` ficam como estão.
+- **Texto do mundo:** cada `Label3D` sai da câmera (`layers = 0`) e é desenhado como `Label` 2D nítido na posição projetada, com o mesmo tamanho na tela (`font_size × pixel_size × altura da janela / camera.size`).
+- **Liga/desliga:** botão "Filtro PSX" na pausa; `main.set_psx` guarda a escolha em `user://configuracoes.cfg` (`[video] psx`). Desligar devolve os materiais originais, guardados em metadados de cada nó. Padrão: ligado.
+- Captura de comparação: `tests/psx_capture.gd`.
+
 ## Testes e ferramentas
 
 - `tests/runtime_test.gd`: suíte no mundo fixo. `godot --headless --path jogo -- --test`.
@@ -101,6 +110,7 @@ A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrint
 - `tests/weapons_capture.gd`: armas em mãos e em uso (precisa de tela).
 - `tests/proficiency_capture.gd`: criação de personagem, janela de proficiências e aviso de nível (precisa de tela).
 - `tests/skills_capture.gd`: armaduras no corpo, guarda, furtivo, baú trancado, dica de armadura e janela agrupada (precisa de tela).
+- `tests/psx_capture.gd`: as mesmas cenas com e sem o filtro PSX (precisa de tela).
 - `tests/hud_capture.gd`: capturas do HUD para revisão (precisa de tela).
 - `tools/render_icons.gd`: gera os ícones dos itens a partir dos modelos.
 
