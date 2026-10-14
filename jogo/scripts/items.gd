@@ -1,15 +1,30 @@
 extends RefCounted
 class_name Items
+## Item catalog loaded from data/itens.json. Names and descriptions are keys
+## in data/textos.csv and come back translated from info().
 
-const DATA = {
- "sword": {"name":"Espada de viajante", "tag":"ARMA", "weight":2.4, "damage":24.0, "range":2.1, "cost":17.0, "cooldown":0.62, "windup":0.22, "style":"slash", "angle":55.0, "targets":3, "description":"Equilibrada e confiável. Um corte custa 17 de fôlego.", "model":"weapon-sword"},
- "spear": {"name":"Lança da guarda", "tag":"ARMA", "weight":3.6, "damage":29.0, "range":3.2, "cost":23.0, "cooldown":0.85, "windup":0.30, "style":"thrust", "angle":7.0, "width":0.34, "targets":1, "description":"Estocada longa de 3,2 m em linha reta. Atinge o primeiro alvo e custa 23 de fôlego.", "model":"weapon-spear"},
- "ration": {"name":"Ração de viagem", "tag":"ALIMENTO", "weight":0.45, "food":35.0, "stamina_gain":12.0, "description":"Restaura 35 de saciedade. Comer também ajuda na recuperação do fôlego.", "model":"pot"},
- "bandage": {"name":"Bandagem limpa", "tag":"TRATAMENTO", "weight":0.15, "heal":18.0, "stops_bleeding":true, "description":"Estanca o sangramento e recupera 18 de vida.", "model":"potion"},
- "ore": {"name":"Ferro bruto", "tag":"MATERIAL", "weight":1.6, "description":"Material pesado. Leve só o que consegue carregar.", "model":"rocks"},
- "coin": {"name":"Moeda antiga", "tag":"TESOURO", "weight":0.02, "description":"Encontrada entre os pertences da antiga guarnição.", "model":"coin"},
- "seal": {"name":"Selo das cisternas", "tag":"OBJETIVO", "weight":0.6, "description":"Recupere este selo e retorne ao abrigo de entrada.", "model":"key"}
-}
+const PATH := "res://data/itens.json"
+static var DATA: Dictionary = _load()
+static var _resolved: Dictionary = {}
 
+static func _load() -> Dictionary:
+	var raw = JSON.parse_string(FileAccess.get_file_as_string(PATH))
+	if not raw is Dictionary or not raw.get("itens") is Dictionary:
+		push_error("Catálogo de itens inválido: " + PATH)
+		return {}
+	return raw["itens"]
+
+## Item data with text already translated. Treat the result as read-only.
 static func info(id: String) -> Dictionary:
- return DATA.get(id, {})
+	if not DATA.has(id):
+		return {}
+	if not _resolved.has(id):
+		var data: Dictionary = DATA[id].duplicate(true)
+		data["name"] = str(TranslationServer.translate(str(data.get("name", id))))
+		data["description"] = str(TranslationServer.translate(str(data.get("description", ""))))
+		_resolved[id] = data
+	return _resolved[id]
+
+## Drops translated copies, e.g. after a language change.
+static func clear_cache() -> void:
+	_resolved.clear()
