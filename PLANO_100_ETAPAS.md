@@ -30,6 +30,8 @@ As etapas têm tamanhos diferentes: decidir a regra de morte cabe numa conversa,
 
 - **14/10/2026 · Armas novas com modelo provisório.** Adaga, katana, montante, machado, maça, martelo, alabarda, arco e besta, com flechas e virotes. Cada uma tem uma mecânica própria por dados (furtivo, sangramento, esmagar armadura, pancada em área, perfurar, projéteis) e indica o ramo de proficiência que vai treinar. Modelos de blocos substituíveis por `.glb`; especificação de modelos e animações em `arte/ARMAS_ESPEC.md`. Antecipa parte das etapas 20, 38 e 64.
 
+- **14/10/2026 · Filtro PSX.** O dono do projeto gosta do estilo de PlayStation 1. Primeiro passo: filtro de pós-processamento e materiais com vértices presos à grade, ligável na pausa (`scripts/systems/psx_filter.gd`). Próximos passos possíveis, ainda não pedidos: labirinto com o PSX Dungeon (Goblinatron, CC BY 4.0), monstros do Characters PSX e efeitos do Brackeys VFX. Antecipa parte da etapa 47 (direção visual).
+
 - **14/10/2026 · Armas com modelos de pacotes.** RPG Weapons (Binbun, CC0) e Low Poly Weapon Pack (Kickin' It Studios) no lugar dos blocos, convertidos por `arte/fontes/converter_armas.gd`. Antecipa parte da etapa 64.
 
 - **14/10/2026 · Perícias no estilo Oblivion, sem magia.** Árvore em grupos (Combate, Furtividade, Sobrevivência) com Lâminas e Pontaria como raízes; Desarmado, Bloqueio com guarda no botão direito, armaduras leves e pesadas com Armadura leve/pesada, Atletismo, Furtividade (C agacha, ataque furtivo), Acrobacia (antiga Esquiva) e Arrombamento com baús trancados e gazuas. Antecipa parte das etapas 42 (armaduras básicas), 53 (árvore), 64 (escudo/guarda) e 65 (armaduras). Ficaram para depois: magia, Alquimia, Reparo, Comércio e Oratória.
