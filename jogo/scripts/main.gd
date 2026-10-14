@@ -230,12 +230,29 @@ func nearest_loot() -> Dictionary:
    best = d
  return nearest
 
+# Containers within reach for the inventory tabs: chests even when empty
+# (items can be stored in them) and ground piles that still hold something.
+func nearby_containers(reach: float = 2.4) -> Array:
+ var found: Array = []
+ for loot in containers:
+  if loot["items"].is_empty() and not loot.get("chest",true):
+   continue
+  var p = Vector3(loot["pos"][0],0,loot["pos"][1])
+  if p.distance_to(player.position) < reach and clear_line(player.position,p):
+   found.append(loot)
+ found.sort_custom(func(a,b): return Vector3(a["pos"][0],0,a["pos"][1]).distance_squared_to(player.position) < Vector3(b["pos"][0],0,b["pos"][1]).distance_squared_to(player.position))
+ return found
+
+func nearest_container() -> Dictionary:
+ var found: Array = nearby_containers()
+ return found[0] if not found.is_empty() else {}
+
 func interaction_text() -> String:
  if player.position.distance_to(camp_position) < 1.6:
   return "E   RETORNAR COM O SELO" if inventory.count("seal") > 0 else "E   DESCANSAR E SALVAR NO ABRIGO"
- var loot = nearest_loot()
+ var loot = nearest_container()
  if not loot.is_empty():
-  return "E   VASCULHAR  ·  " + loot["name"]
+  return ("E   VASCULHAR  ·  " if not loot["items"].is_empty() else "E   ABRIR  ·  ") + loot["name"] + ("" if not loot["items"].is_empty() else "  (vazio)")
  return ""
 
 func interact() -> void:
@@ -249,7 +266,7 @@ func interact() -> void:
    save_game(false)
    message("Expedição salva. Alimente-se e trate ferimentos antes de sair.")
   return
- var loot = nearest_loot()
+ var loot = nearest_container()
  if not loot.is_empty():
   sound.play_at("loot",player.global_position,0.6)
   ui.open_inventory(loot)
@@ -315,31 +332,56 @@ func use_item(id: String) -> bool:
   inventory.equip(id)
   message("Equipado: "+Items.info(id)["name"])
   return true
- if id == "ration":
+ var data: Dictionary = Items.info(id)
+ if data.has("food"):
   if player.food >= 100:
    message("Você já está alimentado.")
    return false
-  player.food = minf(100,player.food+35)
-  player.stamina = minf(100,player.stamina+12)
- elif id == "bandage":
+  player.food = minf(100,player.food+float(data["food"]))
+  player.stamina = minf(100,player.stamina+float(data.get("stamina_gain",0.0)))
+ elif data.has("heal"):
   if player.health >= 100 and not player.bleeding:
    message("Você não precisa de tratamento agora.")
    return false
-  player.bleeding = false
-  player.health = minf(100,player.health+18)
+  if data.get("stops_bleeding",false):
+   player.bleeding = false
+  player.health = minf(100,player.health+float(data["heal"]))
  else:
   return false
  inventory.remove(id)
  ui.refresh_inventory()
  return true
 
-func drop_item(id: String) -> bool:
- if not inventory.remove(id):
+func drop_item(id: String, amount: int = 1) -> bool:
+ amount = mini(amount,inventory.count(id))
+ if amount <= 0 or not inventory.remove(id,amount):
   return false
- add_loot("Itens deixados",layout.to_cell(player.position),{id:1},false)
+ # Reuse a ground pile on the same spot instead of stacking new ones.
+ var pile: Dictionary = {}
+ for loot in containers:
+  if not loot.get("chest",true) and Vector3(loot["pos"][0],0,loot["pos"][1]).distance_to(player.position) < 0.9:
+   pile = loot
+   break
+ if pile.is_empty():
+  add_loot("Itens deixados",layout.to_cell(player.position),{id:amount},false)
+ else:
+  pile["items"][id] = int(pile["items"].get(id,0))+amount
  ui.refresh_inventory()
- message("Item deixado no chão. Use E para recuperá-lo.")
+ message("Item deixado no chão. Use E para recuperá-lo." if amount == 1 else "%d itens deixados no chão. Use E para recuperá-los." % amount)
  return true
+
+## Moves items from the backpack into a container (chest or ground pile).
+func store_item(id: String, amount: int, container: Dictionary) -> int:
+ amount = mini(amount,inventory.count(id))
+ if amount <= 0 or container.is_empty() or not containers.has(container):
+  return 0
+ if not inventory.remove(id,amount):
+  return 0
+ container["items"][id] = int(container["items"].get(id,0))+amount
+ sound.play_at("loot",player.global_position,0.35)
+ message("Guardado em %s: %s ×%d." % [container["name"],Items.info(id)["name"],amount])
+ ui.refresh_inventory()
+ return amount
 
 func on_inventory_changed() -> void:
  if player:
