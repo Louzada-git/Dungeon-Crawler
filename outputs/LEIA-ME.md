@@ -1,9 +1,29 @@
 # Dungepm — As Cisternas
 
+## Novo: perícias no estilo Oblivion, ainda sem magia (14/10/2026)
+
+A árvore de proficiências agora tem três grupos, como as perícias de Oblivion:
+
+- **Combate:** Lâminas (espadas e adaga), Contundentes (maça, martelo e agora os machados), Hastes, **Desarmado**, **Bloqueio**, **Armadura pesada**, **Atletismo**.
+- **Furtividade:** **Furtividade**, Pontaria (arco e besta), **Armadura leve**, **Acrobacia** (a antiga Esquiva) e **Arrombamento**.
+- **Sobrevivência:** Tratamento.
+
+O que mudou no jogo:
+
+- **Socar:** sem arma em mãos, o botão esquerdo dá um soco (8 de dano, rápido e barato). Treina Desarmado.
+- **Guarda:** segurar o botão direito com arma corpo a corpo (ou de punhos) segura 40% dos golpes que vêm de frente (25% com os punhos), gastando fôlego. Golpe pelas costas passa. Sem fôlego, a guarda quebra. A pancada em área do chefe não dá para segurar. Treina Bloqueio.
+- **Armaduras:** gibão acolchoado e couro (leves), cota de malha e armadura de placas (pesadas). Vestir e tirar pelo inventário; a armadura aparece no corpo do personagem. As pesadas protegem mais, mas deixam o passo mais lento, o fôlego volta mais devagar e os monstros te notam de mais longe. O dano que a armadura absorve treina Armadura leve ou pesada, e o treino reduz essas desvantagens.
+- **C para andar agachado:** passo lento e quase silencioso. Um monstro que te veria a 7,5 m só te nota a 3,75 m de frente, e a 2,25 m se você chegar por trás. Golpe agachado em quem não te viu: dano ×1,5 com qualquer arma (com a adaga, soma ao bônus dela). Treina Furtividade.
+- **Correr** treina Atletismo, bem mais quando algo está te perseguindo.
+- **Baús trancados:** parte dos baús vem com fechadura (simples, média, difícil ou de mestre), mais nos de tesouro e em andares fundos. O conteúdo fica escondido até você abrir. Com uma **gazua**, E tenta arrombar e mostra a chance; uma tentativa que falha pode quebrar a gazua. Você começa com 2 gazuas no abrigo. Treina Arrombamento.
+- Cada novo ramo destrava uma habilidade no nível 5 (alguns também no 10), por exemplo Guarda firme (bloquear gasta menos fôlego), Silenciosa (armadura leve sem barulho), Golpe pelas costas (ataque furtivo ×2) e Mão leve (gazuas quebram menos).
+
+Ainda não entrou: magia e Alquimia, Reparo (precisa de desgaste por item), Comércio e Oratória (precisam de mercadores). Personagens sem arte própria para agachar e bloquear usam as animações de guarda e caminhada por enquanto.
+
 ## Novo: atributos e proficiências (14/10/2026)
 
 - **Novo aventureiro:** no começo de cada run você distribui 20 pontos entre Força, Vigor, Agilidade e Destreza (de 2 a 9 cada). Eles mudam carga, vida, fôlego e esquiva, e definem quão rápido e até onde cada proficiência pode crescer.
-- **Proficiências crescem com o uso:** acertar monstros treina o caminho da arma (por exemplo Espadas › Katana), esquivar de um golpe treina Esquiva, tratar um ferimento treina Tratamento.
+- **Proficiências crescem com o uso:** acertar monstros treina o caminho da arma (por exemplo Lâminas › Espadas › Katana), esquivar de um golpe treina Acrobacia, tratar um ferimento treina Tratamento.
 - **Domínio da arma:** cada nível dá +2% de dano e −1% de fôlego por golpe. Armas que compartilham a raiz se ajudam: praticar com a espada reta também adianta a katana.
 - **Habilidades:** cada ramo desbloqueia uma habilidade no nível 5 ou 6, como Corte amplo (+1 alvo), Ferida funda (sangramento mais forte) e Recolher flechas.
 - **P** abre a janela de proficiências. Ela não pausa o jogo. Um aviso no alto da tela mostra cada nível novo.
@@ -45,16 +65,18 @@ Explore as cinco salas, gerencie comida e bandagens, encontre o selo e retorne a
 | Ação | Controle |
 |---|---|
 | Mover | WASD ou setas |
-| Mirar | Segurar botão direito |
+| Mirar / guarda | Segurar botão direito |
 | Atacar na direção do cursor | Botão esquerdo |
 | Correr | Shift |
 | Esquivar | Espaço |
-| Interagir / abrir baú | E, perto do alvo |
+| Andar agachado | C |
+| Interagir / abrir baú / arrombar | E, perto do alvo |
 | Inventário | I ou Tab |
 | Mapa explorado | M |
 | Condição física | H |
 | Comer / usar bandagem | 2 / 3 |
 | Abrir equipamento | 1 |
+| Proficiências | P |
 | Aproximar / afastar câmera | Roda do mouse |
 | Pausar | Esc |
 | Salvar no abrigo | F5 |
