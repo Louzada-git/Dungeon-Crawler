@@ -12,7 +12,7 @@ Mapa rápido de onde cada coisa vive. Atualizado na etapa 8 (13/10/2026).
 | `textos.csv` | Textos de conteúdo por chave (coluna `pt_BR`). Outro idioma = nova coluna. |
 | `saque.json` | Tabelas de saque por tipo de sala: `[item, peso, mínimo, máximo, andar mínimo]`. |
 | `salas.json` | Nomes de sala por tipo, com gênero, e complementos. |
-| `proficiencias.json` | Ramos de proficiência (raízes e especializações); as armas indicam o caminho que treinam. |
+| `proficiencias.json` | Grupos, ramos de proficiência (raízes e especializações), curva, efeitos por nível, perfil dos punhos e migração de nomes; as armas e armaduras indicam o caminho que treinam. |
 
 A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrinth_generator.gd` produz esse formato a partir de (semente, andar). O mundo fixo `cisternas.json` continua existindo só para a suíte de testes.
 
@@ -56,12 +56,41 @@ A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrint
 ## Atributos e proficiências
 
 - **Atributos** (Força, Vigor, Agilidade, Destreza) são escolhidos no início de cada run (painel "Novo aventureiro"). Mudam carga, vida, fôlego, esquiva e passo, e definem o potencial de cada ramo: velocidade de aprendizado (0,6 + 0,08 × atributo) e nível máximo (10 + 4 × atributo).
-- **Experiência** vem do dano causado (o monstro inteiro vale o seu `xp` em `inimigos.json`, +25% por andar), de escapar de golpes esquivando e de tratar ferimentos. A experiência de um golpe se divide entre os ramos do caminho da arma (Espadas › Katana) sem contar duas vezes.
-- **Domínio** de uma arma = nível que a soma da experiência do caminho alcança. Por isso armas de um ou dois ramos evoluem no mesmo ritmo, e praticar uma espada ajuda as outras pela raiz. Cada nível de domínio dá +2% de dano e −1% de fôlego.
-- **Habilidades** (`perks`) destravam por nível de ramo e mudam os números da arma (`CharacterSheet.weapon_stats`).
+- **Árvore** (`proficiencias.json`, versão 3), inspirada nas perícias de Oblivion e agrupada em três `grupos`:
+  - *Combate:* Lâminas › (Espadas › Espada reta, Katana, Montante; Adagas), Contundentes › (Maça, Martelo, Machados), Hastes › (Lança, Alabarda), Desarmado, Bloqueio, Armadura pesada, Atletismo.
+  - *Furtividade:* Furtividade, Pontaria › (Arcos, Bestas), Armadura leve, Acrobacia, Arrombamento.
+  - *Sobrevivência:* Tratamento.
+  - Fora por enquanto: magia, Alquimia, Reparo (precisa de durabilidade por item), Comércio e Oratória (precisam de mercadores).
+- **Experiência** vem do que o personagem faz:
+
+| Ramo | Treina com |
+| --- | --- |
+| Caminho da arma | dano causado (o monstro inteiro vale o seu `xp` em `inimigos.json`, +25% por andar); sangramento também conta |
+| Desarmado | socos (sem arma equipada; perfil `punhos` em `proficiencias.json`) |
+| Bloqueio | dano segurado pela guarda (botão direito com arma corpo a corpo ou punhos, golpe de frente) |
+| Armadura leve / pesada | dano absorvido pela armadura vestida |
+| Atletismo | metros corridos fora do abrigo; ×5 quando algum monstro está te perseguindo |
+| Furtividade | andar agachado (C) perto de um monstro que não te viu (limite por monstro, `sneak_budget`) e ataques furtivos |
+| Acrobacia | escapar de um golpe esquivando |
+| Arrombamento | cada tentativa com gazua; abrir ensina 4× mais que falhar |
+| Tratamento | curar um ferimento real |
+
+- **Divisão:** a experiência de um golpe se divide pelo caminho da arma sem contar duas vezes (`divisao`: 1 ramo 100%; 2 ramos 50/50; 3 ramos 40/35/25, da raiz para a ponta). **Domínio** de uma arma = nível que a soma da experiência do caminho alcança, por isso armas de um, dois ou três ramos evoluem no mesmo ritmo, e praticar uma espada ajuda as outras pela raiz. Cada nível de domínio dá +2% de dano e −1% de fôlego.
+- **Efeitos por nível** (`dominio`): guarda +1,2%/nível; proteção da armadura +2%/nível e penalidades −2,5%/nível; corrida −1,2% de fôlego/nível; distância de detecção agachado −1,5%/nível; chance de arrombar +4 pontos/nível; esquiva −0,3 de fôlego/nível; cura +2%/nível.
+- **Habilidades** (`perks`) destravam por nível de ramo. As das armas mudam os números da arma (`CharacterSheet.weapon_stats`); as outras entram nas funções da ficha (`block_reduction`, `armor_protection`, `armor_penalty_mult`, `armor_noise`, `sprint_cost_mult`, `sneak_detection_mult`, `sneak_attack_mult`, `pick_chance`, `pick_break_chance`, `dodge_cost`, `heal_mult`).
 - **Anti-repetição:** acima de 3 + 4 × andar do monstro, a experiência cai pela metade a cada 1,5 nível.
+- **Save antigo:** `migracao` renomeia ramos (Esquiva → Acrobacia); ramos desconhecidos são descartados.
 - **Morte:** o save da run (com o aventureiro) é apagado; o conhecimento não guarda proficiências.
 - Simulação do ritmo com o código real: `godot --headless --path jogo -s res://tests/progression_sim.gd`.
+
+## Guarda, armaduras, furtividade e fechaduras
+
+- **Guarda** (`DungeonPlayer.can_block`, `receive_damage`): segurando o botão direito com arma corpo a corpo ou punhos, golpes num cone de 140° à frente perdem 40% (punhos: 25%) e gastam fôlego igual ao dano segurado (mínimo 4). Sem fôlego a guarda quebra. A pancada em área do chefe não é bloqueável (`blockable = false`). Arco e besta não bloqueiam.
+- **Armaduras** (tag `ARMADURA` em `itens.json`): `armor_type` leve ou pesada, `protection` (parte de cada golpe absorvida, depois da guarda), `speed_penalty`, `regen_penalty` (recuperação de fôlego) e `noise` (aumenta a distância em que os monstros te notam). Vestir/tirar pelo inventário; `InventoryData.armor` vai no save. Aparece no tronco do personagem (osso `spine`); o campo `corpo` (`pos`, `escala`) ajusta os blocos provisórios.
+- **Furtividade** (C): passo a 55%, quase sem som de passos. Um monstro nota a `sight × detection_mult`: de pé 1,0; agachado 0,5 de frente e 0,3 fora do cone de visão dele (120°); correndo 1,47; armadura barulhenta multiplica tudo. Golpe agachado em monstro desprevenido: ×1,5 com qualquer arma (×2 com a habilidade), somando ao bônus próprio da adaga.
+- **Fechaduras:** baús podem ter `lock` 1–4 (simples, média, difícil, de mestre). Trancado, o conteúdo fica escondido e nada entra ou sai. Gazua (`FERRAMENTA`): chance = 60% − 20% por dificuldade acima de simples + 4% por nível de Arrombamento (+15% com a habilidade), entre 5% e 95%; falhar quebra a gazua em 50% das vezes (25% com a habilidade). `main.attempt_lockpick(container, roll, break_roll)` aceita dados fixos nos testes.
+- **Gerador:** `LabyrinthGenerator._roll_lock` sorteia fechaduras com um gerador próprio, então ligar ou ajustar fechaduras não muda o resto do andar de uma semente. Tesouro 80%, covil 40%, suprimentos 25%, combate 15%; o relicário do chefe nunca. Dificuldade 1 + (andar − 1) / 2, +1 no tesouro, ±1, entre 1 e 4.
+- **Animações opcionais:** quando o personagem tiver `soco`, `bloqueio`, `furtivo` ou `furtivo_andar`, o jogo usa; até lá, ataque, guarda e caminhada normais.
 
 ## Testes e ferramentas
 
@@ -71,6 +100,7 @@ A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrint
 - `tests/labyrinth_capture.gd`: capturas do labirinto (precisa de tela).
 - `tests/weapons_capture.gd`: armas em mãos e em uso (precisa de tela).
 - `tests/proficiency_capture.gd`: criação de personagem, janela de proficiências e aviso de nível (precisa de tela).
+- `tests/skills_capture.gd`: armaduras no corpo, guarda, furtivo, baú trancado, dica de armadura e janela agrupada (precisa de tela).
 - `tests/hud_capture.gd`: capturas do HUD para revisão (precisa de tela).
 - `tools/render_icons.gd`: gera os ícones dos itens a partir dos modelos.
 
