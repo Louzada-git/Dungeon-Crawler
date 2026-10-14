@@ -1,0 +1,114 @@
+extends RefCounted
+class_name Visuals
+
+static var cache: Dictionary = {}
+static var material_cache: Dictionary = {}
+
+static func model(id: String, factor: float = 1.0) -> Node3D:
+ var aliases = {"character-human":"aventureiro","character-orc":"corrompido","weapon-sword":"espada","weapon-spear":"lanca","pot":"vaso","potion":"bandagem","rocks":"rochas","stones":"rochas","coin":"moeda","key":"selo"}
+ var path = "res://assets/originais/%s.glb" % aliases.get(id,id)
+ if not cache.has(path):
+  cache[path] = load(path)
+ var instance: Node3D = cache[path].instantiate()
+ instance.scale = Vector3.ONE * factor
+ return instance
+
+static func material(color: Color, emissive: bool = false) -> StandardMaterial3D:
+ var mat = StandardMaterial3D.new()
+ mat.albedo_color = color
+ mat.roughness = 0.92
+ mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+ if color.a < 1:
+  mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+ if emissive:
+  mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+ return mat
+
+static func ring(radius: float, color: Color, width: float = 0.055) -> MeshInstance3D:
+ var mesh = ImmediateMesh.new()
+ mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES)
+ for i in 64:
+  var a: float = TAU * i / 64.0
+  var b: float = TAU * (i + 1) / 64.0
+  var p = Vector3(sin(a),0,cos(a))
+  var q = Vector3(sin(b),0,cos(b))
+  for v in [p * radius, q * radius, p * (radius-width), q * radius, q * (radius-width), p * (radius-width)]:
+   mesh.surface_add_vertex(v)
+ mesh.surface_end()
+ var instance = MeshInstance3D.new()
+ instance.mesh = mesh
+ instance.material_override = material(color, true)
+ instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+ return instance
+
+static func animation(root: Node) -> AnimationPlayer:
+ for child in root.get_children():
+  if child is AnimationPlayer:
+   return child
+  var found = animation(child)
+  if found:
+   return found
+ return null
+
+static func skeleton(root: Node) -> Skeleton3D:
+ if root is Skeleton3D:
+  return root
+ for child in root.get_children():
+  var found = skeleton(child)
+  if found:
+   return found
+ return null
+
+static func play(anim: AnimationPlayer, name: String, loop: bool = true, speed: float = 1.0) -> void:
+ name = {"attack-melee-right":"attack","sprint":"walk","holding-both":"idle"}.get(name,name)
+ if anim != null and name in ["hit","die"] and anim.has_animation("mixamo_"+name):
+  name = "mixamo_"+name
+ if anim == null or not anim.has_animation(name):
+  return
+ anim.get_animation(name).loop_mode = Animation.LOOP_LINEAR if loop else Animation.LOOP_NONE
+ anim.speed_scale = speed
+ if anim.current_animation != name or not anim.is_playing():
+  anim.play(name, 0.12)
+
+static func collider(parent: Node3D, size: Vector3, pos: Vector3 = Vector3.ZERO) -> StaticBody3D:
+ var body = StaticBody3D.new()
+ var shape = CollisionShape3D.new()
+ var box = BoxShape3D.new()
+ box.size = size
+ shape.shape = box
+ body.add_child(shape)
+ parent.add_child(body)
+ body.position = pos
+ return body
+
+static func tint(root: Node, color: Color) -> void:
+ if root is MeshInstance3D:
+  for index in root.mesh.get_surface_count():
+   var original = root.get_active_material(index)
+   if original is StandardMaterial3D:
+    var key = str(original.get_instance_id())+str(color)
+    if not material_cache.has(key):
+     var tinted = original.duplicate()
+     tinted.albedo_color *= color
+     tinted.roughness = 0.95
+     material_cache[key] = tinted
+    root.set_surface_override_material(index,material_cache[key])
+ for child in root.get_children():
+  tint(child,color)
+
+static func attack_arc(radius: float, color: Color, half_angle: float = 1.2, width: float = 0.25) -> MeshInstance3D:
+ var mesh = ImmediateMesh.new()
+ mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES)
+ for i in 32:
+  var a: float = -half_angle + 2.0*half_angle*i/32.0
+  var b: float = -half_angle + 2.0*half_angle*(i+1)/32.0
+  var p = Vector3(sin(a),0,cos(a))
+  var q = Vector3(sin(b),0,cos(b))
+  for v in [p*radius,q*radius,p*(radius-width),q*radius,q*(radius-width),p*(radius-width)]:
+   mesh.surface_add_vertex(v)
+ mesh.surface_end()
+ var instance = MeshInstance3D.new()
+ instance.mesh = mesh
+ instance.material_override = material(color,true)
+ instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+ return instance
