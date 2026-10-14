@@ -46,3 +46,26 @@ MUNDO_LABIRINTO_NOME,O Labirinto
 RECIPIENTE_BAU,Baú
 RECIPIENTE_BAU_CHEFE,Relicário do guardião
 RECIPIENTE_DESPOJOS,Despojos
+ITEM_ADAGA_NOME,Adaga
+ITEM_ADAGA_DESC,"Lâmina curta e rápida. Em monstro desprevenido, o golpe causa dano muito maior."
+ITEM_KATANA_NOME,Katana
+ITEM_KATANA_DESC,"Corte rápido e preciso num arco estreito. Leve, mas exige proximidade."
+ITEM_MONTANTE_NOME,Montante
+ITEM_MONTANTE_DESC,Espada de duas mãos. Arco largo que acerta vários inimigos e os empurra; lenta e cansativa.
+ITEM_MACHADO_NOME,Machado de guerra
+ITEM_MACHADO_DESC,Golpe curto que abre feridas: o monstro sangra por alguns segundos.
+ITEM_MACA_NOME,Maça de flanges
+ITEM_MACA_DESC,Atordoa e empurra. Causa mais dano em monstros blindados.
+ITEM_MARTELO_NOME,Martelo de guerra
+ITEM_MARTELO_DESC,"Pancada lenta no chão à frente, que atinge todos na área. Pesado."
+ITEM_ALABARDA_NOME,Alabarda
+ITEM_ALABARDA_DESC,Estocada longa que atravessa o primeiro inimigo e acerta o de trás.
+ITEM_ARCO_NOME,Arco curto
+ITEM_ARCO_DESC,Ataque à distância. Gasta flechas; flechas presas num monstro voltam com os pertences dele.
+ITEM_BESTA_NOME,Besta
+ITEM_BESTA_DESC,Tiro forte que atravessa dois inimigos. Recarga lenta; gasta virotes.
+ITEM_FLECHA_NOME,Flecha
+ITEM_FLECHA_DESC,Munição do arco. Parte das flechas que erram pode ser recolhida do chão.
+ITEM_VIROTE_NOME,Virote
+ITEM_VIROTE_DESC,Munição da besta. Parte dos virotes que erram pode ser recolhida do chão.
+RECIPIENTE_ARSENAL,Arsenal de teste
