@@ -1,0 +1,13 @@
+# Godot cache and local editor data
+jogo/.godot/
+*.tmp
+# Logs, probes and scratch captures
+work/
+# Built executables and packed sources (reproducible from the project)
+outputs/linux/*.x86_64
+outputs/windows/*.exe
+outputs/windows/*.pck
+outputs/*.zip
+# Blender backups and Python caches
+*.blend1
+__pycache__/
