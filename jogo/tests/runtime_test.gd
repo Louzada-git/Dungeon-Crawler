@@ -46,7 +46,8 @@ func run(target, capture: bool) -> void:
  game.player.food = 85
  check(game.player.visual.scale.is_equal_approx(Vector3.ONE),"Personagem original usa escala humana em metros")
  var skeleton = Visuals.skeleton(game.player.visual)
- check(skeleton != null and skeleton.find_bone("hand-right") >= 0,"Rig original tem mão para equipar armas")
+ check(skeleton != null and (skeleton.find_bone("hand-right") >= 0 or skeleton.find_bone(DungeonPlayer.MOUNTS["hand-right"][0]) >= 0) and game.player.weapon_mount != null,"Rig do personagem tem mão para equipar armas")
+ check(skeleton.find_bone("mixamorig_RightHand") >= 0 and game.player.weapon_mount.get_parent() is BoneAttachment3D,"Personagem PSX: arma presa à mão do rig Mixamo com a correção de posição")
  for animation_name in ["idle","guard","walk","run","attack","stab","dodge","hit","die"]:
   check(game.player.animator.has_animation(animation_name),"Animação original disponível: "+animation_name)
  for animation_name in ["mixamo_attack","mixamo_stab","mixamo_hit","mixamo_die"]:
@@ -1056,7 +1057,7 @@ func test_skills() -> void:
  # --- Armaduras
  inv.add("cota")
  check(game.use_item("cota") and inv.armor == "cota","Vestir a cota de malha pelo inventário")
- check(is_instance_valid(p.worn_model) and p.worn_model.get_parent() == p.armor_mount and p.armor_mount.bone_name == "spine","Armadura vestida aparece no tronco do personagem")
+ check(is_instance_valid(p.worn_model) and p.worn_model.get_parent() == p.armor_mount and (p.armor_mount if p.armor_mount is BoneAttachment3D else p.armor_mount.get_parent()).bone_name in ["spine","mixamorig_Spine"],"Armadura vestida aparece no tronco do personagem")
  check(is_equal_approx(sheet.armor_protection("cota"),0.25) and is_equal_approx(sheet.armor_speed_penalty("cota"),0.06) and is_equal_approx(p.detection_mult(),1.125),"Cota: 25% de proteção, 6% mais lenta e barulhenta")
  ready_player(p)
  p.health = p.max_health
