@@ -70,3 +70,23 @@ Base Mixamo `attack (4)` com braços adaptados para empurrar a lança em linha r
 - Gerador revalidado com as tabelas de saque novas (90 andares, zero problemas). Em 100 sementes, todo 1º andar tem pelo menos uma arma além da espada inicial (média de 3,5 armas e 13 flechas ou virotes).
 - Capturas conferidas: todas as armas em mãos, ícones gerados dos blocos, besta em uso, dica completa da besta, arco na mão esquerda.
 - Falta: modelos e animações finais (outra IA, conforme `arte/ARMAS_ESPEC.md`) e o teste humano do equilíbrio.
+
+## Atributos e proficiências — 14/10/2026
+
+- Suíte do mundo fixo: **382 verificações, zero falhas**; suíte do labirinto: **41, zero falhas**; as duas também no executável Linux.
+- Verificações novas: divisão da experiência sem contar duas vezes; mesmo domínio com um ou dois ramos em 12 rodadas seguidas; espada reta ajudando a katana pela raiz; Força 9 aprendendo ×1,32 e chegando ao nível 46; ramo parando no nível máximo; monstro raso quase sem ensinar a quem domina; habilidades mudando a katana (alvo extra, preparo mais curto); domínio aumentando dano e reduzindo fôlego; golpe, sangramento, esquiva e tratamento ensinando os ramos certos; curativo sem ferimento sem ensinar nada; aviso de nível; atributos mudando mochila, vida, fôlego e custo da esquiva; save com atributos e mochila acima de 18 kg; janela de proficiências; domínio na dica da arma; regras do painel de criação; save do labirinto com o aventureiro e conhecimento sem proficiências após a morte; golpe no labirinto ensinando.
+- Simulação do ritmo com o código do jogo, na semente 777 (70% dos monstros e o chefe de cada andar). Domínio (bônus de dano):
+
+| Andar | Adaga | Katana | Martelo | Martelo, Força 9 | Espada reta → Katana no 3º |
+| --- | --- | --- | --- | --- | --- |
+| 1 (11 mortes) | 6 (+10%) | 6 (+10%) | 6 (+10%) | 7 | 4 |
+| 2 (22 mortes) | 10 (+18%) | 10 (+18%) | 10 (+18%) | 11 | 8 |
+| 3 (46 mortes) | 14 (+26%) | 14 (+26%) | 14 (+26%) | 15 | 13 |
+| 4 (95 mortes) | 18 (+34%) | 18 (+34%) | 18 (+34%) | 19 | 18 |
+| 5 (166 mortes) | 22 (+42%) | 22 (+42%) | 22 (+42%) | 23 | 21 |
+| 6 (345 mortes) | 25 (+48%) | 25 (+48%) | 25 (+48%) | 26 | 25 |
+| 7 (688 mortes) | 29 (+56%) | 29 (+56%) | 29 (+56%) | 30 | 29 |
+
+Repetir o 1º andar (1x → 6, 2x → 8, 5x → 10, 10x → 11, 20x → 12, 50x → 14) mostra que monstros fracos param de ensinar; na prática os monstros não renascem, então isso só pesaria se voltarem a existir.
+- Capturas conferidas: painel de novo aventureiro, janela de proficiências com dica de ramo e aviso de nível.
+- Falta: teste humano do ritmo e os números das habilidades.
