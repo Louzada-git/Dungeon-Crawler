@@ -6,6 +6,7 @@ var game
 var visual: Node3D
 var animator: AnimationPlayer
 var weapon_mount: BoneAttachment3D
+var left_mount: BoneAttachment3D
 var held_weapon: Node3D
 var facing: Vector3 = Vector3(0,0,-1)
 var health: float = 100.0
@@ -50,6 +51,9 @@ func _ready() -> void:
   weapon_mount = BoneAttachment3D.new()
   weapon_mount.bone_name = "hand-right"
   skel.add_child(weapon_mount)
+  left_mount = BoneAttachment3D.new()
+  left_mount.bone_name = "hand-left"
+  skel.add_child(left_mount)
  var marker = Visuals.ring(0.43,Color("cbb88a"),0.025)
  marker.position.y = 0.04
  add_child(marker)
@@ -61,35 +65,51 @@ func _ready() -> void:
 func refresh_weapon() -> void:
  if weapon_mount == null:
   return
- for child in weapon_mount.get_children():
-  child.queue_free()
+ for mount in [weapon_mount,left_mount]:
+  for child in mount.get_children():
+   child.queue_free()
  held_weapon = null
  var id: String = game.inventory.equipped
  if id == "":
   return
  var data: Dictionary = Items.info(id)
- var weapon = Visuals.model(data["model"],1.0)
- if str(data.get("tint","")) != "":
-  Visuals.tint(weapon,Color(data["tint"]))
+ var weapon = Visuals.item_model(id)
  held_weapon = weapon
- weapon_mount.add_child(weapon)
+ # "mao": "esquerda" holds the weapon in the left hand (bows).
+ (left_mount if str(data.get("mao","direita")) == "esquerda" else weapon_mount).add_child(weapon)
  weapon.position = Vector3(0,0.035,0)
- var pole: bool = data.get("style","") == "thrust"
- weapon.rotation_degrees.x = -85 if pole else -55
- if pole:
-  weapon.scale.y = 1.9
+ weapon.rotation_degrees = rest_rotation(data)
+ weapon.scale = hand_scale(id,data)
+
+## Resting angle in the hand: data "rotacao_mao", else by style.
+func rest_rotation(data: Dictionary) -> Vector3:
+ if data.has("rotacao_mao"):
+  var r: Array = data["rotacao_mao"]
+  return Vector3(r[0],r[1],r[2])
+ return Vector3(-85,0,0) if data.get("alinhar_ao_golpe",false) else Vector3(-55,0,0)
+
+## "escala_mao" stretches the old short spear model; models made for the item use 1.
+func hand_scale(id: String, data: Dictionary) -> Vector3:
+ if data.has("escala_mao") and not Visuals.has_custom_model(id) and not data.has("blocks"):
+  var s: Array = data["escala_mao"]
+  return Vector3(s[0],s[1],s[2])
+ return Vector3.ONE
 
 func _process(_delta: float) -> void:
- if not is_instance_valid(held_weapon) or Items.info(game.inventory.equipped).get("style","") != "thrust":
+ if not is_instance_valid(held_weapon):
   return
- if attack_timer > 0 and attack_weapon.get("style", "") == "thrust":
+ var data: Dictionary = Items.info(game.inventory.equipped)
+ if not data.get("alinhar_ao_golpe",false):
+  return
+ var size: Vector3 = hand_scale(game.inventory.equipped,data)
+ if attack_timer > 0 and attack_weapon.get("alinhar_ao_golpe",false):
   # Keep the pole aimed down the committed attack line while both arms reach.
   var axis: Vector3 = attack_facing.normalized()
   var side: Vector3 = Vector3.UP.cross(axis).normalized()
-  held_weapon.global_basis = Basis(side,axis,side.cross(axis))*Basis.from_scale(Vector3(1,1.9,1))
+  held_weapon.global_basis = Basis(side,axis,side.cross(axis))*Basis.from_scale(size)
  else:
-  held_weapon.rotation_degrees = Vector3(-85,0,0)
-  held_weapon.scale = Vector3(1,1.9,1)
+  held_weapon.rotation_degrees = rest_rotation(data)
+  held_weapon.scale = size
 
 func aim_mouse() -> void:
  if game.camera == null:
@@ -198,6 +218,10 @@ func attack() -> bool:
   return false
  var weapon = Items.info(game.inventory.equipped)
  var cost: float = weapon.get("cost",10.0)
+ var ammo: String = str(weapon.get("ammo",""))
+ if ammo != "" and game.inventory.count(ammo) <= 0:
+  game.message("Sem %ss. Procure mais nos baús e nos corpos dos monstros." % str(Items.info(ammo).get("name",ammo)).to_lower())
+  return false
  if stamina < cost:
   game.message("Sem fôlego. Recue para recuperar.")
   return false
@@ -208,9 +232,21 @@ func attack() -> bool:
  cooldown = weapon.get("cooldown",0.62)
  attack_timer = cooldown*0.90
  attack_wait = weapon.get("windup",0.22)
- animate_action("stab" if weapon.get("style","")=="thrust" else "attack",attack_timer)
+ animate_action(attack_animation(weapon),attack_timer)
  game.sound.play_at("swing",global_position,0.65)
  return true
+
+## The animation made for the weapon when the rig has it; else the closest existing one.
+func attack_animation(weapon: Dictionary) -> String:
+ var wanted: String = str(weapon.get("animacao",""))
+ if wanted != "" and animator and animator.has_animation(wanted):
+  return wanted
+ match str(weapon.get("style","slash")):
+  "thrust":
+   return "stab"
+  "shoot":
+   return "guard"
+ return "attack"
 
 func dodge() -> bool:
  if stamina < 25 or dodge_timer > 0 or attack_timer > 0 or hurt_timer > 0 or health <= 0:
