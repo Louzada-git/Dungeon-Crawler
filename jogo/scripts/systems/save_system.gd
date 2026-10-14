@@ -14,7 +14,7 @@ static func write(game, notify_user: bool = true) -> bool:
 		loot_data.append({"id": loot.get("id", ""), "name": loot["name"], "pos": loot["pos"], "items": loot["items"], "chest": loot["chest"]})
 	var enemy_data: Array = []
 	for enemy in game.enemies:
-		enemy_data.append({"id": enemy.uid, "health": enemy.health, "alive": enemy.alive, "pos": [enemy.position.x, enemy.position.z]})
+		enemy_data.append({"id": enemy.uid, "health": enemy.health, "alive": enemy.alive, "pos": [enemy.position.x, enemy.position.z], "stuck": enemy.stuck.duplicate()})
 	var explored: Array = []
 	for cell in game.discovered:
 		explored.append([cell.x, cell.y])
@@ -97,6 +97,12 @@ static func restore_enemy(enemy, data: Dictionary) -> void:
 	enemy.stagger = 0
 	enemy.attack_recovery = 0
 	enemy.telegraph.hide()
+	enemy.stuck = {}
+	var stuck = data.get("stuck", {})
+	if stuck is Dictionary:
+		for key in stuck:
+			if Items.DATA.has(key):
+				enemy.stuck[key] = int(stuck[key])
 	if not enemy.alive:
 		enemy.health_label.visible = false
 		Visuals.play(enemy.animator, "die", false)
