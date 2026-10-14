@@ -1,0 +1,190 @@
+{
+ "versao": 2,
+ "_sobre": "Nomes de sala por tipo. Cada nome base traz o gênero (m/f) e cada complemento tem forma masculina e feminina. Texto em português; vira chave de tradução quando o idioma for decidido.",
+ "nomes": {
+  "abrigo": [
+   [
+    "Abrigo da entrada",
+    "m"
+   ]
+  ],
+  "entrada": [
+   [
+    "Patamar da escada",
+    "m"
+   ],
+   [
+    "Poço de descida",
+    "m"
+   ],
+   [
+    "Átrio dos degraus",
+    "m"
+   ]
+  ],
+  "combate": [
+   [
+    "Galeria",
+    "f"
+   ],
+   [
+    "Corredor largo",
+    "m"
+   ],
+   [
+    "Salão",
+    "m"
+   ],
+   [
+    "Pátio",
+    "m"
+   ],
+   [
+    "Cisterna",
+    "f"
+   ],
+   [
+    "Câmara",
+    "f"
+   ],
+   [
+    "Passagem",
+    "f"
+   ],
+   [
+    "Saleta",
+    "f"
+   ],
+   [
+    "Claustro",
+    "m"
+   ]
+  ],
+  "suprimentos": [
+   [
+    "Despensa",
+    "f"
+   ],
+   [
+    "Depósito",
+    "m"
+   ],
+   [
+    "Armazém",
+    "m"
+   ],
+   [
+    "Adega",
+    "f"
+   ]
+  ],
+  "tesouro": [
+   [
+    "Relicário",
+    "m"
+   ],
+   [
+    "Tesouro",
+    "m"
+   ],
+   [
+    "Câmara escondida",
+    "f"
+   ],
+   [
+    "Cofre",
+    "m"
+   ]
+  ],
+  "covil": [
+   [
+    "Covil",
+    "m"
+   ],
+   [
+    "Ninho",
+    "m"
+   ],
+   [
+    "Toca",
+    "f"
+   ]
+  ],
+  "chefe": [
+   [
+    "Câmara do guardião",
+    "f"
+   ],
+   [
+    "Trono afundado",
+    "m"
+   ],
+   [
+    "Sala do selo",
+    "f"
+   ]
+  ]
+ },
+ "complementos": [
+  [
+   "alagado",
+   "alagada"
+  ],
+  [
+   "esquecido",
+   "esquecida"
+  ],
+  [
+   "dos ossos",
+   "dos ossos"
+  ],
+  [
+   "das correntes",
+   "das correntes"
+  ],
+  [
+   "em ruínas",
+   "em ruínas"
+  ],
+  [
+   "úmido",
+   "úmida"
+  ],
+  [
+   "dos ecos",
+   "dos ecos"
+  ],
+  [
+   "da guarda",
+   "da guarda"
+  ],
+  [
+   "silencioso",
+   "silenciosa"
+  ],
+  [
+   "rachado",
+   "rachada"
+  ],
+  [
+   "das raízes",
+   "das raízes"
+  ],
+  [
+   "sem luz",
+   "sem luz"
+  ],
+  [
+   "antigo",
+   "antiga"
+  ],
+  [
+   "dos mortos",
+   "dos mortos"
+  ],
+  [
+   "de pedra negra",
+   "de pedra negra"
+  ]
+ ]
+}
