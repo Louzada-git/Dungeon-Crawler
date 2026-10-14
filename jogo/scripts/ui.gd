@@ -7,7 +7,8 @@ const HELP_ROWS := [
 	[["W", "A", "S", "D"], "Mover (setas também)"],
 	[["Shift"], "Correr — gasta fôlego"],
 	[["Espaço"], "Esquivar — 25 de fôlego"],
-	[["Botão dir."], "Mirar e andar em guarda"],
+	[["Botão dir."], "Mirar e erguer a guarda"],
+	[["C"], "Andar furtivo (agachado)"],
 	[["Botão esq."], "Atacar na direção do cursor"],
 	[["E"], "Vasculhar, abrir baú, descansar"],
 	[["I", "Tab"], "Mochila (pausa o jogo)"],
@@ -463,13 +464,13 @@ func _update_hands() -> void:
 	if key == _last_hands:
 		return
 	_last_hands = key
-	var data: Dictionary = game.sheet.weapon_stats(id) if id != "" else {}
+	var data: Dictionary = game.sheet.weapon_stats(id)
 	hands.item_id = id
 	if id == "":
 		hands_icon.texture = null
 		hands_fallback.visible = true
 		hands_name.text = "Mãos vazias"
-		hands_stats.text = "Equipe uma arma pela mochila  [I]"
+		hands_stats.text = "Punhos  ·  Dano %d  ·  Fôlego %d" % [roundi(float(data.get("damage", 8))), roundi(float(data.get("cost", 8)))]
 		return
 	hands_fallback.visible = false
 	hands_icon.texture = UiStyle.item_icon(id)
