@@ -1,16 +1,27 @@
 extends Node3D
+## Game root: builds the current floor from its description, owns the
+## expedition state and wires the systems in scripts/systems/.
+##
+## Two modes:
+## - labyrinth (normal game): floors generated from a seed; stairs between
+##   floors; the shelter on floor 1 saves; death restarts the same labyrinth
+##   and keeps the explored map (decision of 13/10/2026).
+## - fixed world (data/mundos/cisternas.json): used by the automated tests.
+
+const KNOWLEDGE_PATH := "user://conhecimento.json"
 
 var sound
-var aim_marker: MeshInstance3D
-var camera_shake: float = 0.0
-var camera_strength: float = 0.0
+var aim_marker: AimMarker
 var save_path: String = "user://expedicao_v1.json"
+var knowledge_path: String = KNOWLEDGE_PATH
 var inventory = InventoryData.new()
-var layout = DungeonLayout.new()
+var layout: DungeonLayout
 var player: DungeonPlayer
 var camera: Camera3D
-var camera_rig: Node3D
+var camera_rig: GameCamera
 var ui
+var world_root: Node3D
+var stairs_sign: Label3D
 var enemies: Array[DungeonEnemy] = []
 var containers: Array[Dictionary] = []
 var discovered: Dictionary = {}
@@ -19,525 +30,441 @@ var kills: int = 0
 var hits_received: int = 0
 var won: bool = false
 var ended: bool = false
-var last_discover: Vector2i = Vector2i(-99,-99)
+var last_discover: Vector2i = Vector2i(-99, -99)
 var message_text: String = "Prepare sua mochila. Explore e recupere o selo das cisternas."
 var message_time: float = 8.0
-var zoom: float = 16.0
 var test_mode: bool = false
+# Labyrinth state
+var generated: bool = false
+var seed: int = 0
+var floor: int = 1
+var deepest: int = 1
+var seals_delivered: int = 0
+var floor_states: Dictionary = {}
+var knowledge: Dictionary = {}
+var _skip_load: bool = false
 
 func _ready() -> void:
- test_mode = "--test" in OS.get_cmdline_user_args() or "--capture" in OS.get_cmdline_user_args()
- if test_mode:
-  save_path = "user://teste_base_v1.json"
- get_tree().auto_accept_quit = false
- configure_inputs()
- camp_position = layout.to_world(Vector2i(4,20))
- sound = preload("res://scripts/game_audio.gd").new()
- add_child(sound)
- setup_environment()
- WorldBuilder.build(self)
- inventory.add("sword")
- inventory.add("ration",3)
- inventory.add("bandage",3)
- inventory.equip("sword")
- player = DungeonPlayer.new()
- player.game = self
- add_child(player)
- player.position = layout.to_world(DungeonLayout.SPAWN)
- camera_rig = Node3D.new()
- add_child(camera_rig)
- camera = Camera3D.new()
- camera_rig.add_child(camera)
- camera.projection = Camera3D.PROJECTION_ORTHOGONAL
- camera.size = zoom
- camera.position = Vector3(12,9.798,12)
- camera.look_at_from_position(camera.position,Vector3.ZERO)
- camera.far = 100
- camera.current = true
- camera_rig.position = player.position
- var light = OmniLight3D.new()
- player.add_child(light)
- light.position = Vector3(0,2,0)
- light.light_color = Color("d8e2de")
- light.light_energy = 0.25
- light.omni_range = 7
- aim_marker = Visuals.ring(0.20,Color("c7c5ac"),0.025)
- aim_marker.visible = false
- add_child(aim_marker)
- setup_content()
- ui = preload("res://scripts/ui.gd").new()
- ui.game = self
- add_child(ui)
- inventory.changed.connect(on_inventory_changed)
- if not test_mode and FileAccess.file_exists(save_path):
-  load_game()
- discover()
- if test_mode:
-  call_deferred("run_test_mode")
+	TranslationServer.set_locale("pt_BR")
+	var args: PackedStringArray = OS.get_cmdline_user_args()
+	test_mode = "--test" in args or "--capture" in args
+	generated = not test_mode
+	if test_mode:
+		save_path = "user://teste_base_v1.json"
+	if "--test-labirinto" in args:
+		save_path = "user://teste_labirinto.json"
+		knowledge_path = "user://teste_conhecimento.json"
+	get_tree().auto_accept_quit = false
+	InputSetup.configure()
+	if generated:
+		message_text = "Prepare sua mochila. O guardião do andar guarda o selo e a descida."
+		_choose_seed(args)
+		layout = DungeonLayout.new(LabyrinthGenerator.generate(seed, floor))
+	else:
+		layout = DungeonLayout.new()
+	camp_position = layout.to_world(layout.camp)
+	sound = preload("res://scripts/game_audio.gd").new()
+	add_child(sound)
+	WorldBuilder.environment(self)
+	WorldBuilder.build(self)
+	inventory.add("sword")
+	inventory.add("ration", 3)
+	inventory.add("bandage", 3)
+	inventory.equip("sword")
+	player = DungeonPlayer.new()
+	player.game = self
+	add_child(player)
+	player.position = layout.to_world(layout.spawn)
+	camera_rig = GameCamera.new()
+	camera_rig.target = player
+	add_child(camera_rig)
+	camera = camera_rig.camera
+	var light := OmniLight3D.new()
+	player.add_child(light)
+	light.position = Vector3(0, 2, 0)
+	light.light_color = Color("d8e2de")
+	light.light_energy = 0.25
+	light.omni_range = 7
+	aim_marker = AimMarker.new()
+	add_child(aim_marker)
+	setup_content()
+	if generated:
+		discovered = knowledge.get(floor, {})
+		knowledge[floor] = discovered
+	ui = preload("res://scripts/ui.gd").new()
+	ui.game = self
+	add_child(ui)
+	inventory.changed.connect(on_inventory_changed)
+	if not test_mode and not _skip_load and FileAccess.file_exists(save_path):
+		load_game()
+	discover()
+	if test_mode:
+		call_deferred("run_test_mode")
+	elif "--test-labirinto" in args:
+		call_deferred("run_labyrinth_tests")
 
-func configure_inputs() -> void:
- var keys = {"left":[KEY_A,KEY_LEFT],"right":[KEY_D,KEY_RIGHT],"up":[KEY_W,KEY_UP],"down":[KEY_S,KEY_DOWN],"sprint":[KEY_SHIFT],"dodge":[KEY_SPACE],"interact":[KEY_E],"inventory":[KEY_I,KEY_TAB],"map":[KEY_M],"escape":[KEY_ESCAPE],"save":[KEY_F5]}
- for action in keys:
-  if not InputMap.has_action(action):
-   InputMap.add_action(action)
-  for key in keys[action]:
-   var event = InputEventKey.new()
-   event.physical_keycode = key
-   InputMap.action_add_event(action,event)
+## Seed and floor: from --seed=N, from the expedition save, from the knowledge
+## kept after a death, or a new random labyrinth.
+func _choose_seed(args: PackedStringArray) -> void:
+	for arg in args:
+		if arg.begins_with("--seed="):
+			seed = int(arg.substr(7))
+			_skip_load = true
+			return
+	if FileAccess.file_exists(save_path):
+		var raw = JSON.parse_string(FileAccess.get_file_as_string(save_path))
+		if raw is Dictionary and raw.get("version") == SaveSystem.VERSION and raw.get("mode") == "labirinto":
+			seed = int(raw.get("seed", 0))
+			floor = maxi(1, int(raw.get("floor", 1)))
+			return
+	if FileAccess.file_exists(knowledge_path):
+		var known = JSON.parse_string(FileAccess.get_file_as_string(knowledge_path))
+		if known is Dictionary and known.has("seed"):
+			seed = int(known["seed"])
+			knowledge = SaveSystem.parse_knowledge(known.get("knowledge", {}))
+			deepest = int(known.get("deepest", 1))
+			message_text = "Mesmo labirinto, do começo. O que você descobriu continua no mapa."
+			return
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	seed = rng.randi_range(1, 999999999)
 
- if not InputMap.has_action("aim"):
-  InputMap.add_action("aim")
- var aim_event = InputEventMouseButton.new()
- aim_event.button_index = MOUSE_BUTTON_RIGHT
- InputMap.action_add_event("aim",aim_event)
-
-func setup_environment() -> void:
- var node = WorldEnvironment.new()
- var env = Environment.new()
- env.background_mode = Environment.BG_COLOR
- env.background_color = Color("161915")
- env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
- env.ambient_light_color = Color("b8b6a5")
- env.ambient_light_energy = 0.55
- env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
- node.environment = env
- add_child(node)
- var sun = DirectionalLight3D.new()
- sun.rotation_degrees = Vector3(-58,-35,0)
- sun.light_color = Color("ded3b8")
- sun.light_energy = 0.70
- sun.shadow_enabled = true
- sun.directional_shadow_max_distance = 70
- add_child(sun)
-
+## Containers and monsters from the floor description.
 func setup_content() -> void:
- add_loot("Reserva da entrada",Vector2i(6,22),{"ration":2,"bandage":2})
- add_loot("Baú da guarda",Vector2i(9,12),{"spear":1,"bandage":2,"coin":12})
- add_loot("Depósito de ferro",Vector2i(22,22),{"ore":8,"ration":2,"coin":8})
- add_loot("Mantimentos esquecidos",Vector2i(17,6),{"ration":2,"bandage":3})
- add_loot("Relicário das cisternas",DungeonLayout.RELIC,{"seal":1,"coin":20})
- var points = [Vector2i(6,12),Vector2i(9,10),Vector2i(19,21),Vector2i(21,18),Vector2i(18,10),Vector2i(22,7),Vector2i(28,7)]
- for index in points.size():
-  var enemy = DungeonEnemy.new()
-  enemy.game = self
-  enemy.enemy_id = index
-  enemy.heavy = index == points.size()-1
-  enemy.position = layout.to_world(points[index])
-  add_child(enemy)
-  enemies.append(enemy)
+	for entry in layout.world["containers"]:
+		add_loot(str(tr(entry["name"])), DungeonLayout.cell(entry["cell"]), entry["items"], entry.get("chest", true), entry["id"])
+	var index: int = 0
+	for entry in layout.world["enemies"]:
+		var enemy := DungeonEnemy.new()
+		enemy.game = self
+		enemy.enemy_id = index
+		enemy.uid = entry["id"]
+		enemy.kind = entry["type"]
+		enemy.level = int(entry.get("level", 1))
+		enemy.position = layout.to_world(DungeonLayout.cell(entry["cell"]))
+		add_child(enemy)
+		enemies.append(enemy)
+		index += 1
 
-func add_loot(title: String, cell: Vector2i, items: Dictionary, chest: bool = true) -> Dictionary:
- var pos = layout.to_world(cell)
- var data: Dictionary = {"name":title,"pos":[pos.x,pos.z],"items":items.duplicate(true),"chest":chest}
- containers.append(data)
- WorldBuilder.add_container(self,data)
- return data
+func add_loot(title: String, cell: Vector2i, items: Dictionary, chest: bool = true, id: String = "") -> Dictionary:
+	return ContainerSystem.add(self, title, cell, items, chest, id)
 
 func _process(delta: float) -> void:
- if player == null or ui == null:
-  return
- camera_rig.position = camera_rig.position.lerp(player.position,1.0-exp(-delta*9))
- camera.size = lerpf(camera.size,zoom,1.0-exp(-delta*10))
- camera_shake = maxf(0,camera_shake-delta)
- var strength = camera_strength*camera_shake/0.16
- camera.h_offset = sin(camera_shake*180)*strength
- camera.v_offset = cos(camera_shake*155)*strength*0.6
- message_time = maxf(0,message_time-delta)
- discover()
- for loot in containers:
-  loot["ring"].visible = not loot["items"].is_empty()
- update_aim_marker()
- ui.update_hud()
-
-func update_aim_marker() -> void:
- aim_marker.visible = player.aiming and not ui.any_panel() and not ended
- if not aim_marker.visible:
-  return
- var mouse = get_viewport().get_mouse_position()
- var point = Plane(Vector3.UP,0.65).intersects_ray(camera.project_ray_origin(mouse),camera.project_ray_normal(mouse))
- if point == null:
-  aim_marker.hide()
-  return
- var pos: Vector3 = point
- pos.y = 0.06
- if not layout.is_floor(layout.to_cell(pos)):
-  aim_marker.hide()
-  return
- aim_marker.position = pos
- aim_marker.scale = Vector3.ONE
- var color = Color("a6a799")
- for enemy in enemies:
-  if enemy.alive and enemy.position.distance_to(pos)<0.9 and clear_line(player.position,enemy.position):
-   aim_marker.position = enemy.position+Vector3.UP*0.06
-   aim_marker.scale = Vector3.ONE*2.5
-   color = Color("d9bd81") if player.position.distance_to(enemy.position)<=Items.info(inventory.equipped).get("range",1.5) else Color("8d7a65")
-   break
- aim_marker.material_override.albedo_color = color
+	if player == null or ui == null:
+		return
+	message_time = maxf(0, message_time - delta)
+	discover()
+	for loot in containers:
+		loot["ring"].visible = not loot["items"].is_empty()
+	aim_marker.refresh(self)
+	ui.update_hud()
 
 func _unhandled_input(event: InputEvent) -> void:
- if ui == null or ended:
-  return
- if event.is_action_pressed("inventory"):
-  ui.toggle_inventory()
- elif event.is_action_pressed("map"):
-  ui.toggle_map()
- elif event.is_action_pressed("escape"):
-  ui.toggle_pause()
- elif event.is_action_pressed("save"):
-  save_game()
- elif event.is_action_pressed("interact"):
-  interact()
- elif event.is_action_pressed("dodge"):
-  player.dodge()
- elif event is InputEventMouseButton and event.pressed:
-  if event.button_index == MOUSE_BUTTON_LEFT:
-   player.request_attack()
-  elif event.button_index == MOUSE_BUTTON_WHEEL_UP:
-   zoom = maxf(13,zoom-1.5)
-  elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-   zoom = minf(27,zoom+1.5)
+	if ui == null or ended:
+		return
+	if event.is_action_pressed("inventory"):
+		ui.toggle_inventory()
+	elif event.is_action_pressed("map"):
+		ui.toggle_map()
+	elif event.is_action_pressed("escape"):
+		ui.toggle_pause()
+	elif event.is_action_pressed("save"):
+		save_game()
+	elif event.is_action_pressed("interact"):
+		interact()
+	elif event.is_action_pressed("dodge"):
+		player.dodge()
+	elif event is InputEventMouseButton and event.pressed:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			player.request_attack()
+		elif event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			camera_rig.zoom_by(-1.5)
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			camera_rig.zoom_by(1.5)
+
+# --- exploration ---------------------------------------------------------------
 
 func discover() -> void:
- var cell = layout.to_cell(player.position)
- if cell == last_discover:
-  return
- last_discover = cell
- for x in range(cell.x-5,cell.x+6):
-  for y in range(cell.y-5,cell.y+6):
-   var p = Vector2i(x,y)
-   if layout.is_floor(p) and p.distance_to(cell) <= 5.5 and clear_line(player.position,layout.to_world(p)):
-    discovered[p] = true
+	var cell = layout.to_cell(player.position)
+	if cell == last_discover:
+		return
+	last_discover = cell
+	for x in range(cell.x - 5, cell.x + 6):
+		for y in range(cell.y - 5, cell.y + 6):
+			var p := Vector2i(x, y)
+			if layout.is_floor(p) and p.distance_to(cell) <= 5.5 and clear_line(player.position, layout.to_world(p)):
+				discovered[p] = true
 
 func clear_line(a: Vector3, b: Vector3) -> bool:
- if a.distance_squared_to(b) < 0.001:
-  return true
- var query = PhysicsRayQueryParameters3D.create(a+Vector3(0,0.8,0),b+Vector3(0,0.8,0),1)
- return get_world_3d().direct_space_state.intersect_ray(query).is_empty()
+	if a.distance_squared_to(b) < 0.001:
+		return true
+	var query := PhysicsRayQueryParameters3D.create(a + Vector3(0, 0.8, 0), b + Vector3(0, 0.8, 0), 1)
+	return get_world_3d().direct_space_state.intersect_ray(query).is_empty()
 
 func is_safe() -> bool:
- return layout.rooms[0]["rect"].has_point(layout.to_cell(player.position))
+	return layout.is_safe(player.position)
 
-func nearest_loot() -> Dictionary:
- var nearest: Dictionary = {}
- var best: float = 2.4
- for loot in containers:
-  if loot["items"].is_empty():
-   continue
-  var p = Vector3(loot["pos"][0],0,loot["pos"][1])
-  var d: float = p.distance_to(player.position)
-  if d < best and clear_line(player.position,p):
-   nearest = loot
-   best = d
- return nearest
+func has_shelter() -> bool:
+	return layout.world.get("has_shelter", true)
 
-# Containers within reach for the inventory tabs: chests even when empty
-# (items can be stored in them) and ground piles that still hold something.
-func nearby_containers(reach: float = 2.4) -> Array:
- var found: Array = []
- for loot in containers:
-  if loot["items"].is_empty() and not loot.get("chest",true):
-   continue
-  var p = Vector3(loot["pos"][0],0,loot["pos"][1])
-  if p.distance_to(player.position) < reach and clear_line(player.position,p):
-   found.append(loot)
- found.sort_custom(func(a,b): return Vector3(a["pos"][0],0,a["pos"][1]).distance_squared_to(player.position) < Vector3(b["pos"][0],0,b["pos"][1]).distance_squared_to(player.position))
- return found
+func boss() -> DungeonEnemy:
+	for e in enemies:
+		if e.boss:
+			return e
+	return null
+
+func boss_alive() -> bool:
+	var b := boss()
+	return b != null and b.alive
+
+func stairs_down_cell() -> Variant:
+	return DungeonLayout.cell(layout.world["stairs_down"]) if layout.world.has("stairs_down") else null
+
+func stairs_up_cell() -> Variant:
+	return DungeonLayout.cell(layout.world["stairs_up"]) if layout.world.get("stairs_up") != null else null
+
+func _near(cell: Variant, distance: float = 2.3) -> bool:
+	return cell != null and player.position.distance_to(layout.to_world(cell)) < distance
+
+func objective_text() -> String:
+	if not generated:
+		return "Retorne ao abrigo com o selo" if inventory.count("seal") > 0 else "Recupere o selo das cisternas"
+	if inventory.count("seal") > 0:
+		return "Leve o selo ao abrigo — ou desça mais"
+	if boss_alive():
+		return "Derrote o guardião do %dº andar" % floor
+	return "Desça ao %dº andar ou volte ao abrigo" % (floor + 1)
+
+# --- floors ------------------------------------------------------------------------
+
+func snapshot_floor() -> Dictionary:
+	var cs: Array = []
+	for c in containers:
+		cs.append({"id": c["id"], "name": c["name"], "pos": c["pos"], "items": c["items"].duplicate(), "chest": c["chest"]})
+	var es: Dictionary = {}
+	for e in enemies:
+		es[e.uid] = {"health": e.health, "alive": e.alive, "pos": [e.position.x, e.position.z]}
+	return {"containers": cs, "enemies": es}
+
+func apply_floor_state(state: Dictionary) -> void:
+	for c in containers:
+		c["node"].queue_free()
+	containers.clear()
+	for data in state.get("containers", []):
+		var copy: Dictionary = data.duplicate(true)
+		containers.append(copy)
+		WorldBuilder.add_container(self, copy)
+	var saved: Dictionary = state.get("enemies", {})
+	for e in enemies:
+		if saved.has(e.uid):
+			SaveSystem.restore_enemy(e, saved[e.uid])
+
+## Leaves the current floor for floor n. Going down arrives at the entrance of
+## the new floor; going up arrives next to its stairs down.
+func change_floor(n: int, going_down: bool) -> void:
+	if not generated or n < 1:
+		return
+	if ui:
+		ui.close_all()
+	floor_states[floor] = snapshot_floor()
+	WorldBuilder.clear(self)
+	floor = n
+	deepest = maxi(deepest, n)
+	layout = DungeonLayout.new(LabyrinthGenerator.generate(seed, n))
+	camp_position = layout.to_world(layout.camp)
+	WorldBuilder.build(self)
+	setup_content()
+	if floor_states.has(n):
+		apply_floor_state(floor_states[n])
+	discovered = knowledge.get(n, {})
+	knowledge[n] = discovered
+	if going_down:
+		player.position = layout.to_world(layout.spawn)
+	else:
+		player.position = layout.to_world(_free_neighbour(stairs_down_cell()))
+	player.reset_transients()
+	camera_rig.snap()
+	last_discover = Vector2i(-99, -99)
+	discover()
+	sound.play_at("step", player.global_position, 0.6)
+	if going_down:
+		message("%dº andar. %s" % [n, "O guardião deste andar guarda o próximo selo." if boss_alive() else "Este andar já foi vencido."], 5)
+	else:
+		message("De volta ao %dº andar." % n, 3)
+
+func _free_neighbour(cell: Vector2i) -> Vector2i:
+	for d in [Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP]:
+		var c: Vector2i = cell + d
+		if layout.is_floor(c) and not layout.pathfinder.is_point_solid(c):
+			return c
+	return cell
+
+# --- containers and items --------------------------------------------------------
+
+func nearby_containers(reach: float = ContainerSystem.REACH) -> Array:
+	return ContainerSystem.nearby(self, reach)
 
 func nearest_container() -> Dictionary:
- var found: Array = nearby_containers()
- return found[0] if not found.is_empty() else {}
+	return ContainerSystem.nearest(self)
 
-func interaction_text() -> String:
- if player.position.distance_to(camp_position) < 1.6:
-  return "E   RETORNAR COM O SELO" if inventory.count("seal") > 0 else "E   DESCANSAR E SALVAR NO ABRIGO"
- var loot = nearest_container()
- if not loot.is_empty():
-  return ("E   VASCULHAR  ·  " if not loot["items"].is_empty() else "E   ABRIR  ·  ") + loot["name"] + ("" if not loot["items"].is_empty() else "  (vazio)")
- return ""
+func nearest_loot() -> Dictionary:
+	return ContainerSystem.nearest_with_items(self)
 
-func interact() -> void:
- if player.position.distance_to(camp_position) < 1.6:
-  if inventory.count("seal") > 0:
-   won = true
-   save_game(false)
-   end_run(true)
-  else:
-   player.stamina = 100
-   save_game(false)
-   message("Expedição salva. Alimente-se e trate ferimentos antes de sair.")
-  return
- var loot = nearest_container()
- if not loot.is_empty():
-  sound.play_at("loot",player.global_position,0.6)
-  ui.open_inventory(loot)
-  var anim = Visuals.animation(loot["node"])
-  Visuals.play(anim,"open",false)
-
-func camera_impact(strength: float) -> void:
- camera_shake = 0.16
- camera_strength = strength
-
-func resolve_player_attack() -> void:
- # Each committed swing resolves once, even if another callback arrives.
- if player.resolved_serial == player.attack_serial or player.health <= 0:
-  return
- player.resolved_serial = player.attack_serial
- var weapon = player.attack_weapon
- var reach: float = weapon.get("range",1.5)
- var damage: float = weapon.get("damage",9.0)
- var half_angle: float = deg_to_rad(weapon.get("angle",55.0))
- var arc = Visuals.attack_arc(reach,Color(0.9,0.80,0.61,0.30),half_angle,0.06)
- add_child(arc)
- arc.position = player.position+Vector3(0,0.12,0)
- arc.rotation.y = atan2(player.attack_facing.x,player.attack_facing.z)
- get_tree().create_timer(0.12).timeout.connect(arc.queue_free)
- if weapon.get("style","") == "slash":
-  var trail = Visuals.attack_arc(minf(reach,1.65),Color(0.74,0.77,0.74,0.67),half_angle,0.19)
-  add_child(trail)
-  trail.position = player.position+Vector3(0,0.85,0)
-  trail.rotation.y = arc.rotation.y
-  get_tree().create_timer(0.15).timeout.connect(trail.queue_free)
- var candidates: Array[DungeonEnemy] = []
- for enemy in enemies:
-  if not enemy.alive:
-   continue
-  var offset: Vector3 = enemy.position-player.position
-  offset.y = 0
-  var within_shape: bool = player.attack_facing.dot(offset.normalized()) >= cos(half_angle)
-  if weapon.get("style", "") == "thrust":
-   var forward: float = offset.dot(player.attack_facing)
-   var sideways: float = (offset-player.attack_facing*forward).length()
-   within_shape = forward > 0 and sideways <= float(weapon.get("width",0.34))
-  if offset.length() <= reach and within_shape and clear_line(player.position,enemy.position):
-   candidates.append(enemy)
- candidates.sort_custom(func(a,b): return a.position.distance_squared_to(player.position)<b.position.distance_squared_to(player.position))
- var limit: int = mini(candidates.size(),int(weapon.get("targets",1)))
- for i in limit:
-  var enemy = candidates[i]
-  enemy.receive_damage(damage,player.attack_facing)
- if limit > 0:
-  sound.play_at("hit",candidates[0].global_position,0.8)
-  camera_impact(0.045)
-  message("Acerto. Preserve o fôlego para recuar.",1.3)
-
-func enemy_defeated(enemy: DungeonEnemy) -> void:
- kills += 1
- add_loot("Pertences do corrompido",layout.to_cell(enemy.position),{"coin":3,"bandage":1} if enemy.heavy else {"coin":2},false)
- message("Área mais segura. E para recolher os pertences.",3)
-
-func use_item(id: String) -> bool:
- if inventory.count(id) <= 0:
-  return false
- if Items.info(id).has("damage"):
-  inventory.equip(id)
-  message("Equipado: "+Items.info(id)["name"])
-  return true
- var data: Dictionary = Items.info(id)
- if data.has("food"):
-  if player.food >= 100:
-   message("Você já está alimentado.")
-   return false
-  player.food = minf(100,player.food+float(data["food"]))
-  player.stamina = minf(100,player.stamina+float(data.get("stamina_gain",0.0)))
- elif data.has("heal"):
-  if player.health >= 100 and not player.bleeding:
-   message("Você não precisa de tratamento agora.")
-   return false
-  if data.get("stops_bleeding",false):
-   player.bleeding = false
-  player.health = minf(100,player.health+float(data["heal"]))
- else:
-  return false
- inventory.remove(id)
- ui.refresh_inventory()
- return true
+func store_item(id: String, amount: int, container: Dictionary) -> int:
+	return ContainerSystem.store(self, id, amount, container)
 
 func drop_item(id: String, amount: int = 1) -> bool:
- amount = mini(amount,inventory.count(id))
- if amount <= 0 or not inventory.remove(id,amount):
-  return false
- # Reuse a ground pile on the same spot instead of stacking new ones.
- var pile: Dictionary = {}
- for loot in containers:
-  if not loot.get("chest",true) and Vector3(loot["pos"][0],0,loot["pos"][1]).distance_to(player.position) < 0.9:
-   pile = loot
-   break
- if pile.is_empty():
-  add_loot("Itens deixados",layout.to_cell(player.position),{id:amount},false)
- else:
-  pile["items"][id] = int(pile["items"].get(id,0))+amount
- ui.refresh_inventory()
- message("Item deixado no chão. Use E para recuperá-lo." if amount == 1 else "%d itens deixados no chão. Use E para recuperá-los." % amount)
- return true
+	return ContainerSystem.drop(self, id, amount)
 
-## Moves items from the backpack into a container (chest or ground pile).
-func store_item(id: String, amount: int, container: Dictionary) -> int:
- amount = mini(amount,inventory.count(id))
- if amount <= 0 or container.is_empty() or not containers.has(container):
-  return 0
- if not inventory.remove(id,amount):
-  return 0
- container["items"][id] = int(container["items"].get(id,0))+amount
- sound.play_at("loot",player.global_position,0.35)
- message("Guardado em %s: %s ×%d." % [container["name"],Items.info(id)["name"],amount])
- ui.refresh_inventory()
- return amount
+func use_item(id: String) -> bool:
+	return ItemUse.use(self, id)
+
+func interaction_text() -> String:
+	if has_shelter() and player.position.distance_to(camp_position) < 1.6:
+		if inventory.count("seal") > 0:
+			return "E   ENTREGAR O SELO NO ABRIGO" if generated else "E   RETORNAR COM O SELO"
+		return "E   DESCANSAR E SALVAR NO ABRIGO"
+	if generated:
+		if _near(stairs_up_cell()):
+			return "E   SUBIR  ·  para o %dº andar" % (floor - 1)
+		if _near(stairs_down_cell()):
+			return ("E   DESCER  ·  selada pelo guardião" if boss_alive() else "E   DESCER  ·  para o %dº andar" % (floor + 1))
+	var loot = nearest_container()
+	if not loot.is_empty():
+		var empty: bool = loot["items"].is_empty()
+		return ("E   ABRIR  ·  " if empty else "E   VASCULHAR  ·  ") + loot["name"] + ("  (vazio)" if empty else "")
+	return ""
+
+func interact() -> void:
+	if has_shelter() and player.position.distance_to(camp_position) < 1.6:
+		var seals: int = inventory.count("seal")
+		if seals > 0 and not generated:
+			won = true
+			save_game(false)
+			end_run(true)
+			return
+		player.stamina = 100
+		if seals > 0:
+			inventory.remove("seal", seals)
+			seals_delivered += seals
+			save_game(false)
+			message("Selo entregue no abrigo. Selos guardados: %d. Expedição salva." % seals_delivered, 6)
+		else:
+			save_game(false)
+			message("Expedição salva. Alimente-se e trate ferimentos antes de sair.")
+		return
+	if generated:
+		if _near(stairs_up_cell()):
+			change_floor(floor - 1, false)
+			return
+		if _near(stairs_down_cell()):
+			if boss_alive():
+				message("A descida está selada. Derrote o guardião deste andar.", 3)
+			else:
+				change_floor(floor + 1, true)
+			return
+	var loot = nearest_container()
+	if not loot.is_empty():
+		sound.play_at("loot", player.global_position, 0.6)
+		ui.open_inventory(loot)
+		Visuals.play(Visuals.animation(loot["node"]), "open", false)
 
 func on_inventory_changed() -> void:
- if player:
-  player.refresh_weapon()
+	if player:
+		player.refresh_weapon()
+
+# --- combat ------------------------------------------------------------------
+
+func resolve_player_attack() -> void:
+	Combat.resolve_player_attack(self)
+
+func camera_impact(strength: float) -> void:
+	camera_rig.impact(strength)
+
+func enemy_defeated(enemy: DungeonEnemy) -> void:
+	kills += 1
+	var title: String = str(tr("RECIPIENTE_DESPOJOS" if enemy.boss else "RECIPIENTE_PERTENCES"))
+	add_loot(title, layout.to_cell(enemy.position), EnemyTypes.info(enemy.kind).get("loot", {}), false)
+	if enemy.boss:
+		if is_instance_valid(stairs_sign):
+			stairs_sign.modulate = Color("9fdc8f")
+		camera_impact(0.2)
+		message("O guardião caiu. A descida para o %dº andar está aberta." % (floor + 1), 6)
+	else:
+		message("Área mais segura. E para recolher os pertences.", 3)
 
 func flash_damage() -> void:
- ui.damage_flash()
+	ui.damage_flash()
+
+# --- flow ----------------------------------------------------------------------
 
 func message(text: String, duration: float = 4.0) -> void:
- message_text = text
- message_time = duration
- if ui:
-  ui.update_hud()
+	message_text = text
+	message_time = duration
+	if ui:
+		ui.update_hud()
 
 func end_run(success: bool) -> void:
- if ended:
-  return
- ended = true
- ui.show_ending(success)
+	if ended:
+		return
+	ended = true
+	if not success:
+		# Death ends the run: its save goes, what the player learned stays.
+		if FileAccess.file_exists(save_path):
+			DirAccess.remove_absolute(save_path)
+		write_knowledge()
+	ui.show_ending(success)
 
 func save_game(notify_user: bool = true) -> bool:
- if ended and not won:
-  return false
- var loot_data: Array = []
- for loot in containers:
-  loot_data.append({"name":loot["name"],"pos":loot["pos"],"items":loot["items"],"chest":loot["chest"]})
- var enemy_data: Array = []
- for enemy in enemies:
-  enemy_data.append({"health":enemy.health,"alive":enemy.alive,"pos":[enemy.position.x,enemy.position.z]})
- var explored: Array = []
- for cell in discovered:
-  explored.append([cell.x,cell.y])
- var data = {"version":1,"inventory":inventory.snapshot(),"player":{"pos":[player.position.x,player.position.z],"health":player.health,"stamina":player.stamina,"food":player.food,"bleeding":player.bleeding},"containers":loot_data,"enemies":enemy_data,"explored":explored,"kills":kills,"hits":hits_received,"won":won}
- var file = FileAccess.open(save_path+".tmp",FileAccess.WRITE)
- if file == null:
-  message("Não foi possível salvar a expedição.")
-  return false
- file.store_string(JSON.stringify(data))
- file.close()
- var result = DirAccess.rename_absolute(save_path+".tmp",save_path)
- if result != OK:
-  message("Falha ao concluir o salvamento.")
-  return false
- if notify_user:
-  message("Expedição salva.")
- return true
+	var ok: bool = SaveSystem.write(self, notify_user)
+	if ok:
+		write_knowledge()
+	return ok
 
 func load_game() -> bool:
- var raw = JSON.parse_string(FileAccess.get_file_as_string(save_path))
- if not valid_save(raw):
-  message("O save não pôde ser lido. Iniciando uma expedição nova.")
-  return false
- if not inventory.restore(raw["inventory"]):
-  return false
- var p = raw["player"]
- player.position = Vector3(p["pos"][0],0,p["pos"][1])
- player.health = p["health"]
- player.stamina = p["stamina"]
- player.food = p["food"]
- player.bleeding = p["bleeding"]
- player.reset_transients()
- for loot in containers:
-  loot["node"].queue_free()
- containers.clear()
- for data in raw["containers"]:
-  containers.append(data)
-  WorldBuilder.add_container(self,data)
- for i in enemies.size():
-  var data = raw["enemies"][i]
-  enemies[i].health = data["health"]
-  enemies[i].alive = data["alive"]
-  enemies[i].position = Vector3(data["pos"][0],0,data["pos"][1])
-  enemies[i].collision_layer = 4 if enemies[i].alive else 0
-  enemies[i].collision_mask = 7 if enemies[i].alive else 0
-  enemies[i].windup = 0
-  enemies[i].aggro = false
-  enemies[i].memory = 0
-  enemies[i].stagger = 0
-  enemies[i].attack_recovery = 0
-  enemies[i].telegraph.hide()
-  if not enemies[i].alive:
-   Visuals.play(enemies[i].animator,"die",false)
- discovered.clear()
- for cell in raw["explored"]:
-  discovered[Vector2i(cell[0],cell[1])] = true
- kills = raw["kills"]
- hits_received = raw["hits"]
- won = raw["won"]
- last_discover = Vector2i(-99,-99)
- camera_rig.position = player.position
- message("Expedição retomada. I abre a mochila; M abre o mapa.",6)
- return true
+	return SaveSystem.read(self)
 
 func valid_save(raw) -> bool:
- if not raw is Dictionary or raw.get("version") != 1:
-  return false
- for key in ["inventory","player"]:
-  if not raw.get(key) is Dictionary:
-   return false
- for key in ["containers","enemies","explored"]:
-  if not raw.get(key) is Array:
-   return false
- if raw["enemies"].size() != enemies.size():
-  return false
- var p: Dictionary = raw["player"]
- if not valid_pos(p.get("pos")):
-  return false
- for key in ["health","stamina","food"]:
-  if not p.get(key) is float and not p.get(key) is int:
-   return false
-  if not is_finite(float(p[key])) or p[key] < (0.01 if key == "health" else 0.0) or p[key] > 100:
-   return false
- if not p.get("bleeding") is bool or not raw.get("won") is bool:
-  return false
- for key in ["kills","hits"]:
-  if not (raw.get(key) is float or raw.get(key) is int) or raw[key] < 0:
-   return false
- for e in raw["enemies"]:
-  if not e is Dictionary or not valid_pos(e.get("pos")) or not e.get("alive") is bool:
-   return false
-  if not (e.get("health") is float or e.get("health") is int) or not is_finite(float(e["health"])):
-   return false
- for loot in raw["containers"]:
-  if not loot is Dictionary or not valid_pos(loot.get("pos")) or not loot.get("items") is Dictionary or not loot.get("name") is String or not loot.get("chest") is bool:
-   return false
-  for id in loot["items"]:
-   var n = loot["items"][id]
-   if not Items.DATA.has(id) or not (n is float or n is int) or n < 1 or n > 10000 or n != int(n):
-    return false
- for cell in raw["explored"]:
-  if not cell is Array or cell.size() != 2 or not (cell[0] is float or cell[0] is int) or not (cell[1] is float or cell[1] is int):
-   return false
- var check = InventoryData.new()
- return check.restore(raw["inventory"])
+	return SaveSystem.valid(self, raw)
 
-func valid_pos(pos) -> bool:
- if not pos is Array or pos.size() != 2:
-  return false
- for value in pos:
-  if not (value is float or value is int) or not is_finite(float(value)):
-   return false
- return layout.is_floor(layout.to_cell(Vector3(pos[0],0,pos[1])))
+## Knowledge kept across deaths: seed, explored map per floor, deepest floor.
+func write_knowledge() -> void:
+	if not generated:
+		return
+	var file := FileAccess.open(knowledge_path, FileAccess.WRITE)
+	if file:
+		file.store_string(JSON.stringify({"version": 1, "seed": seed, "deepest": deepest, "knowledge": SaveSystem.pack_knowledge(knowledge)}))
+		file.close()
 
+## After a death: same labyrinth from the start, knowledge kept.
+func restart_same() -> void:
+	get_tree().paused = false
+	if FileAccess.file_exists(save_path):
+		DirAccess.remove_absolute(save_path)
+	write_knowledge()
+	get_tree().reload_current_scene()
+
+## New expedition: a new labyrinth, nothing kept.
 func restart() -> void:
- get_tree().paused = false
- if FileAccess.file_exists(save_path):
-  DirAccess.remove_absolute(save_path)
- get_tree().reload_current_scene()
+	get_tree().paused = false
+	if FileAccess.file_exists(save_path):
+		DirAccess.remove_absolute(save_path)
+	if generated and FileAccess.file_exists(knowledge_path):
+		DirAccess.remove_absolute(knowledge_path)
+	get_tree().reload_current_scene()
 
 func run_test_mode() -> void:
- var harness = load("res://tests/runtime_test.gd").new()
- add_child(harness)
- harness.run(self, "--capture" in OS.get_cmdline_user_args())
+	var harness = load("res://tests/runtime_test.gd").new()
+	add_child(harness)
+	harness.run(self, "--capture" in OS.get_cmdline_user_args())
+
+func run_labyrinth_tests() -> void:
+	var harness = load("res://tests/labyrinth_test.gd").new()
+	add_child(harness)
+	harness.run(self)
 
 func _notification(what: int) -> void:
- if what == NOTIFICATION_WM_CLOSE_REQUEST and is_instance_valid(player):
-  if not test_mode and player.health > 0:
-   save_game(false)
-  get_tree().quit()
+	if what == NOTIFICATION_WM_CLOSE_REQUEST and is_instance_valid(player):
+		if not test_mode and player.health > 0 and not ended:
+			save_game(false)
+		get_tree().quit()
