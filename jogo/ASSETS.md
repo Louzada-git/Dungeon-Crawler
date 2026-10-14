@@ -33,7 +33,7 @@ A organização do HUD segue a leitura do Project Zomboid (barra lateral, janela
 
 ## Armas com modelo provisório
 
-Adaga, katana, montante, machado, maça, martelo de guerra, alabarda, arco, besta, flecha e virote aparecem como **blocos** montados em tempo de execução a partir do campo `blocks` de `data/itens.json` (`Visuals.blocks`). São formas originais e provisórias. Um arquivo `assets/armas/<id>.glb` substitui os blocos automaticamente; a especificação para produzir esses modelos e as animações está em `../arte/ARMAS_ESPEC.md`. Se os modelos vierem de uma ferramenta de IA, registre aqui a ferramenta e os termos de uso, porque a Steam pede essa informação no questionário de conteúdo.
+Adaga, katana, montante, machado, maça, martelo de guerra, alabarda, arco, besta, flecha, virote, as quatro armaduras (gibão, couro, cota de malha, placas) e a gazua aparecem como **blocos** montados em tempo de execução a partir do campo `blocks` de `data/itens.json` (`Visuals.blocks`). São formas originais e provisórias. Um arquivo `assets/armas/<id>.glb` substitui os blocos automaticamente; a especificação para produzir esses modelos e as animações está em `../arte/ARMAS_ESPEC.md`. Se os modelos vierem de uma ferramenta de IA, registre aqui a ferramenta e os termos de uso, porque a Steam pede essa informação no questionário de conteúdo.
 
 ## Animações e sons de gameplay
 
