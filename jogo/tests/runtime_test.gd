@@ -675,6 +675,20 @@ func test_weapons() -> void:
   check(is_instance_valid(p.held_weapon),"Personagem segura a arma: "+id)
   inv.remove(id)
  check(ProficiencyTree.path_text(Items.info("katana")["proficiencias"]) == "Lâminas › Espadas › Katana","Arma indica o ramo de proficiência que treina")
+ # Real models from the asset packs: right length, grip at the origin.
+ var lengths := {"adaga":0.42,"katana":1.0,"montante":1.6,"machado":0.78,"maca":0.79,"martelo":1.27,"spear":2.6,"lanca_longa":3.1,"alabarda":2.62,"arco":1.16,"besta":0.79,"flecha":0.73,"virote":0.45}
+ for id in lengths:
+  var real: Node3D = Visuals.item_model(id)
+  add_child(real)
+  var box := AABB()
+  var first := true
+  for mesh in real.find_children("*","MeshInstance3D",true,false):
+   var b: AABB = mesh.global_transform*mesh.get_aabb()
+   box = b if first else box.merge(b)
+   first = false
+  var grip_inside: bool = box.position.y <= 0.001 and box.end.y > 0.0
+  check(Visuals.has_custom_model(id) and not real.get_meta("placeholder",false) and absf(box.size.y-lengths[id]) < 0.02 and grip_inside,"Modelo real de %s: %s m, empunhadura na origem" % [id,UiStyle.fmt(box.size.y,2)])
+  real.free()
  var at: Vector3 = game.layout.to_world(Vector2i(5,12))
  p.position = at
  var e0 = game.enemies[0]
