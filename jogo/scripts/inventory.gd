@@ -9,6 +9,8 @@ var capacity: float = CAPACITY
 var comfort: float = COMFORT
 var stacks: Dictionary = {}
 var equipped: String = ""
+## Armor worn on the body ("" = none).
+var armor: String = ""
 
 func weight() -> float:
  var total: float = 0.0
@@ -38,6 +40,8 @@ func remove(id: String, amount: int = 1) -> bool:
   stacks.erase(id)
   if equipped == id:
    equipped = ""
+  if armor == id:
+   armor = ""
  changed.emit()
  return true
 
@@ -61,8 +65,20 @@ func transfer_from(source: Dictionary, id: String, requested: int) -> int:
    source.erase(id)
  return accepted
 
+func wear(id: String) -> bool:
+ if count(id) == 0 or not Items.info(id).has("protection"):
+  return false
+ armor = id
+ changed.emit()
+ return true
+
+func take_off() -> void:
+ if armor != "":
+  armor = ""
+  changed.emit()
+
 func snapshot() -> Dictionary:
- return {"stacks":stacks.duplicate(true), "equipped":equipped}
+ return {"stacks":stacks.duplicate(true), "equipped":equipped, "armor":armor}
 
 func restore(data: Dictionary) -> bool:
  var raw = data.get("stacks", {})
@@ -83,7 +99,11 @@ func restore(data: Dictionary) -> bool:
  var next_equipped: String = str(data.get("equipped", ""))
  if next_equipped != "" and (not candidate.has(next_equipped) or not Items.info(next_equipped).has("damage")):
   return false
+ var next_armor: String = str(data.get("armor", ""))
+ if next_armor != "" and (not candidate.has(next_armor) or not Items.info(next_armor).has("protection")):
+  return false
  stacks = candidate
  equipped = next_equipped
+ armor = next_armor
  changed.emit()
  return true
