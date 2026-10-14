@@ -123,7 +123,7 @@ func _build_character_page() -> void:
 	info_grid.add_theme_constant_override("h_separation", 16)
 	info_grid.add_theme_constant_override("v_separation", 6)
 	page.add_child(info_grid)
-	for entry in [["weapon", "Em mãos"], ["damage", "Dano / alcance"], ["cost", "Fôlego por golpe"], ["area", "Área atual"], ["objective", "Objetivo"], ["depth", "Andar mais fundo"], ["seals", "Selos entregues"], ["kills", "Monstros derrotados"], ["hits", "Golpes recebidos"], ["load", "Carga"]]:
+	for entry in [["weapon", "Em mãos"], ["armor", "Armadura"], ["damage", "Dano / alcance"], ["cost", "Fôlego por golpe"], ["area", "Área atual"], ["objective", "Objetivo"], ["depth", "Andar mais fundo"], ["seals", "Selos entregues"], ["kills", "Monstros derrotados"], ["hits", "Golpes recebidos"], ["load", "Carga"]]:
 		info_grid.add_child(UiStyle.label(entry[1], 13, UiStyle.DIM))
 		var value := UiStyle.label("", 13, UiStyle.TEXT, "medium")
 		value.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -201,3 +201,5 @@ func refresh() -> void:
 		info_values["kills"].text = str(game.kills)
 		info_values["hits"].text = str(game.hits_received)
 		info_values["load"].text = "%s de %s kg" % [UiStyle.fmt(game.inventory.weight()), UiStyle.fmt(game.inventory.capacity, 0)]
+		var worn: String = game.inventory.armor
+		info_values["armor"].text = ("%s  ·  protege %d%%" % [Items.info(worn).get("name", worn), roundi(game.sheet.armor_protection(worn) * 100)]) if worn != "" else "nenhuma"
