@@ -32,6 +32,9 @@ var food: float = 85.0
 var bleeding: bool = false
 var attack_timer: float = 0.0
 var attack_wait: float = 0.0
+## Technique dash: seconds left and speed.
+var dash_time: float = 0.0
+var dash_velocity: Vector3 = Vector3.ZERO
 var attack_weapon: Dictionary = {}
 var attack_facing: Vector3 = Vector3.FORWARD
 var attack_serial: int = 0
@@ -213,6 +216,7 @@ func _physics_process(delta: float) -> void:
  if health <= 0:
   return
  cooldown = maxf(0,cooldown-delta)
+ game.techniques.tick(delta)
  invulnerable = maxf(0,invulnerable-delta)
  attack_timer = maxf(0,attack_timer-delta)
  hurt_timer = maxf(0,hurt_timer-delta)
@@ -228,6 +232,8 @@ func _physics_process(delta: float) -> void:
   else:
    attack_buffer = maxf(0,attack_buffer-delta)
  var input_axis = Input.get_vector("left","right","up","down")
+ if game.ui and game.ui.typing():
+  input_axis = Vector2.ZERO
  if test_direction != Vector2.ZERO:
   input_axis = test_direction
  var direction = Vector3(input_axis.x+input_axis.y,0,input_axis.y-input_axis.x).normalized()
@@ -265,6 +271,10 @@ func _physics_process(delta: float) -> void:
  if dodge_timer > 0:
   dodge_timer = maxf(0,dodge_timer-delta)
   horizontal = dodge_direction*8.0
+ elif dash_time > 0:
+  # Technique dash (Investida, Avanço): forward during the wind-up.
+  dash_time = maxf(0,dash_time-delta)
+  horizontal = dash_velocity
  motion_velocity = horizontal
  impulse = impulse.move_toward(Vector3.ZERO,12*delta)
  velocity = horizontal+impulse
@@ -290,10 +300,12 @@ func _physics_process(delta: float) -> void:
  if health <= 0:
   die()
 
-func attack() -> bool:
+## Normal attack with the weapon in hand, or a technique when `stats` is given
+## (Techniques.stats: same fields plus hits, dash and recarga).
+func attack(stats: Dictionary = {}) -> bool:
  if cooldown > 0 or dodge_timer > 0 or hurt_timer > 0 or health <= 0:
   return false
- var weapon = game.sheet.weapon_stats(game.inventory.equipped)
+ var weapon = stats if not stats.is_empty() else game.sheet.weapon_stats(game.inventory.equipped)
  var cost: float = weapon.get("cost",10.0)
  var ammo: String = str(weapon.get("ammo",""))
  if ammo != "" and game.inventory.count(ammo) <= 0:
@@ -306,11 +318,44 @@ func attack() -> bool:
  attack_weapon = weapon.duplicate()
  attack_facing = facing
  attack_serial += 1
- cooldown = weapon.get("cooldown",0.62)
+ # A long wind-up (heavy techniques) keeps the adventurer committed until the blow lands.
+ cooldown = maxf(float(weapon.get("cooldown",0.62)),float(weapon.get("windup",0.22))+0.15)
  attack_timer = cooldown*0.90
  attack_wait = weapon.get("windup",0.22)
+ var dash: float = float(weapon.get("dash",0.0))
+ if dash > 0.0:
+  dash_time = maxf(0.12,float(attack_wait))
+  dash_velocity = facing.normalized()*dash/dash_time
  animate_action(attack_animation(weapon),attack_timer)
  game.sound.play_at("swing",global_position,0.65)
+ return true
+
+## Uses the technique on bar slot `slot` (keys 4-7) toward the cursor
+## (aim = false keeps the current facing; used by tests).
+func use_technique(slot: int, aim: bool = true) -> bool:
+ var book: TechniqueBook = game.techniques
+ var recipe: Dictionary = book.at_slot(slot)
+ if recipe.is_empty():
+  game.message("Espaço %d da barra vazio. T monta técnicas." % (slot+4),2)
+  return false
+ if health <= 0 or hurt_timer > 0 or dodge_timer > 0 or cooldown > 0:
+  return false
+ var weapon: String = game.inventory.equipped
+ var problem: String = Techniques.problem(game.sheet,recipe,weapon)
+ if problem != "":
+  game.message(problem,2.5)
+  return false
+ var index: int = book.bar[slot]
+ if book.remaining(index) > 0:
+  game.message("%s recarrega em %s s." % [recipe["name"],UiStyle.fmt(book.remaining(index))],1.5)
+  return false
+ if aim:
+  aim_mouse()
+ var stats: Dictionary = Techniques.stats(game.sheet,recipe,weapon)
+ if not attack(stats):
+  return false
+ book.start(index,float(stats.get("recarga",1.5)))
+ game.on_technique_used(recipe)
  return true
 
 ## The animation made for the weapon when the rig has it; else the closest existing one.
@@ -416,6 +461,7 @@ func receive_damage(amount: float, from: Vector3 = Vector3.ZERO, blockable: bool
  attack_timer = 0
  attack_wait = 0
  attack_buffer = 0
+ dash_time = 0
  impulse = from.normalized()*1.8
  animate_action("hit",hurt_timer)
  game.sound.play_at("hurt",global_position,0.8)
@@ -439,6 +485,7 @@ func reset_transients() -> void:
  dodge_timer = 0
  hurt_timer = 0
  invulnerable = 0
+ dash_time = 0
  resolved_serial = attack_serial
 
 func die() -> void:
