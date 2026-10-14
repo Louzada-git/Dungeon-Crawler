@@ -31,6 +31,10 @@ A organização do HUD segue a leitura do Project Zomboid (barra lateral, janela
 - **Ícones de interface e silhueta corporal**: desenhos vetoriais originais em `scripts/ui/ui_icon.gd` e `scripts/ui/ui_body_figure.gd`.
 - **Fonte Inter** (`assets/fontes/Inter-*.otf`): © 2016-2023 The Inter Project Authors, [rsms/inter](https://github.com/rsms/inter), versão 4.0, licença SIL Open Font License 1.1. Texto completo em `assets/fontes/OFL.txt`; ele precisa acompanhar o jogo distribuído (já copiado para `outputs/linux/LICENCA-FONTE-INTER.txt`). A OFL permite embutir a fonte em software, inclusive comercial, desde que a fonte não seja vendida sozinha.
 
+## Armas com modelo provisório
+
+Adaga, katana, montante, machado, maça, martelo de guerra, alabarda, arco, besta, flecha e virote aparecem como **blocos** montados em tempo de execução a partir do campo `blocks` de `data/itens.json` (`Visuals.blocks`). São formas originais e provisórias. Um arquivo `assets/armas/<id>.glb` substitui os blocos automaticamente; a especificação para produzir esses modelos e as animações está em `../arte/ARMAS_ESPEC.md`. Se os modelos vierem de uma ferramenta de IA, registre aqui a ferramenta e os termos de uso, porque a Steam pede essa informação no questionário de conteúdo.
+
 ## Animações e sons de gameplay
 
 Nove ações originais no rig próprio: `idle`, `guard`, `walk`, `run`, `attack`, `stab`, `dodge`, `hit`, `die`. Ações criadas pelo gerador Blender do projeto.
