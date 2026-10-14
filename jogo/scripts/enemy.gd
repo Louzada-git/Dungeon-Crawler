@@ -51,6 +51,9 @@ func _ready() -> void:
  health_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
  health_label.modulate = Color("ecb9a7")
  health_label.no_depth_test = true
+ health_label.font = UiStyle.font("semibold")
+ health_label.outline_size = 8
+ health_label.outline_modulate = Color(0,0,0,0.85)
  add_child(health_label)
  maximum_health = 95 if heavy else 65
  health = maximum_health
