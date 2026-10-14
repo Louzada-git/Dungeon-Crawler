@@ -1,6 +1,6 @@
 # Armas — especificação para modelos e animações
 
-Esta é a ficha para quem for fazer os modelos 3D e as animações das armas, armaduras e perícias, seja você, outra IA ou um artista. Hoje as armas novas aparecem no jogo como **blocos provisórios**. Quando chegar um arquivo com o nome certo, o jogo passa a usar esse modelo sozinho.
+Esta é a ficha para quem for fazer os modelos 3D e as animações das armas, armaduras e perícias, seja você, outra IA ou um artista. Desde 14/10/2026 as armas usam modelos dos pacotes RPG Weapons e Low Poly Weapon Pack (lista em `jogo/ASSETS.md`); as armaduras e a gazua continuam como **blocos provisórios**. Quando chegar um arquivo com o nome certo, o jogo passa a usar esse modelo sozinho, inclusive no lugar das armas atuais.
 
 Os números de jogo (dano, alcance, tempos) ficam em `jogo/data/itens.json`. As medidas abaixo são do modelo provisório: servem de referência de tamanho, não de forma final.
 
