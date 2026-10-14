@@ -49,6 +49,9 @@ var knowledge: Dictionary = {}
 ## Fractions of missed ammunition still owed to the floor (see Projectile._fall).
 var ammo_recovery: Dictionary = {}
 var _skip_load: bool = false
+## PlayStation-style filter (pause menu); preference kept in settings_path.
+var psx: PsxFilter
+var settings_path: String = "user://configuracoes.cfg"
 
 func _ready() -> void:
 	TranslationServer.set_locale("pt_BR")
@@ -62,6 +65,12 @@ func _ready() -> void:
 		knowledge_path = "user://teste_conhecimento.json"
 	get_tree().auto_accept_quit = false
 	InputSetup.configure()
+	if test_mode or "--test-labirinto" in args:
+		settings_path = "user://teste_configuracoes.cfg"
+	psx = PsxFilter.new()
+	psx.name = "FiltroPSX"
+	psx.enabled = load_setting("video", "psx", true)
+	add_child(psx)
 	# Progression is off in the fixed test world so its exact numbers stay put.
 	sheet.enabled = generated
 	if generated:
@@ -117,6 +126,23 @@ func _ready() -> void:
 		call_deferred("run_test_mode")
 	elif "--test-labirinto" in args:
 		call_deferred("run_labyrinth_tests")
+
+func load_setting(section: String, key: String, fallback: Variant) -> Variant:
+	var cfg := ConfigFile.new()
+	if cfg.load(settings_path) != OK:
+		return fallback
+	return cfg.get_value(section, key, fallback)
+
+func save_setting(section: String, key: String, value: Variant) -> void:
+	var cfg := ConfigFile.new()
+	cfg.load(settings_path)
+	cfg.set_value(section, key, value)
+	cfg.save(settings_path)
+
+## Turns the PlayStation-style filter on or off and remembers the choice.
+func set_psx(on: bool) -> void:
+	psx.set_enabled(on)
+	save_setting("video", "psx", on)
 
 ## Seed and floor: from --seed=N, from the expedition save, from the knowledge
 ## kept after a death, or a new random labyrinth.
