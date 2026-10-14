@@ -1,6 +1,6 @@
 {
  "versao": 1,
- "_sobre": "Catálogo de itens. name/description são chaves de data/textos.csv. Números usados diretamente pelo combate e pelo inventário.",
+ "_sobre": "Catálogo de itens. name/description são chaves de data/textos.csv. Armas: style slash|thrust|smash|shoot; efeitos opcionais sneak_mult, bleed, crush, stagger, knockback, pierce. 'blocks' é o modelo provisório de blocos; um arquivo assets/armas/<id>.glb substitui os blocos automaticamente. 'proficiencias' é o caminho de ramos que a arma treina.",
  "itens": {
   "sword": {
    "tag": "ARMA",
@@ -15,7 +15,13 @@
    "targets": 3,
    "model": "weapon-sword",
    "name": "ITEM_SWORD_NOME",
-   "description": "ITEM_SWORD_DESC"
+   "description": "ITEM_SWORD_DESC",
+   "proficiencias": [
+    "espadas",
+    "espada_reta"
+   ],
+   "maos": 1,
+   "animacao": "golpe_espada"
   },
   "spear": {
    "tag": "ARMA",
@@ -31,7 +37,19 @@
    "targets": 1,
    "model": "weapon-spear",
    "name": "ITEM_SPEAR_NOME",
-   "description": "ITEM_SPEAR_DESC"
+   "description": "ITEM_SPEAR_DESC",
+   "proficiencias": [
+    "hastes",
+    "lanca"
+   ],
+   "maos": 2,
+   "animacao": "estocada_lanca",
+   "escala_mao": [
+    1,
+    1.9,
+    1
+   ],
+   "alinhar_ao_golpe": true
   },
   "ration": {
    "tag": "ALIMENTO",
@@ -86,7 +104,13 @@
    "model": "weapon-sword",
    "tint": "9fb4d6",
    "name": "ITEM_ESPADA_GUARDA_NOME",
-   "description": "ITEM_ESPADA_GUARDA_DESC"
+   "description": "ITEM_ESPADA_GUARDA_DESC",
+   "proficiencias": [
+    "espadas",
+    "espada_reta"
+   ],
+   "maos": 1,
+   "animacao": "golpe_espada"
   },
   "lanca_longa": {
    "tag": "ARMA",
@@ -103,7 +127,19 @@
    "model": "weapon-spear",
    "tint": "c9a36b",
    "name": "ITEM_LANCA_LONGA_NOME",
-   "description": "ITEM_LANCA_LONGA_DESC"
+   "description": "ITEM_LANCA_LONGA_DESC",
+   "proficiencias": [
+    "hastes",
+    "lanca"
+   ],
+   "maos": 2,
+   "animacao": "estocada_lanca",
+   "escala_mao": [
+    1,
+    1.9,
+    1
+   ],
+   "alinhar_ao_golpe": true
   },
   "unguento": {
    "tag": "TRATAMENTO",
@@ -132,6 +168,978 @@
    "tint": "d26fd0",
    "name": "ITEM_GEMA_NOME",
    "description": "ITEM_GEMA_DESC"
+  },
+  "adaga": {
+   "tag": "ARMA",
+   "weight": 0.8,
+   "damage": 15.0,
+   "range": 1.5,
+   "cost": 9.0,
+   "cooldown": 0.36,
+   "windup": 0.12,
+   "style": "slash",
+   "angle": 35.0,
+   "targets": 1,
+   "sneak_mult": 2.5,
+   "proficiencias": [
+    "adagas"
+   ],
+   "maos": 1,
+   "animacao": "golpe_adaga",
+   "blocks": [
+    {
+     "size": [
+      0.035,
+      0.025,
+      0.035
+     ],
+     "pos": [
+      0,
+      -0.07,
+      0
+     ],
+     "color": "b8913f"
+    },
+    {
+     "size": [
+      0.028,
+      0.11,
+      0.028
+     ],
+     "pos": [
+      0,
+      0,
+      0
+     ],
+     "color": "4a3324"
+    },
+    {
+     "size": [
+      0.1,
+      0.018,
+      0.03
+     ],
+     "pos": [
+      0,
+      0.064,
+      0
+     ],
+     "color": "b8913f"
+    },
+    {
+     "size": [
+      0.036,
+      0.24,
+      0.008
+     ],
+     "pos": [
+      0,
+      0.193,
+      0
+     ],
+     "color": "aeb5bc"
+    },
+    {
+     "size": [
+      0.02,
+      0.03,
+      0.008
+     ],
+     "pos": [
+      0,
+      0.325,
+      0
+     ],
+     "color": "aeb5bc"
+    }
+   ],
+   "model": "adaga",
+   "name": "ITEM_ADAGA_NOME",
+   "description": "ITEM_ADAGA_DESC"
+  },
+  "katana": {
+   "tag": "ARMA",
+   "weight": 1.4,
+   "damage": 25.0,
+   "range": 2.0,
+   "cost": 17.0,
+   "cooldown": 0.5,
+   "windup": 0.16,
+   "style": "slash",
+   "angle": 40.0,
+   "targets": 2,
+   "proficiencias": [
+    "espadas",
+    "katana"
+   ],
+   "maos": 2,
+   "animacao": "golpe_katana",
+   "blocks": [
+    {
+     "size": [
+      0.032,
+      0.27,
+      0.034
+     ],
+     "pos": [
+      0,
+      0.04,
+      0
+     ],
+     "color": "2b2b30"
+    },
+    {
+     "size": [
+      0.075,
+      0.012,
+      0.075
+     ],
+     "pos": [
+      0,
+      0.182,
+      0
+     ],
+     "color": "b8913f"
+    },
+    {
+     "size": [
+      0.03,
+      0.38,
+      0.008
+     ],
+     "pos": [
+      0,
+      0.38,
+      0
+     ],
+     "color": "aeb5bc"
+    },
+    {
+     "size": [
+      0.027,
+      0.34,
+      0.008
+     ],
+     "pos": [
+      0.012,
+      0.735,
+      0
+     ],
+     "color": "aeb5bc",
+     "rot": -4
+    }
+   ],
+   "model": "katana",
+   "name": "ITEM_KATANA_NOME",
+   "description": "ITEM_KATANA_DESC"
+  },
+  "montante": {
+   "tag": "ARMA",
+   "weight": 5.5,
+   "damage": 40.0,
+   "range": 2.6,
+   "cost": 30.0,
+   "cooldown": 1.1,
+   "windup": 0.45,
+   "style": "slash",
+   "angle": 80.0,
+   "targets": 4,
+   "knockback": 4.5,
+   "proficiencias": [
+    "espadas",
+    "montante"
+   ],
+   "maos": 2,
+   "animacao": "golpe_montante",
+   "blocks": [
+    {
+     "size": [
+      0.06,
+      0.05,
+      0.06
+     ],
+     "pos": [
+      0,
+      -0.17,
+      0
+     ],
+     "color": "b8913f"
+    },
+    {
+     "size": [
+      0.038,
+      0.34,
+      0.038
+     ],
+     "pos": [
+      0,
+      0.02,
+      0
+     ],
+     "color": "4a3324"
+    },
+    {
+     "size": [
+      0.36,
+      0.04,
+      0.05
+     ],
+     "pos": [
+      0,
+      0.21,
+      0
+     ],
+     "color": "5f666d"
+    },
+    {
+     "size": [
+      0.05,
+      0.12,
+      0.014
+     ],
+     "pos": [
+      0,
+      0.29,
+      0
+     ],
+     "color": "aeb5bc"
+    },
+    {
+     "size": [
+      0.065,
+      1.05,
+      0.012
+     ],
+     "pos": [
+      0,
+      0.875,
+      0
+     ],
+     "color": "aeb5bc"
+    }
+   ],
+   "model": "montante",
+   "name": "ITEM_MONTANTE_NOME",
+   "description": "ITEM_MONTANTE_DESC"
+  },
+  "machado": {
+   "tag": "ARMA",
+   "weight": 2.8,
+   "damage": 26.0,
+   "range": 1.9,
+   "cost": 18.0,
+   "cooldown": 0.7,
+   "windup": 0.26,
+   "style": "slash",
+   "angle": 45.0,
+   "targets": 2,
+   "bleed": {
+    "dps": 5.0,
+    "time": 5.0
+   },
+   "proficiencias": [
+    "machados"
+   ],
+   "maos": 1,
+   "animacao": "golpe_machado",
+   "blocks": [
+    {
+     "size": [
+      0.038,
+      0.78,
+      0.038
+     ],
+     "pos": [
+      0,
+      0.2,
+      0
+     ],
+     "color": "6e4b2e"
+    },
+    {
+     "size": [
+      0.06,
+      0.1,
+      0.045
+     ],
+     "pos": [
+      0,
+      0.5,
+      0
+     ],
+     "color": "5f666d"
+    },
+    {
+     "size": [
+      0.13,
+      0.17,
+      0.016
+     ],
+     "pos": [
+      0.09,
+      0.5,
+      0
+     ],
+     "color": "aeb5bc"
+    },
+    {
+     "size": [
+      0.05,
+      0.04,
+      0.03
+     ],
+     "pos": [
+      -0.05,
+      0.5,
+      0
+     ],
+     "color": "5f666d"
+    }
+   ],
+   "model": "machado",
+   "name": "ITEM_MACHADO_NOME",
+   "description": "ITEM_MACHADO_DESC"
+  },
+  "maca": {
+   "tag": "ARMA",
+   "weight": 3.2,
+   "damage": 28.0,
+   "range": 1.8,
+   "cost": 19.0,
+   "cooldown": 0.72,
+   "windup": 0.26,
+   "style": "slash",
+   "angle": 40.0,
+   "targets": 1,
+   "crush": 1.5,
+   "stagger": 0.9,
+   "knockback": 5.0,
+   "proficiencias": [
+    "contundentes",
+    "maca"
+   ],
+   "maos": 1,
+   "animacao": "golpe_maca",
+   "blocks": [
+    {
+     "size": [
+      0.036,
+      0.56,
+      0.036
+     ],
+     "pos": [
+      0,
+      0.12,
+      0
+     ],
+     "color": "6e4b2e"
+    },
+    {
+     "size": [
+      0.05,
+      0.04,
+      0.05
+     ],
+     "pos": [
+      0,
+      -0.18,
+      0
+     ],
+     "color": "5f666d"
+    },
+    {
+     "size": [
+      0.1,
+      0.14,
+      0.1
+     ],
+     "pos": [
+      0,
+      0.47,
+      0
+     ],
+     "color": "5f666d"
+    },
+    {
+     "size": [
+      0.17,
+      0.11,
+      0.025
+     ],
+     "pos": [
+      0,
+      0.47,
+      0
+     ],
+     "color": "aeb5bc"
+    },
+    {
+     "size": [
+      0.025,
+      0.11,
+      0.17
+     ],
+     "pos": [
+      0,
+      0.47,
+      0
+     ],
+     "color": "aeb5bc"
+    },
+    {
+     "size": [
+      0.03,
+      0.05,
+      0.03
+     ],
+     "pos": [
+      0,
+      0.565,
+      0
+     ],
+     "color": "aeb5bc"
+    }
+   ],
+   "model": "maca",
+   "name": "ITEM_MACA_NOME",
+   "description": "ITEM_MACA_DESC"
+  },
+  "martelo": {
+   "tag": "ARMA",
+   "weight": 6.5,
+   "damage": 44.0,
+   "range": 2.9,
+   "cost": 32.0,
+   "cooldown": 1.35,
+   "windup": 0.6,
+   "style": "smash",
+   "area_offset": 1.3,
+   "area_radius": 1.6,
+   "targets": 6,
+   "crush": 1.3,
+   "stagger": 1.0,
+   "knockback": 6.0,
+   "proficiencias": [
+    "contundentes",
+    "martelo"
+   ],
+   "maos": 2,
+   "animacao": "pancada_martelo",
+   "blocks": [
+    {
+     "size": [
+      0.045,
+      1.15,
+      0.045
+     ],
+     "pos": [
+      0,
+      0.32,
+      0
+     ],
+     "color": "6e4b2e"
+    },
+    {
+     "size": [
+      0.05,
+      0.3,
+      0.05
+     ],
+     "pos": [
+      0,
+      -0.05,
+      0
+     ],
+     "color": "4a3324"
+    },
+    {
+     "size": [
+      0.34,
+      0.17,
+      0.17
+     ],
+     "pos": [
+      0,
+      0.92,
+      0
+     ],
+     "color": "5f666d"
+    },
+    {
+     "size": [
+      0.04,
+      0.19,
+      0.19
+     ],
+     "pos": [
+      0.18,
+      0.92,
+      0
+     ],
+     "color": "aeb5bc"
+    },
+    {
+     "size": [
+      0.1,
+      0.05,
+      0.05
+     ],
+     "pos": [
+      -0.21,
+      0.92,
+      0
+     ],
+     "color": "aeb5bc"
+    }
+   ],
+   "model": "martelo",
+   "name": "ITEM_MARTELO_NOME",
+   "description": "ITEM_MARTELO_DESC"
+  },
+  "alabarda": {
+   "tag": "ARMA",
+   "weight": 5.0,
+   "damage": 33.0,
+   "range": 3.5,
+   "cost": 25.0,
+   "cooldown": 0.95,
+   "windup": 0.34,
+   "style": "thrust",
+   "angle": 7.0,
+   "width": 0.45,
+   "targets": 2,
+   "knockback": 3.0,
+   "proficiencias": [
+    "hastes",
+    "alabarda"
+   ],
+   "maos": 2,
+   "animacao": "estocada_alabarda",
+   "alinhar_ao_golpe": true,
+   "blocks": [
+    {
+     "size": [
+      0.042,
+      2.3,
+      0.042
+     ],
+     "pos": [
+      0,
+      0.55,
+      0
+     ],
+     "color": "6e4b2e"
+    },
+    {
+     "size": [
+      0.06,
+      0.3,
+      0.06
+     ],
+     "pos": [
+      0,
+      1.52,
+      0
+     ],
+     "color": "5f666d"
+    },
+    {
+     "size": [
+      0.24,
+      0.28,
+      0.018
+     ],
+     "pos": [
+      0.13,
+      1.52,
+      0
+     ],
+     "color": "aeb5bc"
+    },
+    {
+     "size": [
+      0.1,
+      0.05,
+      0.018
+     ],
+     "pos": [
+      -0.07,
+      1.56,
+      0
+     ],
+     "color": "aeb5bc"
+    },
+    {
+     "size": [
+      0.035,
+      0.32,
+      0.012
+     ],
+     "pos": [
+      0,
+      1.86,
+      0
+     ],
+     "color": "aeb5bc"
+    }
+   ],
+   "model": "alabarda",
+   "name": "ITEM_ALABARDA_NOME",
+   "description": "ITEM_ALABARDA_DESC"
+  },
+  "arco": {
+   "tag": "ARMA",
+   "weight": 1.2,
+   "damage": 22.0,
+   "range": 14.0,
+   "cost": 10.0,
+   "cooldown": 0.75,
+   "windup": 0.35,
+   "style": "shoot",
+   "targets": 1,
+   "ammo": "flecha",
+   "projectile_speed": 22.0,
+   "pierce": 1,
+   "proficiencias": [
+    "arcos"
+   ],
+   "maos": 2,
+   "animacao": "disparo_arco",
+   "rotacao_mao": [
+    0,
+    0,
+    0
+   ],
+   "blocks": [
+    {
+     "size": [
+      0.04,
+      0.13,
+      0.035
+     ],
+     "pos": [
+      0,
+      0,
+      0
+     ],
+     "color": "4a3324"
+    },
+    {
+     "size": [
+      0.03,
+      0.48,
+      0.025
+     ],
+     "pos": [
+      -0.03,
+      0.3,
+      0
+     ],
+     "color": "6e4b2e",
+     "rot": 10
+    },
+    {
+     "size": [
+      0.03,
+      0.48,
+      0.025
+     ],
+     "pos": [
+      -0.03,
+      -0.3,
+      0
+     ],
+     "color": "6e4b2e",
+     "rot": -10
+    },
+    {
+     "size": [
+      0.025,
+      0.06,
+      0.02
+     ],
+     "pos": [
+      -0.075,
+      0.55,
+      0
+     ],
+     "color": "6e4b2e",
+     "rot": 20
+    },
+    {
+     "size": [
+      0.025,
+      0.06,
+      0.02
+     ],
+     "pos": [
+      -0.075,
+      -0.55,
+      0
+     ],
+     "color": "6e4b2e",
+     "rot": -20
+    },
+    {
+     "size": [
+      0.006,
+      1.12,
+      0.006
+     ],
+     "pos": [
+      -0.1,
+      0,
+      0
+     ],
+     "color": "d9d0b8"
+    }
+   ],
+   "icon_view": {
+    "rot": [
+     0,
+     0,
+     -35
+    ],
+    "margin": 1.08,
+    "pitch": 30.0
+   },
+   "model": "arco",
+   "name": "ITEM_ARCO_NOME",
+   "description": "ITEM_ARCO_DESC",
+   "mao": "esquerda"
+  },
+  "besta": {
+   "tag": "ARMA",
+   "weight": 4.0,
+   "damage": 45.0,
+   "range": 16.0,
+   "cost": 8.0,
+   "cooldown": 1.6,
+   "windup": 0.25,
+   "style": "shoot",
+   "targets": 1,
+   "ammo": "virote",
+   "projectile_speed": 30.0,
+   "pierce": 2,
+   "knockback": 3.0,
+   "proficiencias": [
+    "bestas"
+   ],
+   "maos": 2,
+   "animacao": "disparo_besta",
+   "alinhar_ao_golpe": true,
+   "rotacao_mao": [
+    -85,
+    0,
+    0
+   ],
+   "blocks": [
+    {
+     "size": [
+      0.05,
+      0.72,
+      0.07
+     ],
+     "pos": [
+      0,
+      0.16,
+      0
+     ],
+     "color": "6e4b2e"
+    },
+    {
+     "size": [
+      0.02,
+      0.4,
+      0.02
+     ],
+     "pos": [
+      0,
+      0.36,
+      0.045
+     ],
+     "color": "5f666d"
+    },
+    {
+     "size": [
+      0.62,
+      0.045,
+      0.04
+     ],
+     "pos": [
+      0,
+      0.5,
+      0
+     ],
+     "color": "aeb5bc"
+    },
+    {
+     "size": [
+      0.58,
+      0.006,
+      0.006
+     ],
+     "pos": [
+      0,
+      0.42,
+      0
+     ],
+     "color": "d9d0b8"
+    },
+    {
+     "size": [
+      0.09,
+      0.06,
+      0.015
+     ],
+     "pos": [
+      0,
+      0.56,
+      0
+     ],
+     "color": "5f666d"
+    },
+    {
+     "size": [
+      0.015,
+      0.05,
+      0.03
+     ],
+     "pos": [
+      0,
+      -0.02,
+      -0.05
+     ],
+     "color": "5f666d"
+    }
+   ],
+   "model": "besta",
+   "name": "ITEM_BESTA_NOME",
+   "description": "ITEM_BESTA_DESC"
+  },
+  "flecha": {
+   "tag": "MUNICAO",
+   "weight": 0.05,
+   "recover": 0.5,
+   "blocks": [
+    {
+     "size": [
+      0.012,
+      0.68,
+      0.012
+     ],
+     "pos": [
+      0,
+      0.34,
+      0
+     ],
+     "color": "a07a4f"
+    },
+    {
+     "size": [
+      0.03,
+      0.06,
+      0.006
+     ],
+     "pos": [
+      0,
+      0.7,
+      0
+     ],
+     "color": "aeb5bc"
+    },
+    {
+     "size": [
+      0.035,
+      0.1,
+      0.003
+     ],
+     "pos": [
+      0,
+      0.06,
+      0
+     ],
+     "color": "c94a3a"
+    },
+    {
+     "size": [
+      0.003,
+      0.1,
+      0.035
+     ],
+     "pos": [
+      0,
+      0.06,
+      0
+     ],
+     "color": "c94a3a"
+    }
+   ],
+   "model": "flecha",
+   "name": "ITEM_FLECHA_NOME",
+   "description": "ITEM_FLECHA_DESC"
+  },
+  "virote": {
+   "tag": "MUNICAO",
+   "weight": 0.08,
+   "recover": 0.5,
+   "blocks": [
+    {
+     "size": [
+      0.016,
+      0.4,
+      0.016
+     ],
+     "pos": [
+      0,
+      0.2,
+      0
+     ],
+     "color": "6e4b2e"
+    },
+    {
+     "size": [
+      0.034,
+      0.05,
+      0.01
+     ],
+     "pos": [
+      0,
+      0.42,
+      0
+     ],
+     "color": "aeb5bc"
+    },
+    {
+     "size": [
+      0.03,
+      0.06,
+      0.003
+     ],
+     "pos": [
+      0,
+      0.04,
+      0
+     ],
+     "color": "e0d6c0"
+    },
+    {
+     "size": [
+      0.003,
+      0.06,
+      0.03
+     ],
+     "pos": [
+      0,
+      0.04,
+      0
+     ],
+     "color": "e0d6c0"
+    }
+   ],
+   "model": "virote",
+   "name": "ITEM_VIROTE_NOME",
+   "description": "ITEM_VIROTE_DESC"
   }
  }
 }
