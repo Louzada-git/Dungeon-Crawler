@@ -17,6 +17,8 @@ var knowledge_path: String = KNOWLEDGE_PATH
 var inventory = InventoryData.new()
 ## The adventurer of this run: attributes and proficiencies.
 var sheet := CharacterSheet.new()
+## Techniques made by the player (recipes, bar 4-7, recharges).
+var techniques := TechniqueBook.new()
 ## True while the "new adventurer" panel waits for the player.
 var choosing_character: bool = false
 var layout: DungeonLayout
@@ -164,6 +166,8 @@ func _choose_seed(args: PackedStringArray) -> void:
 			seed = int(known["seed"])
 			knowledge = SaveSystem.parse_knowledge(known.get("knowledge", {}))
 			deepest = int(known.get("deepest", 1))
+			# Recipes are knowledge: the next adventurer remembers them (the bar starts empty).
+			techniques.restore(known.get("tecnicas", {}), false)
 			message_text = "Mesmo labirinto, do começo. O que você descobriu continua no mapa."
 			return
 	var rng := RandomNumberGenerator.new()
@@ -203,6 +207,21 @@ func on_hit_taken(blocked: float, absorbed: float) -> void:
 	var branch: String = CharacterSheet.armor_branch(inventory.armor)
 	if absorbed > 0 and branch != "":
 		sheet.award(branch, absorbed, floor)
+
+## A monster is hunting the adventurer: techniques cannot be changed now.
+func in_combat() -> bool:
+	if is_safe():
+		return false
+	for e in enemies:
+		if e.alive and e.aggro:
+			return true
+	return false
+
+## Each component of a technique trains the branch that unlocked it.
+func on_technique_used(recipe: Dictionary) -> void:
+	for id in recipe.get("components", []):
+		for branch in Techniques.COMPONENTS.get(id, {}).get("requer", {}):
+			sheet.award(branch, Techniques.rule("xp_por_componente", 1.5), floor)
 
 ## Running trains Atletismo, mostly when something is chasing.
 func on_sprint(distance: float) -> void:
@@ -592,7 +611,7 @@ func write_knowledge() -> void:
 		return
 	var file := FileAccess.open(knowledge_path, FileAccess.WRITE)
 	if file:
-		file.store_string(JSON.stringify({"version": 1, "seed": seed, "deepest": deepest, "knowledge": SaveSystem.pack_knowledge(knowledge)}))
+		file.store_string(JSON.stringify({"version": 1, "seed": seed, "deepest": deepest, "knowledge": SaveSystem.pack_knowledge(knowledge), "tecnicas": {"recipes": techniques.recipes.duplicate(true)}}))
 		file.close()
 
 ## After a death: same labyrinth from the start, knowledge kept.
