@@ -9,6 +9,14 @@ static func use(game, id: String) -> bool:
 	if inventory.count(id) <= 0:
 		return false
 	var data: Dictionary = Items.info(id)
+	if data.has("protection"):
+		if inventory.armor == id:
+			inventory.take_off()
+			game.message("Tirou: " + data["name"])
+		else:
+			inventory.wear(id)
+			game.message("Vestiu: %s. Proteção de %d%%." % [data["name"], roundi(game.sheet.armor_protection(id) * 100)])
+		return true
 	if data.has("damage"):
 		inventory.equip(id)
 		game.message("Equipado: " + data["name"])
