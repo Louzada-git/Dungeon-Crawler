@@ -61,3 +61,12 @@ Base Mixamo `attack (4)` com braços adaptados para empurrar a lança em linha r
 - Capturas renderizadas: abrigo gerado, sala de combate, golpe em área do chefe, chefe furioso, mapa do andar, descida aberta, 2º andar, tela de morte.
 - Recomeço após a morte conferido: mesma semente e mapa explorado carregados.
 - Falta: teste humano, equilíbrio de dano e quantidade de monstros, e desempenho em placa de vídeo real.
+
+## Armas novas — 14/10/2026
+
+- Projeto restaurado a partir do pacote entregue em 13/10 e conferido antes de mexer: 242 + 37 verificações, zero falhas. Histórico do Git reconstruído a partir dos três pacotes (original, HUD, labirinto).
+- Suíte do mundo fixo: **341 verificações, zero falhas**; suíte do labirinto: **38, zero falhas**; as duas também no executável Linux exportado.
+- Novas verificações: toda arma tem modelo (blocos quando não há .glb) e é segurada pelo personagem; adaga ×2,5 em monstro desprevenido e normal depois; katana em até dois alvos; machado abre sangramento de 5/s que termina no tempo certo e pode matar; maça ×1,5 em blindado, normal em comum, e atordoa mais; martelo acerta toda a área à frente e nada atrás; alabarda atravessa um e acerta o segundo; montante em arco largo; arco não dispara sem flechas, gasta uma por disparo, a flecha voa, acerta a 6 m, fica presa e volta com os pertences; metade das flechas que erram fica no chão; besta atravessa dois; munição presa sobrevive ao save; dica do martelo; arsenal de teste; flecha em voo some ao trocar de andar.
+- Gerador revalidado com as tabelas de saque novas (90 andares, zero problemas). Em 100 sementes, todo 1º andar tem pelo menos uma arma além da espada inicial (média de 3,5 armas e 13 flechas ou virotes).
+- Capturas conferidas: todas as armas em mãos, ícones gerados dos blocos, besta em uso, dica completa da besta, arco na mão esquerda.
+- Falta: modelos e animações finais (outra IA, conforme `arte/ARMAS_ESPEC.md`) e o teste humano do equilíbrio.
