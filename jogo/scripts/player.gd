@@ -5,10 +5,20 @@ const INPUT_BUFFER: float = 0.16
 var game
 var visual: Node3D
 var animator: AnimationPlayer
-var weapon_mount: BoneAttachment3D
-var left_mount: BoneAttachment3D
+## Character model (assets/originais/<id>.glb) and where its hands and torso are.
+const MODEL := "aventureiro_psx"
+## Rigs with other bone names: [bone, rotation, offset] that puts the mount where
+## the original rig's bone was, so weapons and armour keep their placement.
+## Values from arte/fontes/personagem_psx/transferir_animacoes.gd (MOUNT lines).
+const MOUNTS := {
+	"hand-right": ["mixamorig_RightHand", Quaternion(0.14137444, -0.69607383, 0.060264293, 0.7013293), Vector3(-0.033115923, -0.024450481, -0.0018466413)],
+	"hand-left": ["mixamorig_LeftHand", Quaternion(0.02726483, -0.691197, 0.1413904, 0.7081752), Vector3(-0.03531605, -0.014843881, 0.05487594)],
+	"spine": ["mixamorig_Spine", Quaternion(0.039866824, 0.705982, -0.03986682, 0.705982), Vector3(0.0030038357, -0.06060183, -0.025849571)],
+}
+var weapon_mount: Node3D
+var left_mount: Node3D
 ## Worn armor rides on the spine bone.
-var armor_mount: BoneAttachment3D
+var armor_mount: Node3D
 var worn_model: Node3D
 var _worn_id: String = ""
 var held_weapon: Node3D
@@ -52,20 +62,14 @@ func _ready() -> void:
  collision.shape = capsule
  collision.position.y = 0.72
  add_child(collision)
- visual = Visuals.model("aventureiro_mixamo",1.0)
+ visual = Visuals.model(MODEL,1.0)
  add_child(visual)
  animator = Visuals.animation(visual)
  var skel = Visuals.skeleton(visual)
  if skel:
-  weapon_mount = BoneAttachment3D.new()
-  weapon_mount.bone_name = "hand-right"
-  skel.add_child(weapon_mount)
-  left_mount = BoneAttachment3D.new()
-  left_mount.bone_name = "hand-left"
-  skel.add_child(left_mount)
-  armor_mount = BoneAttachment3D.new()
-  armor_mount.bone_name = "spine"
-  skel.add_child(armor_mount)
+  weapon_mount = mount(skel,"hand-right")
+  left_mount = mount(skel,"hand-left")
+  armor_mount = mount(skel,"spine")
  var marker = Visuals.ring(0.43,Color("cbb88a"),0.025)
  marker.position.y = 0.04
  add_child(marker)
@@ -87,6 +91,22 @@ func locomotion(moving: float) -> Array:
  if sneaking and has.call("furtivo"):
   return ["furtivo",true,1.0]
  return ["guard" if aiming or sneaking else "idle",true,1.0]
+
+## Attachment that follows a bone of the original rig, or the matching bone of
+## another rig with the correction from MOUNTS.
+func mount(skel: Skeleton3D, bone: String) -> Node3D:
+ var attach := BoneAttachment3D.new()
+ skel.add_child(attach)
+ if skel.find_bone(bone) >= 0 or not MOUNTS.has(bone):
+  attach.bone_name = bone
+  return attach
+ var entry: Array = MOUNTS[bone]
+ attach.bone_name = entry[0]
+ var grip := Node3D.new()
+ grip.name = "ponto_" + bone
+ grip.transform = Transform3D(Basis(entry[1]), entry[2])
+ attach.add_child(grip)
+ return grip
 
 func refresh_weapon() -> void:
  refresh_armor()
