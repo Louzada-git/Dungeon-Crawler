@@ -15,6 +15,10 @@ var aim_marker: AimMarker
 var save_path: String = "user://expedicao_v1.json"
 var knowledge_path: String = KNOWLEDGE_PATH
 var inventory = InventoryData.new()
+## The adventurer of this run: attributes and proficiencies.
+var sheet := CharacterSheet.new()
+## True while the "new adventurer" panel waits for the player.
+var choosing_character: bool = false
 var layout: DungeonLayout
 var player: DungeonPlayer
 var camera: Camera3D
@@ -58,6 +62,8 @@ func _ready() -> void:
 		knowledge_path = "user://teste_conhecimento.json"
 	get_tree().auto_accept_quit = false
 	InputSetup.configure()
+	# Progression is off in the fixed test world so its exact numbers stay put.
+	sheet.enabled = generated
 	if generated:
 		message_text = "Prepare sua mochila. O guardião do andar guarda o selo e a descida."
 		_choose_seed(args)
@@ -77,6 +83,7 @@ func _ready() -> void:
 	player.game = self
 	add_child(player)
 	player.position = layout.to_world(layout.spawn)
+	apply_attributes(true)
 	camera_rig = GameCamera.new()
 	camera_rig.target = player
 	add_child(camera_rig)
@@ -97,8 +104,14 @@ func _ready() -> void:
 	ui.game = self
 	add_child(ui)
 	inventory.changed.connect(on_inventory_changed)
+	sheet.level_up.connect(ui.on_level_up)
+	sheet.perk_unlocked.connect(ui.on_perk_unlocked)
+	var loaded: bool = false
 	if not test_mode and not _skip_load and FileAccess.file_exists(save_path):
-		load_game()
+		loaded = load_game()
+	if generated and not loaded and not _skip_load and not "--test-labirinto" in args:
+		choosing_character = true
+		ui.show_creation()
 	discover()
 	if test_mode:
 		call_deferred("run_test_mode")
@@ -131,6 +144,32 @@ func _choose_seed(args: PackedStringArray) -> void:
 	rng.randomize()
 	seed = rng.randi_range(1, 999999999)
 
+## Limits that come from the attributes. fill = start at full health and stamina.
+func apply_attributes(fill: bool) -> void:
+	inventory.capacity = sheet.capacity()
+	inventory.comfort = sheet.comfort()
+	if player:
+		player.max_health = sheet.max_health()
+		player.max_stamina = sheet.max_stamina()
+		if fill:
+			player.health = player.max_health
+			player.stamina = player.max_stamina
+		else:
+			player.health = minf(player.health, player.max_health)
+			player.stamina = minf(player.stamina, player.max_stamina)
+	if ui:
+		ui.update_hud()
+
+## Called by the "new adventurer" panel.
+func start_character(values: Dictionary) -> void:
+	sheet.reset(values)
+	apply_attributes(true)
+	choosing_character = false
+	message("Atributos definem o seu potencial. As proficiências crescem com o uso: P mostra o progresso.", 7)
+
+func on_dodged(amount: float) -> void:
+	sheet.award("esquiva", amount * 0.8, floor)
+
 ## Containers and monsters from the floor description.
 func setup_content() -> void:
 	for entry in layout.world["containers"]:
@@ -162,7 +201,7 @@ func _process(delta: float) -> void:
 	ui.update_hud()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if ui == null or ended:
+	if ui == null or ended or choosing_character:
 		return
 	if event.is_action_pressed("inventory"):
 		ui.toggle_inventory()
@@ -345,7 +384,7 @@ func interact() -> void:
 			save_game(false)
 			end_run(true)
 			return
-		player.stamina = 100
+		player.stamina = player.max_stamina
 		if seals > 0:
 			inventory.remove("seal", seals)
 			seals_delivered += seals
