@@ -54,6 +54,32 @@ static func nearest_with_items(game) -> Dictionary:
 			return c
 	return {}
 
+## Puts items on the floor near pos, joining a ground pile within 1.5 m.
+static func add_ground(game, pos: Vector3, id: String, amount: int) -> Dictionary:
+	var cell: Vector2i = game.layout.to_cell(pos)
+	if not game.layout.is_floor(cell):
+		var found: bool = false
+		for d in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN, Vector2i(1, 1), Vector2i(-1, -1), Vector2i(1, -1), Vector2i(-1, 1)]:
+			if game.layout.is_floor(cell + d):
+				cell = cell + d
+				found = true
+				break
+		if not found:
+			cell = game.layout.to_cell(game.player.position)
+	var best: Dictionary = {}
+	var best_distance: float = 1.5
+	for c in game.containers:
+		if c.get("chest", true):
+			continue
+		var d: float = position_of(c).distance_to(Vector3(pos.x, 0, pos.z))
+		if d < best_distance:
+			best = c
+			best_distance = d
+	if best.is_empty():
+		return add(game, str(TranslationServer.translate("RECIPIENTE_DEIXADOS")), cell, {id: amount}, false)
+	best["items"][id] = int(best["items"].get(id, 0)) + amount
+	return best
+
 static func store(game, id: String, amount: int, container: Dictionary) -> int:
 	amount = mini(amount, game.inventory.count(id))
 	if amount <= 0 or container.is_empty() or not game.containers.has(container):
