@@ -67,16 +67,20 @@ func refresh_weapon() -> void:
  var id: String = game.inventory.equipped
  if id == "":
   return
- var weapon = Visuals.model(Items.info(id)["model"],1.0)
+ var data: Dictionary = Items.info(id)
+ var weapon = Visuals.model(data["model"],1.0)
+ if str(data.get("tint","")) != "":
+  Visuals.tint(weapon,Color(data["tint"]))
  held_weapon = weapon
  weapon_mount.add_child(weapon)
  weapon.position = Vector3(0,0.035,0)
- weapon.rotation_degrees.x = -85 if id == "spear" else -55
- if id == "spear":
+ var pole: bool = data.get("style","") == "thrust"
+ weapon.rotation_degrees.x = -85 if pole else -55
+ if pole:
   weapon.scale.y = 1.9
 
 func _process(_delta: float) -> void:
- if not is_instance_valid(held_weapon) or game.inventory.equipped != "spear":
+ if not is_instance_valid(held_weapon) or Items.info(game.inventory.equipped).get("style","") != "thrust":
   return
  if attack_timer > 0 and attack_weapon.get("style", "") == "thrust":
   # Keep the pole aimed down the committed attack line while both arms reach.
