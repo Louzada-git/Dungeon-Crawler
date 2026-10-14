@@ -8,13 +8,21 @@ var large: bool = false
 const FLOOR := Color("33433f")
 const FLOOR_NEAR := Color("4f665f")
 const EDGE := Color("b9c2b0")
-const ORIGIN := Vector2(16, 13)
+var ORIGIN := Vector2(16, 13)
+const MIN_FACTOR := 9.0
 
 func _draw() -> void:
 	if game == null or game.player == null:
 		return
-	var factor: float = minf(size.x / 63.0, size.y / 34.0)
-	var center: Vector2 = size * Vector2(0.50, 0.53)
+	# Fit the whole floor; on big floors keep a readable scale centred on the player.
+	var grid: Vector2 = Vector2(game.layout.size)
+	var span: float = grid.x + grid.y + 2.0
+	var factor: float = minf(size.x / span, size.y / (span * 0.5))
+	ORIGIN = grid * 0.5
+	var center: Vector2 = size * Vector2(0.50, 0.50)
+	if factor < MIN_FACTOR:
+		factor = MIN_FACTOR
+		ORIGIN = Vector2(game.player.position.x / 2.0, game.player.position.z / 2.0)
 	var here: Vector2i = game.layout.to_cell(game.player.position)
 	var half := Vector2(factor * 0.97, factor * 0.49)
 	for cell in game.discovered:
@@ -51,10 +59,19 @@ func _draw() -> void:
 		var s: float = (22.0 if large else 12.0)
 		if icon:
 			draw_texture_rect(icon, Rect2(p - Vector2(s, s) * 0.5 - Vector2(0, s * 0.25), Vector2(s, s)), false, Color(1, 1, 1, 1.0 if full else 0.4))
-	var camp: Vector2 = project(Vector2(game.layout.to_cell(game.camp_position)) - ORIGIN, factor) + center
 	var t: float = 9.0 if large else 5.0
-	draw_colored_polygon(PackedVector2Array([camp + Vector2(0, -t * 1.3), camp + Vector2(t, t * 0.6), camp + Vector2(-t, t * 0.6)]), Color("79c9a4"))
-	draw_colored_polygon(PackedVector2Array([camp + Vector2(0, -t * 0.2), camp + Vector2(t * 0.35, t * 0.6), camp + Vector2(-t * 0.35, t * 0.6)]), Color("1b2a24"))
+	if game.has_shelter():
+		var camp: Vector2 = project(Vector2(game.layout.to_cell(game.camp_position)) - ORIGIN, factor) + center
+		draw_colored_polygon(PackedVector2Array([camp + Vector2(0, -t * 1.3), camp + Vector2(t, t * 0.6), camp + Vector2(-t, t * 0.6)]), Color("79c9a4"))
+		draw_colored_polygon(PackedVector2Array([camp + Vector2(0, -t * 0.2), camp + Vector2(t * 0.35, t * 0.6), camp + Vector2(-t * 0.35, t * 0.6)]), Color("1b2a24"))
+	for entry in [[game.stairs_up_cell(), Color("8fc3e0"), -1.0], [game.stairs_down_cell(), Color("9fdc8f") if not game.boss_alive() else Color("e07a5a"), 1.0]]:
+		var cell = entry[0]
+		if cell == null or not game.discovered.has(cell):
+			continue
+		var p: Vector2 = project(Vector2(cell) - ORIGIN, factor) + center
+		var dir: float = entry[2]
+		draw_colored_polygon(PackedVector2Array([p + Vector2(0, t * dir), p + Vector2(t, -t * 0.5 * dir), p + Vector2(-t, -t * 0.5 * dir)]), entry[1])
+		draw_polyline(PackedVector2Array([p + Vector2(0, t * dir), p + Vector2(t, -t * 0.5 * dir), p + Vector2(-t, -t * 0.5 * dir), p + Vector2(0, t * dir)]), Color(0, 0, 0, 0.8), 1.2, true)
 	var player: Vector2 = project(Vector2(game.player.position.x / 2.0, game.player.position.z / 2.0) - ORIGIN, factor) + center
 	var facing3: Vector3 = game.player.facing
 	var screen_dir: Vector2 = project(Vector2(facing3.x, facing3.z), 1.0).normalized()
