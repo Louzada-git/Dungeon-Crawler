@@ -112,3 +112,48 @@ static func attack_arc(radius: float, color: Color, half_angle: float = 1.2, wid
  instance.material_override = material(color,true)
  instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
  return instance
+
+## Model of an item, in this order: assets/armas/<id>.glb made for it,
+## the provisional block model from its data ("blocks"), or the shared model
+## named in "model" (tinted by "tint"). Grip at the origin, tip toward +Y.
+static func item_model(id: String) -> Node3D:
+ var data: Dictionary = Items.DATA.get(id,{})
+ var custom := "res://assets/armas/%s.glb" % id
+ if ResourceLoader.exists(custom):
+  if not cache.has(custom):
+   cache[custom] = load(custom)
+  return cache[custom].instantiate()
+ if data.has("blocks"):
+  return blocks(data["blocks"])
+ var node := model(str(data.get("model","coin")))
+ if str(data.get("tint","")) != "":
+  tint(node,Color(data["tint"]))
+ return node
+
+static func has_custom_model(id: String) -> bool:
+ return ResourceLoader.exists("res://assets/armas/%s.glb" % id)
+
+## Provisional model made of boxes: [{size:[x,y,z], pos:[x,y,z], color, rot (degrees around Z)}].
+static func blocks(list: Array) -> Node3D:
+ var root := Node3D.new()
+ root.name = "ModeloDeBlocos"
+ root.set_meta("placeholder",true)
+ for i in list.size():
+  var entry: Dictionary = list[i]
+  var mesh := BoxMesh.new()
+  mesh.size = Vector3(entry["size"][0],entry["size"][1],entry["size"][2])
+  var part := MeshInstance3D.new()
+  part.name = "bloco_%d" % i
+  part.mesh = mesh
+  var key := "bloco_"+str(entry.get("color","aaaaaa"))
+  if not material_cache.has(key):
+   var mat := StandardMaterial3D.new()
+   mat.albedo_color = Color(str(entry.get("color","aaaaaa")))
+   mat.roughness = 0.7
+   mat.metallic = 0.15
+   material_cache[key] = mat
+  part.material_override = material_cache[key]
+  part.position = Vector3(entry["pos"][0],entry["pos"][1],entry["pos"][2])
+  part.rotation_degrees.z = float(entry.get("rot",0.0))
+  root.add_child(part)
+ return root
