@@ -59,9 +59,12 @@ func _init(id: String) -> void:
 func columns(w: float) -> Array:
 	return [w - 192.0, w - 106.0, w - 62.0]
 
-func set_items(items: Dictionary, equipped: String = "") -> void:
+var worn_id: String = ""
+
+func set_items(items: Dictionary, equipped: String = "", worn: String = "") -> void:
 	_items = items.duplicate()
 	equipped_id = equipped
+	worn_id = worn
 	if not _items.has(selected_id):
 		selected_id = ""
 	rebuild()
@@ -106,6 +109,7 @@ func rebuild() -> void:
 		var row := UiItemRow.new(self, id, int(_items[id]), i)
 		row.selected = id == selected_id
 		row.equipped = id == equipped_id
+		row.tag_text = "EM MÃOS" if id == equipped_id else ("VESTIDA" if id == worn_id else "")
 		rows.add_child(row)
 		i += 1
 	header.queue_redraw()
