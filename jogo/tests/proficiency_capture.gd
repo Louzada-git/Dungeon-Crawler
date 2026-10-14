@@ -46,7 +46,7 @@ func run() -> void:
 	sheet.award_path(["espadas", "espada_reta"], 1400.0)
 	sheet.award_path(["espadas", "katana"], 300.0)
 	sheet.award_path(["contundentes", "martelo"], 450.0)
-	sheet.award("esquiva", 120.0)
+	sheet.award("acrobacia", 120.0)
 	sheet.award("tratamento", 40.0)
 	game.ui.level_banner.queue.clear()
 	game.ui.level_banner._time = 0
