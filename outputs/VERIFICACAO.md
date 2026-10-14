@@ -121,3 +121,10 @@ Caminhos de um, dois ou três ramos andam no mesmo ritmo. Trocar de espada no 3�
 - Conversão conferida em vista frontal e lateral com eixos: ponta em +Y, fio do machado e da alabarda em +X, corda do arco em −X, empunhadura no cabo.
 - Capturas conferidas: as 12 armas na mão (espada, katana, montante, adaga, machado, maça, martelo, lança, lança longa, alabarda, arco, besta), besta em uso e ícones novos. Lanças e martelo foram afinados depois da primeira captura.
 
+## Filtro PSX — 14/10/2026
+
+- Suíte do mundo fixo: **477 verificações, zero falhas**; suíte do labirinto: **47, zero falhas**; as duas também no executável Linux.
+- Verificações novas: filtro entre o 3D e o HUD; tamanho do pixel conforme a janela; personagem, monstros, chão e paredes em lote com materiais PSX; anéis e marcadores intocados; arma equipada com o filtro ligado convertida no quadro seguinte; nome do monstro como rótulo 2D; botão da pausa desligando; materiais e texto originais de volta; preferência salva; rótulos 2D sumindo; religar reaplicando tudo.
+- Capturas conferidas lado a lado (sem e com filtro): abrigo, sala com monstro, perto do personagem e inventário aberto. A primeira versão pegava um só pixel por bloco e quebrava as juntas finas do piso em pontinhos; agora cada bloco é a média dos pixels. O nome do monstro, que virava um borrão vermelho, agora é desenhado nítido acima do filtro.
+- O tremido dos vértices só aparece em movimento; conferir jogando.
+
