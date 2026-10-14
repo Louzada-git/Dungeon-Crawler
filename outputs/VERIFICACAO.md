@@ -35,3 +35,12 @@ Duas animações do pacote Sword And Shield Pack continuam ativas no aventureiro
 ## Estocada longa — 13/10/2026
 
 Base Mixamo `attack (4)` com braços adaptados para empurrar a lança em linha reta. Haste alinhada à direção do ataque. Capturas de preparo, impacto e recuo conferidas. Testes cobrem alvo a 3,05 m, alvo lateral, além do alcance, atrás do jogador e primeiro alvo bloqueando o segundo. Projeto e executável: **87 verificações, zero falhas**.
+
+## HUD no estilo Project Zomboid — 13/10/2026
+
+- Interface refeita em `jogo/scripts/ui/` (um arquivo por painel). `ui.gd` ficou só com a montagem e a API usada pelo jogo e pelos testes.
+- Suíte ampliada para **145 verificações, zero falhas**, no projeto (Godot 4.7.2 headless) e no **executável Linux exportado** com o novo HUD.
+- Novas verificações: ícone para todos os itens, fonte carregada, cada indicador de estado ligado à regra real (sangramento, níveis de ferimento, fome, fôlego abaixo da esquiva e do custo da arma, carga, perseguição, abrigo), painel e barra rápida mostrando os valores atuais, guardar em baú e arrastar nos dois sentidos conservando quantidades, pilha única ao deixar vários itens no mesmo lugar, baú vazio que pode ser aberto, menu de contexto, ordenação, peças do HUD dentro da tela e sem sobreposição, janelas abertas sem cobrir condição e indicadores, janela arrastada mantendo o título na tela.
+- Arrastar e soltar testado também com eventos reais de mouse na janela renderizada.
+- Capturas conferidas em 1280×800 e 1440×900, renderizadas por software (Mesa llvmpipe, OpenGL 4.5) numa tela virtual: exploração, aviso de ação, inventário com dica, menu de contexto, arrasto, condição com indicadores, aba Personagem, mapa, pausa, barra rápida e final.
+- Ainda falta o teste humano: sensação de uso, tamanho das letras na sua tela e velocidade das dicas.
