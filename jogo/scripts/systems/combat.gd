@@ -38,10 +38,12 @@ static func resolve_player_attack(game) -> void:
 	candidates.sort_custom(func(a, b): return a.position.distance_squared_to(player.position) < b.position.distance_squared_to(player.position))
 	var limit: int = mini(candidates.size(), int(weapon.get("targets", 1)))
 	var notes: Array = []
-	for i in limit:
-		var note: String = apply_hit(game, candidates[i], weapon, player.attack_facing)
-		if note != "" and not notes.has(note):
-			notes.append(note)
+	# Techniques may strike more than once (Golpe duplo, Sequência de socos).
+	for strike in maxi(1, int(weapon.get("hits", 1))):
+		for i in limit:
+			var note: String = apply_hit(game, candidates[i], weapon, player.attack_facing)
+			if note != "" and not notes.has(note):
+				notes.append(note)
 	if limit > 0:
 		game.sound.play_at("hit", candidates[0].global_position, 0.8)
 		game.camera_impact(0.045 if float(weapon.get("knockback", 3.0)) <= 3.0 else 0.08)
@@ -105,12 +107,13 @@ static func _smash(game, weapon: Dictionary) -> void:
 			hits.append(enemy)
 	hits.sort_custom(func(a, b): return a.position.distance_squared_to(center) < b.position.distance_squared_to(center))
 	var notes: Array = []
-	for i in mini(hits.size(), int(weapon.get("targets", 6))):
-		var away: Vector3 = hits[i].position - center
-		away.y = 0
-		var note: String = apply_hit(game, hits[i], weapon, away.normalized() if away.length() > 0.05 else player.attack_facing)
-		if note != "" and not notes.has(note):
-			notes.append(note)
+	for strike in maxi(1, int(weapon.get("hits", 1))):
+		for i in mini(hits.size(), int(weapon.get("targets", 6))):
+			var away: Vector3 = hits[i].position - center
+			away.y = 0
+			var note: String = apply_hit(game, hits[i], weapon, away.normalized() if away.length() > 0.05 else player.attack_facing)
+			if note != "" and not notes.has(note):
+				notes.append(note)
 	game.camera_impact(0.12)
 	game.sound.play_at("hit", center, 0.9 if not hits.is_empty() else 0.45)
 	if not hits.is_empty():
@@ -118,6 +121,12 @@ static func _smash(game, weapon: Dictionary) -> void:
 
 ## Releases a projectile and spends one unit of ammunition.
 static func _shoot(game, weapon: Dictionary) -> void:
+	var count: int = maxi(1, int(weapon.get("hits", 1)))
+	for i in count:
+		# Extra shots of a technique fan out a little.
+		_shoot_one(game, weapon, deg_to_rad(5.0) * (i - (count - 1) * 0.5))
+
+static func _shoot_one(game, weapon: Dictionary, spread: float) -> void:
 	var player = game.player
 	var ammo: String = str(weapon.get("ammo", ""))
 	if ammo != "":
@@ -128,7 +137,7 @@ static func _shoot(game, weapon: Dictionary) -> void:
 	shot.game = game
 	shot.weapon = weapon
 	shot.ammo = ammo
-	shot.direction = player.attack_facing.normalized()
+	shot.direction = player.attack_facing.normalized().rotated(Vector3.UP, spread)
 	shot.speed = float(weapon.get("projectile_speed", 22.0))
 	shot.max_distance = float(weapon.get("range", 14.0))
 	shot.pierce = int(weapon.get("pierce", 1))
