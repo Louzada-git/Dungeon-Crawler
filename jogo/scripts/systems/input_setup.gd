@@ -5,7 +5,7 @@ class_name InputSetup
 const KEYS := {
 	"left": [KEY_A, KEY_LEFT], "right": [KEY_D, KEY_RIGHT], "up": [KEY_W, KEY_UP], "down": [KEY_S, KEY_DOWN],
 	"sprint": [KEY_SHIFT], "dodge": [KEY_SPACE], "interact": [KEY_E], "inventory": [KEY_I, KEY_TAB],
-	"map": [KEY_M], "escape": [KEY_ESCAPE], "save": [KEY_F5],
+	"map": [KEY_M], "escape": [KEY_ESCAPE], "save": [KEY_F5], "sneak": [KEY_C],
 }
 
 static func configure() -> void:
