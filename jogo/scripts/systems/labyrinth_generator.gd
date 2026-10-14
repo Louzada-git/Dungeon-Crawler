@@ -493,6 +493,9 @@ static func _fill_room(rng: RandomNumberGenerator, desc: Dictionary, index: int,
 			continue
 		occupied[cell] = true
 		var entry := {"id": "%s_bau_%d" % [tag, n], "name": chest[1], "cell": [cell.x, cell.y], "items": _roll_loot(rng, chest[0], floor), "chest": true}
+		var lock: int = _roll_lock(int(desc["seed"]), floor, index, n, kind)
+		if lock > 0:
+			entry["lock"] = lock
 		if kind == "chefe":
 			entry["objective"] = true
 		desc["containers"].append(entry)
@@ -527,6 +530,19 @@ static func _fill_room(rng: RandomNumberGenerator, desc: Dictionary, index: int,
 		occupied[cell] = true
 		desc["enemies"].append({"id": "%s_m%d" % [tag, m], "type": foe, "cell": [cell.x, cell.y], "level": floor})
 		m += 1
+
+## Locks use their own generator so the rest of the floor stays the same for a seed.
+## Treasure is usually locked; supplies, lairs and combat rooms sometimes.
+static func _roll_lock(seed: int, floor: int, room: int, chest: int, kind: String) -> int:
+	var odds: float = {"tesouro": 0.8, "covil": 0.4, "suprimentos": 0.25, "combate": 0.15}.get(kind, 0.0)
+	if odds <= 0.0:
+		return 0
+	var lr := RandomNumberGenerator.new()
+	lr.seed = floor_seed(seed, floor) ^ (room * 7919 + chest * 104729 + 31)
+	if lr.randf() >= odds:
+		return 0
+	var base: int = 1 + (floor - 1) / 2 + (1 if kind == "tesouro" else 0)
+	return clampi(base + lr.randi_range(-1, 1), 1, 4)
 
 static func _flood(floors: Dictionary, solid: Dictionary, start: Vector2i) -> Dictionary:
 	var seen: Dictionary = {start: true}
