@@ -33,7 +33,7 @@ A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrint
 | `world_builder.gd` | Ambiente, pisos, paredes, tochas, mobília e recipientes em 3D. |
 | `items.gd`, `enemy_types.gd` | Leitura dos catálogos; textos traduzidos em `Items.info()`. |
 | `inventory.gd` | Mochila: pilhas, peso, equipar, transferir. |
-| `player.gd`, `enemy.gd` | Personagem e monstros (movimento, golpes, IA). |
+| `player.gd`, `enemy.gd` | Personagem e monstros (movimento, golpes, IA). O modelo do personagem é `DungeonPlayer.MODEL`; `MOUNTS` diz em que osso ficam as mãos e o tronco em rigs com outros nomes (Mixamo) e a correção que mantém armas e armaduras no lugar. |
 | `systems/combat.gd` | Resolução do golpe do jogador. |
 | `systems/containers.gd` | Baús e pilhas no chão: ids, proximidade, guardar, deixar. |
 | `systems/item_use.gd` | Comer, tratar, equipar a partir dos dados do item. |
