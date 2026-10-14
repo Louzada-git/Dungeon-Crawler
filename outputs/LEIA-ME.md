@@ -1,5 +1,9 @@
 # Dungepm — As Cisternas
 
+## Novo: personagem PSX (14/10/2026)
+
+O aventureiro agora é um personagem do pacote Characters PSX (Character_16, CC0), com a roupa repintada: túnica verde de lã, mangas de linho, braçadeiras e cinto de couro com fivela, alça de bolsa, calça marrom e botas. Rosto, mãos e cabelo são do original. Ele faz os mesmos movimentos de antes (andar, correr, golpes, estocada, esquiva, guarda, dano e morte) e segura as armas e veste as armaduras no mesmo lugar.
+
 ## Novo: filtro PSX (14/10/2026)
 
 O jogo agora tem cara de PlayStation 1:
