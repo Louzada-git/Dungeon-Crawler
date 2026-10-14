@@ -45,11 +45,6 @@
    ],
    "maos": 2,
    "animacao": "estocada_lanca",
-   "escala_mao": [
-    1,
-    1.9,
-    1
-   ],
    "alinhar_ao_golpe": true
   },
   "ration": {
@@ -136,11 +131,6 @@
    ],
    "maos": 2,
    "animacao": "estocada_lanca",
-   "escala_mao": [
-    1,
-    1.9,
-    1
-   ],
    "alinhar_ao_golpe": true
   },
   "unguento": {
@@ -189,73 +179,6 @@
    ],
    "maos": 1,
    "animacao": "golpe_adaga",
-   "blocks": [
-    {
-     "size": [
-      0.035,
-      0.025,
-      0.035
-     ],
-     "pos": [
-      0,
-      -0.07,
-      0
-     ],
-     "color": "b8913f"
-    },
-    {
-     "size": [
-      0.028,
-      0.11,
-      0.028
-     ],
-     "pos": [
-      0,
-      0,
-      0
-     ],
-     "color": "4a3324"
-    },
-    {
-     "size": [
-      0.1,
-      0.018,
-      0.03
-     ],
-     "pos": [
-      0,
-      0.064,
-      0
-     ],
-     "color": "b8913f"
-    },
-    {
-     "size": [
-      0.036,
-      0.24,
-      0.008
-     ],
-     "pos": [
-      0,
-      0.193,
-      0
-     ],
-     "color": "aeb5bc"
-    },
-    {
-     "size": [
-      0.02,
-      0.03,
-      0.008
-     ],
-     "pos": [
-      0,
-      0.325,
-      0
-     ],
-     "color": "aeb5bc"
-    }
-   ],
    "model": "adaga",
    "name": "ITEM_ADAGA_NOME",
    "description": "ITEM_ADAGA_DESC"
@@ -278,61 +201,6 @@
    ],
    "maos": 2,
    "animacao": "golpe_katana",
-   "blocks": [
-    {
-     "size": [
-      0.032,
-      0.27,
-      0.034
-     ],
-     "pos": [
-      0,
-      0.04,
-      0
-     ],
-     "color": "2b2b30"
-    },
-    {
-     "size": [
-      0.075,
-      0.012,
-      0.075
-     ],
-     "pos": [
-      0,
-      0.182,
-      0
-     ],
-     "color": "b8913f"
-    },
-    {
-     "size": [
-      0.03,
-      0.38,
-      0.008
-     ],
-     "pos": [
-      0,
-      0.38,
-      0
-     ],
-     "color": "aeb5bc"
-    },
-    {
-     "size": [
-      0.027,
-      0.34,
-      0.008
-     ],
-     "pos": [
-      0.012,
-      0.735,
-      0
-     ],
-     "color": "aeb5bc",
-     "rot": -4
-    }
-   ],
    "model": "katana",
    "name": "ITEM_KATANA_NOME",
    "description": "ITEM_KATANA_DESC"
@@ -356,73 +224,6 @@
    ],
    "maos": 2,
    "animacao": "golpe_montante",
-   "blocks": [
-    {
-     "size": [
-      0.06,
-      0.05,
-      0.06
-     ],
-     "pos": [
-      0,
-      -0.17,
-      0
-     ],
-     "color": "b8913f"
-    },
-    {
-     "size": [
-      0.038,
-      0.34,
-      0.038
-     ],
-     "pos": [
-      0,
-      0.02,
-      0
-     ],
-     "color": "4a3324"
-    },
-    {
-     "size": [
-      0.36,
-      0.04,
-      0.05
-     ],
-     "pos": [
-      0,
-      0.21,
-      0
-     ],
-     "color": "5f666d"
-    },
-    {
-     "size": [
-      0.05,
-      0.12,
-      0.014
-     ],
-     "pos": [
-      0,
-      0.29,
-      0
-     ],
-     "color": "aeb5bc"
-    },
-    {
-     "size": [
-      0.065,
-      1.05,
-      0.012
-     ],
-     "pos": [
-      0,
-      0.875,
-      0
-     ],
-     "color": "aeb5bc"
-    }
-   ],
    "model": "montante",
    "name": "ITEM_MONTANTE_NOME",
    "description": "ITEM_MONTANTE_DESC"
@@ -448,60 +249,6 @@
    ],
    "maos": 1,
    "animacao": "golpe_machado",
-   "blocks": [
-    {
-     "size": [
-      0.038,
-      0.78,
-      0.038
-     ],
-     "pos": [
-      0,
-      0.2,
-      0
-     ],
-     "color": "6e4b2e"
-    },
-    {
-     "size": [
-      0.06,
-      0.1,
-      0.045
-     ],
-     "pos": [
-      0,
-      0.5,
-      0
-     ],
-     "color": "5f666d"
-    },
-    {
-     "size": [
-      0.13,
-      0.17,
-      0.016
-     ],
-     "pos": [
-      0.09,
-      0.5,
-      0
-     ],
-     "color": "aeb5bc"
-    },
-    {
-     "size": [
-      0.05,
-      0.04,
-      0.03
-     ],
-     "pos": [
-      -0.05,
-      0.5,
-      0
-     ],
-     "color": "5f666d"
-    }
-   ],
    "model": "machado",
    "name": "ITEM_MACHADO_NOME",
    "description": "ITEM_MACHADO_DESC"
@@ -526,86 +273,6 @@
    ],
    "maos": 1,
    "animacao": "golpe_maca",
-   "blocks": [
-    {
-     "size": [
-      0.036,
-      0.56,
-      0.036
-     ],
-     "pos": [
-      0,
-      0.12,
-      0
-     ],
-     "color": "6e4b2e"
-    },
-    {
-     "size": [
-      0.05,
-      0.04,
-      0.05
-     ],
-     "pos": [
-      0,
-      -0.18,
-      0
-     ],
-     "color": "5f666d"
-    },
-    {
-     "size": [
-      0.1,
-      0.14,
-      0.1
-     ],
-     "pos": [
-      0,
-      0.47,
-      0
-     ],
-     "color": "5f666d"
-    },
-    {
-     "size": [
-      0.17,
-      0.11,
-      0.025
-     ],
-     "pos": [
-      0,
-      0.47,
-      0
-     ],
-     "color": "aeb5bc"
-    },
-    {
-     "size": [
-      0.025,
-      0.11,
-      0.17
-     ],
-     "pos": [
-      0,
-      0.47,
-      0
-     ],
-     "color": "aeb5bc"
-    },
-    {
-     "size": [
-      0.03,
-      0.05,
-      0.03
-     ],
-     "pos": [
-      0,
-      0.565,
-      0
-     ],
-     "color": "aeb5bc"
-    }
-   ],
    "model": "maca",
    "name": "ITEM_MACA_NOME",
    "description": "ITEM_MACA_DESC"
@@ -631,73 +298,6 @@
    ],
    "maos": 2,
    "animacao": "pancada_martelo",
-   "blocks": [
-    {
-     "size": [
-      0.045,
-      1.15,
-      0.045
-     ],
-     "pos": [
-      0,
-      0.32,
-      0
-     ],
-     "color": "6e4b2e"
-    },
-    {
-     "size": [
-      0.05,
-      0.3,
-      0.05
-     ],
-     "pos": [
-      0,
-      -0.05,
-      0
-     ],
-     "color": "4a3324"
-    },
-    {
-     "size": [
-      0.34,
-      0.17,
-      0.17
-     ],
-     "pos": [
-      0,
-      0.92,
-      0
-     ],
-     "color": "5f666d"
-    },
-    {
-     "size": [
-      0.04,
-      0.19,
-      0.19
-     ],
-     "pos": [
-      0.18,
-      0.92,
-      0
-     ],
-     "color": "aeb5bc"
-    },
-    {
-     "size": [
-      0.1,
-      0.05,
-      0.05
-     ],
-     "pos": [
-      -0.21,
-      0.92,
-      0
-     ],
-     "color": "aeb5bc"
-    }
-   ],
    "model": "martelo",
    "name": "ITEM_MARTELO_NOME",
    "description": "ITEM_MARTELO_DESC"
@@ -722,73 +322,6 @@
    "maos": 2,
    "animacao": "estocada_alabarda",
    "alinhar_ao_golpe": true,
-   "blocks": [
-    {
-     "size": [
-      0.042,
-      2.3,
-      0.042
-     ],
-     "pos": [
-      0,
-      0.55,
-      0
-     ],
-     "color": "6e4b2e"
-    },
-    {
-     "size": [
-      0.06,
-      0.3,
-      0.06
-     ],
-     "pos": [
-      0,
-      1.52,
-      0
-     ],
-     "color": "5f666d"
-    },
-    {
-     "size": [
-      0.24,
-      0.28,
-      0.018
-     ],
-     "pos": [
-      0.13,
-      1.52,
-      0
-     ],
-     "color": "aeb5bc"
-    },
-    {
-     "size": [
-      0.1,
-      0.05,
-      0.018
-     ],
-     "pos": [
-      -0.07,
-      1.56,
-      0
-     ],
-     "color": "aeb5bc"
-    },
-    {
-     "size": [
-      0.035,
-      0.32,
-      0.012
-     ],
-     "pos": [
-      0,
-      1.86,
-      0
-     ],
-     "color": "aeb5bc"
-    }
-   ],
    "model": "alabarda",
    "name": "ITEM_ALABARDA_NOME",
    "description": "ITEM_ALABARDA_DESC"
@@ -816,90 +349,6 @@
     0,
     0,
     0
-   ],
-   "blocks": [
-    {
-     "size": [
-      0.04,
-      0.13,
-      0.035
-     ],
-     "pos": [
-      0,
-      0,
-      0
-     ],
-     "color": "4a3324"
-    },
-    {
-     "size": [
-      0.03,
-      0.48,
-      0.025
-     ],
-     "pos": [
-      -0.03,
-      0.3,
-      0
-     ],
-     "color": "6e4b2e",
-     "rot": 10
-    },
-    {
-     "size": [
-      0.03,
-      0.48,
-      0.025
-     ],
-     "pos": [
-      -0.03,
-      -0.3,
-      0
-     ],
-     "color": "6e4b2e",
-     "rot": -10
-    },
-    {
-     "size": [
-      0.025,
-      0.06,
-      0.02
-     ],
-     "pos": [
-      -0.075,
-      0.55,
-      0
-     ],
-     "color": "6e4b2e",
-     "rot": 20
-    },
-    {
-     "size": [
-      0.025,
-      0.06,
-      0.02
-     ],
-     "pos": [
-      -0.075,
-      -0.55,
-      0
-     ],
-     "color": "6e4b2e",
-     "rot": -20
-    },
-    {
-     "size": [
-      0.006,
-      1.12,
-      0.006
-     ],
-     "pos": [
-      -0.1,
-      0,
-      0
-     ],
-     "color": "d9d0b8"
-    }
    ],
    "icon_view": {
     "rot": [
@@ -941,86 +390,6 @@
     0,
     0
    ],
-   "blocks": [
-    {
-     "size": [
-      0.05,
-      0.72,
-      0.07
-     ],
-     "pos": [
-      0,
-      0.16,
-      0
-     ],
-     "color": "6e4b2e"
-    },
-    {
-     "size": [
-      0.02,
-      0.4,
-      0.02
-     ],
-     "pos": [
-      0,
-      0.36,
-      0.045
-     ],
-     "color": "5f666d"
-    },
-    {
-     "size": [
-      0.62,
-      0.045,
-      0.04
-     ],
-     "pos": [
-      0,
-      0.5,
-      0
-     ],
-     "color": "aeb5bc"
-    },
-    {
-     "size": [
-      0.58,
-      0.006,
-      0.006
-     ],
-     "pos": [
-      0,
-      0.42,
-      0
-     ],
-     "color": "d9d0b8"
-    },
-    {
-     "size": [
-      0.09,
-      0.06,
-      0.015
-     ],
-     "pos": [
-      0,
-      0.56,
-      0
-     ],
-     "color": "5f666d"
-    },
-    {
-     "size": [
-      0.015,
-      0.05,
-      0.03
-     ],
-     "pos": [
-      0,
-      -0.02,
-      -0.05
-     ],
-     "color": "5f666d"
-    }
-   ],
    "model": "besta",
    "name": "ITEM_BESTA_NOME",
    "description": "ITEM_BESTA_DESC"
@@ -1029,60 +398,6 @@
    "tag": "MUNICAO",
    "weight": 0.05,
    "recover": 0.5,
-   "blocks": [
-    {
-     "size": [
-      0.012,
-      0.68,
-      0.012
-     ],
-     "pos": [
-      0,
-      0.34,
-      0
-     ],
-     "color": "a07a4f"
-    },
-    {
-     "size": [
-      0.03,
-      0.06,
-      0.006
-     ],
-     "pos": [
-      0,
-      0.7,
-      0
-     ],
-     "color": "aeb5bc"
-    },
-    {
-     "size": [
-      0.035,
-      0.1,
-      0.003
-     ],
-     "pos": [
-      0,
-      0.06,
-      0
-     ],
-     "color": "c94a3a"
-    },
-    {
-     "size": [
-      0.003,
-      0.1,
-      0.035
-     ],
-     "pos": [
-      0,
-      0.06,
-      0
-     ],
-     "color": "c94a3a"
-    }
-   ],
    "model": "flecha",
    "name": "ITEM_FLECHA_NOME",
    "description": "ITEM_FLECHA_DESC"
@@ -1091,60 +406,6 @@
    "tag": "MUNICAO",
    "weight": 0.08,
    "recover": 0.5,
-   "blocks": [
-    {
-     "size": [
-      0.016,
-      0.4,
-      0.016
-     ],
-     "pos": [
-      0,
-      0.2,
-      0
-     ],
-     "color": "6e4b2e"
-    },
-    {
-     "size": [
-      0.034,
-      0.05,
-      0.01
-     ],
-     "pos": [
-      0,
-      0.42,
-      0
-     ],
-     "color": "aeb5bc"
-    },
-    {
-     "size": [
-      0.03,
-      0.06,
-      0.003
-     ],
-     "pos": [
-      0,
-      0.04,
-      0
-     ],
-     "color": "e0d6c0"
-    },
-    {
-     "size": [
-      0.003,
-      0.06,
-      0.03
-     ],
-     "pos": [
-      0,
-      0.04,
-      0
-     ],
-     "color": "e0d6c0"
-    }
-   ],
    "model": "virote",
    "name": "ITEM_VIROTE_NOME",
    "description": "ITEM_VIROTE_DESC"
