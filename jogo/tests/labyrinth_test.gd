@@ -84,10 +84,23 @@ func run(target) -> void:
 	# Down to floor 2
 	near(game.stairs_down_cell())
 	check(game.interaction_text().contains("2º andar"), "Descida aberta depois do chefe")
+	game.inventory.add("arco")
+	game.inventory.add("flecha", 3)
+	game.inventory.equip("arco")
+	p.cooldown = 0
+	p.attack_timer = 0
+	p.attack_wait = 0
+	p.stamina = 100
+	p.facing = Vector3.RIGHT
+	p.attack()
+	game.resolve_player_attack()
+	var flying: int = get_tree().get_nodes_in_group("projeteis").size()
 	var t0 := Time.get_ticks_msec()
 	game.interact()
 	await frames(3)
 	var build_ms: int = Time.get_ticks_msec() - t0
+	check(flying == 1 and get_tree().get_nodes_in_group("projeteis").is_empty(), "Flecha em voo some ao trocar de andar")
+	game.inventory.equip("sword")
 	check(game.floor == 2 and game.layout.rooms.size() == 20, "Escada leva ao 2º andar, com 20 salas")
 	check(build_ms < 4000, "Andar 2 monta em menos de 4 s (%d ms)" % build_ms)
 	check(game.layout.is_floor(game.layout.to_cell(p.position)) and game.layout.rooms[0]["rect"].has_point(game.layout.to_cell(p.position)), "Chega na entrada do 2º andar")
