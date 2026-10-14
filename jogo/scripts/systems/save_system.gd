@@ -19,7 +19,7 @@ static func write(game, notify_user: bool = true) -> bool:
 	for cell in game.discovered:
 		explored.append([cell.x, cell.y])
 	var p = game.player
-	var data := {"version": VERSION, "mode": "labirinto" if game.generated else "fixo", "seed": game.seed, "floor": game.floor, "deepest": game.deepest, "seals": game.seals_delivered, "floors": _pack_floors(game), "knowledge": pack_knowledge(game.knowledge), "world": game.layout.world.get("id", ""), "inventory": game.inventory.snapshot(), "player": {"pos": [p.position.x, p.position.z], "health": p.health, "stamina": p.stamina, "food": p.food, "bleeding": p.bleeding}, "containers": loot_data, "enemies": enemy_data, "explored": explored, "kills": game.kills, "hits": game.hits_received, "won": game.won}
+	var data := {"sheet": game.sheet.snapshot(), "version": VERSION, "mode": "labirinto" if game.generated else "fixo", "seed": game.seed, "floor": game.floor, "deepest": game.deepest, "seals": game.seals_delivered, "floors": _pack_floors(game), "knowledge": pack_knowledge(game.knowledge), "world": game.layout.world.get("id", ""), "inventory": game.inventory.snapshot(), "player": {"pos": [p.position.x, p.position.z], "health": p.health, "stamina": p.stamina, "food": p.food, "bleeding": p.bleeding}, "containers": loot_data, "enemies": enemy_data, "explored": explored, "kills": game.kills, "hits": game.hits_received, "won": game.won}
 	var file := FileAccess.open(game.save_path + ".tmp", FileAccess.WRITE)
 	if file == null:
 		game.message("Não foi possível salvar a expedição.")
@@ -38,6 +38,10 @@ static func read(game) -> bool:
 	if not valid(game, raw):
 		game.message("O save não pôde ser lido. Iniciando uma expedição nova.")
 		return false
+	# The adventurer first: Força sets how much the backpack can hold.
+	if raw.has("sheet"):
+		game.sheet.restore(raw["sheet"])
+	game.apply_attributes(false)
 	if not game.inventory.restore(raw["inventory"]):
 		return false
 	var p = game.player
@@ -172,7 +176,7 @@ static func valid(game, raw) -> bool:
 	for key in ["health", "stamina", "food"]:
 		if not p.get(key) is float and not p.get(key) is int:
 			return false
-		if not is_finite(float(p[key])) or p[key] < (0.01 if key == "health" else 0.0) or p[key] > 100:
+		if not is_finite(float(p[key])) or p[key] < (0.01 if key == "health" else 0.0) or p[key] > 400:
 			return false
 	if not p.get("bleeding") is bool or not raw.get("won") is bool:
 		return false
@@ -197,6 +201,11 @@ static func valid(game, raw) -> bool:
 		if not cell is Array or cell.size() != 2 or not (cell[0] is float or cell[0] is int) or not (cell[1] is float or cell[1] is int):
 			return false
 	var check := InventoryData.new()
+	if raw.has("sheet"):
+		var sheet := CharacterSheet.new()
+		if not sheet.restore(raw["sheet"]):
+			return false
+		check.capacity = sheet.capacity()
 	return check.restore(raw["inventory"])
 
 static func valid_pos(game, pos) -> bool:
