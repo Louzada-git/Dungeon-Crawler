@@ -1,6 +1,6 @@
 {
  "versao": 1,
- "_sobre": "Tipos de monstro. 'sight' é o alcance de visão; chefes têm golpe em área (slam_*). Vida e dano crescem com o andar (ver LabyrinthGenerator.scaling). 'armored' marca monstros blindados (armas com 'crush' causam mais dano).",
+ "_sobre": "Tipos de monstro. 'sight' é o alcance de visão; chefes têm golpe em área (slam_*). Vida e dano crescem com o andar (ver LabyrinthGenerator.scaling). 'armored' marca monstros blindados (armas com 'crush' causam mais dano). 'xp' é a experiência que o monstro inteiro ensina (dividida pelo dano causado; +25% por andar).",
  "inimigos": {
   "corrompido": {
    "name": "INIMIGO_CORROMPIDO_NOME",
@@ -15,7 +15,8 @@
     "coin": 2
    },
    "tint": "",
-   "radius": 0.4
+   "radius": 0.4,
+   "xp": 30
   },
   "guardiao": {
    "name": "INIMIGO_GUARDIAO_NOME",
@@ -32,7 +33,8 @@
    },
    "tint": "b9a07a",
    "radius": 0.45,
-   "armored": true
+   "armored": true,
+   "xp": 60
   },
   "espreitador": {
    "name": "INIMIGO_ESPREITADOR_NOME",
@@ -48,7 +50,8 @@
    "sight": 9.5,
    "loot": {
     "coin": 1
-   }
+   },
+   "xp": 22
   },
   "brutamontes": {
    "name": "INIMIGO_BRUTAMONTES_NOME",
@@ -65,7 +68,8 @@
     "coin": 4,
     "ration": 1
    },
-   "armored": true
+   "armored": true,
+   "xp": 55
   },
   "chefe": {
    "name": "INIMIGO_CHEFE_NOME",
@@ -88,7 +92,8 @@
     "coin": 25,
     "unguento": 1
    },
-   "armored": true
+   "armored": true,
+   "xp": 250
   }
  }
 }
