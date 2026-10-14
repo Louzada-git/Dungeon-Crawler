@@ -90,3 +90,25 @@ Base Mixamo `attack (4)` com braços adaptados para empurrar a lança em linha r
 Repetir o 1º andar (1x → 6, 2x → 8, 5x → 10, 10x → 11, 20x → 12, 50x → 14) mostra que monstros fracos param de ensinar; na prática os monstros não renascem, então isso só pesaria se voltarem a existir.
 - Capturas conferidas: painel de novo aventureiro, janela de proficiências com dica de ramo e aviso de nível.
 - Falta: teste humano do ritmo e os números das habilidades.
+
+## Perícias no estilo Oblivion, sem magia — 14/10/2026
+
+- Suíte do mundo fixo: **452 verificações, zero falhas**; suíte do labirinto: **47, zero falhas**; as duas também no executável Linux.
+- Verificações novas no mundo fixo: Lâminas, Contundentes e Pontaria como raízes; ramos agrupados em Combate, Furtividade e Sobrevivência; save antigo com Esquiva virando Acrobacia e ramo desconhecido descartado; golpe ensinando Lâminas, Espadas e Espada reta na divisão 40/35/25; soco sem arma (8 de dano, ensina Desarmado, mais forte no nível 5); guarda segurando 40% de frente, gastando fôlego, sem interromper e ensinando Bloqueio; golpe pelas costas passando; pancada do chefe não bloqueável; guarda quebrando sem fôlego; guarda de punhos com 25%; arco sem guarda; Bloqueio nível 10; vestir a cota pelo inventário e vê-la no tronco; proteção, lentidão e barulho da cota; armadura absorvendo e ensinando Armadura pesada; guarda e armadura somando (20 → 12 → 9); mochila marcando a armadura vestida; dica da armadura; armadura vestida no save; Armadura pesada nível 10 protegendo mais e pesando menos; couro sem perder velocidade; Armadura leve nível 5 silenciosa; largar a armadura tirando-a do corpo; corrida ensinando Atletismo cinco vezes mais quando perseguido; Atletismo nível 5; indicador de furtivo; animações de furtivo com reserva; detecção agachado de frente (metade) e por trás (30%); monstro real a 5 m sem notar quem passa agachado e ensinando Furtividade; limite de furtividade por monstro; o mesmo monstro notando de pé; ataque furtivo ×1,5 com espada ensinando Furtividade; Furtividade nível 10; baú trancado pedindo gazua, escondendo o conteúdo e recusando retirar itens; chance de 40% numa fechadura média; tentativa falha com e sem quebra da gazua; fechadura cedendo e abrindo o baú; abrir ensinando mais que tentar; chances por dificuldade; Arrombamento nível 10; fechadura no save; save com fechadura inválida recusado.
+- Verificações novas no labirinto: baús em jogo com as fechaduras da descrição do andar; baú arrombado continuando aberto ao voltar ao andar e o outro continuando trancado; em 12 andares gerados, 31% dos baús trancados, relicário do chefe nunca trancado, fechaduras do 3º andar mais difíceis que as do 1º (média 2,43 contra 1,90).
+- As fechaduras usam um gerador próprio: as sementes antigas geram os mesmos andares, monstros e saque de antes.
+- Simulação do ritmo atualizada para os caminhos novos (semente 777, 70% dos monstros e o chefe de cada andar). Domínio:
+
+| Andar | Adaga (2 ramos) | Katana (3) | Martelo (2) | Punhos (1) | Martelo, Força 9 | Espada reta → Katana no 3º |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 (9 mortes) | 5 | 5 | 5 | 5 | 6 | 5 |
+| 2 (21 mortes) | 10 | 10 | 10 | 10 | 11 | 9 |
+| 3 (47 mortes) | 14 | 14 | 14 | 14 | 15 | 14 |
+| 4 (94 mortes) | 18 | 18 | 18 | 18 | 19 | 18 |
+| 5 (163 mortes) | 21 | 21 | 21 | 21 | 23 | 21 |
+| 6 (343 mortes) | 25 | 25 | 25 | 25 | 26 | 25 |
+| 7 (696 mortes) | 29 | 29 | 29 | 29 | 30 | 29 |
+
+Caminhos de um, dois ou três ramos andam no mesmo ritmo. Trocar de espada no 3º andar agora quase não custa nada, porque Lâminas e Espadas são compartilhadas.
+- Capturas conferidas: as quatro armaduras no corpo, guarda e furtivo com os indicadores, aviso "Arrombar · 20% de chance", baú trancado, baú aberto, dica da cota de malha, janela de proficiências agrupada (início, meio e fim) com dica de ramo.
+- Falta: animações próprias de soco, guarda e agachado (outra IA, conforme `arte/ARMAS_ESPEC.md`), modelos finais das armaduras e o teste humano do equilíbrio.
