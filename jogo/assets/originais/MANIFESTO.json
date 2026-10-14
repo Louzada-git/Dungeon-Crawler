@@ -1,0 +1,140 @@
+{
+  "piso": {
+    "meshes": 1,
+    "triangles": 200,
+    "source": "arte/fontes/gerar_modelos.py",
+    "authorship": "Original para Dungepm"
+  },
+  "piso_b": {
+    "meshes": 1,
+    "triangles": 200,
+    "source": "arte/fontes/gerar_modelos.py",
+    "authorship": "Original para Dungepm"
+  },
+  "parede": {
+    "meshes": 1,
+    "triangles": 1332,
+    "source": "arte/fontes/gerar_modelos.py",
+    "authorship": "Original para Dungepm"
+  },
+  "pilar": {
+    "meshes": 1,
+    "triangles": 440,
+    "source": "arte/fontes/gerar_modelos.py",
+    "authorship": "Original para Dungepm"
+  },
+  "porta": {
+    "meshes": 1,
+    "triangles": 1056,
+    "source": "arte/fontes/gerar_modelos.py",
+    "authorship": "Original para Dungepm"
+  },
+  "bau": {
+    "meshes": 1,
+    "triangles": 1716,
+    "source": "arte/fontes/gerar_modelos.py",
+    "authorship": "Original para Dungepm"
+  },
+  "barril": {
+    "meshes": 1,
+    "triangles": 468,
+    "source": "arte/fontes/gerar_modelos.py",
+    "authorship": "Original para Dungepm"
+  },
+  "mesa": {
+    "meshes": 1,
+    "triangles": 440,
+    "source": "arte/fontes/gerar_modelos.py",
+    "authorship": "Original para Dungepm"
+  },
+  "banco": {
+    "meshes": 1,
+    "triangles": 264,
+    "source": "arte/fontes/gerar_modelos.py",
+    "authorship": "Original para Dungepm"
+  },
+  "caixote": {
+    "meshes": 1,
+    "triangles": 1056,
+    "source": "arte/fontes/gerar_modelos.py",
+    "authorship": "Original para Dungepm"
+  },
+  "saco": {
+    "meshes": 1,
+    "triangles": 114,
+    "source": "arte/fontes/gerar_modelos.py",
+    "authorship": "Original para Dungepm"
+  },
+  "vaso": {
+    "meshes": 1,
+    "triangles": 164,
+    "source": "arte/fontes/gerar_modelos.py",
+    "authorship": "Original para Dungepm"
+  },
+  "tocha": {
+    "meshes": 1,
+    "triangles": 184,
+    "source": "arte/fontes/gerar_modelos.py",
+    "authorship": "Original para Dungepm"
+  },
+  "espada": {
+    "meshes": 1,
+    "triangles": 114,
+    "source": "arte/fontes/gerar_modelos.py",
+    "authorship": "Original para Dungepm"
+  },
+  "lanca": {
+    "meshes": 1,
+    "triangles": 62,
+    "source": "arte/fontes/gerar_modelos.py",
+    "authorship": "Original para Dungepm"
+  },
+  "escada": {
+    "meshes": 1,
+    "triangles": 220,
+    "source": "arte/fontes/gerar_modelos.py",
+    "authorship": "Original para Dungepm"
+  },
+  "rochas": {
+    "meshes": 1,
+    "triangles": 80,
+    "source": "arte/fontes/gerar_modelos.py",
+    "authorship": "Original para Dungepm"
+  },
+  "catre": {
+    "meshes": 1,
+    "triangles": 352,
+    "source": "arte/fontes/gerar_modelos.py",
+    "authorship": "Original para Dungepm"
+  },
+  "bandagem": {
+    "meshes": 1,
+    "triangles": 44,
+    "source": "arte/fontes/gerar_modelos.py",
+    "authorship": "Original para Dungepm"
+  },
+  "moeda": {
+    "meshes": 1,
+    "triangles": 44,
+    "source": "arte/fontes/gerar_modelos.py",
+    "authorship": "Original para Dungepm"
+  },
+  "selo": {
+    "meshes": 1,
+    "triangles": 80,
+    "source": "arte/fontes/gerar_modelos.py",
+    "authorship": "Original para Dungepm"
+  },
+  "aventureiro": {
+    "meshes": 1,
+    "triangles": 1596,
+    "source": "arte/fontes/gerar_modelos.py",
+    "authorship": "Original para Dungepm"
+  },
+  "corrompido": {
+    "meshes": 1,
+    "triangles": 1300,
+    "source": "arte/fontes/gerar_modelos.py",
+    "authorship": "Original para Dungepm"
+  }
+}
