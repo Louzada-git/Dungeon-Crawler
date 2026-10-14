@@ -300,6 +300,7 @@ func run(target, capture: bool) -> void:
  game.discover()
  check(game.discovered.size() > 10 and not game.discovered.has(game.layout.relic),"Mapa revela só a região explorada")
  await test_hud()
+ await test_weapons()
  inv.add("seal")
  p.position = game.camp_position
  game.interact()
@@ -605,3 +606,205 @@ func test_data() -> void:
  file.store_string(JSON.stringify(raw))
  file.close()
  check(game.load_game() and game.containers[0]["id"] == "reserva_entrada" and game.containers[4]["id"] == "relicario","Save antigo sem identificadores carrega e recupera os ids do mundo")
+
+func fresh(enemy, pos: Vector3) -> void:
+ enemy.set_physics_process(false)
+ enemy.alive = true
+ enemy.health = enemy.maximum_health
+ enemy.aggro = false
+ enemy.stagger = 0
+ enemy.windup = 0
+ enemy.bleed_time = 0
+ enemy.bleed_dps = 0
+ enemy.stuck = {}
+ enemy.impulse = Vector3.ZERO
+ enemy.collision_layer = 4
+ enemy.collision_mask = 7
+ enemy.position = pos
+
+func swing(id: String, facing: Vector3) -> bool:
+ var p = game.player
+ var inv = game.inventory
+ if inv.count(id) == 0:
+  inv.add(id)
+ inv.equip(id)
+ p.cooldown = 0
+ p.attack_timer = 0
+ p.attack_wait = 0
+ p.hurt_timer = 0
+ p.dodge_timer = 0
+ p.stamina = 100
+ p.facing = facing
+ var ok: bool = p.attack()
+ if ok:
+  game.resolve_player_attack()
+ return ok
+
+func ground_count(id: String, near: Vector3, radius: float) -> int:
+ var n: int = 0
+ for c in game.containers:
+  if not c.get("chest", true) and Vector3(c["pos"][0],0,c["pos"][1]).distance_to(near) < radius:
+   n += int(c["items"].get(id,0))
+ return n
+
+func test_weapons() -> void:
+ get_tree().paused = false
+ var p = game.player
+ var inv = game.inventory
+ var saved_inventory: Dictionary = inv.snapshot()
+ inv.restore({"stacks":{},"equipped":""})
+ p.set_physics_process(false)
+ for e in game.enemies:
+  e.set_physics_process(false)
+  e.position = game.layout.to_world(Vector2i(28,7))
+ var weapons: Array = []
+ for id in Items.DATA:
+  if Items.DATA[id]["tag"] == "ARMA":
+   weapons.append(id)
+ check(weapons.size() >= 13,"Catálogo tem as armas novas (%d armas)" % weapons.size())
+ for id in weapons:
+  var model: Node3D = Visuals.item_model(id)
+  var meshes: int = model.find_children("*","MeshInstance3D",true,false).size()
+  check(meshes > 0 and (not Items.DATA[id].has("blocks") or model.get_meta("placeholder",false)),"Arma tem modelo (blocos provisórios quando não há .glb): "+id)
+  model.free()
+  inv.add(id)
+  inv.equip(id)
+  p.refresh_weapon()
+  check(is_instance_valid(p.held_weapon),"Personagem segura a arma: "+id)
+  inv.remove(id)
+ check(ProficiencyTree.path_text(Items.info("katana")["proficiencias"]) == "Espadas › Katana","Arma indica o ramo de proficiência que treina")
+ var at: Vector3 = game.layout.to_world(Vector2i(5,12))
+ p.position = at
+ var e0 = game.enemies[0]
+ var e1 = game.enemies[1]
+ var e2 = game.enemies[2]
+ var guard = game.enemies[6]
+ # Dagger: sneak attack on an unaware monster.
+ fresh(e0,at+Vector3(1.1,0,0))
+ swing("adaga",Vector3.RIGHT)
+ check(is_equal_approx(e0.health,65.0-15.0*2.5),"Adaga: dano ×2,5 em monstro desprevenido")
+ swing("adaga",Vector3.RIGHT)
+ check(is_equal_approx(e0.health,65.0-15.0*2.5-15.0),"Adaga: dano normal quando o monstro já está alerta")
+ inv.remove("adaga")
+ # Katana: up to two targets in a narrow arc.
+ fresh(e0,at+Vector3(1.2,0,0.2))
+ fresh(e1,at+Vector3(1.5,0,-0.3))
+ fresh(e2,at+Vector3(1.8,0,0.1))
+ swing("katana",Vector3.RIGHT)
+ var hit_count: int = [e0,e1,e2].filter(func(e): return e.health < 65.0).size()
+ check(hit_count == 2,"Katana acerta até dois alvos")
+ inv.remove("katana")
+ # Axe: bleeding keeps hurting after the hit.
+ fresh(e0,at+Vector3(1.2,0,0))
+ fresh(e1,at+Vector3(-3,0,0))
+ fresh(e2,at+Vector3(-3,0,2))
+ swing("machado",Vector3.RIGHT)
+ check(is_equal_approx(e0.health,39.0) and e0.bleed_time > 4.9,"Machado: golpe abre sangramento")
+ e0.tick_bleed(1.0)
+ check(is_equal_approx(e0.health,34.0),"Sangramento tira 5 de vida por segundo")
+ e0.tick_bleed(5.0)
+ check(e0.bleed_time == 0 and e0.health >= 13.9 and e0.alive,"Sangramento acaba depois do tempo")
+ e0.health = 3
+ e0.apply_bleed(5,5)
+ var kills_before: int = game.kills
+ e0.tick_bleed(1.0)
+ check(not e0.alive and game.kills == kills_before+1,"Monstro pode morrer de sangramento")
+ inv.remove("machado")
+ # Mace: crushes armor and stuns longer.
+ fresh(guard,at+Vector3(1.2,0,0))
+ swing("maca",Vector3.RIGHT)
+ check(is_equal_approx(guard.health,95.0-28.0*1.5) and guard.armored,"Maça: dano ×1,5 em monstro blindado")
+ check(guard.stagger >= 0.89,"Maça atordoa por mais tempo")
+ fresh(e0,at+Vector3(1.2,0,0))
+ fresh(guard,game.layout.to_world(Vector2i(28,7)))
+ swing("maca",Vector3.RIGHT)
+ check(is_equal_approx(e0.health,65.0-28.0),"Maça: dano normal em monstro sem armadura")
+ inv.remove("maca")
+ # War hammer: area in front, nothing behind.
+ fresh(e0,at+Vector3(1.3,0,1.0))
+ fresh(e1,at+Vector3(2.2,0,-0.6))
+ fresh(e2,at+Vector3(-1.5,0,0))
+ swing("martelo",Vector3.RIGHT)
+ check(is_equal_approx(e0.health,65.0-44.0) and is_equal_approx(e1.health,65.0-44.0),"Martelo acerta todos na área à frente")
+ check(is_equal_approx(e2.health,65.0),"Martelo não acerta quem está atrás")
+ inv.remove("martelo")
+ # Halberd: pierces two in a line.
+ fresh(e0,at+Vector3(1.3,0,0))
+ fresh(e1,at+Vector3(2.4,0,0))
+ fresh(e2,at+Vector3(3.3,0,0))
+ swing("alabarda",Vector3.RIGHT)
+ check(is_equal_approx(e0.health,32.0) and is_equal_approx(e1.health,32.0) and is_equal_approx(e2.health,65.0),"Alabarda atravessa o primeiro e acerta o segundo")
+ inv.remove("alabarda")
+ # Montante: wide arc, four targets.
+ fresh(e0,at+Vector3(1.2,0,1.2))
+ fresh(e1,at+Vector3(1.6,0,0))
+ fresh(e2,at+Vector3(1.2,0,-1.2))
+ swing("montante",Vector3.RIGHT)
+ check([e0,e1,e2].all(func(e): return is_equal_approx(e.health,25.0)),"Montante acerta em arco largo")
+ inv.remove("montante")
+ # Bow: needs arrows, spends one on release, projectile flies and sticks.
+ fresh(e0,at+Vector3(6.0,0,0))
+ fresh(e1,game.layout.to_world(Vector2i(28,7)))
+ fresh(e2,game.layout.to_world(Vector2i(28,7)))
+ inv.add("arco")
+ inv.equip("arco")
+ game.ui.update_hud()
+ check("ammo" in moodle_ids(),"Indicador de sem munição com arco e sem flechas")
+ check(not swing("arco",Vector3.RIGHT),"Arco sem flechas não dispara")
+ inv.add("flecha",5)
+ game.ui.update_hud()
+ check(game.ui.hotbar.slots[0]["count"].text == "5","Barra rápida mostra as flechas do arco")
+ check(swing("arco",Vector3.RIGHT) and inv.count("flecha") == 4,"Disparo gasta uma flecha")
+ check(get_tree().get_nodes_in_group("projeteis").size() == 1,"Flecha voa como projétil")
+ await wait_frames(30)
+ check(is_equal_approx(e0.health,43.0) and int(e0.stuck.get("flecha",0)) == 1,"Flecha acerta à distância e fica presa no monstro")
+ check(get_tree().get_nodes_in_group("projeteis").is_empty(),"Projétil some depois de acertar")
+ e0.receive_damage(999,Vector3.RIGHT)
+ check(int(game.containers[-1]["items"].get("flecha",0)) == 1,"Flecha presa volta com os pertences do monstro")
+ # Misses into a wall: half of them can be picked up.
+ var wall_side: Vector3 = at+Vector3(-4.0,0,0)
+ var before: int = ground_count("flecha",wall_side,3.5)
+ game.ammo_recovery.clear()
+ swing("arco",Vector3.LEFT)
+ await wait_frames(20)
+ swing("arco",Vector3.LEFT)
+ await wait_frames(20)
+ check(ground_count("flecha",wall_side,3.5) == before+1,"Metade das flechas que erram fica no chão")
+ inv.remove("arco")
+ # Crossbow: pierces two.
+ fresh(e0,at+Vector3(3.0,0,0))
+ fresh(e1,at+Vector3(5.0,0,0))
+ fresh(e2,at+Vector3(7.0,0,0))
+ inv.add("virote",3)
+ swing("besta",Vector3.RIGHT)
+ await wait_frames(30)
+ check(is_equal_approx(e0.health,20.0) and is_equal_approx(e1.health,20.0) and is_equal_approx(e2.health,65.0),"Besta atravessa dois inimigos")
+ check(int(e1.stuck.get("virote",0)) == 1 and int(e0.stuck.get("virote",0)) == 0,"Virote fica preso no último atingido")
+ # Stuck ammunition survives a save.
+ game.ui.close_all()
+ check(game.save_game(false),"Save com munição presa é gravado")
+ e1.stuck = {}
+ game.load_game()
+ check(int(game.enemies[1].stuck.get("virote",0)) == 1,"Munição presa no monstro volta ao carregar")
+ inv.remove("besta")
+ # HUD text
+ var tip: Control = UiItemTooltip.build("martelo")
+ var texts: Array = []
+ for node in tip.find_children("*","Label",true,false):
+  texts.append(node.text)
+ var joined: String = " | ".join(texts)
+ check(joined.contains("Contundentes › Martelo") and joined.contains("Pancada") and joined.contains("Duas mãos"),"Dica do martelo mostra família, golpe e empunhadura")
+ tip.free()
+ # Test arsenal
+ var chest: Dictionary = game.spawn_test_arsenal()
+ var all_there: bool = true
+ for id in weapons:
+  all_there = all_there and int(chest["items"].get(id,0)) == 1
+ check(all_there and int(chest["items"].get("flecha",0)) == 40,"Arsenal de teste traz todas as armas e munição")
+ game.containers.erase(chest)
+ chest["node"].queue_free()
+ for e in [e0,e1,e2,guard]:
+  fresh(e,game.layout.to_world(Vector2i(28,7)))
+ inv.restore(saved_inventory)
+ p.refresh_weapon()
+ game.ui.close_all()
