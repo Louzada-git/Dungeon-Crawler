@@ -303,6 +303,7 @@ func run(target, capture: bool) -> void:
  await test_weapons()
  await test_proficiencies()
  await test_skills()
+ await test_psx()
  inv.add("seal")
  p.position = game.camp_position
  game.interact()
@@ -1211,3 +1212,48 @@ func test_skills() -> void:
  p.refresh_weapon()
  p.set_physics_process(was_processing)
  game.ui.close_all()
+
+func psx_surface(node: Node) -> bool:
+ for mesh in node.find_children("*","MeshInstance3D",true,false):
+  for i in mesh.get_surface_override_material_count():
+   if mesh.get_surface_override_material(i) is ShaderMaterial:
+    return true
+ return false
+
+## PlayStation-style filter: post-process, PSX materials, sharp world text, toggle.
+func test_psx() -> void:
+ get_tree().paused = false
+ var p = game.player
+ var psx: PsxFilter = game.psx
+ game.set_psx(true)
+ await wait_frames(2)
+ check(psx.enabled and psx.screen.visible and psx.layer.layer < game.ui.layer,"Filtro PSX ligado fica entre o 3D e o HUD")
+ check(psx.pixel_size() >= 1.0 and is_equal_approx(float(psx.post.get_shader_parameter("pixel_size")),psx.pixel_size()),"Tamanho do pixel acompanha a altura da janela")
+ check(psx_surface(p.visual) and psx_surface(game.enemies[0].visual),"Personagem e monstros usam os materiais PSX")
+ var batches: Array = game.world_root.find_children("*","MultiMeshInstance3D",true,false)
+ check(not batches.is_empty() and batches.all(func(b): return b.has_meta("psx_mesh") or b.multimesh.mesh.get_surface_count() == 0),"Chão e paredes em lote também recebem os materiais PSX")
+ check(game.aim_marker.ring.material_override is StandardMaterial3D,"Anéis e marcadores sem sombra ficam como estão")
+ # A weapon equipped now is converted on the next frame.
+ game.inventory.add("machado")
+ game.inventory.equip("machado")
+ await wait_frames(2)
+ check(psx_surface(p.weapon_mount),"Arma equipada com o filtro ligado vira PSX")
+ var label: Label3D = game.enemies[0].health_label
+ check(label.layers == 0 and psx.overlay.get_child_count() > 0,"Texto do mundo vira rótulo 2D nítido acima do filtro")
+ var ui_label_count: int = psx.overlay.get_child_count()
+ # Off: everything back to the original materials, and the choice is saved.
+ game.ui.toggle_pause()
+ game.ui.psx_button.pressed.emit()
+ await wait_frames(2)
+ check(not psx.enabled and not psx.screen.visible and game.ui.psx_button.text == "Filtro PSX: desligado","Botão da pausa desliga o filtro")
+ check(not psx_surface(p.visual) and not psx_surface(p.weapon_mount) and label.layers != 0,"Desligar devolve os materiais e o texto originais")
+ check(game.load_setting("video","psx",true) == false,"Preferência do filtro fica salva")
+ await wait_frames(2)
+ check(psx.overlay.get_child_count() < ui_label_count or psx.overlay.get_children().all(func(c): return c.is_queued_for_deletion() or not c.visible),"Rótulos 2D somem com o filtro desligado")
+ game.ui.psx_button.pressed.emit()
+ await wait_frames(2)
+ check(psx.enabled and psx_surface(p.visual) and psx_surface(p.weapon_mount) and game.ui.psx_button.text == "Filtro PSX: ligado","Ligar de novo reaplica o filtro")
+ game.ui.close_all()
+ game.inventory.remove("machado")
+ game.inventory.equip("sword")
+ DirAccess.remove_absolute(game.settings_path)
