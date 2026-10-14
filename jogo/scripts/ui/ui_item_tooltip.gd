@@ -5,6 +5,8 @@ class_name UiItemTooltip
 
 ## Backpack the tooltips read ammunition counts from (set by the HUD).
 static var inventory = null
+## Adventurer sheet for mastery and unlocked abilities (set by the HUD).
+static var sheet = null
 
 static func build(id: String, count: int = 1, equipped: bool = false) -> Control:
 	var data: Dictionary = Items.info(id)
@@ -60,6 +62,9 @@ static func _weapon_rows(grid: GridContainer, data: Dictionary) -> void:
 	if data.has("proficiencias"):
 		_row(grid, "Família", ProficiencyTree.path_text(data["proficiencias"]))
 	_row(grid, "Empunhadura", "Duas mãos" if int(data.get("maos", 1)) == 2 else "Uma mão")
+	if sheet != null and sheet.enabled and data.has("proficiencias"):
+		var path: Array = data["proficiencias"]
+		_row(grid, "Domínio", "nível %d  ·  +%d%% dano, −%d%% fôlego" % [sheet.mastery(path), roundi((sheet.damage_mult(path) - 1.0) * 100), roundi((1.0 - sheet.cost_mult(path)) * 100)])
 	_row(grid, "Dano", "%d" % int(data["damage"]))
 	_row(grid, "Alcance", "%s m" % UiStyle.fmt(float(data.get("range", 1.5)), 1))
 	_row(grid, "Fôlego por golpe", "%d" % int(data.get("cost", 10)))
