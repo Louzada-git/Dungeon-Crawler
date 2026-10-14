@@ -54,6 +54,10 @@ static func apply_hit(game, enemy, weapon: Dictionary, direction: Vector3, damag
 	if weapon.has("sneak_mult") and not enemy.aggro:
 		amount *= float(weapon["sneak_mult"])
 		note = "Ataque furtivo!"
+	var sneak: bool = game.player.sneaking and not enemy.aggro
+	if sneak:
+		amount *= game.sheet.sneak_attack_mult()
+		note = "Ataque furtivo!"
 	if weapon.has("crush") and enemy.armored:
 		amount *= float(weapon["crush"])
 		note = "Esmagou a armadura!"
@@ -66,7 +70,11 @@ static func apply_hit(game, enemy, weapon: Dictionary, direction: Vector3, damag
 	var path: Array = weapon.get("proficiencias", [])
 	enemy.receive_damage(amount, direction, hit)
 	# Practice: the monster teaches in proportion to the damage that landed.
-	game.sheet.award_damage(enemy, clampf(minf(amount, before), 0.0, before), path)
+	var dealt: float = clampf(minf(amount, before), 0.0, before)
+	game.sheet.award_damage(enemy, dealt, path)
+	if sneak:
+		var value: float = float(EnemyTypes.info(enemy.kind).get("xp", 20)) * (1.0 + 0.25 * (enemy.level - 1))
+		game.sheet.award("furtividade", value * 0.3 * dealt / enemy.maximum_health, enemy.level)
 	if weapon.has("bleed") and enemy.alive:
 		enemy.apply_bleed(float(weapon["bleed"].get("dps", 4.0)), float(weapon["bleed"].get("time", 4.0)), path)
 		if note == "":
