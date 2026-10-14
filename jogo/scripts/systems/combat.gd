@@ -62,9 +62,13 @@ static func apply_hit(game, enemy, weapon: Dictionary, direction: Vector3, damag
 		hit["stagger"] = float(weapon["stagger"])
 	if weapon.has("knockback"):
 		hit["knockback"] = float(weapon["knockback"])
+	var before: float = enemy.health
+	var path: Array = weapon.get("proficiencias", [])
 	enemy.receive_damage(amount, direction, hit)
+	# Practice: the monster teaches in proportion to the damage that landed.
+	game.sheet.award_damage(enemy, clampf(minf(amount, before), 0.0, before), path)
 	if weapon.has("bleed") and enemy.alive:
-		enemy.apply_bleed(float(weapon["bleed"].get("dps", 4.0)), float(weapon["bleed"].get("time", 4.0)))
+		enemy.apply_bleed(float(weapon["bleed"].get("dps", 4.0)), float(weapon["bleed"].get("time", 4.0)), path)
 		if note == "":
 			note = "Ferida aberta: o monstro sangra."
 	return note
