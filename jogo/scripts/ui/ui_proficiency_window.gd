@@ -15,7 +15,7 @@ var rows: Dictionary = {}
 var list: VBoxContainer
 
 func _init(game_ref, ui_ref) -> void:
-	super._init("Proficiências", UiIcon.new("book", UiStyle.TEXT), 500, 640)
+	super._init("Proficiências", UiIcon.new("book", UiStyle.TEXT), 500, 760)
 	game = game_ref
 	ui = ui_ref
 	position = Vector2(60, 56)
@@ -72,16 +72,23 @@ func _init(game_ref, ui_ref) -> void:
 	list.add_theme_constant_override("separation", 2)
 	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(list)
-	var order: Array = ProficiencyTree.roots()
-	order.sort_custom(func(a, b): return int(a in ["esquiva", "tratamento"]) < int(b in ["esquiva", "tratamento"]))
-	for root in order:
-		_add_row(root, 0)
-		for child in ProficiencyTree.children(root):
-			_add_row(child, 1)
-	var hint := UiStyle.label("Experiência vem do dano que você causa (dividida entre os ramos da arma), de escapar de golpes esquivando e de tratar ferimentos de verdade. Monstros de andares rasos ensinam pouco quando o domínio já está alto.", 11, UiStyle.DIM)
+	for group in ProficiencyTree.groups():
+		var heading := UiStyle.caps(str(group.get("name", "")), 11, UiStyle.ACCENT)
+		heading.custom_minimum_size.y = 24
+		heading.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+		list.add_child(heading)
+		for root in ProficiencyTree.roots():
+			if ProficiencyTree.group_of(root) == group["id"]:
+				_add_tree(root, 0)
+	var hint := UiStyle.label("Experiência vem do que você faz: dano causado (dividido entre os ramos da arma), golpes bloqueados ou esquivados, golpes absorvidos pela armadura, corridas, andar furtivo perto de monstros, fechaduras abertas e ferimentos tratados. Monstros de andares rasos ensinam pouco a quem já domina.", 11, UiStyle.DIM)
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hint.custom_minimum_size.x = 460
 	body.add_child(hint)
+
+func _add_tree(branch: String, depth: int) -> void:
+	_add_row(branch, depth)
+	for child in ProficiencyTree.children(branch):
+		_add_tree(child, depth + 1)
 
 func _add_row(branch: String, depth: int) -> void:
 	var row := Row.new()
@@ -99,16 +106,16 @@ func refresh() -> void:
 		attr_chips[id].text = str(sheet.attr(id))
 	var weapon: String = game.inventory.equipped
 	var path: Array = CharacterSheet.path_of(weapon)
-	if weapon == "" or path.is_empty():
-		weapon_title.text = "Mãos vazias"
-		weapon_path.text = "Equipe uma arma para ver o domínio dela."
+	if path.is_empty():
+		weapon_title.text = str(Items.info(weapon).get("name", weapon))
+		weapon_path.text = "Esta arma ainda não treina nenhuma proficiência."
 		weapon_bonus.text = ""
 		weapon_perks.text = ""
 		mastery_bar.value = 0
 	else:
 		var level: int = sheet.mastery(path)
 		var top: int = sheet.mastery_cap(path)
-		weapon_title.text = "%s  ·  nível %d de %d" % [Items.info(weapon).get("name", weapon), level, top]
+		weapon_title.text = "%s  ·  nível %d de %d" % [Items.info(weapon).get("name", weapon) if weapon != "" else "Punhos", level, top]
 		weapon_path.text = ProficiencyTree.path_text(path) + "   (" + "  +  ".join(path.map(func(b): return "%s %d" % [ProficiencyTree.display_name(b), sheet.level(b)])) + ")"
 		weapon_bonus.text = "+%d%% dano  ·  −%d%% fôlego" % [roundi((sheet.damage_mult(path) - 1.0) * 100), roundi((1.0 - sheet.cost_mult(path)) * 100)]
 		var low: float = ProficiencyTree.xp_for_level(level)
