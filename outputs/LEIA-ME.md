@@ -46,9 +46,21 @@ Primeiro protótipo visual, com repetição de materiais e animações ainda sim
 
 Próxima etapa sugerida: refinar peso do movimento e ataque, melhorar ocultação de paredes e preencher as salas com detalhes de uso e desgaste.
 
-## HUD compacto
+## HUD no estilo Project Zomboid — 13/10/2026
 
-Interface atualizada conforme a captura enviada: tabela de inventário no alto à esquerda, painéis escuros translúcidos, indicadores nas bordas e painel corporal opcional. Ícones originais desenhados no próprio jogo. O centro da tela fica livre durante a exploração.
+- **Barra lateral** (esquerda): mochila, condição física, mapa e pausa, com a tecla de cada um.
+- **Mochila e Arredores** (alto): recolhidas, mostram peso com barra e o recipiente mais próximo; clique ou I para abrir. Abertas, viram tabelas com ícone de cada item, categoria, quantidade e peso. Clique no cabeçalho para ordenar.
+  - **Clique duplo**: usa, equipa ou guarda a arma (mochila) e pega a pilha (arredores).
+  - **Botão direito**: menu com as ações do item.
+  - **Arrastar** entre as janelas: pega ou guarda a pilha inteira.
+  - **Guardar em baús**: agora dá para deixar itens em baús, não só tirar. Baús vazios também abrem com E.
+  - Abas à direita da janela Arredores alternam entre os recipientes próximos.
+  - Passe o mouse sobre um item para ver peso, efeito e, nas armas, dano, alcance, fôlego, preparação e alvos.
+- **Condição** (alto à direita): vida, fôlego, saciedade e carga com barras. Clique para abrir a janela de condição.
+- **Indicadores de estado** (lateral direita): aparecem só quando a situação existe no jogo — sangrando, ferido, com fome, ofegante/exausto, carga pesada, perseguido, no abrigo, selo recuperado. A dica de cada um mostra a regra real.
+- **Condição física** (H): aba Saúde com silhueta, barras e tratamentos; aba Personagem com arma, área, objetivo e contadores. Não pausa o jogo.
+- **Em mãos** (embaixo à esquerda), **barra rápida** 1-2-3 com quantidades, aviso de ação com a tecla, mensagens e borda vermelha com vida baixa.
+- Fonte Inter (licença livre) e ícones dos itens gerados a partir dos modelos do próprio jogo.
 
 ## Gameplay atualizada
 
