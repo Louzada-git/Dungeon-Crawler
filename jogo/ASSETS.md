@@ -56,6 +56,22 @@ As armas usam modelos de dois pacotes gratuitos, escolhidos pelo dono do projeto
 - Nenhum dos dois foi gerado por IA, até onde as páginas informam.
 - `sword` e `espada_guarda` continuam com a espada original do projeto (`assets/originais/espada.glb`).
 
+## Pacotes recebidos e ainda não usados
+
+Recebidos em 14/10/2026. Nada destes pacotes está no jogo ainda; registrado aqui para quando forem usados.
+
+| Pacote | Autor | Licença | Observação |
+| --- | --- | --- | --- |
+| PSX Dungeon | [Goblinatron](https://goblinatron.itch.io/psx-dungeon) | CC BY 4.0: créditos precisam citar "Goblinatron" | Kit PSX de masmorra; as texturas são três atlas (`Dungeon_Map`, `Doors_Map`, `CratesAndBarrels_Map`) |
+| Characters PSX | [Elbolilloduro](https://elbolilloduro.itch.io/characters-psx) | CC0 | 113 personagens, quase todos atuais; 9 monstros |
+| Fantasy Props MegaKit | [Quaternius](https://quaternius.com) | CC0 | Versão gratuita |
+| Universal Animation Library | Quaternius | CC0 | 43 animações num esqueleto próprio |
+| Brackeys VFX Bundle | Brackeys (texturas de Picster, Kenney, Thomas Iché, CodeManu) | CC0 | Fogo, fumaça, faíscas, sequências animadas |
+| 3D Fantasy Weapons Pack | Polyy | CC0, **gerado por IA** | Exige declaração de IA na Steam |
+| Victorian Study | FoxDev | Crédito a "FoxDev" em projetos comerciais | Mobília vitoriana |
+| Models + 512 (props de masmorra) | desconhecido | **sem licença** | Não usar sem confirmar a origem |
+| LowPolyDungeon_FBX | desconhecido | **sem licença** | Veio sem texturas |
+
 ## Modelos provisórios
 
 As quatro armaduras (gibão, couro, cota de malha, placas) e a gazua aparecem como **blocos** montados em tempo de execução a partir do campo `blocks` de `data/itens.json` (`Visuals.blocks`). São formas originais e provisórias. Um arquivo `assets/armas/<id>.glb` substitui os blocos automaticamente; a especificação está em `../arte/ARMAS_ESPEC.md`. Se os modelos vierem de uma ferramenta de IA, registre aqui a ferramenta e os termos de uso, porque a Steam pede essa informação no questionário de conteúdo.
