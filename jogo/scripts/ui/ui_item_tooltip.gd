@@ -116,6 +116,25 @@ static func _item_rows(grid: GridContainer, id: String, data: Dictionary) -> voi
 	if not effects.is_empty():
 		var text: String = ", ".join(effects)
 		_row(grid, "Efeito", text.substr(0, 1).to_upper() + text.substr(1))
+	if data.has("protection"):
+		var heavy: bool = data.get("armor_type", "") == "pesada"
+		_row(grid, "Tipo", "Armadura pesada" if heavy else "Armadura leve")
+		var effective: float = sheet.armor_protection(id) if sheet != null else float(data["protection"])
+		_row(grid, "Proteção", "%d%% de cada golpe" % roundi(effective * 100))
+		var penalty_mult: float = sheet.armor_penalty_mult(id) if sheet != null else 1.0
+		var penalties: PackedStringArray = []
+		if float(data.get("speed_penalty", 0)) > 0:
+			penalties.append("passo −%d%%" % roundi(float(data["speed_penalty"]) * penalty_mult * 100))
+		if float(data.get("regen_penalty", 0)) > 0:
+			penalties.append("fôlego recupera −%d%%" % roundi(float(data["regen_penalty"]) * penalty_mult * 100))
+		_row(grid, "Penalidade", ", ".join(penalties) if not penalties.is_empty() else "nenhuma")
+		var noise: float = sheet.armor_noise(id) if sheet != null else float(data.get("noise", 0))
+		_row(grid, "Barulho", "monstros te notam %d%% mais longe" % roundi(noise * 50) if noise > 0 else "silenciosa")
+		_row(grid, "Treina", ProficiencyTree.path_text(data.get("proficiencias", [])))
+	if id == "gazua":
+		_row(grid, "Uso", "abre baús trancados  [E]")
+		if sheet != null:
+			_row(grid, "Chance", "simples %d%%, média %d%%, difícil %d%%, mestre %d%%" % [roundi(sheet.pick_chance(1) * 100), roundi(sheet.pick_chance(2) * 100), roundi(sheet.pick_chance(3) * 100), roundi(sheet.pick_chance(4) * 100)])
 	if data.get("tag", "") == "MUNICAO":
 		var users: PackedStringArray = []
 		for other in Items.DATA:
