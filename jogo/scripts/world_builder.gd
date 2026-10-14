@@ -47,6 +47,8 @@ static func clear(game) -> void:
 			e.queue_free()
 	game.containers.clear()
 	game.enemies.clear()
+	for shot in game.get_tree().get_nodes_in_group("projeteis"):
+		shot.queue_free()
 
 ## One MultiMeshInstance3D per model for repeated tiles.
 static func _batch(world: Node3D, id: String, transforms: Array) -> void:
