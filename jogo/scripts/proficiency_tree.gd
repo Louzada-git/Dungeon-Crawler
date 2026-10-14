@@ -32,6 +32,17 @@ static func path_text(path: Array) -> String:
 		names.append(display_name(str(id)))
 	return " › ".join(names)
 
+## Groups in display order: [{id, name}].
+static func groups() -> Array:
+	return RAW.get("grupos", [])
+
+## Group of a branch (specializations inherit it from their root).
+static func group_of(id: String) -> String:
+	var node: Dictionary = DATA.get(id, {})
+	while node.has("parent"):
+		node = DATA.get(node["parent"], {})
+	return str(node.get("grupo", ""))
+
 static func roots() -> Array:
 	var out: Array = []
 	for id in DATA:
