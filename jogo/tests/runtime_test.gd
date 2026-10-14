@@ -301,6 +301,7 @@ func run(target, capture: bool) -> void:
  check(game.discovered.size() > 10 and not game.discovered.has(game.layout.relic),"Mapa revela só a região explorada")
  await test_hud()
  await test_weapons()
+ await test_proficiencies()
  inv.add("seal")
  p.position = game.camp_position
  game.interact()
@@ -805,6 +806,141 @@ func test_weapons() -> void:
  chest["node"].queue_free()
  for e in [e0,e1,e2,guard]:
   fresh(e,game.layout.to_world(Vector2i(28,7)))
+ inv.restore(saved_inventory)
+ p.refresh_weapon()
+ game.ui.close_all()
+
+func test_proficiencies() -> void:
+ get_tree().paused = false
+ var p = game.player
+ var inv = game.inventory
+ var sheet: CharacterSheet = game.sheet
+ var saved_inventory: Dictionary = inv.snapshot()
+ sheet.enabled = true
+ sheet.reset()
+ # Split without double counting; equal pace for one or two branches.
+ var added: float = sheet.award_path(["espadas","katana"],100.0)
+ check(is_equal_approx(added,100.0) and is_equal_approx(sheet.path_xp(["espadas","katana"]),100.0),"Experiência se divide entre os ramos sem contar duas vezes")
+ var one := CharacterSheet.new()
+ var two := CharacterSheet.new()
+ for i in 12:
+  one.award_path(["adagas"],300.0)
+  two.award_path(["espadas","katana"],300.0)
+  check(one.mastery(["adagas"]) == two.mastery(["espadas","katana"]),"Mesmo esforço, mesmo domínio com um ou dois ramos (rodada %d)" % (i+1))
+ var cross := CharacterSheet.new()
+ cross.award_path(["espadas","espada_reta"],2000.0)
+ check(cross.mastery(["espadas","katana"]) > 1 and cross.mastery(["espadas","katana"]) < cross.mastery(["espadas","espada_reta"]),"Praticar espada reta ajuda a katana pela raiz Espadas")
+ # Attributes: potential and cap.
+ var strong := CharacterSheet.new()
+ strong.reset({"forca":9,"vigor":4,"agilidade":4,"destreza":3})
+ check(is_equal_approx(strong.award("martelo",100.0),132.0) and strong.cap("martelo") == 46 and sheet.cap("martelo") == 30,"Força 9: martelo aprende ×1,32 e chega ao nível 46")
+ strong.award("martelo",1.0e9)
+ check(strong.level("martelo") == 46 and is_equal_approx(float(strong.xp["martelo"]),ProficiencyTree.xp_for_level(46)),"Ramo para no nível máximo do atributo")
+ # Anti-repetition: weak monsters teach little to a master.
+ var master := CharacterSheet.new()
+ master.award_path(["adagas"],ProficiencyTree.xp_for_level(16))
+ var e_weak = game.enemies[0]
+ var gained: float = master.award_damage(e_weak,e_weak.maximum_health,["adagas"])
+ check(gained < 30.0*0.1,"Monstro do 1º andar quase não ensina a quem já domina (ganhou %s)" % UiStyle.fmt(gained,2))
+ # Perks and mastery change the weapon.
+ var base: Dictionary = Items.info("sword")
+ check(is_equal_approx(sheet.weapon_stats("sword")["damage"],base["damage"]) or sheet.mastery(["espadas","espada_reta"]) > 1,"Sem domínio, arma com números base")
+ var veteran := CharacterSheet.new()
+ veteran.award_path(["espadas","katana"],ProficiencyTree.xp_for_level(14)*2.0)
+ var kat: Dictionary = veteran.weapon_stats("katana")
+ check(int(kat["targets"]) == int(Items.info("katana")["targets"])+1 and is_equal_approx(kat["windup"],Items.info("katana")["windup"]-0.04),"Habilidades desbloqueadas mudam a arma (Corte amplo, Saque rápido)")
+ check(kat["damage"] > Items.info("katana")["damage"] and kat["cost"] < Items.info("katana")["cost"],"Domínio aumenta o dano e reduz o fôlego do golpe")
+ # Practice in play: hits, bleeding, dodges, treatment.
+ sheet.reset()
+ p.position = game.layout.to_world(Vector2i(5,12))
+ for e in game.enemies:
+  fresh(e,game.layout.to_world(Vector2i(28,7)))
+ var e0 = game.enemies[0]
+ fresh(e0,p.position+Vector3(1.2,0,0))
+ e0.aggro = true
+ swing("sword",Vector3.RIGHT)
+ var expected: float = 30.0*24.0/65.0
+ check(is_equal_approx(e0.health,41.0) and is_equal_approx(float(sheet.xp.get("espadas",0)),expected*0.5) and is_equal_approx(float(sheet.xp.get("espada_reta",0)),expected*0.5),"Golpe ensina Espadas e Espada reta pelo dano causado")
+ fresh(e0,p.position+Vector3(1.2,0,0))
+ e0.aggro = true
+ swing("machado",Vector3.RIGHT)
+ var axe_before: float = float(sheet.xp.get("machados",0))
+ e0.tick_bleed(2.0)
+ check(float(sheet.xp.get("machados",0)) > axe_before,"Sangramento do machado também ensina Machados")
+ inv.remove("machado")
+ p.stamina = p.max_stamina
+ p.dodge_timer = 0
+ p.attack_timer = 0
+ p.hurt_timer = 0
+ p.health = p.max_health
+ check(p.dodge(),"Esquiva funciona com o custo do personagem")
+ p.receive_damage(17,Vector3.RIGHT)
+ check(p.health == p.max_health and float(sheet.xp.get("esquiva",0)) > 0,"Escapar de um golpe esquivando ensina Esquiva")
+ p.dodge_timer = 0
+ p.invulnerable = 0
+ p.health = 50
+ inv.add("bandage")
+ game.use_item("bandage")
+ var healed_xp: float = float(sheet.xp.get("tratamento",0))
+ check(healed_xp > 0,"Tratar um ferimento ensina Tratamento")
+ p.health = p.max_health
+ game.use_item("bandage")
+ check(is_equal_approx(float(sheet.xp.get("tratamento",0)),healed_xp),"Curativo sem ferimento não ensina nada")
+ # Level-up notice
+ game.ui.level_banner.queue.clear()
+ sheet.award("adagas",500.0)
+ check(not game.ui.level_banner.queue.is_empty() or game.ui.level_banner.card.visible,"Subir de nível mostra aviso na tela")
+ # Attributes change the body and the backpack.
+ sheet.reset({"forca":9,"vigor":4,"agilidade":4,"destreza":3})
+ game.apply_attributes(true)
+ check(is_equal_approx(inv.capacity,24.0) and is_equal_approx(inv.comfort,15.0),"Força 9: mochila de 24 kg, conforto até 15 kg")
+ check(is_equal_approx(p.max_health,94.0) and is_equal_approx(p.max_stamina,95.0) and is_equal_approx(p.dodge_cost(),26.0),"Vigor e Agilidade 4: vida 94, fôlego 95, esquiva custa 26")
+ inv.add("ore",12)
+ check(inv.weight() > 18.0,"Com Força 9 cabe mais de 18 kg")
+ sheet.award_path(["espadas","espada_reta"],777.0)
+ var xp_before: Dictionary = sheet.xp.duplicate()
+ game.ui.close_all()
+ check(game.save_game(false),"Save com atributos e proficiências é gravado")
+ sheet.reset()
+ game.apply_attributes(true)
+ check(game.load_game(),"Save com mochila acima de 18 kg (Força 9) carrega")
+ check(sheet.attr("forca") == 9 and sheet.xp == xp_before and is_equal_approx(inv.capacity,24.0),"Atributos e experiência voltam do save")
+ inv.remove("ore",inv.count("ore"))
+ # Interface
+ game.ui.toggle_proficiencies()
+ await wait_frames(2)
+ var window = game.ui.prof_window
+ check(window.visible and window.rows.size() == ProficiencyTree.DATA.size(),"Janela de proficiências lista todos os ramos")
+ inv.equip("sword")
+ window.refresh()
+ check(window.weapon_title.text.contains("nível") and window.rows["espada_reta"].active,"Janela destaca o caminho da arma em mãos")
+ game.ui.toggle_proficiencies()
+ var tip: Control = UiItemTooltip.build("sword")
+ var texts: Array = []
+ for node in tip.find_children("*","Label",true,false):
+  texts.append(node.text)
+ check(" ".join(texts).contains("Domínio"),"Dica da arma mostra o domínio")
+ tip.free()
+ var panel: UiCreationPanel = game.ui.creation_panel
+ panel.reset()
+ panel._change("forca",1)
+ check(panel.start_button.disabled == false and panel.values["forca"] == 5,"Criação não passa do total de pontos")
+ panel._change("vigor",-1)
+ panel._change("forca",1)
+ panel._change("forca",1)
+ check(panel.values["forca"] == 6 and panel.values["vigor"] == 4 and not panel.start_button.disabled,"Criação move pontos entre atributos")
+ panel._change("agilidade",-1)
+ check(panel.start_button.disabled,"Criação exige gastar todos os pontos")
+ panel.reset()
+ game.choosing_character = true
+ game.ui.show_creation()
+ check(get_tree().paused and panel.visible,"Criação de personagem pausa e aparece")
+ panel.confirmed.emit({"forca":6,"vigor":4,"agilidade":5,"destreza":5})
+ check(not get_tree().paused and not game.choosing_character and sheet.attr("forca") == 6 and sheet.xp.is_empty(),"Começar expedição aplica os atributos e zera a experiência")
+ # Back to the fixed numbers for the rest of the suite.
+ sheet.reset()
+ sheet.enabled = false
+ game.apply_attributes(true)
  inv.restore(saved_inventory)
  p.refresh_weapon()
  game.ui.close_all()
