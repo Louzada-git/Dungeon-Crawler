@@ -25,7 +25,11 @@ Godot é software livre sob licença MIT. A licença da engine deve acompanhar a
 
 ## Interface
 
-Ícones de mochila, saúde, mapa, espada, comida, bandagem e fôlego, além da silhueta corporal: desenhos vetoriais originais implementados em `scripts/ui_glyph.gd`. A captura fornecida pelo usuário foi usada como referência de organização visual e não integra os assets distribuídos.
+A organização do HUD segue a leitura do Project Zomboid (barra lateral, janelas recolhíveis, tabela de itens, indicadores de estado), por decisão do usuário. Nenhuma imagem, ícone, fonte ou layout gráfico do Project Zomboid foi copiado; as capturas enviadas pelo usuário serviram só como referência e não integram os assets distribuídos.
+
+- **Ícones dos itens e recipientes** (`assets/ui/icones/*.png`): renderizados a partir dos modelos originais do projeto por `tools/render_icons.gd`, com contorno escuro aplicado no próprio script. Regeneração: `godot --path jogo --rendering-driver opengl3 -s res://tools/render_icons.gd` (precisa de tela, real ou virtual).
+- **Ícones de interface e silhueta corporal**: desenhos vetoriais originais em `scripts/ui/ui_icon.gd` e `scripts/ui/ui_body_figure.gd`.
+- **Fonte Inter** (`assets/fontes/Inter-*.otf`): © 2016-2023 The Inter Project Authors, [rsms/inter](https://github.com/rsms/inter), versão 4.0, licença SIL Open Font License 1.1. Texto completo em `assets/fontes/OFL.txt`; ele precisa acompanhar o jogo distribuído (já copiado para `outputs/linux/LICENCA-FONTE-INTER.txt`). A OFL permite embutir a fonte em software, inclusive comercial, desde que a fonte não seja vendida sozinha.
 
 ## Animações e sons de gameplay
 
