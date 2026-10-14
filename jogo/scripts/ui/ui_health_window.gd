@@ -16,6 +16,7 @@ var ration_button: Button
 var info_grid: GridContainer
 var info_values: Dictionary = {}
 var current_tab: String = "health"
+var subtitle: Label
 
 func _init(game_ref, ui_ref) -> void:
 	super._init("Condição física", UiIcon.new("pulse", UiStyle.TEXT), 400, 452)
@@ -115,13 +116,14 @@ func _build_character_page() -> void:
 	names.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	head.add_child(names)
 	names.add_child(UiStyle.label("Aventureiro", 18, UiStyle.TEXT, "semibold"))
-	names.add_child(UiStyle.label("Expedição às cisternas", 13, UiStyle.MUTED))
+	subtitle = UiStyle.label("", 13, UiStyle.MUTED)
+	names.add_child(subtitle)
 	info_grid = GridContainer.new()
 	info_grid.columns = 2
 	info_grid.add_theme_constant_override("h_separation", 16)
 	info_grid.add_theme_constant_override("v_separation", 6)
 	page.add_child(info_grid)
-	for entry in [["weapon", "Em mãos"], ["damage", "Dano / alcance"], ["cost", "Fôlego por golpe"], ["area", "Área atual"], ["objective", "Objetivo"], ["kills", "Monstros derrotados"], ["hits", "Golpes recebidos"], ["load", "Carga"]]:
+	for entry in [["weapon", "Em mãos"], ["damage", "Dano / alcance"], ["cost", "Fôlego por golpe"], ["area", "Área atual"], ["objective", "Objetivo"], ["depth", "Andar mais fundo"], ["seals", "Selos entregues"], ["kills", "Monstros derrotados"], ["hits", "Golpes recebidos"], ["load", "Carga"]]:
 		info_grid.add_child(UiStyle.label(entry[1], 13, UiStyle.DIM))
 		var value := UiStyle.label("", 13, UiStyle.TEXT, "medium")
 		value.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -190,7 +192,10 @@ func refresh() -> void:
 		info_values["damage"].text = ("%d  ·  %s m" % [int(weapon["damage"]), UiStyle.fmt(float(weapon.get("range", 1.5)))]) if weapon.has("damage") else "—"
 		info_values["cost"].text = str(int(weapon.get("cost", 10)))
 		info_values["area"].text = game.layout.room_name(p.position)
-		info_values["objective"].text = "Retornar ao abrigo com o selo" if game.inventory.count("seal") > 0 else "Recuperar o selo das cisternas"
+		info_values["objective"].text = game.objective_text()
+		info_values["depth"].text = "%dº  (agora no %dº)" % [game.deepest, game.floor] if game.generated else "—"
+		info_values["seals"].text = str(game.seals_delivered)
+		subtitle.text = ("Labirinto %d" % game.seed) if game.generated else "Expedição às cisternas"
 		info_values["kills"].text = str(game.kills)
 		info_values["hits"].text = str(game.hits_received)
 		info_values["load"].text = "%s de %s kg" % [UiStyle.fmt(game.inventory.weight()), UiStyle.fmt(InventoryData.CAPACITY, 0)]
