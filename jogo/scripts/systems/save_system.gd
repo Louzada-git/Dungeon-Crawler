@@ -11,7 +11,7 @@ static func write(game, notify_user: bool = true) -> bool:
 		return false
 	var loot_data: Array = []
 	for loot in game.containers:
-		loot_data.append({"id": loot.get("id", ""), "name": loot["name"], "pos": loot["pos"], "items": loot["items"], "chest": loot["chest"]})
+		loot_data.append({"id": loot.get("id", ""), "name": loot["name"], "pos": loot["pos"], "items": loot["items"], "chest": loot["chest"], "lock": int(loot.get("lock", 0))})
 	var enemy_data: Array = []
 	for enemy in game.enemies:
 		enemy_data.append({"id": enemy.uid, "health": enemy.health, "alive": enemy.alive, "pos": [enemy.position.x, enemy.position.z], "stuck": enemy.stuck.duplicate()})
@@ -192,6 +192,8 @@ static func valid(game, raw) -> bool:
 		if not loot is Dictionary or not valid_pos(game, loot.get("pos")) or not loot.get("items") is Dictionary or not loot.get("name") is String or not loot.get("chest") is bool:
 			return false
 		if loot.has("id") and not loot["id"] is String:
+			return false
+		if loot.has("lock") and (not (loot["lock"] is int or loot["lock"] is float) or loot["lock"] < 0 or loot["lock"] > 4):
 			return false
 		for id in loot["items"]:
 			var n = loot["items"][id]
