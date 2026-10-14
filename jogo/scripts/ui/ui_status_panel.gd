@@ -69,12 +69,12 @@ func refresh() -> void:
 	var p = game.player
 	if p == null:
 		return
-	_set_cell("health", p.health, str(ceili(p.health)), p.health / 100.0)
-	_set_cell("stamina", p.stamina, str(ceili(p.stamina)), p.stamina / 100.0)
+	_set_cell("health", p.health / p.max_health * 100.0, str(ceili(p.health)), p.health / p.max_health)
+	_set_cell("stamina", p.stamina / p.max_stamina * 100.0, str(ceili(p.stamina)), p.stamina / p.max_stamina)
 	_set_cell("food", p.food, str(ceili(p.food)), p.food / 100.0)
 	var w: float = game.inventory.weight()
-	var load_ratio: float = 1.0 if w <= InventoryData.COMFORT else (0.45 if w <= 15.0 else 0.15)
-	_set_cell("load", w / InventoryData.CAPACITY * 100.0, UiStyle.fmt(w) + " kg", load_ratio)
+	var load_ratio: float = 1.0 if w <= game.inventory.comfort else (0.45 if w <= lerpf(game.inventory.comfort, game.inventory.capacity, 0.57) else 0.15)
+	_set_cell("load", w / game.inventory.capacity * 100.0, UiStyle.fmt(w) + " kg", load_ratio)
 
 func _set_cell(id: String, bar_value: float, text: String, ratio: float) -> void:
 	var cell: Dictionary = cells[id]
