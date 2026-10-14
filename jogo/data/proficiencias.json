@@ -1,0 +1,55 @@
+{
+ "versao": 1,
+ "_sobre": "Ramos de proficiência. 'parent' liga especializações às raízes (Espadas › Katana). O sistema de experiência usa esta árvore; as armas indicam o caminho que treinam em 'proficiencias'.",
+ "ramos": {
+  "espadas": {
+   "name": "Espadas"
+  },
+  "espada_reta": {
+   "name": "Espada reta",
+   "parent": "espadas"
+  },
+  "katana": {
+   "name": "Katana",
+   "parent": "espadas"
+  },
+  "montante": {
+   "name": "Montante",
+   "parent": "espadas"
+  },
+  "adagas": {
+   "name": "Adagas"
+  },
+  "machados": {
+   "name": "Machados"
+  },
+  "contundentes": {
+   "name": "Contundentes"
+  },
+  "maca": {
+   "name": "Maça",
+   "parent": "contundentes"
+  },
+  "martelo": {
+   "name": "Martelo",
+   "parent": "contundentes"
+  },
+  "hastes": {
+   "name": "Hastes"
+  },
+  "lanca": {
+   "name": "Lança",
+   "parent": "hastes"
+  },
+  "alabarda": {
+   "name": "Alabarda",
+   "parent": "hastes"
+  },
+  "arcos": {
+   "name": "Arcos"
+  },
+  "bestas": {
+   "name": "Bestas"
+  }
+ }
+}
