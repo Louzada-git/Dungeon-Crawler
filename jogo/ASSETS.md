@@ -31,6 +31,10 @@ A organização do HUD segue a leitura do Project Zomboid (barra lateral, janela
 - **Ícones de interface e silhueta corporal**: desenhos vetoriais originais em `scripts/ui/ui_icon.gd` e `scripts/ui/ui_body_figure.gd`.
 - **Fonte Inter** (`assets/fontes/Inter-*.otf`): © 2016-2023 The Inter Project Authors, [rsms/inter](https://github.com/rsms/inter), versão 4.0, licença SIL Open Font License 1.1. Texto completo em `assets/fontes/OFL.txt`; ele precisa acompanhar o jogo distribuído (já copiado para `outputs/linux/LICENCA-FONTE-INTER.txt`). A OFL permite embutir a fonte em software, inclusive comercial, desde que a fonte não seja vendida sozinha.
 
+## Personagem
+
+O aventureiro é o `Character_16` do pacote [Characters PSX](https://elbolilloduro.itch.io/characters-psx), de Elbolilloduro, licença CC0 (conferida na página do autor em 14/10/2026). O rig é o esqueleto padrão do Mixamo; a [FAQ da Adobe](https://helpx.adobe.com/creative-cloud/faq/mixamo-faq.html) permite usar personagens e animações do Mixamo em jogos comerciais. A textura foi repintada para este projeto (roupa medieval; rosto, mãos e cabelo do original) e as animações são as do aventureiro anterior, transferidas para o novo esqueleto. Arquivo: `assets/originais/aventureiro_psx.glb`; fontes e ferramentas em `../arte/fontes/personagem_psx/`. O modelo anterior (`aventureiro_mixamo.glb`, criação própria) continua no projeto como fonte das animações.
+
 ## Armas
 
 As armas usam modelos de dois pacotes gratuitos, escolhidos pelo dono do projeto em 14/10/2026 e convertidos para a convenção do jogo (empunhadura na origem, ponta em +Y, metros) por `../arte/fontes/converter_armas.gd`. Os arquivos de origem escolhidos e as licenças estão em `../arte/fontes/pacotes/`. Os créditos vão junto do jogo em `outputs/linux/CREDITOS.txt`.
@@ -63,7 +67,7 @@ Recebidos em 14/10/2026. Nada destes pacotes está no jogo ainda; registrado aqu
 | Pacote | Autor | Licença | Observação |
 | --- | --- | --- | --- |
 | PSX Dungeon | [Goblinatron](https://goblinatron.itch.io/psx-dungeon) | CC BY 4.0: créditos precisam citar "Goblinatron" | Kit PSX de masmorra; as texturas são três atlas (`Dungeon_Map`, `Doors_Map`, `CratesAndBarrels_Map`) |
-| Characters PSX | [Elbolilloduro](https://elbolilloduro.itch.io/characters-psx) | CC0 | 113 personagens, quase todos atuais; 9 monstros |
+| Characters PSX | [Elbolilloduro](https://elbolilloduro.itch.io/characters-psx) | CC0 | Em uso: `Character_16` é o aventureiro. Os outros 112 (9 monstros) ainda não |
 | Fantasy Props MegaKit | [Quaternius](https://quaternius.com) | CC0 | Versão gratuita |
 | Universal Animation Library | Quaternius | CC0 | 43 animações num esqueleto próprio |
 | Brackeys VFX Bundle | Brackeys (texturas de Picster, Kenney, Thomas Iché, CodeManu) | CC0 | Fogo, fumaça, faíscas, sequências animadas |
