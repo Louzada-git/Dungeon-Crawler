@@ -69,3 +69,13 @@ ITEM_FLECHA_DESC,Munição do arco. Parte das flechas que erram pode ser recolhi
 ITEM_VIROTE_NOME,Virote
 ITEM_VIROTE_DESC,Munição da besta. Parte dos virotes que erram pode ser recolhida do chão.
 RECIPIENTE_ARSENAL,Arsenal de teste
+ITEM_GIBAO_NOME,Gibão acolchoado
+ITEM_GIBAO_DESC,"Camadas de tecido grosso. Leve e silencioso, protege pouco."
+ITEM_COURO_NOME,Couraça de couro batido
+ITEM_COURO_DESC,Couro endurecido com rebites. Boa proteção sem pesar demais.
+ITEM_COTA_NOME,Cota de malha
+ITEM_COTA_DESC,"Anéis de ferro entrelaçados. Protege bem, mas pesa, cansa e faz barulho."
+ITEM_PLACAS_NOME,Armadura de placas
+ITEM_PLACAS_DESC,"Aço sobre o corpo inteiro. A melhor proteção, a mais pesada e a mais barulhenta."
+ITEM_GAZUA_NOME,Gazua
+ITEM_GAZUA_DESC,Ferramenta para abrir fechaduras. Pode quebrar quando a tentativa falha.
