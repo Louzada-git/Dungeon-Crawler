@@ -30,6 +30,7 @@ var store_button: Button
 var take_button: Button
 var take_stack_button: Button
 var take_all_button: Button
+var lock_button: Button
 var menu: PopupMenu
 var menu_source: String = ""
 var menu_item: String = ""
@@ -141,7 +142,11 @@ func _build_loot() -> void:
 	take_button = UiStyle.button("Pegar 1", take_selected)
 	take_stack_button = UiStyle.button("Pegar a pilha", func(): take(loot_list.selected_id, int(loot.get("items", {}).get(loot_list.selected_id, 0))))
 	take_all_button = UiStyle.button("Pegar tudo", take_all)
-	for b in [take_button, take_stack_button, take_all_button]:
+	lock_button = UiStyle.button("Arrombar", func():
+		game.attempt_lockpick(loot)
+		_after_change())
+	lock_button.visible = false
+	for b in [take_button, take_stack_button, take_all_button, lock_button]:
 		actions.add_child(b)
 	var hint := UiStyle.label("Clique duplo pega a pilha  ·  arraste para a mochila", 11, UiStyle.DIM)
 	loot_window.body.add_child(hint)
@@ -218,12 +223,18 @@ func refresh() -> void:
 		if entry == loot and not current.has(entry):
 			current.insert(0, entry)
 	nearby = current
-	bag_list.set_items(game.inventory.stacks, game.inventory.equipped)
+	bag_list.set_items(game.inventory.stacks, game.inventory.equipped, game.inventory.armor)
 	loot_list.empty_text = "Nada por perto.\nAproxime-se de um baú ou de itens no chão e pressione E." if loot.is_empty() else "Vazio. Arraste itens da mochila para guardar aqui."
-	loot_list.set_items(loot.get("items", {}) if not loot.is_empty() else {})
+	if locked():
+		loot_list.empty_text = "Trancado: fechadura %s.\nUse uma gazua para arrombar." % game.LOCK_NAMES[int(loot["lock"])]
+	loot_list.set_items(loot.get("items", {}) if not loot.is_empty() and not locked() else {})
 	_rebuild_tabs()
 	_refresh_buttons()
 	update_bars()
+
+## The open container is locked: its contents stay hidden until it is picked.
+func locked() -> bool:
+	return not loot.is_empty() and int(loot.get("lock", 0)) > 0
 
 func _rebuild_tabs() -> void:
 	for child in loot_tabs.get_children():
@@ -234,7 +245,10 @@ func _rebuild_tabs() -> void:
 		var count: int = 0
 		for id in entry["items"]:
 			count += int(entry["items"][id])
-		var b := _tab_button(UiStyle.item_icon("container_chest" if chest else "container_sack"), "", "%s\n%d %s" % [entry["name"], count, "item" if count == 1 else "itens"], _switch_to.bind(entry))
+		var hint: String = "%s\n%d %s" % [entry["name"], count, "item" if count == 1 else "itens"]
+		if int(entry.get("lock", 0)) > 0:
+			hint = "%s\ntrancado" % entry["name"]
+		var b := _tab_button(UiStyle.item_icon("container_chest" if chest else "container_sack"), "", hint, _switch_to.bind(entry))
 		_style_tab(b, entry == loot)
 		loot_tabs.add_child(b)
 
@@ -262,6 +276,8 @@ func update_bars() -> void:
 			w += float(Items.info(id).get("weight", 0.0)) * int(target["items"][id])
 		# Open, the totals move to the footer to leave room for the title.
 		loot_info.text = "" if is_open else (("%d %s  ·  %s kg" % [count, "item" if count == 1 else "itens", UiStyle.fmt(w)]) if count > 0 else "vazio")
+		if int(target.get("lock", 0)) > 0 and not is_open:
+			loot_info.text = "trancado"
 		loot_info.add_theme_color_override("font_color", UiStyle.ACCENT)
 	loot_window.title_bar.tooltip_text = "" if is_open else ("Vasculhar  [E]" if not target.is_empty() else "Abrir mochila  [I]")
 
@@ -292,16 +308,24 @@ func _refresh_buttons() -> void:
 		use_button.text = _use_label(id)
 		use_button.disabled = not _usable(id)
 		drop_button.disabled = false
-		store_button.disabled = not has_target
+		store_button.disabled = not has_target or locked()
 	store_button.tooltip_text = ("Guardar em: " + str(loot["name"])) if has_target else "Abra um recipiente próximo para guardar"
 	var lid: String = loot_list.selected_id
-	var items: Dictionary = loot.get("items", {}) if has_target else {}
+	var items: Dictionary = loot.get("items", {}) if has_target and not locked() else {}
+	lock_button.visible = locked()
+	if locked():
+		var d: int = int(loot["lock"])
+		lock_button.text = "Arrombar  ·  %d%%" % roundi(game.sheet.pick_chance(d) * 100)
+		lock_button.disabled = game.inventory.count("gazua") <= 0
+		lock_button.tooltip_text = "Gazuas na mochila: %d. Uma tentativa que falha pode quebrar a gazua." % game.inventory.count("gazua")
 	take_button.disabled = lid == "" or not items.has(lid)
 	take_stack_button.disabled = take_button.disabled
 	take_all_button.disabled = items.is_empty()
 	title_take_all.visible = is_open and not items.is_empty()
 	if not has_target:
 		loot_detail.text = "Recipientes a até 2,4 m aparecem nas abas à direita."
+	elif locked():
+		loot_detail.text = "Fechadura %s  ·  chance de abrir: %d%%  ·  gazuas: %d" % [game.LOCK_NAMES[int(loot["lock"])], roundi(game.sheet.pick_chance(int(loot["lock"])) * 100), game.inventory.count("gazua")]
 	elif lid != "" and items.has(lid):
 		var ld: Dictionary = Items.info(lid)
 		loot_detail.text = "%s  ·  %d × %s kg  ·  %s" % [UiStyle.category(str(ld.get("tag", "")))[0], int(items[lid]), UiStyle.fmt(float(ld.get("weight", 0.0)), 2), ld.get("description", "")]
@@ -316,10 +340,13 @@ func _refresh_buttons() -> void:
 func _use_label(id: String) -> String:
 	if Items.info(id).has("damage"):
 		return "Guardar arma" if game.inventory.equipped == id else "Equipar"
+	if Items.info(id).has("protection"):
+		return "Tirar" if game.inventory.armor == id else "Vestir"
 	return {"ration": "Comer", "bandage": "Aplicar bandagem"}.get(id, "Usar")
 
 func _usable(id: String) -> bool:
-	return Items.info(id).has("damage") or id in ["ration", "bandage"]
+	var data: Dictionary = Items.info(id)
+	return data.has("damage") or data.has("protection") or data.has("heal") or data.has("food")
 
 # --- actions -----------------------------------------------------------------
 
@@ -352,6 +379,9 @@ func store_selected() -> void:
 		store(bag_list.selected_id, 1)
 
 func store(id: String, amount: int) -> void:
+	if locked():
+		game.message("Trancado. Arrombe antes de guardar algo aqui.", 2)
+		return
 	if loot.is_empty():
 		game.drop_item(id, amount)
 	else:
@@ -362,7 +392,7 @@ func take_selected() -> void:
 	take(loot_list.selected_id, 1)
 
 func take(id: String, amount: int) -> void:
-	if loot.is_empty() or id == "" or amount <= 0:
+	if loot.is_empty() or locked() or id == "" or amount <= 0:
 		return
 	if game.inventory.transfer_from(loot["items"], id, amount) == 0:
 		game.message("A mochila está cheia. Deixe algo para trás.")
@@ -371,7 +401,7 @@ func take(id: String, amount: int) -> void:
 	_after_change()
 
 func take_all() -> void:
-	if loot.is_empty():
+	if loot.is_empty() or locked():
 		return
 	for id in loot["items"].keys():
 		game.inventory.transfer_from(loot["items"], id, int(loot["items"][id]))
