@@ -57,7 +57,8 @@ func _slot(key: String, callback: Callable) -> void:
 
 func refresh() -> void:
 	var weapon: String = game.inventory.equipped
-	_fill(0, weapon, -1)
+	var ammo: String = str(Items.info(weapon).get("ammo", ""))
+	_fill(0, weapon, game.inventory.count(ammo) if ammo != "" else -1)
 	_fill(1, "ration", game.inventory.count("ration"))
 	_fill(2, "bandage", game.inventory.count("bandage"))
 
