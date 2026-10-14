@@ -48,6 +48,8 @@ var bleed_dps: float = 0.0
 var bleed_path: Array = []
 ## Ammunition stuck in this monster; it drops with its belongings.
 var stuck: Dictionary = {}
+## What sneaking near this monster can still teach (Furtividade).
+var sneak_budget: float = 0.0
 
 func _ready() -> void:
 	stats = EnemyTypes.info(kind)
@@ -97,6 +99,7 @@ func _ready() -> void:
 	health_label.outline_modulate = Color(0, 0, 0, 0.85)
 	add_child(health_label)
 	maximum_health = float(stats.get("health", 65.0)) * scaling["health"]
+	sneak_budget = float(stats.get("xp", 20)) * (1.0 + 0.25 * (level - 1)) * 0.5
 	health = maximum_health
 
 func display_name() -> String:
@@ -140,10 +143,12 @@ func _physics_process(delta: float) -> void:
 		return
 	var can_see: bool = game.clear_line(global_position, player.global_position)
 	var sight: float = float(stats.get("sight", 7.5))
-	if not game.is_safe() and distance < (sight * 1.47 if player.sprinting else sight) and can_see:
+	if not game.is_safe() and distance < sight * player.detection_mult(self) and can_see:
 		aggro = true
 		last_seen = player.global_position
 		memory = 3.0
+	elif player.sneaking and not aggro and can_see and distance < sight and not game.is_safe():
+		game.on_sneak_near(self, delta)
 	if aggro and can_see and not game.is_safe():
 		last_seen = player.global_position
 		memory = 3.0
@@ -207,7 +212,7 @@ func _strike(player) -> void:
 	if slamming:
 		game.camera_impact(0.16)
 		if not game.is_safe() and offset.length() < float(stats.get("slam_radius", 3.0)) and sees:
-			player.receive_damage(float(stats.get("slam_damage", 30.0)) * damage_scale, offset.normalized())
+			player.receive_damage(float(stats.get("slam_damage", 30.0)) * damage_scale, offset.normalized(), false)
 	elif not game.is_safe() and offset.length() < reach + 0.2 and committed.dot(offset.normalized()) >= cos(0.95) and sees:
 		player.receive_damage(float(stats.get("damage", 17.0)) * damage_scale, committed)
 	slamming = false
