@@ -27,11 +27,12 @@ const SHADOW := Color(0, 0, 0, 0.85)
 ## Category id -> [label, color, sort order]
 const CATEGORIES := {
 	"ARMA": ["Arma", Color("dc9f80"), 0],
-	"TRATAMENTO": ["Tratamento", Color("8cc6b6"), 1],
-	"ALIMENTO": ["Alimento", Color("bfca7c"), 2],
-	"MATERIAL": ["Material", Color("aaa6c2"), 3],
-	"TESOURO": ["Tesouro", Color("e0c46c"), 4],
-	"OBJETIVO": ["Objetivo", Color("e39bd6"), 5],
+	"MUNICAO": ["Munição", Color("d2b48a"), 1],
+	"TRATAMENTO": ["Tratamento", Color("8cc6b6"), 2],
+	"ALIMENTO": ["Alimento", Color("bfca7c"), 3],
+	"MATERIAL": ["Material", Color("aaa6c2"), 4],
+	"TESOURO": ["Tesouro", Color("e0c46c"), 5],
+	"OBJETIVO": ["Objetivo", Color("e39bd6"), 6],
 }
 
 static var _fonts: Dictionary = {}
