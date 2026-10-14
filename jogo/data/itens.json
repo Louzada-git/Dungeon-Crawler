@@ -1,0 +1,137 @@
+{
+ "versao": 1,
+ "_sobre": "Catálogo de itens. name/description são chaves de data/textos.csv. Números usados diretamente pelo combate e pelo inventário.",
+ "itens": {
+  "sword": {
+   "tag": "ARMA",
+   "weight": 2.4,
+   "damage": 24.0,
+   "range": 2.1,
+   "cost": 17.0,
+   "cooldown": 0.62,
+   "windup": 0.22,
+   "style": "slash",
+   "angle": 55.0,
+   "targets": 3,
+   "model": "weapon-sword",
+   "name": "ITEM_SWORD_NOME",
+   "description": "ITEM_SWORD_DESC"
+  },
+  "spear": {
+   "tag": "ARMA",
+   "weight": 3.6,
+   "damage": 29.0,
+   "range": 3.2,
+   "cost": 23.0,
+   "cooldown": 0.85,
+   "windup": 0.3,
+   "style": "thrust",
+   "angle": 7.0,
+   "width": 0.34,
+   "targets": 1,
+   "model": "weapon-spear",
+   "name": "ITEM_SPEAR_NOME",
+   "description": "ITEM_SPEAR_DESC"
+  },
+  "ration": {
+   "tag": "ALIMENTO",
+   "weight": 0.45,
+   "food": 35.0,
+   "stamina_gain": 12.0,
+   "model": "pot",
+   "name": "ITEM_RATION_NOME",
+   "description": "ITEM_RATION_DESC"
+  },
+  "bandage": {
+   "tag": "TRATAMENTO",
+   "weight": 0.15,
+   "heal": 18.0,
+   "stops_bleeding": true,
+   "model": "potion",
+   "name": "ITEM_BANDAGE_NOME",
+   "description": "ITEM_BANDAGE_DESC"
+  },
+  "ore": {
+   "tag": "MATERIAL",
+   "weight": 1.6,
+   "model": "rocks",
+   "name": "ITEM_ORE_NOME",
+   "description": "ITEM_ORE_DESC"
+  },
+  "coin": {
+   "tag": "TESOURO",
+   "weight": 0.02,
+   "model": "coin",
+   "name": "ITEM_COIN_NOME",
+   "description": "ITEM_COIN_DESC"
+  },
+  "seal": {
+   "tag": "OBJETIVO",
+   "weight": 0.6,
+   "model": "key",
+   "name": "ITEM_SEAL_NOME",
+   "description": "ITEM_SEAL_DESC"
+  },
+  "espada_guarda": {
+   "tag": "ARMA",
+   "weight": 3.0,
+   "damage": 31.0,
+   "range": 2.2,
+   "cost": 19.0,
+   "cooldown": 0.66,
+   "windup": 0.23,
+   "style": "slash",
+   "angle": 55.0,
+   "targets": 3,
+   "model": "weapon-sword",
+   "tint": "9fb4d6",
+   "name": "ITEM_ESPADA_GUARDA_NOME",
+   "description": "ITEM_ESPADA_GUARDA_DESC"
+  },
+  "lanca_longa": {
+   "tag": "ARMA",
+   "weight": 4.2,
+   "damage": 36.0,
+   "range": 3.7,
+   "cost": 26.0,
+   "cooldown": 0.92,
+   "windup": 0.33,
+   "style": "thrust",
+   "angle": 7.0,
+   "width": 0.36,
+   "targets": 1,
+   "model": "weapon-spear",
+   "tint": "c9a36b",
+   "name": "ITEM_LANCA_LONGA_NOME",
+   "description": "ITEM_LANCA_LONGA_DESC"
+  },
+  "unguento": {
+   "tag": "TRATAMENTO",
+   "weight": 0.3,
+   "heal": 40.0,
+   "stops_bleeding": true,
+   "model": "pot",
+   "tint": "8fcf8a",
+   "name": "ITEM_UNGUENTO_NOME",
+   "description": "ITEM_UNGUENTO_DESC"
+  },
+  "tonico": {
+   "tag": "ALIMENTO",
+   "weight": 0.25,
+   "food": 8.0,
+   "stamina_gain": 100.0,
+   "model": "pot",
+   "tint": "8ab4e8",
+   "name": "ITEM_TONICO_NOME",
+   "description": "ITEM_TONICO_DESC"
+  },
+  "gema": {
+   "tag": "TESOURO",
+   "weight": 0.05,
+   "model": "coin",
+   "tint": "d26fd0",
+   "name": "ITEM_GEMA_NOME",
+   "description": "ITEM_GEMA_DESC"
+  }
+ }
+}
