@@ -104,6 +104,17 @@ func _draw() -> void:
 				stroke([[19, y], [25, y - 1.2]], shade(c, 0.45), 1.1)
 				stroke([[13, y], [7, y - 1.2]], shade(c, 0.5), 1.1)
 			fill([[21, 25.5], [24, 24.8], [24, 30], [22.5, 28.5], [21, 30]], Color("b8322a"), false)
+		"shield":
+			fill([[6, 6], [16, 3], [26, 6], [26, 15], [24, 21], [16, 29], [8, 21], [6, 15]], c)
+			fill([[16, 3], [26, 6], [26, 15], [24, 21], [16, 29]], shade(c, 0.2), false)
+			stroke([[16, 7], [16, 25]], shade(c, 0.45), 1.4)
+		"eye_off":
+			var top: Array = ellipse(16, 22, 13, 13, PI * 1.18, PI * 1.82, 14)
+			var bottom: Array = ellipse(16, 10, 13, 13, PI * 0.18, PI * 0.82, 14)
+			fill(top + bottom, c)
+			disc(16, 16, 4.6, Color("26221d"), false)
+			stroke([[5, 27], [27, 5]], Color("1d1b17"), 3.2)
+			stroke([[5, 27], [27, 5]], c, 1.4)
 		"star":
 			var points: Array = []
 			for i in 10:
