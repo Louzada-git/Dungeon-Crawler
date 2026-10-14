@@ -1,5 +1,14 @@
 # Dungepm — As Cisternas
 
+## Novo: atributos e proficiências (14/10/2026)
+
+- **Novo aventureiro:** no começo de cada run você distribui 20 pontos entre Força, Vigor, Agilidade e Destreza (de 2 a 9 cada). Eles mudam carga, vida, fôlego e esquiva, e definem quão rápido e até onde cada proficiência pode crescer.
+- **Proficiências crescem com o uso:** acertar monstros treina o caminho da arma (por exemplo Espadas › Katana), esquivar de um golpe treina Esquiva, tratar um ferimento treina Tratamento.
+- **Domínio da arma:** cada nível dá +2% de dano e −1% de fôlego por golpe. Armas que compartilham a raiz se ajudam: praticar com a espada reta também adianta a katana.
+- **Habilidades:** cada ramo desbloqueia uma habilidade no nível 5 ou 6, como Corte amplo (+1 alvo), Ferida funda (sangramento mais forte) e Recolher flechas.
+- **P** abre a janela de proficiências. Ela não pausa o jogo. Um aviso no alto da tela mostra cada nível novo.
+- Morrer leva o aventureiro junto: o próximo começa do zero, no mesmo labirinto e com o mapa que você já conhece.
+
 ## Novo: armas (14/10/2026)
 
 Nove armas novas, ainda com modelo provisório de blocos:
