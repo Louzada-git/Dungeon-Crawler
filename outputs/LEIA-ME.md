@@ -1,5 +1,14 @@
 # Dungepm — As Cisternas
 
+## Novo: filtro PSX (14/10/2026)
+
+O jogo agora tem cara de PlayStation 1:
+
+- A imagem do mundo sai em pixels grandes (cerca de 300 linhas, como os jogos de PS1), com cores reduzidas e pontilhado.
+- As texturas não são suavizadas e os vértices tremem levemente quando a câmera anda, como no PS1.
+- O HUD, as janelas e os nomes dos monstros continuam nítidos.
+- **Esc → Filtro PSX** liga e desliga. A escolha fica salva. Começa ligado.
+
 ## Novo: armas com modelo de verdade (14/10/2026)
 
 Os blocos provisórios das armas foram trocados por modelos dos pacotes que você mandou:
