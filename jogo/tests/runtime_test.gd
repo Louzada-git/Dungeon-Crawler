@@ -298,6 +298,7 @@ func run(target, capture: bool) -> void:
  p.position = game.layout.to_world(DungeonLayout.SPAWN)
  game.discover()
  check(game.discovered.size() > 10 and not game.discovered.has(DungeonLayout.RELIC),"Mapa revela só a região explorada")
+ await test_hud()
  inv.add("seal")
  p.position = game.camp_position
  game.interact()
@@ -406,3 +407,140 @@ func capture_views() -> void:
  get_viewport().get_texture().get_image().save_png(path+"/combate.png")
  print("CAPTURES SAVED "+path)
  get_tree().quit()
+
+func moodle_ids() -> Array:
+ var ids: Array = []
+ for m in game.ui.moodles.compute():
+  ids.append(m["id"])
+ return ids
+
+func rect_of(node: Control) -> Rect2:
+ return node.get_global_rect()
+
+func test_hud() -> void:
+ var ui = game.ui
+ var p = game.player
+ var inv = game.inventory
+ for id in Items.DATA:
+  check(UiStyle.item_icon(id) != null,"Ícone renderizado existe para o item: "+id)
+ check(UiStyle.item_icon("container_chest") != null and UiStyle.item_icon("container_sack") != null,"Ícones de baú e de itens no chão existem")
+ check(UiStyle.font("regular") is FontFile and UiStyle.font("semibold") is FontFile,"Fonte Inter carrega nos pesos usados pela interface")
+ # Status indicators follow the simulation rules, not guesses.
+ p.position = game.layout.to_world(DungeonLayout.SPAWN)
+ p.health = 100
+ p.bleeding = false
+ p.food = 85
+ p.stamina = 100
+ check("safe" in moodle_ids() and not "bleeding" in moodle_ids(),"Indicador de abrigo aparece só na área segura")
+ p.position = game.layout.to_world(Vector2i(9,11))
+ for enemy in game.enemies:
+  enemy.aggro = false
+ check(moodle_ids().is_empty(),"Sem indicadores quando nada exige atenção: "+str(moodle_ids()))
+ p.bleeding = true
+ p.health = 40
+ p.food = 9
+ p.stamina = 20
+ var list: Array = game.ui.moodles.compute()
+ var by_id: Dictionary = {}
+ for m in list:
+  by_id[m["id"]] = m
+ check(by_id.has("bleeding") and list[0]["id"] == "bleeding","Sangramento aparece primeiro entre os indicadores")
+ check(by_id.has("hurt") and by_id["hurt"]["level"] == 2,"Vida 40 mostra nível 2 de ferimento")
+ check(by_id.has("food") and by_id["food"]["level"] == 2,"Saciedade 9 mostra fome com efeito no fôlego")
+ check(by_id.has("stamina") and by_id["stamina"]["title"] == "Ofegante","Fôlego 20 bloqueia esquiva e mostra Ofegante")
+ p.stamina = 10
+ check(game.ui.moodles.compute().filter(func(m): return m["id"] == "stamina")[0]["title"] == "Exausto","Fôlego abaixo do custo da arma mostra Exausto")
+ inv.add("ore",5)
+ check("load" in moodle_ids(),"Carga acima de 11 kg mostra indicador de peso")
+ game.enemies[2].aggro = true
+ check("hunted" in moodle_ids(),"Monstro em perseguição mostra indicador")
+ game.enemies[2].aggro = false
+ game.ui.update_hud()
+ await wait_frames(2)
+ check(game.ui.moodles.get_child_count() == game.ui.moodles.compute().size(),"Coluna de indicadores mostra exatamente os estados ativos")
+ check(game.ui.status_panel.cells["health"]["value"].text == "40","Painel de condição mostra a vida atual")
+ check(game.ui.hotbar.slots[1]["count"].text == str(inv.count("ration")),"Barra rápida mostra quantidade de rações")
+ inv.remove("ore",5)
+ p.bleeding = false
+ p.health = 100
+ p.food = 85
+ p.stamina = 100
+ # Storing in a chest, dropping several units, drag & drop handlers.
+ var chest: Dictionary = game.containers[1]
+ p.position = Vector3(chest["pos"][0]+1.0,0,chest["pos"][1])
+ check(game.nearby_containers().has(chest),"Baú próximo aparece nas abas de recipientes")
+ inv.add("ore",3)
+ var total_before: int = inv.count("ore")+int(chest["items"].get("ore",0))
+ check(game.store_item("ore",2,chest) == 2 and inv.count("ore")+int(chest["items"].get("ore",0)) == total_before,"Guardar no baú conserva a quantidade total")
+ ui.open_inventory(chest)
+ check(ui.inventory.loot == chest and get_tree().paused,"Mochila abre no baú escolhido")
+ ui.inventory._on_drop_into_bag({"type":"item","source":"loot","id":"ore","count":2})
+ check(int(chest["items"].get("ore",0)) == 0 and inv.count("ore") == 3,"Arrastar do baú para a mochila pega a pilha")
+ ui.inventory._on_drop_into_loot({"type":"item","source":"bag","id":"ore","count":3})
+ check(int(chest["items"].get("ore",0)) == 3 and inv.count("ore") == 0,"Arrastar da mochila para o baú guarda a pilha")
+ check(not ui.inventory.bag_list._can_drop_data(Vector2.ZERO,{"type":"item","source":"bag","id":"ore"}),"Lista não aceita itens arrastados dela mesma")
+ ui.inventory.take("ore",3)
+ # Weapon actions: unequip and re-equip through the inventory.
+ inv.equip("sword")
+ ui.inventory._primary_bag("sword")
+ check(inv.equipped == "" and inv.count("sword") == 1,"Clique duplo na arma em mãos guarda a arma")
+ ui.inventory._primary_bag("sword")
+ check(inv.equipped == "sword","Clique duplo na arma guardada equipa de novo")
+ ui.inventory._open_menu("bag","sword",Vector2(300,200))
+ var labels: Array = []
+ for i in ui.inventory.menu.item_count:
+  labels.append(ui.inventory.menu.get_item_text(i))
+ check("Guardar arma na mochila" in labels and "Deixar 1 no chão" in labels,"Menu de contexto oferece ações reais da arma")
+ ui.inventory.menu.hide()
+ # Sorting by weight puts the heaviest stack first when descending.
+ ui.inventory.bag_list.sort_key = "weight"
+ ui.inventory.bag_list.sort_ascending = false
+ var ordered: Array = ui.inventory.bag_list.ordered_ids()
+ var heaviest: float = 0.0
+ for id in inv.stacks:
+  heaviest = maxf(heaviest,Items.info(id)["weight"]*inv.count(id))
+ check(is_equal_approx(Items.info(ordered[0])["weight"]*inv.count(ordered[0]),heaviest),"Ordenar por peso coloca a pilha mais pesada no topo")
+ ui.inventory.bag_list.sort_key = "category"
+ ui.inventory.bag_list.sort_ascending = true
+ ui.close_all()
+ # Dropping several units uses one pile on the same spot.
+ p.position = game.layout.to_world(Vector2i(10,13))
+ inv.add("ore",3)
+ var piles_before: int = game.containers.size()
+ game.drop_item("ore",2)
+ game.drop_item("ore",1)
+ check(game.containers.size() == piles_before+1 and game.containers[-1]["items"].get("ore") == 3,"Itens deixados no mesmo lugar formam uma única pilha")
+ var pile: Dictionary = game.containers[-1]
+ inv.transfer_from(pile["items"],"ore",3)
+ # Empty chests can be opened to store things.
+ var empty_chest: Dictionary = game.containers[3]
+ var saved_items: Dictionary = empty_chest["items"].duplicate()
+ empty_chest["items"].clear()
+ p.position = Vector3(empty_chest["pos"][0]+1.0,0,empty_chest["pos"][1])
+ check(game.nearest_container() == empty_chest and game.interaction_text().contains("vazio"),"Baú vazio pode ser aberto para guardar itens")
+ empty_chest["items"] = saved_items
+ inv.remove("ore",inv.count("ore"))
+ # Layout: fixed HUD pieces never overlap and stay on screen at the design size.
+ ui.update_hud()
+ await wait_frames(2)
+ var view := Rect2(Vector2.ZERO,Vector2(1440,900))
+ var pieces := {"barra lateral":ui.sidebar,"mochila recolhida":ui.inventory.bag_window,"arredores recolhido":ui.inventory.loot_window,"painel de condição":ui.status_panel,"barra rápida":ui.hotbar,"em mãos":ui.hands}
+ var names: Array = pieces.keys()
+ for i in names.size():
+  var r: Rect2 = rect_of(pieces[names[i]])
+  check(view.encloses(r),"HUD dentro da tela: "+names[i])
+  for j in range(i+1,names.size()):
+   check(not r.intersects(rect_of(pieces[names[j]])),"HUD sem sobreposição: %s × %s" % [names[i],names[j]])
+ ui.open_inventory(game.containers[0])
+ await wait_frames(2)
+ for window in [ui.inventory.bag_window,ui.inventory.loot_window]:
+  check(not rect_of(window).intersects(rect_of(ui.status_panel)) and not rect_of(window).intersects(Rect2(ui.moodles.global_position,Vector2(44,400))),"Janela de inventário aberta não cobre condição nem indicadores")
+ ui.close_all()
+ ui.toggle_health()
+ await wait_frames(3)
+ check(not rect_of(ui.health_panel).intersects(Rect2(ui.moodles.global_position,Vector2(44,400))) and not rect_of(ui.health_panel).intersects(rect_of(ui.status_panel)),"Janela de condição não cobre indicadores nem painel de condição")
+ ui.health_panel.move_to(Vector2(5000,-300))
+ check(view.encloses(Rect2(ui.health_panel.position,Vector2(ui.health_panel.size.x,UiWindow.TITLE_HEIGHT))),"Arrastar janela para fora mantém a barra de título na tela")
+ ui.health_panel.position = Vector2(976,412)
+ ui.toggle_health()
+ p.position = game.layout.to_world(DungeonLayout.SPAWN)
