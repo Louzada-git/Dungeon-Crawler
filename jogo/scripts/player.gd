@@ -7,6 +7,10 @@ var visual: Node3D
 var animator: AnimationPlayer
 var weapon_mount: BoneAttachment3D
 var left_mount: BoneAttachment3D
+## Worn armor rides on the spine bone.
+var armor_mount: BoneAttachment3D
+var worn_model: Node3D
+var _worn_id: String = ""
 var held_weapon: Node3D
 var facing: Vector3 = Vector3(0,0,-1)
 var health: float = 100.0
@@ -30,6 +34,8 @@ var invulnerable: float = 0.0
 var walking: bool = false
 var sprinting: bool = false
 var aiming: bool = false
+## Crouched and quiet (C): slower, harder to notice.
+var sneaking: bool = false
 var hurt_timer: float = 0.0
 var impulse: Vector3 = Vector3.ZERO
 var motion_velocity: Vector3 = Vector3.ZERO
@@ -57,6 +63,9 @@ func _ready() -> void:
   left_mount = BoneAttachment3D.new()
   left_mount.bone_name = "hand-left"
   skel.add_child(left_mount)
+  armor_mount = BoneAttachment3D.new()
+  armor_mount.bone_name = "spine"
+  skel.add_child(armor_mount)
  var marker = Visuals.ring(0.43,Color("cbb88a"),0.025)
  marker.position.y = 0.04
  add_child(marker)
@@ -65,7 +74,22 @@ func _ready() -> void:
  listener.make_current()
  refresh_weapon()
 
+## Animation for moving or standing still. Optional animations made for the rig
+## (furtivo, furtivo_andar, bloqueio) replace the stand-ins when they exist.
+func locomotion(moving: float) -> Array:
+ var has = func(n: String) -> bool: return animator != null and animator.has_animation(n)
+ if moving > 0.3:
+  if sneaking and not sprinting and has.call("furtivo_andar"):
+   return ["furtivo_andar",true,clampf(moving/2.0,0.45,1.25)]
+  return ["run" if sprinting else "walk",true,clampf(moving/(5.7 if sprinting else 3.5),0.45,1.25)]
+ if aiming and can_block() and has.call("bloqueio"):
+  return ["bloqueio",true,1.0]
+ if sneaking and has.call("furtivo"):
+  return ["furtivo",true,1.0]
+ return ["guard" if aiming or sneaking else "idle",true,1.0]
+
 func refresh_weapon() -> void:
+ refresh_armor()
  if weapon_mount == null:
   return
  for mount in [weapon_mount,left_mount]:
@@ -83,6 +107,29 @@ func refresh_weapon() -> void:
  weapon.position = Vector3(0,0.035,0)
  weapon.rotation_degrees = rest_rotation(data)
  weapon.scale = hand_scale(id,data)
+
+## Shows the worn armor on the torso. Data "corpo": {"pos":[x,y,z], "escala":[x,y,z]}
+## places it relative to the spine bone (models made for the rig use the defaults).
+func refresh_armor() -> void:
+ if armor_mount == null:
+  return
+ var id: String = game.inventory.armor
+ if id == _worn_id and (id == "" or is_instance_valid(worn_model)):
+  return
+ if is_instance_valid(worn_model):
+  worn_model.queue_free()
+ worn_model = null
+ _worn_id = id
+ if id == "":
+  return
+ var data: Dictionary = Items.info(id)
+ var place: Dictionary = data.get("corpo",{})
+ worn_model = Visuals.item_model(id)
+ armor_mount.add_child(worn_model)
+ var pos: Array = place.get("pos",[0,0,0])
+ var size: Array = place.get("escala",[1,1,1])
+ worn_model.position = Vector3(pos[0],pos[1],pos[2])
+ worn_model.scale = Vector3(size[0],size[1],size[2])
 
 ## Resting angle in the hand: data "rotacao_mao", else by style.
 func rest_rotation(data: Dictionary) -> Vector3:
@@ -172,12 +219,18 @@ func _physics_process(delta: float) -> void:
   elif walking:
    facing = direction
  sprinting = walking and Input.is_action_pressed("sprint") and not aiming and stamina > 4 and attack_timer <= 0 and hurt_timer <= 0 and dodge_timer <= 0
+ if sprinting:
+  sneaking = false
+ var armor: String = game.inventory.armor
  var speed: float = 3.5
  if sprinting:
   speed = 5.7
-  stamina = maxf(0,stamina-16*delta)
+  stamina = maxf(0,stamina-16*delta*game.sheet.sprint_cost_mult())
  elif attack_timer <= 0 and dodge_timer <= 0 and hurt_timer <= 0:
-  stamina = minf(max_stamina,stamina+(16.0 if food > 10 else 6.0)*game.sheet.stamina_regen_mult()*delta)
+  stamina = minf(max_stamina,stamina+(16.0 if food > 10 else 6.0)*game.sheet.stamina_regen_mult()*(1.0-game.sheet.armor_regen_penalty(armor))*delta)
+ if sneaking:
+  speed *= 0.55
+ speed *= 1.0 - game.sheet.armor_speed_penalty(armor)
  if aiming:
   speed *= 0.75 if direction.dot(facing) >= 0 else 0.55
  speed *= game.sheet.speed_mult()
@@ -197,17 +250,17 @@ func _physics_process(delta: float) -> void:
  velocity = horizontal+impulse
  velocity.y = -2
  move_and_slide()
+ if sprinting and horizontal.length() > 3.0 and not game.is_safe():
+  game.on_sprint(horizontal.length()*delta)
  var look = attack_facing if attack_timer > 0 else facing
  visual.rotation.y = lerp_angle(visual.rotation.y,atan2(look.x,look.z),minf(1,delta*18))
  # One-shot actions start only on entry; they are not restarted on every frame.
  if hurt_timer <= 0 and attack_timer <= 0 and dodge_timer <= 0:
-  if horizontal.length() > 0.3:
-   Visuals.play(animator,"run" if sprinting else "walk",true,clampf(horizontal.length()/(5.7 if sprinting else 3.5),0.45,1.25))
-  else:
-   Visuals.play(animator,"guard" if aiming else "idle")
+  var pose: Array = locomotion(horizontal.length())
+  Visuals.play(animator,pose[0],pose[1],pose[2])
  step_time -= delta
  if horizontal.length() > 0.5 and dodge_timer <= 0 and step_time <= 0:
-  game.sound.play_at("step",global_position,0.48 if sprinting else 0.28)
+  game.sound.play_at("step",global_position,0.48 if sprinting else (0.1 if sneaking else 0.28))
   step_time = 0.25 if sprinting else 0.42
  food = maxf(0,food-delta*(0.07 if sprinting else 0.025)*game.sheet.hunger_mult())
  if bleeding:
@@ -271,14 +324,72 @@ func dodge() -> bool:
  game.sound.play_at("step",global_position,0.55)
  return true
 
-func receive_damage(amount: float, from: Vector3 = Vector3.ZERO) -> void:
+func toggle_sneak() -> void:
+ if health <= 0:
+  return
+ sneaking = not sneaking
+ game.message("Furtivo: os monstros só te notam de mais perto, e menos ainda por trás." if sneaking else "De pé.", 2.5)
+
+## The guard is up while aiming (right button) with a melee weapon or bare hands.
+func can_block() -> bool:
+ if not aiming or attack_timer > 0 or dodge_timer > 0 or hurt_timer > 0 or health <= 0:
+  return false
+ return str(CharacterSheet.base_stats(game.inventory.equipped).get("style","slash")) != "shoot"
+
+## How far monsters notice the adventurer, relative to their normal sight.
+func detection_mult(enemy = null) -> float:
+ var noise: float = game.sheet.armor_noise(game.inventory.armor)
+ if sprinting:
+  return 1.47*(1.0+noise)
+ if not sneaking:
+  return 1.0+noise*0.5
+ var m: float = game.sheet.sneak_detection_mult()*(1.0+noise)
+ if enemy != null and enemy.visual != null:
+  var forward := Vector3(sin(enemy.visual.rotation.y),0,cos(enemy.visual.rotation.y))
+  var to_me: Vector3 = global_position-enemy.global_position
+  to_me.y = 0
+  # Outside the monster's 120° view cone: from behind it notices even later.
+  if to_me.length() > 0.01 and forward.dot(to_me.normalized()) < 0.5:
+   m *= 0.6
+ return m
+
+## blockable = false for blows that cannot be parried (a boss slam on the ground).
+func receive_damage(amount: float, from: Vector3 = Vector3.ZERO, blockable: bool = true) -> void:
  if health <= 0:
   return
  if invulnerable > 0:
-  # A blow that lands during the dodge window trains Esquiva.
+  # A blow that lands during the dodge window trains Acrobacia.
   if dodge_timer > 0 and amount > 0:
    game.on_dodged(amount)
   return
+ var blocked: float = 0.0
+ if blockable and from.length() > 0.01 and can_block():
+  var toward: Vector3 = -from
+  toward.y = 0
+  if facing.dot(toward.normalized()) >= cos(deg_to_rad(70.0)):
+   var reduction: float = game.sheet.block_reduction(game.inventory.equipped)
+   var cost: float = maxf(4.0,amount*reduction*game.sheet.block_cost_mult())
+   if stamina >= cost:
+    stamina -= cost
+    blocked = amount*reduction
+   else:
+    stamina = 0
+    game.message("Guarda quebrada: sem fôlego para segurar o golpe.",2)
+ var rest: float = amount-blocked
+ var absorbed: float = rest*game.sheet.armor_protection(game.inventory.armor)
+ var taken: float = rest-absorbed
+ game.on_hit_taken(blocked,absorbed)
+ if blocked > 0:
+  # A parried blow: no wound, a short recoil.
+  health = maxf(0,health-taken)
+  invulnerable = 0.35
+  impulse = from.normalized()*0.8
+  game.sound.play_at("hit",global_position,0.55)
+  game.camera_impact(0.05)
+  if health <= 0:
+   die()
+  return
+ amount = taken
  health = maxf(0,health-amount)
  invulnerable = 0.7
  hurt_timer = 0.23
