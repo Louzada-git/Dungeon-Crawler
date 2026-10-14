@@ -72,6 +72,7 @@ func _ready() -> void:
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.theme = UiStyle.build_theme()
+	UiItemTooltip.inventory = game.inventory
 	add_child(root)
 	_build_effects()
 	_build_hud()
@@ -329,6 +330,10 @@ func _build_pause() -> void:
 	)
 	sound_button.custom_minimum_size.y = 34
 	left.add_child(sound_button)
+	var arsenal := UiStyle.button("Arsenal de teste", func(): game.spawn_test_arsenal(); close_all())
+	arsenal.custom_minimum_size.y = 34
+	arsenal.tooltip_text = "Ferramenta de desenvolvimento: um baú com todas as armas\ne munição aparece ao seu lado. Sai antes do lançamento."
+	left.add_child(arsenal)
 	var restart := UiStyle.button("Nova expedição", confirm_restart)
 	restart.custom_minimum_size.y = 34
 	left.add_child(restart)
@@ -432,9 +437,11 @@ func update_hud() -> void:
 
 func _update_hands() -> void:
 	var id: String = game.inventory.equipped
-	if id == _last_hands:
+	var ammo_key: String = str(Items.info(id).get("ammo", ""))
+	var key: String = id + ("|%d" % game.inventory.count(ammo_key) if ammo_key != "" else "")
+	if key == _last_hands:
 		return
-	_last_hands = id
+	_last_hands = key
 	var data: Dictionary = Items.info(id)
 	hands.item_id = id
 	if id == "":
@@ -447,6 +454,9 @@ func _update_hands() -> void:
 	hands_icon.texture = UiStyle.item_icon(id)
 	hands_name.text = str(data.get("name", id))
 	hands_stats.text = "Dano %d  ·  Alcance %s m  ·  Fôlego %d" % [int(data.get("damage", 0)), UiStyle.fmt(float(data.get("range", 1.5))), int(data.get("cost", 10))]
+	var ammo: String = str(data.get("ammo", ""))
+	if ammo != "":
+		hands_stats.text = "Dano %d  ·  Alcance %s m  ·  %ss: %d" % [int(data.get("damage", 0)), UiStyle.fmt(float(data.get("range", 1.5)), 0), str(Items.info(ammo).get("name", ammo)), game.inventory.count(ammo)]
 
 func _update_prompt() -> void:
 	var raw: String = "" if any_panel() or game.ended else game.interaction_text()
