@@ -144,7 +144,7 @@ func run() -> void:
 	ui.toggle_health()
 	ui.health_panel._show_tab("health")
 	# 7. Map after walking a route.
-	for cell in game.layout.pathfinder.get_id_path(DungeonLayout.SPAWN, Vector2i(18, 10)):
+	for cell in game.layout.pathfinder.get_id_path(game.layout.spawn, Vector2i(18, 10)):
 		p.position = game.layout.to_world(cell)
 		game.discover()
 	ui.toggle_map()
