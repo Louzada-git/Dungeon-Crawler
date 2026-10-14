@@ -40,7 +40,7 @@ func compute() -> Array:
 		out.append({"id": "food", "icon": "bread", "level": 2, "title": "Faminto", "text": "Saciedade %d. O fôlego recupera 6 por segundo em vez de 16.\nComa uma ração  [2]." % ceili(p.food)})
 	elif p.food <= 30:
 		out.append({"id": "food", "icon": "bread", "level": 1, "title": "Com fome", "text": "Saciedade %d. Ainda sem efeito; abaixo de 10\no fôlego passa a recuperar devagar." % ceili(p.food)})
-	var held: Dictionary = Items.info(game.inventory.equipped)
+	var held: Dictionary = game.sheet.weapon_stats(game.inventory.equipped)
 	var ammo: String = str(held.get("ammo", ""))
 	if ammo != "" and game.inventory.count(ammo) <= 0:
 		out.append({"id": "ammo", "icon": "arrow", "level": 2, "title": "Sem munição", "text": "%s sem %ss. Procure nos baús, no chão\nonde os disparos erraram e nos corpos dos monstros." % [str(held.get("name", "")), str(Items.info(ammo).get("name", ammo)).to_lower()]})
@@ -60,6 +60,11 @@ func compute() -> Array:
 			hunters += 1
 	if hunters > 0:
 		out.append({"id": "hunted", "icon": "eye", "level": 2 if hunters == 1 else 3, "title": "Perseguido", "text": ("Um monstro está atrás de você." if hunters == 1 else "%d monstros estão atrás de você." % hunters) + "\nNo abrigo eles desistem e não atacam."})
+	if p.sneaking:
+		var sight: float = 7.5 * p.detection_mult()
+		out.append({"id": "sneak", "icon": "eye_off", "level": 0, "title": "Furtivo", "text": "Um monstro comum te nota a %s m de frente e %s m por trás\n(de pé: 7,5 m). Ataque em desprevenido: dano ×%s.  [C] levanta." % [UiStyle.fmt(sight), UiStyle.fmt(sight * 0.6), UiStyle.fmt(game.sheet.sneak_attack_mult(), 1)]})
+	if p.can_block():
+		out.append({"id": "guard", "icon": "shield", "level": 0, "title": "Em guarda", "text": "Golpes de frente perdem %d%% do dano; cada bloqueio gasta fôlego.\nNão segura a pancada em área do chefe." % roundi(game.sheet.block_reduction(game.inventory.equipped) * 100)})
 	if game.is_safe():
 		out.append({"id": "safe", "icon": "tent", "level": 0, "title": "No abrigo", "text": "Monstros não atacam aqui.\nNo ponto de descanso, E salva a expedição."})
 	if game.inventory.count("seal") > 0:
