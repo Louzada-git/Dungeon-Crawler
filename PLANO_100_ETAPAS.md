@@ -28,6 +28,8 @@ As etapas têm tamanhos diferentes: decidir a regra de morte cabe numa conversa,
 
 - **13/10/2026 · Labirinto procedural — primeira versão entregue.** Andares gerados por semente (10, 20, 40, 60… salas), tipos de sala, mobília, saque por tabela, quatro tipos de monstro com força por profundidade, chefe por andar com golpe em área e fúria, escadas entre andares com estado guardado por andar, selos entregues no abrigo e a regra de morte (recomeça no mesmo labirinto mantendo o mapa). Cobre o essencial das etapas 9, 14, 15, 16, 27, 31, 32, 33 e 34 e parte da 36 (andares leves com MultiMesh e monstros que dormem longe). Verificação: gerador validado em 240 andares; suítes de 242 e 37 checagens. Falta o teste humano e o equilíbrio.
 
+- **14/10/2026 · Armas novas com modelo provisório.** Adaga, katana, montante, machado, maça, martelo, alabarda, arco e besta, com flechas e virotes. Cada uma tem uma mecânica própria por dados (furtivo, sangramento, esmagar armadura, pancada em área, perfurar, projéteis) e indica o ramo de proficiência que vai treinar. Modelos de blocos substituíveis por `.glb`; especificação de modelos e animações em `arte/ARMAS_ESPEC.md`. Antecipa parte das etapas 20, 38 e 64.
+
 ## Marcos
 
 | Etapa | Marco | Pergunta que o marco responde |
