@@ -1,6 +1,6 @@
 {
  "versao": 1,
- "_sobre": "Tipos de monstro. 'sight' é o alcance de visão; chefes têm golpe em área (slam_*). Vida e dano crescem com o andar (ver LabyrinthGenerator.scaling).",
+ "_sobre": "Tipos de monstro. 'sight' é o alcance de visão; chefes têm golpe em área (slam_*). Vida e dano crescem com o andar (ver LabyrinthGenerator.scaling). 'armored' marca monstros blindados (armas com 'crush' causam mais dano).",
  "inimigos": {
   "corrompido": {
    "name": "INIMIGO_CORROMPIDO_NOME",
@@ -31,7 +31,8 @@
     "bandage": 1
    },
    "tint": "b9a07a",
-   "radius": 0.45
+   "radius": 0.45,
+   "armored": true
   },
   "espreitador": {
    "name": "INIMIGO_ESPREITADOR_NOME",
@@ -63,7 +64,8 @@
    "loot": {
     "coin": 4,
     "ration": 1
-   }
+   },
+   "armored": true
   },
   "chefe": {
    "name": "INIMIGO_CHEFE_NOME",
@@ -85,7 +87,8 @@
     "gema": 2,
     "coin": 25,
     "unguento": 1
-   }
+   },
+   "armored": true
   }
  }
 }
