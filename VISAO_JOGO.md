@@ -12,7 +12,9 @@ O jogador é um aventureiro que aprende a sobreviver em um mundo de fantasia. Eq
 
 Combate e exploração acontecem em tempo real, em um mundo 3D estilizado visto por câmera isométrica. Alcance, posicionamento, preparação dos golpes, fôlego, ferimentos e carga influenciam cada encontro. Sobrevivência cria decisões ao longo da expedição: levar comida ou reservar espaço para saque, gastar uma cura ou recuar, carregar uma arma pesada ou preservar mobilidade.
 
-Cada jogador recebe um labirinto procedural definido por uma semente própria. A estrutura persiste entre incursões, tornando mapas, atalhos e descobertas valiosos. As regras e a biblioteca de conteúdo são comuns, mas rotas, encontros e distribuição de recompensas produzem partidas diferentes. A experiência deve ser extremamente longa, a ponto de parecer endless. A duração total e a estrutura de conclusão serão definidas mais adiante. O destino desse mundo após a morte será definido na etapa 5.
+Cada jogador recebe um labirinto procedural definido por uma semente própria. A estrutura persiste entre incursões, tornando mapas, atalhos e descobertas valiosos. As regras e a biblioteca de conteúdo são comuns, mas rotas, encontros e distribuição de recompensas produzem partidas diferentes. A experiência deve ser extremamente longa, a ponto de parecer endless: na ordem de 100 a 200 horas para concluir uma run, com andares que crescem de forma aproximadamente exponencial. A estrutura de conclusão será definida mais adiante.
+
+**Morrer custa a run, não o que você aprendeu.** A run recomeça do zero na mesma semente, com um personagem novo e o mundo no estado inicial. O mapa explorado, as passagens secretas, os NPCs conhecidos, o que cada item e opção faz e as receitas descobertas permanecem. O jogador volta fraco, porém mais esperto.
 
 ## Como o personagem se torna diferente
 
@@ -32,6 +34,6 @@ Monstros, segredos e recompensas devem abrir escolhas. NPCs e companheiros serã
 
 ## Para quem e como avaliar
 
-A proposta atende jogadores que gostam de exploração perigosa, evolução pela prática e experimentação com builds. A direção combina a sobrevivência de Project Zomboid, o labirinto e as descobertas de Dungeon and Stone, a progressão por uso citada em Oblivion e a composição de efeitos inspirada em Noita, com mundo e conteúdo próprios.
+A proposta atende jogadores que gostam de exploração perigosa, evolução pela prática e experimentação com builds. A direção combina a sobrevivência de Project Zomboid, o labirinto e as descobertas de Dungeon and Stone, a progressão por uso citada em Oblivion e a composição de efeitos inspirada em Noita, com mundo e conteúdo próprios. *Echoes of Mystralia* serve como referência de mercado para criação de magias e poderes: inspiração e comparação com um concorrente, não modelo a copiar.
 
 O jogo cumpre sua promessa quando jogadores com as mesmas ferramentas conseguem construir estratégias diferentes, reconhecer o valor do que aprenderam e explicar por que avançaram ou recuaram. **Será sempre single player, com lançamento para Windows e Linux e controles por teclado e mouse**, conforme decisões do usuário. Volume de conteúdo e limites da versão 1.0 serão definidos na etapa 3; duração total e desfecho ficam para discussão posterior.
