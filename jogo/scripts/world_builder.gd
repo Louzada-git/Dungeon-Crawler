@@ -80,6 +80,9 @@ static func build(game) -> void:
  camp_label.pixel_size = 0.006
  camp_label.modulate = Color("c7d1b3")
  camp_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+ camp_label.font = UiStyle.caps_font()
+ camp_label.outline_size = 8
+ camp_label.outline_modulate = Color(0,0,0,0.8)
  world.add_child(camp_label)
 
 static func torch(world: Node3D, pos: Vector3) -> void:
