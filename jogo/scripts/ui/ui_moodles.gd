@@ -39,7 +39,11 @@ func compute() -> Array:
 		out.append({"id": "food", "icon": "bread", "level": 2, "title": "Faminto", "text": "Saciedade %d. O fôlego recupera 6 por segundo em vez de 16.\nComa uma ração  [2]." % ceili(p.food)})
 	elif p.food <= 30:
 		out.append({"id": "food", "icon": "bread", "level": 1, "title": "Com fome", "text": "Saciedade %d. Ainda sem efeito; abaixo de 10\no fôlego passa a recuperar devagar." % ceili(p.food)})
-	var cost: float = float(Items.info(game.inventory.equipped).get("cost", 10.0))
+	var held: Dictionary = Items.info(game.inventory.equipped)
+	var ammo: String = str(held.get("ammo", ""))
+	if ammo != "" and game.inventory.count(ammo) <= 0:
+		out.append({"id": "ammo", "icon": "arrow", "level": 2, "title": "Sem munição", "text": "%s sem %ss. Procure nos baús, no chão\nonde os disparos erraram e nos corpos dos monstros." % [str(held.get("name", "")), str(Items.info(ammo).get("name", ammo)).to_lower()]})
+	var cost: float = float(held.get("cost", 10.0))
 	if p.stamina < cost:
 		out.append({"id": "stamina", "icon": "lungs", "level": 3, "title": "Exausto", "text": "Fôlego %d: abaixo dos %d que a arma exige por golpe.\nRecue e recupere o fôlego." % [floori(p.stamina), int(cost)]})
 	elif p.stamina < 25:
