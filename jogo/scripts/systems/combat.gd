@@ -1,6 +1,9 @@
 extends RefCounted
 class_name Combat
-## Resolves the player's committed strike against monsters.
+## Resolves the player's committed strike. Weapon styles come from the item
+## data: slash (arc), thrust (straight line, pierces "targets"), smash (area in
+## front) and shoot (projectile with ammunition). Effects: sneak_mult (unaware
+## monsters), bleed, crush (armored monsters), stagger and knockback.
 
 static func resolve_player_attack(game) -> void:
 	var player = game.player
@@ -9,8 +12,14 @@ static func resolve_player_attack(game) -> void:
 		return
 	player.resolved_serial = player.attack_serial
 	var weapon: Dictionary = player.attack_weapon
+	match str(weapon.get("style", "slash")):
+		"shoot":
+			_shoot(game, weapon)
+			return
+		"smash":
+			_smash(game, weapon)
+			return
 	var reach: float = weapon.get("range", 1.5)
-	var damage: float = weapon.get("damage", 9.0)
 	var half_angle: float = deg_to_rad(weapon.get("angle", 55.0))
 	_show_arc(game, weapon, reach, half_angle)
 	var candidates: Array = []
@@ -28,12 +37,93 @@ static func resolve_player_attack(game) -> void:
 			candidates.append(enemy)
 	candidates.sort_custom(func(a, b): return a.position.distance_squared_to(player.position) < b.position.distance_squared_to(player.position))
 	var limit: int = mini(candidates.size(), int(weapon.get("targets", 1)))
+	var notes: Array = []
 	for i in limit:
-		candidates[i].receive_damage(damage, player.attack_facing)
+		var note: String = apply_hit(game, candidates[i], weapon, player.attack_facing)
+		if note != "" and not notes.has(note):
+			notes.append(note)
 	if limit > 0:
 		game.sound.play_at("hit", candidates[0].global_position, 0.8)
-		game.camera_impact(0.045)
-		game.message("Acerto. Preserve o fôlego para recuar.", 1.3)
+		game.camera_impact(0.045 if float(weapon.get("knockback", 3.0)) <= 3.0 else 0.08)
+		game.message(" ".join(notes) if not notes.is_empty() else "Acerto. Preserve o fôlego para recuar.", 1.3)
+
+## Damage and effects of one hit. Returns a short note for the message line.
+static func apply_hit(game, enemy, weapon: Dictionary, direction: Vector3, damage: float = -1.0) -> String:
+	var amount: float = float(weapon.get("damage", 9.0)) if damage < 0 else damage
+	var note: String = ""
+	if weapon.has("sneak_mult") and not enemy.aggro:
+		amount *= float(weapon["sneak_mult"])
+		note = "Ataque furtivo!"
+	if weapon.has("crush") and enemy.armored:
+		amount *= float(weapon["crush"])
+		note = "Esmagou a armadura!"
+	var hit: Dictionary = {}
+	if weapon.has("stagger"):
+		hit["stagger"] = float(weapon["stagger"])
+	if weapon.has("knockback"):
+		hit["knockback"] = float(weapon["knockback"])
+	enemy.receive_damage(amount, direction, hit)
+	if weapon.has("bleed") and enemy.alive:
+		enemy.apply_bleed(float(weapon["bleed"].get("dps", 4.0)), float(weapon["bleed"].get("time", 4.0)))
+		if note == "":
+			note = "Ferida aberta: o monstro sangra."
+	return note
+
+## Heavy blow on the ground in front: everything in the circle is hit.
+static func _smash(game, weapon: Dictionary) -> void:
+	var player = game.player
+	var center: Vector3 = player.position + player.attack_facing * float(weapon.get("area_offset", 1.3))
+	var radius: float = float(weapon.get("area_radius", 1.6))
+	var ring = Visuals.ring(radius, Color(0.92, 0.78, 0.52, 0.85), 0.16)
+	game.add_child(ring)
+	ring.position = center + Vector3(0, 0.07, 0)
+	# Shockwave: grows to full size and fades.
+	ring.scale = Vector3.ONE * 0.55
+	var wave = ring.create_tween()
+	wave.tween_property(ring, "scale", Vector3.ONE, 0.12)
+	wave.parallel().tween_property(ring.material_override, "albedo_color:a", 0.0, 0.4)
+	wave.tween_callback(ring.queue_free)
+	var hits: Array = []
+	for enemy in game.enemies:
+		if not enemy.alive:
+			continue
+		var offset: Vector3 = enemy.position - center
+		offset.y = 0
+		if offset.length() <= radius + float(enemy.stats.get("radius", 0.4)) * 0.5 and game.clear_line(player.position, enemy.position):
+			hits.append(enemy)
+	hits.sort_custom(func(a, b): return a.position.distance_squared_to(center) < b.position.distance_squared_to(center))
+	var notes: Array = []
+	for i in mini(hits.size(), int(weapon.get("targets", 6))):
+		var away: Vector3 = hits[i].position - center
+		away.y = 0
+		var note: String = apply_hit(game, hits[i], weapon, away.normalized() if away.length() > 0.05 else player.attack_facing)
+		if note != "" and not notes.has(note):
+			notes.append(note)
+	game.camera_impact(0.12)
+	game.sound.play_at("hit", center, 0.9 if not hits.is_empty() else 0.45)
+	if not hits.is_empty():
+		game.message(" ".join(notes) if not notes.is_empty() else "Pancada certeira.", 1.3)
+
+## Releases a projectile and spends one unit of ammunition.
+static func _shoot(game, weapon: Dictionary) -> void:
+	var player = game.player
+	var ammo: String = str(weapon.get("ammo", ""))
+	if ammo != "":
+		if not game.inventory.remove(ammo, 1):
+			game.message("Sem munição.", 1.5)
+			return
+	var shot := Projectile.new()
+	shot.game = game
+	shot.weapon = weapon
+	shot.ammo = ammo
+	shot.direction = player.attack_facing.normalized()
+	shot.speed = float(weapon.get("projectile_speed", 22.0))
+	shot.max_distance = float(weapon.get("range", 14.0))
+	shot.pierce = int(weapon.get("pierce", 1))
+	game.add_child(shot)
+	shot.global_position = player.position + Vector3(0, 1.15, 0) + shot.direction * 0.45
+	game.sound.play_at("swing", player.global_position, 0.5)
+	game.ui.refresh_inventory()
 
 static func _show_arc(game, weapon: Dictionary, reach: float, half_angle: float) -> void:
 	var player = game.player
