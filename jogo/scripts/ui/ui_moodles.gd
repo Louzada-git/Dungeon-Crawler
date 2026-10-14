@@ -29,10 +29,11 @@ func compute() -> Array:
 		return out
 	if p.bleeding:
 		out.append({"id": "bleeding", "icon": "drop", "level": 3, "title": "Sangrando", "text": "Perde 0,5 de vida por segundo até ser tratado.\nUse uma bandagem  [3]."})
-	if p.health < 75:
-		var lv: int = 1 if p.health >= 50 else (2 if p.health >= 25 else (3 if p.health >= 12 else 4))
+	var life: float = p.health / p.max_health
+	if life < 0.75:
+		var lv: int = 1 if life >= 0.5 else (2 if life >= 0.25 else (3 if life >= 0.12 else 4))
 		var names := ["Machucado", "Ferido", "Gravemente ferido", "À beira da morte"]
-		out.append({"id": "hurt", "icon": "heart_crack", "level": lv, "title": names[lv - 1], "text": "Vida %d de 100. A vida não se recupera sozinha;\numa bandagem restaura 18." % ceili(p.health)})
+		out.append({"id": "hurt", "icon": "heart_crack", "level": lv, "title": names[lv - 1], "text": "Vida %d de %d. A vida não se recupera sozinha;\numa bandagem restaura 18." % [ceili(p.health), roundi(p.max_health)]})
 	if p.food <= 0:
 		out.append({"id": "food", "icon": "bread", "level": 4, "title": "Inanição", "text": "Perde 0,2 de vida por segundo e o fôlego recupera devagar.\nComa uma ração  [2]."})
 	elif p.food <= 10:
@@ -46,12 +47,12 @@ func compute() -> Array:
 	var cost: float = float(held.get("cost", 10.0))
 	if p.stamina < cost:
 		out.append({"id": "stamina", "icon": "lungs", "level": 3, "title": "Exausto", "text": "Fôlego %d: abaixo dos %d que a arma exige por golpe.\nRecue e recupere o fôlego." % [floori(p.stamina), int(cost)]})
-	elif p.stamina < 25:
-		out.append({"id": "stamina", "icon": "lungs", "level": 2, "title": "Ofegante", "text": "Fôlego %d: abaixo dos 25 necessários para esquivar." % floori(p.stamina)})
+	elif p.stamina < p.dodge_cost():
+		out.append({"id": "stamina", "icon": "lungs", "level": 2, "title": "Ofegante", "text": "Fôlego %d: abaixo dos %d necessários para esquivar." % [floori(p.stamina), ceili(p.dodge_cost())]})
 	var w: float = game.inventory.weight()
-	if w > InventoryData.COMFORT:
-		var factor: float = lerpf(1.0, 0.72, (w - InventoryData.COMFORT) / (InventoryData.CAPACITY - InventoryData.COMFORT))
-		var lv2: int = 1 if w <= 15.0 else 2
+	if w > game.inventory.comfort:
+		var factor: float = lerpf(1.0, 0.72, (w - game.inventory.comfort) / (game.inventory.capacity - game.inventory.comfort))
+		var lv2: int = 1 if w <= lerpf(game.inventory.comfort, game.inventory.capacity, 0.57) else 2
 		out.append({"id": "load", "icon": "weight", "level": lv2, "title": "Carga pesada" if lv2 == 1 else "Sobrecarregado", "text": "%s kg na mochila: %d%% mais lento.\nAcima de 11 kg o passo pesa; o limite é 18 kg." % [UiStyle.fmt(w), roundi((1.0 - factor) * 100.0)]})
 	var hunters: int = 0
 	for enemy in game.enemies:
