@@ -17,6 +17,7 @@
    "name": "ITEM_SWORD_NOME",
    "description": "ITEM_SWORD_DESC",
    "proficiencias": [
+    "laminas",
     "espadas",
     "espada_reta"
    ],
@@ -106,6 +107,7 @@
    "name": "ITEM_ESPADA_GUARDA_NOME",
    "description": "ITEM_ESPADA_GUARDA_DESC",
    "proficiencias": [
+    "laminas",
     "espadas",
     "espada_reta"
    ],
@@ -182,6 +184,7 @@
    "targets": 1,
    "sneak_mult": 2.5,
    "proficiencias": [
+    "laminas",
     "adagas"
    ],
    "maos": 1,
@@ -269,6 +272,7 @@
    "angle": 40.0,
    "targets": 2,
    "proficiencias": [
+    "laminas",
     "espadas",
     "katana"
    ],
@@ -346,6 +350,7 @@
    "targets": 4,
    "knockback": 4.5,
    "proficiencias": [
+    "laminas",
     "espadas",
     "montante"
    ],
@@ -438,6 +443,7 @@
     "time": 5.0
    },
    "proficiencias": [
+    "contundentes",
     "machados"
    ],
    "maos": 1,
@@ -801,6 +807,7 @@
    "projectile_speed": 22.0,
    "pierce": 1,
    "proficiencias": [
+    "pontaria",
     "arcos"
    ],
    "maos": 2,
@@ -923,6 +930,7 @@
    "pierce": 2,
    "knockback": 3.0,
    "proficiencias": [
+    "pontaria",
     "bestas"
    ],
    "maos": 2,
@@ -1140,6 +1148,510 @@
    "model": "virote",
    "name": "ITEM_VIROTE_NOME",
    "description": "ITEM_VIROTE_DESC"
+  },
+  "gibao": {
+   "tag": "ARMADURA",
+   "weight": 2.5,
+   "armor_type": "leve",
+   "protection": 0.1,
+   "noise": 0.0,
+   "proficiencias": [
+    "armadura_leve"
+   ],
+   "blocks": [
+    {
+     "size": [
+      0.42,
+      0.52,
+      0.24
+     ],
+     "pos": [
+      0,
+      0.26,
+      0
+     ],
+     "color": "8c7d62"
+    },
+    {
+     "size": [
+      0.16,
+      0.1,
+      0.26
+     ],
+     "pos": [
+      -0.2,
+      0.5,
+      0
+     ],
+     "color": "6f6350"
+    },
+    {
+     "size": [
+      0.16,
+      0.1,
+      0.26
+     ],
+     "pos": [
+      0.2,
+      0.5,
+      0
+     ],
+     "color": "6f6350"
+    },
+    {
+     "size": [
+      0.44,
+      0.06,
+      0.25
+     ],
+     "pos": [
+      0,
+      0.04,
+      0
+     ],
+     "color": "6f6350"
+    },
+    {
+     "size": [
+      0.03,
+      0.44,
+      0.245
+     ],
+     "pos": [
+      0,
+      0.26,
+      0
+     ],
+     "color": "6f6350"
+    }
+   ],
+   "model": "gibao",
+   "name": "ITEM_GIBAO_NOME",
+   "description": "ITEM_GIBAO_DESC",
+   "icon_view": {
+    "rot": [
+     0,
+     25,
+     0
+    ],
+    "margin": 1.15,
+    "pitch": 20.0
+   },
+   "corpo": {
+    "pos": [
+     0,
+     -0.1,
+     0.0
+    ],
+    "escala": [
+     1.05,
+     1.0,
+     1.25
+    ]
+   }
+  },
+  "couro": {
+   "tag": "ARMADURA",
+   "weight": 4.0,
+   "armor_type": "leve",
+   "protection": 0.15,
+   "noise": 0.05,
+   "proficiencias": [
+    "armadura_leve"
+   ],
+   "blocks": [
+    {
+     "size": [
+      0.42,
+      0.52,
+      0.24
+     ],
+     "pos": [
+      0,
+      0.26,
+      0
+     ],
+     "color": "7a5634"
+    },
+    {
+     "size": [
+      0.16,
+      0.1,
+      0.26
+     ],
+     "pos": [
+      -0.2,
+      0.5,
+      0
+     ],
+     "color": "4f3a28"
+    },
+    {
+     "size": [
+      0.16,
+      0.1,
+      0.26
+     ],
+     "pos": [
+      0.2,
+      0.5,
+      0
+     ],
+     "color": "4f3a28"
+    },
+    {
+     "size": [
+      0.44,
+      0.06,
+      0.25
+     ],
+     "pos": [
+      0,
+      0.04,
+      0
+     ],
+     "color": "4f3a28"
+    },
+    {
+     "size": [
+      0.44,
+      0.05,
+      0.25
+     ],
+     "pos": [
+      0,
+      0.2,
+      0
+     ],
+     "color": "4f3a28"
+    },
+    {
+     "size": [
+      0.05,
+      0.05,
+      0.26
+     ],
+     "pos": [
+      0.12,
+      0.33,
+      0
+     ],
+     "color": "b8913f"
+    }
+   ],
+   "model": "couro",
+   "name": "ITEM_COURO_NOME",
+   "description": "ITEM_COURO_DESC",
+   "icon_view": {
+    "rot": [
+     0,
+     25,
+     0
+    ],
+    "margin": 1.15,
+    "pitch": 20.0
+   },
+   "corpo": {
+    "pos": [
+     0,
+     -0.1,
+     0.0
+    ],
+    "escala": [
+     1.05,
+     1.0,
+     1.25
+    ]
+   }
+  },
+  "cota": {
+   "tag": "ARMADURA",
+   "weight": 7.5,
+   "armor_type": "pesada",
+   "protection": 0.25,
+   "speed_penalty": 0.06,
+   "regen_penalty": 0.12,
+   "noise": 0.25,
+   "proficiencias": [
+    "armadura_pesada"
+   ],
+   "blocks": [
+    {
+     "size": [
+      0.42,
+      0.52,
+      0.24
+     ],
+     "pos": [
+      0,
+      0.26,
+      0
+     ],
+     "color": "8f979e"
+    },
+    {
+     "size": [
+      0.16,
+      0.1,
+      0.26
+     ],
+     "pos": [
+      -0.2,
+      0.5,
+      0
+     ],
+     "color": "6d737a"
+    },
+    {
+     "size": [
+      0.16,
+      0.1,
+      0.26
+     ],
+     "pos": [
+      0.2,
+      0.5,
+      0
+     ],
+     "color": "6d737a"
+    },
+    {
+     "size": [
+      0.44,
+      0.06,
+      0.25
+     ],
+     "pos": [
+      0,
+      0.04,
+      0
+     ],
+     "color": "6d737a"
+    },
+    {
+     "size": [
+      0.46,
+      0.14,
+      0.26
+     ],
+     "pos": [
+      0,
+      -0.05,
+      0
+     ],
+     "color": "8f979e"
+    }
+   ],
+   "model": "cota",
+   "name": "ITEM_COTA_NOME",
+   "description": "ITEM_COTA_DESC",
+   "icon_view": {
+    "rot": [
+     0,
+     25,
+     0
+    ],
+    "margin": 1.15,
+    "pitch": 20.0
+   },
+   "corpo": {
+    "pos": [
+     0,
+     -0.1,
+     0.0
+    ],
+    "escala": [
+     1.05,
+     1.0,
+     1.25
+    ]
+   }
+  },
+  "placas": {
+   "tag": "ARMADURA",
+   "weight": 11.0,
+   "armor_type": "pesada",
+   "protection": 0.33,
+   "speed_penalty": 0.1,
+   "regen_penalty": 0.2,
+   "noise": 0.45,
+   "proficiencias": [
+    "armadura_pesada"
+   ],
+   "blocks": [
+    {
+     "size": [
+      0.42,
+      0.52,
+      0.24
+     ],
+     "pos": [
+      0,
+      0.26,
+      0
+     ],
+     "color": "b3bac0"
+    },
+    {
+     "size": [
+      0.16,
+      0.1,
+      0.26
+     ],
+     "pos": [
+      -0.2,
+      0.5,
+      0
+     ],
+     "color": "7c848b"
+    },
+    {
+     "size": [
+      0.16,
+      0.1,
+      0.26
+     ],
+     "pos": [
+      0.2,
+      0.5,
+      0
+     ],
+     "color": "7c848b"
+    },
+    {
+     "size": [
+      0.44,
+      0.06,
+      0.25
+     ],
+     "pos": [
+      0,
+      0.04,
+      0
+     ],
+     "color": "7c848b"
+    },
+    {
+     "size": [
+      0.36,
+      0.2,
+      0.27
+     ],
+     "pos": [
+      0,
+      0.36,
+      0
+     ],
+     "color": "b3bac0"
+    },
+    {
+     "size": [
+      0.2,
+      0.14,
+      0.29
+     ],
+     "pos": [
+      -0.22,
+      0.52,
+      0
+     ],
+     "color": "b3bac0"
+    },
+    {
+     "size": [
+      0.2,
+      0.14,
+      0.29
+     ],
+     "pos": [
+      0.22,
+      0.52,
+      0
+     ],
+     "color": "b3bac0"
+    }
+   ],
+   "model": "placas",
+   "name": "ITEM_PLACAS_NOME",
+   "description": "ITEM_PLACAS_DESC",
+   "icon_view": {
+    "rot": [
+     0,
+     25,
+     0
+    ],
+    "margin": 1.15,
+    "pitch": 20.0
+   },
+   "corpo": {
+    "pos": [
+     0,
+     -0.1,
+     0.0
+    ],
+    "escala": [
+     1.05,
+     1.0,
+     1.25
+    ]
+   }
+  },
+  "gazua": {
+   "tag": "FERRAMENTA",
+   "weight": 0.05,
+   "model": "gazua",
+   "name": "ITEM_GAZUA_NOME",
+   "description": "ITEM_GAZUA_DESC",
+   "blocks": [
+    {
+     "size": [
+      0.02,
+      0.08,
+      0.02
+     ],
+     "pos": [
+      0,
+      0,
+      0
+     ],
+     "color": "5f666d"
+    },
+    {
+     "size": [
+      0.006,
+      0.14,
+      0.006
+     ],
+     "pos": [
+      0,
+      0.11,
+      0
+     ],
+     "color": "aeb5bc"
+    },
+    {
+     "size": [
+      0.02,
+      0.006,
+      0.006
+     ],
+     "pos": [
+      0.008,
+      0.18,
+      0
+     ],
+     "color": "aeb5bc"
+    }
+   ],
+   "icon_view": {
+    "rot": [
+     0,
+     0,
+     -40
+    ],
+    "margin": 1.1,
+    "pitch": 35.0
+   }
   }
  }
 }
