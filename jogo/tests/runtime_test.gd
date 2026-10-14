@@ -24,6 +24,7 @@ func run(target, capture: bool) -> void:
   await capture_views()
   return
  test_inventory()
+ test_data()
  var health_key = InputEventKey.new()
  health_key.physical_keycode = KEY_H
  health_key.pressed = true
@@ -61,7 +62,7 @@ func run(target, capture: bool) -> void:
  await wait_frames(50)
  game.player.test_direction = Vector2.ZERO
  check(game.player.position.x > 4.6,"Colisão do catre impede atravessar o móvel")
- game.player.position = game.layout.to_world(DungeonLayout.SPAWN)
+ game.player.position = game.layout.to_world(game.layout.spawn)
  for room in game.layout.rooms:
   var rect: Rect2i = room["rect"]
   var point: Vector3 = game.layout.to_world(rect.position+Vector2i(1,1))
@@ -295,9 +296,9 @@ func run(target, capture: bool) -> void:
  p.position = safe_pos
  game.discovered.clear()
  game.last_discover = Vector2i(-99,-99)
- p.position = game.layout.to_world(DungeonLayout.SPAWN)
+ p.position = game.layout.to_world(game.layout.spawn)
  game.discover()
- check(game.discovered.size() > 10 and not game.discovered.has(DungeonLayout.RELIC),"Mapa revela só a região explorada")
+ check(game.discovered.size() > 10 and not game.discovered.has(game.layout.relic),"Mapa revela só a região explorada")
  await test_hud()
  inv.add("seal")
  p.position = game.camp_position
@@ -385,7 +386,7 @@ func capture_views() -> void:
  game.ui.toggle_health()
  game.ui.close_all()
  # Show a meaningful explored route without revealing the whole map.
- for cell in game.layout.pathfinder.get_id_path(DungeonLayout.SPAWN,Vector2i(18,10)):
+ for cell in game.layout.pathfinder.get_id_path(game.layout.spawn,Vector2i(18,10)):
   game.player.position = game.layout.to_world(cell)
   game.discover()
  game.ui.toggle_map()
@@ -426,7 +427,7 @@ func test_hud() -> void:
  check(UiStyle.item_icon("container_chest") != null and UiStyle.item_icon("container_sack") != null,"Ícones de baú e de itens no chão existem")
  check(UiStyle.font("regular") is FontFile and UiStyle.font("semibold") is FontFile,"Fonte Inter carrega nos pesos usados pela interface")
  # Status indicators follow the simulation rules, not guesses.
- p.position = game.layout.to_world(DungeonLayout.SPAWN)
+ p.position = game.layout.to_world(game.layout.spawn)
  p.health = 100
  p.bleeding = false
  p.food = 85
@@ -543,4 +544,64 @@ func test_hud() -> void:
  check(view.encloses(Rect2(ui.health_panel.position,Vector2(ui.health_panel.size.x,UiWindow.TITLE_HEIGHT))),"Arrastar janela para fora mantém a barra de título na tela")
  ui.health_panel.position = Vector2(976,412)
  ui.toggle_health()
- p.position = game.layout.to_world(DungeonLayout.SPAWN)
+ p.position = game.layout.to_world(game.layout.spawn)
+
+func test_data() -> void:
+ # Item catalog: every entry complete, text translated, numbers sane.
+ check(Items.DATA.size() >= 7,"Catálogo de itens carrega de data/itens.json")
+ for id in Items.DATA:
+  var d: Dictionary = Items.info(id)
+  var complete: bool = d.has("tag") and d.has("weight") and d.has("model") and float(d["weight"]) > 0
+  check(complete and UiStyle.CATEGORIES.has(d["tag"]),"Item completo e com categoria conhecida: "+id)
+  check(not str(d["name"]).begins_with("ITEM_") and not str(d["description"]).begins_with("ITEM_"),"Nome e descrição traduzidos: "+id)
+  if d.has("damage"):
+   check(float(d["range"]) > 0 and float(d["cost"]) > 0 and float(d["windup"]) < float(d["cooldown"]),"Arma com números coerentes: "+id)
+ # Monster types
+ for kind in EnemyTypes.DATA:
+  var e: Dictionary = EnemyTypes.info(kind)
+  check(float(e.get("health",0)) > 0 and float(e.get("speed",0)) > 0 and not EnemyTypes.display_name(kind).begins_with("INIMIGO_"),"Tipo de monstro completo: "+kind)
+  for loot_id in e.get("loot",{}):
+   check(Items.DATA.has(loot_id),"Espólio de %s usa item existente: %s" % [kind,loot_id])
+ # World description: ids unique, everything placed on floor, references valid.
+ var world: Dictionary = game.layout.world
+ var ids: Dictionary = {}
+ var unique: bool = true
+ for c in world["containers"]:
+  unique = unique and not ids.has(c["id"])
+  ids[c["id"]] = true
+  check(game.layout.is_floor(DungeonLayout.cell(c["cell"])),"Recipiente sobre o piso: "+c["id"])
+  for item_id in c["items"]:
+   check(Items.DATA.has(item_id),"Recipiente %s usa item existente: %s" % [c["id"],item_id])
+ for e in world["enemies"]:
+  unique = unique and not ids.has(e["id"])
+  ids[e["id"]] = true
+  check(EnemyTypes.DATA.has(e["type"]) and game.layout.is_floor(DungeonLayout.cell(e["cell"])),"Monstro com tipo válido sobre o piso: "+e["id"])
+ check(unique,"Identificadores do mundo são únicos")
+ for key in ["spawn","camp","camp_exit"]:
+  check(game.layout.is_floor(DungeonLayout.cell(world[key])),"Ponto do mundo sobre o piso: "+key)
+ for room in game.layout.rooms:
+  check(not str(room["name"]).begins_with("SALA_"),"Nome de sala traduzido: "+room["id"])
+ check(game.layout.is_safe(game.layout.to_world(game.layout.spawn)),"Início fica na sala segura")
+ for c in game.containers:
+  check(str(c.get("id","")) != "","Recipiente em jogo tem identificador: "+str(c["name"]))
+ for enemy in game.enemies:
+  check(enemy.uid != "" and enemy.maximum_health == float(EnemyTypes.info(enemy.kind)["health"]),"Monstro em jogo usa os dados do tipo: "+enemy.uid)
+ # The description format is the seam for the future generator: a tiny
+ # hand-written world builds floors, rooms and routes the same way.
+ var tiny := {"id":"teste","name":"MUNDO_CISTERNAS_NOME","cell_size":2.0,"size":[12,6],"spawn":[1,1],"camp":[1,2],"camp_exit":[0,2],
+  "rooms":[{"id":"a","name":"SALA_ABRIGO","rect":[0,0,4,4],"safe":true},{"id":"b","name":"SALA_GALERIA","rect":[8,0,4,4]}],
+  "corridors":[[4,1,4,1]],"blocked":[],"furniture":[],"containers":[{"id":"x","name":"RECIPIENTE_RESERVA","cell":[9,1],"items":{},"chest":true,"objective":true}],"enemies":[]}
+ var small := DungeonLayout.new(tiny)
+ check(small.route(small.to_world(Vector2i(1,1)),small.to_world(Vector2i(10,2))).size() > 0 and small.relic == Vector2i(9,1),"Descrição mínima de mundo gera piso, rotas e objetivo")
+ # Saves written before ids existed still load and get the world's ids back.
+ check(game.save_game(false),"Save com identificadores é gravado")
+ var raw = JSON.parse_string(FileAccess.get_file_as_string(game.save_path))
+ for c in raw["containers"]:
+  c.erase("id")
+ for e in raw["enemies"]:
+  e.erase("id")
+ raw.erase("world")
+ var file := FileAccess.open(game.save_path,FileAccess.WRITE)
+ file.store_string(JSON.stringify(raw))
+ file.close()
+ check(game.load_game() and game.containers[0]["id"] == "reserva_entrada" and game.containers[4]["id"] == "relicario","Save antigo sem identificadores carrega e recupera os ids do mundo")
