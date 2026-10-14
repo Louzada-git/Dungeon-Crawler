@@ -30,6 +30,8 @@ As etapas têm tamanhos diferentes: decidir a regra de morte cabe numa conversa,
 
 - **14/10/2026 · Armas novas com modelo provisório.** Adaga, katana, montante, machado, maça, martelo, alabarda, arco e besta, com flechas e virotes. Cada uma tem uma mecânica própria por dados (furtivo, sangramento, esmagar armadura, pancada em área, perfurar, projéteis) e indica o ramo de proficiência que vai treinar. Modelos de blocos substituíveis por `.glb`; especificação de modelos e animações em `arte/ARMAS_ESPEC.md`. Antecipa parte das etapas 20, 38 e 64.
 
+- **14/10/2026 · Atributos e proficiências.** Etapas 17, 18 e 19 concluídas; habilidades por nível de ramo antecipam parte da 26, e a janela de proficiências, parte da 28. Técnicas montáveis continuam nas etapas 21 a 25.
+
 ## Marcos
 
 | Etapa | Marco | Pergunta que o marco responde |
@@ -78,9 +80,9 @@ As etapas têm tamanhos diferentes: decidir a regra de morte cabe numa conversa,
 14. **Gerar um andar por semente.** A mesma semente reconstrói o mesmo andar; o caminho entrada → objetivo → retorno é garantido em toda semente aceita.
 15. **Popular o andar por regras.** Salas de combate, recurso e repouso; monstros e recipientes distribuídos pelo gerador, não posicionados à mão.
 16. **Persistir o andar.** Portas, baús, inimigos, mapa descoberto e alterações sobrevivem ao save, com a versão do gerador registrada.
-17. **Ligar atributos ao que já existe.** Três ou quatro atributos que alteram vida, carga, fôlego e potencial de treino, substituindo constantes atuais.
-18. **Modelar as proficiências numa planilha.** Simular, antes de programar, a divisão do progresso entre ramos, a soma de contribuições sem dupla contagem, a igualdade de ritmo e a regra contra grind.
-19. **Implementar as proficiências da fatia.** Os dois ramos da etapa 13, com experiência por uso relevante e persistência.
+17. **Ligar atributos ao que já existe — concluída em 14/10/2026.** Força, Vigor, Agilidade e Destreza, escolhidos no início de cada run. Três ou quatro atributos que alteram vida, carga, fôlego e potencial de treino, substituindo constantes atuais.
+18. **Modelar as proficiências numa planilha — concluída em 14/10/2026** como simulação com o código real (`tests/progression_sim.gd`). Simular, antes de programar, a divisão do progresso entre ramos, a soma de contribuições sem dupla contagem, a igualdade de ritmo e a regra contra grind.
+19. **Implementar as proficiências da fatia — concluída em 14/10/2026** para todas as armas, Esquiva e Tratamento. Os dois ramos da etapa 13, com experiência por uso relevante e persistência.
 20. **Criar etiquetas de itens.** Tipo, material, peso, alcance e afinidades ligam itens a proficiências e técnicas. O treino por tipo de arma depende delas.
 21. **Definir a ficha de técnica.** Alcance, origem do dano, tempo, custo, alvo, animação, requisitos e espaços como dados verificáveis.
 22. **Converter os golpes atuais em técnicas.** Corte e estocada viram fichas, sem perder o comportamento já ajustado e testado.
