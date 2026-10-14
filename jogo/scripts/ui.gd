@@ -47,6 +47,10 @@ var toast: PanelContainer
 var toast_label: Label
 var paused_badge: PanelContainer
 var boss_bar: UiBossBar
+var prof_window: UiProficiencyWindow
+var creation_panel: UiCreationPanel
+var level_banner: UiLevelBanner
+var hands_caption: Label
 var end_buttons: HBoxContainer
 var health_panel: UiHealthWindow
 var map_panel: UiWindow
@@ -73,6 +77,7 @@ func _ready() -> void:
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.theme = UiStyle.build_theme()
 	UiItemTooltip.inventory = game.inventory
+	UiItemTooltip.sheet = game.sheet
 	add_child(root)
 	_build_effects()
 	_build_hud()
@@ -117,6 +122,7 @@ func _build_hud() -> void:
 	hud.add_child(sidebar)
 	sidebar.add_tool("inventory", "bag", "Mochila", "I", toggle_inventory)
 	sidebar.add_tool("health", "pulse", "Condição física", "H", toggle_health)
+	sidebar.add_tool("skills", "book", "Proficiências", "P", toggle_proficiencies)
 	sidebar.add_tool("map", "map", "Mapa explorado", "M", toggle_map)
 	sidebar.add_gap(10)
 	sidebar.add_tool("pause", "gear", "Pausa e controles", "Esc", toggle_pause)
@@ -158,6 +164,11 @@ func _build_hud() -> void:
 	health_panel = UiHealthWindow.new(game, self)
 	health_panel.hide()
 	hud.add_child(health_panel)
+	prof_window = UiProficiencyWindow.new(game, self)
+	prof_window.hide()
+	hud.add_child(prof_window)
+	level_banner = UiLevelBanner.new()
+	hud.add_child(level_banner)
 	mini_map = DungeonMapView.new()
 	mini_map.game = game
 	mini_map.hide()
@@ -198,7 +209,8 @@ func _build_hands() -> void:
 	col.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(col)
-	col.add_child(UiStyle.caps("Em mãos", 10, UiStyle.DIM))
+	hands_caption = UiStyle.caps("Em mãos", 10, UiStyle.DIM)
+	col.add_child(hands_caption)
 	hands_name = UiStyle.label("", 16, UiStyle.TEXT, "semibold")
 	col.add_child(hands_name)
 	hands_stats = UiStyle.label("", 12, UiStyle.MUTED)
@@ -265,6 +277,9 @@ func _build_modals() -> void:
 	_build_map()
 	_build_pause()
 	_build_ending()
+	creation_panel = UiCreationPanel.new()
+	_centered(creation_panel)
+	creation_panel.confirmed.connect(_on_creation_confirmed)
 
 func _centered(window: UiWindow) -> void:
 	window.position = (Vector2(1440, 900) - window.custom_minimum_size) * 0.5
@@ -420,6 +435,9 @@ func update_hud() -> void:
 		health_panel.refresh()
 	sidebar.set_active("inventory", inventory.is_open)
 	sidebar.set_active("health", health_panel.visible)
+	sidebar.set_active("skills", prof_window.visible)
+	if prof_window.visible:
+		prof_window.refresh()
 	sidebar.set_active("map", map_panel.visible)
 	sidebar.set_active("pause", pause_panel.visible)
 	_update_hands()
@@ -438,11 +456,14 @@ func update_hud() -> void:
 func _update_hands() -> void:
 	var id: String = game.inventory.equipped
 	var ammo_key: String = str(Items.info(id).get("ammo", ""))
-	var key: String = id + ("|%d" % game.inventory.count(ammo_key) if ammo_key != "" else "")
+	var path: Array = CharacterSheet.path_of(id)
+	var mastery: int = game.sheet.mastery(path) if game.sheet.enabled and not path.is_empty() else 0
+	hands_caption.text = ("EM MÃOS  ·  DOMÍNIO %d" % mastery) if mastery > 0 else "EM MÃOS"
+	var key: String = id + ("|%d" % game.inventory.count(ammo_key) if ammo_key != "" else "") + "|m%d" % mastery
 	if key == _last_hands:
 		return
 	_last_hands = key
-	var data: Dictionary = Items.info(id)
+	var data: Dictionary = game.sheet.weapon_stats(id) if id != "" else {}
 	hands.item_id = id
 	if id == "":
 		hands_icon.texture = null
@@ -453,10 +474,10 @@ func _update_hands() -> void:
 	hands_fallback.visible = false
 	hands_icon.texture = UiStyle.item_icon(id)
 	hands_name.text = str(data.get("name", id))
-	hands_stats.text = "Dano %d  ·  Alcance %s m  ·  Fôlego %d" % [int(data.get("damage", 0)), UiStyle.fmt(float(data.get("range", 1.5))), int(data.get("cost", 10))]
+	hands_stats.text = "Dano %d  ·  Alcance %s m  ·  Fôlego %d" % [roundi(float(data.get("damage", 0))), UiStyle.fmt(float(data.get("range", 1.5))), roundi(float(data.get("cost", 10)))]
 	var ammo: String = str(data.get("ammo", ""))
 	if ammo != "":
-		hands_stats.text = "Dano %d  ·  Alcance %s m  ·  %ss: %d" % [int(data.get("damage", 0)), UiStyle.fmt(float(data.get("range", 1.5)), 0), str(Items.info(ammo).get("name", ammo)), game.inventory.count(ammo)]
+		hands_stats.text = "Dano %d  ·  Alcance %s m  ·  %ss: %d" % [roundi(float(data.get("damage", 0))), UiStyle.fmt(float(data.get("range", 1.5)), 0), str(Items.info(ammo).get("name", ammo)), game.inventory.count(ammo)]
 
 func _update_prompt() -> void:
 	var raw: String = "" if any_panel() or game.ended else game.interaction_text()
@@ -490,11 +511,15 @@ func _update_toast() -> void:
 # --- panels --------------------------------------------------------------------
 
 func _input(event: InputEvent) -> void:
-	if game == null or game.ended:
+	if game == null or game.ended or game.choosing_character:
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.physical_keycode == KEY_H:
 			toggle_health()
+			get_viewport().set_input_as_handled()
+			return
+		if event.physical_keycode == KEY_P:
+			toggle_proficiencies()
 			get_viewport().set_input_as_handled()
 			return
 		if not any_panel() and event.physical_keycode in [KEY_1, KEY_2, KEY_3]:
@@ -557,6 +582,39 @@ func toggle_health() -> void:
 		health_panel.reset_size()
 		health_panel.move_to(health_panel.position)
 	update_hud()
+
+func toggle_proficiencies() -> void:
+	if game.ended or game.choosing_character:
+		return
+	prof_window.visible = not prof_window.visible
+	if prof_window.visible:
+		prof_window.refresh()
+		prof_window.move_to(prof_window.position)
+	update_hud()
+
+## Start of a new run: the attribute points.
+func show_creation() -> void:
+	hide_panels()
+	modal.show()
+	dim.show()
+	creation_panel.reset()
+	creation_panel.show()
+	get_tree().paused = true
+
+func _on_creation_confirmed(values: Dictionary) -> void:
+	creation_panel.hide()
+	modal.hide()
+	get_tree().paused = false
+	game.start_character(values)
+	update_hud()
+
+func on_level_up(branch: String, level: int) -> void:
+	level_banner.push("%s  ·  nível %d" % [ProficiencyTree.display_name(branch), level])
+	if game.sound:
+		game.sound.play_at("loot", game.player.global_position, 0.4)
+
+func on_perk_unlocked(branch: String, perk: Dictionary) -> void:
+	level_banner.push("Desbloqueado: %s" % perk.get("name", ""), "%s  ·  %s" % [ProficiencyTree.display_name(branch), perk.get("text", "")])
 
 func toggle_map() -> void:
 	if game.ended:
