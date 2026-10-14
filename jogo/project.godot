@@ -18,5 +18,9 @@ renderer/rendering_method.mobile="gl_compatibility"
 textures/default_filters/use_nearest_mipmap_filter=false
 environment/defaults/default_clear_color=Color(0.027,0.04,0.047,1)
 
+[gui]
+
+timers/tooltip_delay_sec=0.3
+
 [physics]
 common/physics_ticks_per_second=60
