@@ -11,6 +11,9 @@ var held_weapon: Node3D
 var facing: Vector3 = Vector3(0,0,-1)
 var health: float = 100.0
 var stamina: float = 100.0
+## Set from the adventurer's attributes (CharacterSheet).
+var max_health: float = 100.0
+var max_stamina: float = 100.0
 var food: float = 85.0
 var bleeding: bool = false
 var attack_timer: float = 0.0
@@ -174,11 +177,12 @@ func _physics_process(delta: float) -> void:
   speed = 5.7
   stamina = maxf(0,stamina-16*delta)
  elif attack_timer <= 0 and dodge_timer <= 0 and hurt_timer <= 0:
-  stamina = minf(100,stamina+(16.0 if food > 10 else 6.0)*delta)
+  stamina = minf(max_stamina,stamina+(16.0 if food > 10 else 6.0)*game.sheet.stamina_regen_mult()*delta)
  if aiming:
   speed *= 0.75 if direction.dot(facing) >= 0 else 0.55
- if game.inventory.weight() > InventoryData.COMFORT:
-  speed *= lerpf(1.0,0.72,(game.inventory.weight()-InventoryData.COMFORT)/(InventoryData.CAPACITY-InventoryData.COMFORT))
+ speed *= game.sheet.speed_mult()
+ if game.inventory.weight() > game.inventory.comfort:
+  speed *= lerpf(1.0,0.72,(game.inventory.weight()-game.inventory.comfort)/(game.inventory.capacity-game.inventory.comfort))
  if attack_timer > 0:
   speed *= 0.30
  if hurt_timer > 0:
@@ -205,7 +209,7 @@ func _physics_process(delta: float) -> void:
  if horizontal.length() > 0.5 and dodge_timer <= 0 and step_time <= 0:
   game.sound.play_at("step",global_position,0.48 if sprinting else 0.28)
   step_time = 0.25 if sprinting else 0.42
- food = maxf(0,food-delta*(0.07 if sprinting else 0.025))
+ food = maxf(0,food-delta*(0.07 if sprinting else 0.025)*game.sheet.hunger_mult())
  if bleeding:
   health = maxf(0,health-delta*0.5)
  if food <= 0:
@@ -216,7 +220,7 @@ func _physics_process(delta: float) -> void:
 func attack() -> bool:
  if cooldown > 0 or dodge_timer > 0 or hurt_timer > 0 or health <= 0:
   return false
- var weapon = Items.info(game.inventory.equipped)
+ var weapon = game.sheet.weapon_stats(game.inventory.equipped)
  var cost: float = weapon.get("cost",10.0)
  var ammo: String = str(weapon.get("ammo",""))
  if ammo != "" and game.inventory.count(ammo) <= 0:
@@ -248,14 +252,18 @@ func attack_animation(weapon: Dictionary) -> String:
    return "guard"
  return "attack"
 
+func dodge_cost() -> float:
+ return game.sheet.dodge_cost()
+
 func dodge() -> bool:
- if stamina < 25 or dodge_timer > 0 or attack_timer > 0 or hurt_timer > 0 or health <= 0:
+ var cost: float = dodge_cost()
+ if stamina < cost or dodge_timer > 0 or attack_timer > 0 or hurt_timer > 0 or health <= 0:
   return false
  var input = Input.get_vector("left","right","up","down")
  if test_direction != Vector2.ZERO:
   input = test_direction
  dodge_direction = Vector3(input.x+input.y,0,input.y-input.x).normalized() if input.length()>0 else facing
- stamina -= 25
+ stamina -= cost
  dodge_timer = 0.25
  invulnerable = 0.20
  attack_buffer = 0
@@ -264,7 +272,12 @@ func dodge() -> bool:
  return true
 
 func receive_damage(amount: float, from: Vector3 = Vector3.ZERO) -> void:
- if invulnerable > 0 or health <= 0:
+ if health <= 0:
+  return
+ if invulnerable > 0:
+  # A blow that lands during the dodge window trains Esquiva.
+  if dodge_timer > 0 and amount > 0:
+   game.on_dodged(amount)
   return
  health = maxf(0,health-amount)
  invulnerable = 0.7
