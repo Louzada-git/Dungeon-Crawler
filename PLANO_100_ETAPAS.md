@@ -1,164 +1,206 @@
 # Plano de produção — 100 etapas até uma versão pronta para a Steam
 
-**Data:** 13/10/2026  
+**Revisão:** 13/10/2026 (reorganização do plano original da mesma data)  
 **Projeto:** Dungepm (nome provisório)  
-**Ponto de partida:** já existe um protótipo Godot 3D com câmera isométrica, movimentação, combate básico, inventário, mapa, salvamento, modelos próprios e uma pequena incursão. As etapas abaixo partem desse protótipo; nenhuma etapa é marcada como concluída apenas porque existe uma implementação provisória.
+**Ponto de partida:** protótipo Godot 4.7.2 em 3D com câmera isométrica, movimentação, combate com espada e lança, inventário por peso, mapa descoberto, salvamento, modelos próprios e uma incursão de cinco salas fixas. Linha de base reconfirmada em 13/10/2026: **87 verificações, zero falhas** em execução headless. Nenhuma etapa é marcada como concluída só porque existe uma implementação provisória.
 
 ## Visão e regra de conclusão
 
-Jogo solo de sobrevivência e exploração em tempo real. Cada jogador tem um labirinto procedural próprio, definido por uma semente e persistente entre incursões. Atributos definem potencial; proficiências adquiridas pelo uso liberam habilidades. Uma ação pode treinar vários ramos e receber contribuições de todos os ramos aplicáveis: espada + katana + escola rápida; magia + elementalismo + fogo. Técnicas físicas e mágicas aceitam componentes em espaços compatíveis. Equipamentos têm categorias, propriedades e usos distintos. O visual usa modelos 3D estilizados com câmera isométrica e interface legível.
+Jogo solo de sobrevivência e exploração em tempo real. Cada jogador tem um labirinto procedural próprio, definido por uma semente e persistente entre incursões. Atributos definem potencial; proficiências adquiridas pelo uso liberam habilidades. Uma ação pode treinar vários ramos e receber contribuições de todos os ramos aplicáveis: espada + katana + escola rápida; magia + elementalismo + fogo. Técnicas físicas e mágicas aceitam componentes em espaços compatíveis. Equipamentos têm categorias, propriedades e usos distintos. O visual usa modelos 3D estilizados com câmera isométrica e interface legível. Detalhes em [VISAO_JOGO.md](VISAO_JOGO.md) e [ESCOPO_V1.md](ESCOPO_V1.md).
 
-O objetivo da etapa 100 é uma **versão 1.0 completa, estável e apta a ser lançada na Steam**, após cumprir as verificações da plataforma. O ato de pagar a taxa, enviar para revisão ou publicar depende da conta do titular e das decisões comerciais dele. Esta lista apresenta dependências de produção, não uma agenda rigidamente sequencial nem uma estimativa de duração: cadastro Steamworks, página da loja e testes externos podem ocorrer em paralelo às etapas de conteúdo, respeitando seus prazos. Requisitos de conteúdo são metas de lançamento propostas e podem ser ajustados após testes, sem perder os sistemas centrais.
+O objetivo da etapa 100 é uma **versão 1.0 completa, estável e apta a ser lançada na Steam**. Pagar a taxa, enviar para revisão e publicar dependem da conta do titular e das decisões comerciais dele.
 
-**Marcos de avaliação:** 20 = fundação técnica confiável; 40 = labirinto e progressão jogáveis; 60 = combinações e itens sustentam builds; 80 = campanha completa; 100 = build candidata a lançamento, aprovada nos critérios internos e nos requisitos aplicáveis da Steam.
+## O que mudou nesta revisão
 
-## Modelo e esforço recomendados para as etapas 1–5
+1. **Os sistemas se encontram cedo.** O plano anterior construía labirinto, proficiências, técnicas e itens um depois do outro, cada um por inteiro, e só os juntava perto da etapa 60. Agora uma **fatia vertical** (13–30) une todos em miniatura. Isso responde se o núcleo é divertido antes de produzir conteúdo em escala.
+2. **Pessoas jogam em todos os marcos:** etapas 6, 29, 46, 68, 79 e 91. Antes, testadores externos só entravam na 85.
+3. **Decisões que travam etapas foram antecipadas:** forma do labirinto (4), idiomas e tamanho da 1.0 (3) e regra de morte (5). As etapas 4 e 5 já foram decididas.
+4. **Infraestrutura antes da expansão:** Git (7), separação de dados (8), save versionado (9) e build Windows testada (10). Antes, Windows só era testado na 89 e migração de save só aparecia na 82.
+5. **A direção visual e o pipeline de arte vêm antes do conteúdo em massa** (48–49; antes, 71), para não refazer modelos.
+6. **Steamworks e a página "Em breve" ficam no meio** (50–52), não no fim, para acumular listas de desejos.
+7. As etapas **1, 2, 3 e 5 mantêm número e conteúdo**, e as referências nos outros documentos continuam válidas. A tabela de modelos e esforço saiu do plano.
 
-| Etapa | Modelo Codex | Esforço | Motivo |
-| --- | --- | --- | --- |
-| 1 · Inventariar o protótipo | GPT-6.1 Sol | Médio | Inspeção técnica de cenas, scripts, assets e testes existentes. |
-| 2 · Definir a promessa do jogo | GPT-6 Astra | Médio | Sintetizar as ideias em uma visão criativa clara e coerente. |
-| 3 · Fixar o escopo da versão 1.0 | GPT-6 Astra | Alto | Resolver dependências e limites de um projeto grande sem perder os sistemas centrais. |
-| 4 · Dar identidade própria ao projeto | GPT-6 Astra | Médio | Desenvolver nomes, mundo e direção autoral a partir das inspirações; revisão formal de direitos, se necessária, fica fora do escopo do modelo. |
-| 5 · Decidir a consequência da morte | GPT-6 Astra | Alto | Comparar o efeito das regras de morte sobre labirinto persistente, itens, proficiências e motivação para recomeçar. |
+As etapas têm tamanhos diferentes: decidir a regra de morte cabe numa conversa, enquanto chegar à meta de itens é um bloco grande de produção. **Os marcos medem o progresso; o número da etapa, não.** A lista mostra dependências, não uma agenda fixa. Itens de loja podem andar em paralelo, respeitando os prazos da Steam.
 
-Se o consumo for uma preocupação, GPT-6.1 Sol em esforço médio é uma alternativa adequada para as cinco; aumentar para alto nas etapas 3 e 5 quando houver decisões conflitantes. A recomendação acima prioriza qualidade de decisão. Fonte: [seleção de modelos](https://developers.openai.com/api/docs/guides/model-selection) e [esforço de raciocínio](https://developers.openai.com/api/docs/guides/reasoning) da documentação oficial da OpenAI.
+## Trabalho antecipado a pedido do usuário
 
-## 1–10 · Consolidar o protótipo e fixar o produto
+- **13/10/2026 · HUD no estilo Project Zomboid — entregue.** Interface de exploração, inventário, condição física, mapa, pausa e final refeita com desenho próprio, seguindo a organização do Project Zomboid. Inclui janelas recolhíveis e arrastáveis, ícones gerados dos modelos, ordenação, menu de contexto, arrastar entre janelas, guardar em baús, indicadores de estado ligados às regras reais e fonte Inter (OFL). Antecipa partes das etapas 42 (inventário) e 84 (interfaces) e já separa o `ui.gd` por painel, parte da etapa 8. Verificação: 145 checagens no projeto e no executável Linux. Falta o teste humano.
 
-1. **Inventariar o protótipo — concluída em 13/10/2026.** [Diagnóstico e evidências](INVENTARIO_PROTOTIPO.md): 87 verificações passaram no projeto e no executável Linux; duas lacunas adicionais de persistência foram reproduzidas.
-2. **Definir a promessa do jogo — concluída em 13/10/2026.** [Visão de uma página](VISAO_JOGO.md): fantasia, ciclo de incursão, público alvo e relações entre os sistemas; regras de morte e limites da versão 1.0 permanecem nas etapas seguintes.
-3. **Fixar o escopo da versão 1.0 — em andamento.** [Decisões de escopo](ESCOPO_V1.md): sempre single player, Windows e Linux, teclado/mouse e experiência extremamente longa confirmados; conteúdo será definido junto. Duração total e final ficam para discussão posterior.
-4. **Dar identidade própria ao projeto.** Criar nomes, personagens, símbolos, monstros e lore originais; revisar semelhanças diretas com as obras de inspiração.
-5. **Decidir a consequência da morte.** Definir destino do personagem, do labirinto, dos itens e do conhecimento descoberto.
-6. **Especificar o ciclo completo.** Preparação, entrada, exploração, retirada, recuperação e nova incursão precisam formar um fluxo fechado.
-7. **Definir metas e calendário comercial.** Fixar objetivos de duração, variedade, desempenho e uma janela que permita iniciar Steamworks e a página “Em breve” com antecedência.
-8. **Organizar dados e código.** Separar regras de itens, habilidades, inimigos, salas e progressão das cenas que os exibem.
-9. **Automatizar a exportação local.** Produzir builds reproduzíveis e registrar versão, plataforma e mudanças de cada uma.
-10. **Criar um roteiro de teste repetível.** Validar movimento, inventário, combate, morte, save e retorno ao abrigo antes de novas expansões.
+## Marcos
 
-## 11–20 · Combate, exploração e sobrevivência fundamentais
+| Etapa | Marco | Pergunta que o marco responde |
+| --- | --- | --- |
+| 12 | Fundação confiável | O projeto está versionado, com builds nas duas plataformas, save protegido e decisões bloqueantes tomadas? |
+| 30 | Fatia vertical | Labirinto + proficiências + técnicas + itens, juntos e pequenos, são divertidos? |
+| 46 | Labirinto longo | Várias incursões seguidas num mundo persistente se sustentam? |
+| 52 | Página no ar | O jogo tem identidade, visual definido e presença na Steam? (decisão do titular) |
+| 68 | Builds | Estilos diferentes de personagem completam o mesmo desafio por caminhos diferentes? |
+| 80 | Conteúdo completo | Todos os sistemas prometidos e a estrutura de longo prazo estão acessíveis? |
+| 90 | Acabamento | Recursos congelados, apresentação completa, saves e combinações testados em escala? |
+| 100 | Versão 1.0 | Build candidata aprovada nos critérios internos e nos fluxos da Steam? |
 
-11. **Ajustar movimentação e câmera.** Garantir leitura de direção, obstáculos, profundidade e alvos.
-12. **Fechar o combate básico.** Preparação, impacto, defesa, esquiva e recuperação devem ter sinais visuais e sonoros claros.
-13. **Padronizar alcance e colisões.** Espada, lança, projéteis e paredes devem obedecer às mesmas regras espaciais.
-14. **Criar estados de ferimento.** Feridas afetam decisões e têm formas legíveis de tratamento.
-15. **Balancear fôlego e carga.** Correr, lutar e carregar saque apresentam escolhas reais, sem espera excessiva.
-16. **Completar recursos de expedição.** Comida, cura e luz pressionam a viagem em uma escala compreensível.
-17. **Melhorar inventário e equipamentos.** Comparar, transferir, equipar, usar e descartar itens sem ambiguidade.
-18. **Melhorar o mapa explorado.** Mostrar descoberta, marcos e anotações sem revelar o desconhecido.
-19. **Criar a retirada.** Voltar à base encerra a incursão, preserva consequências e entrega recompensas.
-20. **Validar uma incursão completa.** Um testador consegue preparar, explorar, sobreviver ou morrer e entender o resultado.
+## Decisões em aberto e onde elas bloqueiam
 
-## 21–30 · Labirinto procedural próprio e persistente
+| Decisão | Situação | Precisa estar decidida antes de |
+| --- | --- | --- |
+| Núcleo obrigatório da 1.0 × lista pós-lançamento | Etapa 3 | 13 |
+| Idiomas de lançamento | Etapa 3 | 51 (página) e 77 (textos); a etapa 8 já prepara textos por chave |
+| Forma do labirinto | **Decidida** (etapa 4): longo, com fundo, andares exponenciais | — |
+| Consequência da morte | **Decidida** (etapa 5): roguelite com memória | — |
+| Metas numéricas de conteúdo | Propostas | Revisão na 30; fixar antes da 62 |
+| Tamanho do sistema de companheiros na 1.0 | Confirmados no escopo; papel, autonomia e ordens em aberto | 71. Proposta: reavaliar na 30, com o resultado da fatia |
+| Final, história e condição de conclusão | Adiados por decisão do usuário | 76 |
 
-21. **Definir a semente por jogador.** A mesma semente reconstrói a mesma estrutura em qualquer carregamento.
-22. **Criar a estrutura de regiões.** Andares, setores, salas, corredores e conexões seguem regras explícitas.
-23. **Gerar um caminho principal válido.** Entrada, objetivo e retorno são alcançáveis em toda semente aceita.
-24. **Gerar ramificações úteis.** Atalhos, riscos e recompensas criam escolhas de rota.
-25. **Distribuir tipos de sala.** Combate, recurso, repouso, evento, segredo e guardião têm funções distintas.
-26. **Distribuir ameaças por profundidade.** Dificuldade e recompensas escalam sem saltos impossíveis.
-27. **Persistir mudanças do mundo.** Portas abertas, baús, inimigos, atalhos e anotações sobrevivem ao save.
-28. **Carregar setores sob demanda.** O labirinto cresce sem manter tudo ativo na memória.
-29. **Testar muitas sementes.** Detectar mapas impossíveis, gargalos, sobreposição e repetição excessiva.
-30. **Validar retorno ao mesmo labirinto.** Uma nova incursão reconhece rotas e alterações da anterior.
+## 1–12 · Fundação e decisões que travam o resto
 
-## 31–40 · Atributos e proficiências em múltiplos ramos
+1. **Inventariar o protótipo — concluída em 13/10/2026.** [Diagnóstico e evidências](INVENTARIO_PROTOTIPO.md): 87 verificações passaram no projeto e no executável Linux; duas lacunas de persistência foram reproduzidas (A e B).
+2. **Definir a promessa do jogo — concluída em 13/10/2026.** [Visão de uma página](VISAO_JOGO.md).
+3. **Fixar o escopo da versão 1.0 — em andamento.** [Decisões de escopo](ESCOPO_V1.md). Já confirmados: sempre single player; Windows e Linux; teclado e mouse; experiência extremamente longa; NPCs e companheiros controlados por IA. Falta: separar o núcleo obrigatório das metas de conteúdo e da lista pós-lançamento, e decidir os idiomas de lançamento.
+4. **Decidir a forma do labirinto — concluída em 13/10/2026.** Longo, com fundo, não infinito: 100 a 200 horas para concluir uma run. Andares crescem de forma aproximadamente exponencial (10 → 20 → 40 → … → 400 salas) até andares de cerca de 20 horas. Final e condição de conclusão continuam adiados. Ver [ESCOPO_V1.md](ESCOPO_V1.md).
+5. **Decidir a consequência da morte — concluída em 13/10/2026.** Roguelite com memória: a run recomeça do zero na mesma semente, com mundo no estado inicial e personagem novo; o conhecimento do jogador (mapa explorado, passagens secretas, NPCs, o que itens e opções fazem, receitas) permanece. A correção da lacuna B segue essa regra na etapa 9.
+6. **Testar a sensação da base atual.** O usuário joga o build Linux existente e registra o que incomoda em controle, câmera, combate, inventário e ritmo. As verificações automáticas provam que as regras funcionam, não que o jogo é divertido.
+7. **Versionar o projeto.** Git com `.gitignore` para cache da Godot, `work/`, builds e backups `.blend1`; commit-base; um commit por etapa concluída. De preferência num repositório privado no GitHub, para trabalhar a partir de qualquer máquina.
+8. **Separar dados, regras e cenas.** Dividir `main.gd` (combate, itens, objetivos, save) e `ui.gd` (todos os painéis); catálogos de dados para itens e inimigos; identificadores estáveis para entidades; textos por chave, prontos para tradução.
+9. **Versionar e proteger o save.** Número de versão do formato, migração, backup recuperável e restauração por identificador em vez de índice. Separa o estado da run, apagado na morte, do conhecimento persistente. Corrige a lacuna A e aplica a regra da etapa 5, encerrando a lacuna B.
+10. **Automatizar builds Linux e Windows.** Exportação sem caminhos absolutos, versão registrada em cada build e teste de fumaça no Windows desde já.
+11. **Criar um roteiro de teste repetível.** Suíte automática headless mais uma lista curta de verificação manual, rodadas em cada marco.
+12. **Ajustar a base conforme o teste da etapa 6.** Corrigir movimento, câmera, leitura dos golpes e inventário antes de construir em cima.
 
-31. **Definir atributos.** Cada atributo explica um potencial concreto, sem substituir habilidades aprendidas.
-32. **Definir a estrutura de proficiências.** Registrar raízes, especializações, escolas e tipos de equipamento como ramos que podem se sobrepor.
-33. **Implementar experiência por uso relevante.** Ações em situações válidas geram progresso; repetição sem desafio não domina a progressão.
-34. **Distribuir progresso entre ramos participantes.** O total ganho por ação é controlado; raiz, especialização e subtipo recebem parcelas.
-35. **Somar contribuições aplicáveis.** Magia + Elementalismo + Fogo e Espadas + Katana + Escola Rápida funcionam sem dupla contagem acidental.
-36. **Implementar requisitos de habilidade.** Domínio em um ou mais ramos libera golpes, magias, passivas e espaços de modificação.
-37. **Criar treino de escolas de espada.** Real, brutal, fluida, rápida e pesada avançam pelas ações correspondentes.
-38. **Criar treino de tipos de espada.** Espada leve, katana e outros tipos crescem pelo equipamento efetivamente usado.
-39. **Criar treino mágico hierárquico.** Magia pura fortalece a raiz mais rápido; uso elemental divide progresso entre Magia, Elementalismo e elemento.
-40. **Validar igualdade de ritmo.** Com esforço comparável, a habilidade praticada progride em dano no mesmo ritmo total, ainda que fortaleça ramos diferentes.
+**Marco 12 — fundação confiável.**
 
-## 41–50 · Técnicas físicas, magia e combinações
+## 13–30 · Fatia vertical: o jogo inteiro em miniatura
 
-41. **Definir a ficha de técnica.** Alcance, dano de origem, tempo, custo, alvo, animação e requisitos são dados verificáveis.
-42. **Implementar golpes básicos montáveis.** Corte vertical, estocada e ataques equivalentes são úteis sem modificadores.
-43. **Criar espaços de componentes.** Imbuimentos, características e outros espaços têm compatibilidades explícitas.
-44. **Criar componentes físicos.** Avanço, ruptura de guarda, ampliação de arco e outras alterações mudam comportamento.
-45. **Criar magia pura.** Técnicas arcanas exercitam a raiz de Magia e mostram seu valor próprio.
-46. **Criar elementalismo.** Fogo, vento e outros elementos têm efeitos distintos além da quantidade de dano.
-47. **Unir combate físico e magia.** Esgrima + Elementalismo produz técnicas híbridas utilizáveis e treináveis.
-48. **Implementar ordem e interação dos componentes.** Combinações dependentes da sequência têm resultados previsíveis.
-49. **Validar receitas antes de equipar.** A interface explica efeito, custo, requisitos e motivo de incompatibilidade.
-50. **Salvar técnicas criadas.** O jogador pode nomear, equipar, modificar e recuperar receitas após carregar o jogo.
+13. **Fechar a lista e o ciclo da fatia.** Conteúdo pequeno e fechado: um andar de 6 a 10 salas, duas famílias de monstros, Espadas › um tipo › uma escola, Magia › Elementalismo › Fogo, 3 ou 4 componentes, cerca de 15 itens. Ciclo: base → incursão → retirada ou morte → nova incursão. Nada além disso entra na fatia.
+14. **Gerar um andar por semente.** A mesma semente reconstrói o mesmo andar; o caminho entrada → objetivo → retorno é garantido em toda semente aceita.
+15. **Popular o andar por regras.** Salas de combate, recurso e repouso; monstros e recipientes distribuídos pelo gerador, não posicionados à mão.
+16. **Persistir o andar.** Portas, baús, inimigos, mapa descoberto e alterações sobrevivem ao save, com a versão do gerador registrada.
+17. **Ligar atributos ao que já existe.** Três ou quatro atributos que alteram vida, carga, fôlego e potencial de treino, substituindo constantes atuais.
+18. **Modelar as proficiências numa planilha.** Simular, antes de programar, a divisão do progresso entre ramos, a soma de contribuições sem dupla contagem, a igualdade de ritmo e a regra contra grind.
+19. **Implementar as proficiências da fatia.** Os dois ramos da etapa 13, com experiência por uso relevante e persistência.
+20. **Criar etiquetas de itens.** Tipo, material, peso, alcance e afinidades ligam itens a proficiências e técnicas. O treino por tipo de arma depende delas.
+21. **Definir a ficha de técnica.** Alcance, origem do dano, tempo, custo, alvo, animação, requisitos e espaços como dados verificáveis.
+22. **Converter os golpes atuais em técnicas.** Corte e estocada viram fichas, sem perder o comportamento já ajustado e testado.
+23. **Implementar espaços e componentes mínimos.** Três ou quatro componentes, incluindo imbuimento de fogo; a ordem altera o resultado de forma previsível.
+24. **Implementar a magia mínima.** Uma magia pura e uma de fogo, cada uma treinando os ramos corretos.
+25. **Montar técnicas e equipar na barra.** Editor mínimo com validação, custo e motivo de incompatibilidade.
+26. **Liberar algo por domínio.** Pelo menos um componente e uma técnica destravados por proficiência.
+27. **Fechar o ciclo de incursão.** Retirada ou morte, retorno à base e nova incursão no mesmo labirinto. Na morte, a run recomeça na mesma semente e o conhecimento acumulado aparece no mapa e nas descrições.
+28. **Criar uma interface mínima para proficiências e técnicas.** Pode ser feia, mas precisa ser compreensível.
+29. **Testar a fatia com pessoas.** O usuário e de três a cinco pessoas de fora jogam. Medir se entendem as combinações, se escolhem caminhos diferentes e se querem voltar.
+30. **Decidir pelo resultado.** Definir o que fica, muda ou sai; revisar metas de conteúdo, tamanho do sistema de companheiros e o [ESCOPO_V1.md](ESCOPO_V1.md).
 
-## 51–60 · Itens, categorias e diversidade de builds
+**Marco 30 — o núcleo é divertido?** Mudar de rumo aqui custa pouco.
 
-51. **Definir categorias de itens.** Armas, armaduras, consumíveis, materiais, focos, componentes, relíquias e itens de missão têm regras próprias.
-52. **Criar propriedades e etiquetas.** Tipo, peso, material, alcance, dano e afinidades determinam compatibilidade com proficiências e técnicas.
-53. **Criar modelos base de itens.** Gerar variações de dados a partir de bases sem transformar cada item em uma cópia numérica.
-54. **Criar espadas funcionalmente distintas.** Espada leve, katana, espada pesada e outras formas oferecem decisões de alcance, custo e ritmo.
-55. **Criar outras famílias de armas.** Lança, arco, escudo e foco mágico participam da progressão e das combinações.
-56. **Criar armaduras e acessórios.** Proteção, mobilidade, resistência e espaços disponíveis apresentam compensações.
-57. **Criar consumíveis e materiais.** Cura, preparo, manutenção e produção alimentam a exploração.
-58. **Criar relíquias e itens singulares.** Efeitos especiais alteram estratégias sem invalidar equipamentos comuns.
-59. **Atingir uma biblioteca de centenas de itens.** Meta proposta: pelo menos 200 entradas nomeadas, com utilidade, obtenção e diferenças verificadas.
-60. **Testar diversidade de builds.** Pelo menos cinco estilos viáveis completam a mesma incursão por meios diferentes.
+## 31–46 · Labirinto, combate e sobrevivência em escala
 
-## 61–70 · Mundo, inimigos, progressão e campanha
+31. **Estruturar andares e setores** com o crescimento aproximadamente exponencial decidido na etapa 4.
+32. **Gerar ramificações e atalhos persistentes** que criem escolhas de rota.
+33. **Completar os tipos de sala:** evento, segredo, repouso e guardião.
+34. **Escalar ameaças e recompensas por profundidade** sem saltos impossíveis.
+35. **Fixar metas de desempenho.** FPS, memória, carregamento e configuração mínima, medidos a partir daqui.
+36. **Carregar setores sob demanda** dentro dessas metas.
+37. **Testar milhares de sementes automaticamente.** Detectar mapas impossíveis, gargalos, sobreposição e repetição excessiva.
+38. **Padronizar alcance e colisões.** Espada, lança, projéteis, magias e paredes seguem as mesmas regras espaciais.
+39. **Fechar o combate base.** Defesa, esquiva, impacto e recuperação com sinais visuais e sonoros claros.
+40. **Criar estados de ferimento** legíveis e tratáveis.
+41. **Balancear fôlego, carga, comida, cura e luz** para que pressionem a expedição inteira, não cada combate.
+42. **Melhorar inventário e equipamento.** Comparar, transferir, equipar e descartar sem ambiguidade; armaduras básicas.
+43. **Melhorar o mapa** com marcos e anotações, sem revelar o desconhecido.
+44. **Criar famílias de monstros.** Comum, rápida e resistente ou de área, cada uma com sinais e fraquezas próprios.
+45. **Criar a base segura funcional.** Guardar, reparar, preparar técnicas e escolher a próxima incursão num fluxo curto.
+46. **Testar com pessoas de fora.** Incursões longas em vários andares; medir mortes, retiradas e pontos de confusão.
 
-61. **Criar base segura funcional.** Armazenar, reparar, preparar técnicas e escolher expedições em um fluxo curto.
-62. **Criar economia de expedição.** Saque, gasto e manutenção incentivam risco calculado sem obrigar repetição vazia.
-63. **Criar famílias de monstros.** Cada família ensina sinais, fraquezas e escolhas próprias de combate.
-64. **Criar inimigos de elite e guardiões.** Encontros especiais testam posicionamento, preparo e adaptação de build.
-65. **Criar companheiros recrutáveis controlados por IA.** Personagens com funções e custos diferentes podem acompanhar uma incursão; autonomia e possíveis ordens seguem as decisões de escopo.
-66. **Criar comandos e comportamento do grupo.** Aliados seguem, lutam, recuam e administram perigo de modo legível.
-67. **Criar descobertas e objetivos.** Segredos e marcos conduzem o jogador a setores mais profundos.
-68. **Criar início e dificuldade progressiva.** Setores iniciais ensinam na prática; os avançados exigem domínio dos sistemas.
-69. **Implementar a estrutura de conclusão definida posteriormente.** A experiência extremamente longa deve seguir a decisão futura sobre objetivos finais e desfecho; essa escolha foi adiada pelo usuário.
-70. **Testar a campanha do início ao fim.** Uma partida completa não depende de ferramentas de desenvolvimento.
+**Marco 46 — labirinto longo jogável.**
 
-## 71–80 · Apresentação, clareza e experiência de lançamento
+## 47–52 · Identidade, direção visual e loja
 
-71. **Fixar direção visual própria.** Personagens, cenários, armas e efeitos compartilham escala, paleta e leitura.
-72. **Completar modelos modulares.** Equipamentos principais aparecem nos personagens sem exigir um modelo inteiro para cada combinação.
-73. **Completar animações essenciais.** Locomoção, escolas de golpe, dano, magia, morte e interação correspondem às regras.
-74. **Completar efeitos e áudio.** Impactos, elementos, ambiente e interface comunicam ação sem esconder perigos.
-75. **Refinar a interface de proficiências.** Mostrar ramos, contribuições, desbloqueios e progresso de forma compreensível.
-76. **Refinar o editor de técnicas.** Experimentar componentes, comparar resultados e corrigir combinações é rápido.
-77. **Concluir acessibilidade básica.** Remapeamento de teclas, escalas de texto, volume separado e sinais que não dependam só de cor.
-78. **Concluir opções e retomada.** Gráficos, áudio, controles e saves funcionam depois de fechar e reabrir o jogo.
-79. **Preparar textos e localização inicial.** Português consistente; inglês entra como requisito se a página prometer suporte.
-80. **Validar uma versão de conteúdo completo.** Todos os sistemas prometidos, a campanha e o final estão acessíveis.
+47. **Dar identidade própria ao projeto.** Nome, mundo, símbolos, monstros e lore originais; revisar semelhanças diretas com as obras de inspiração.
+48. **Fixar a direção visual.** Escala, paleta, materiais, silhuetas e leitura, antes de modelar dezenas de itens e monstros.
+49. **Definir o pipeline de arte.** Gerador Blender, texturas, convenções de nome e equipamentos modulares (como um item aparece no personagem).
+50. **Iniciar o cadastro no Steamworks e a janela comercial.** O titular conclui verificação, dados bancários e fiscais e taxa quando decidir. O prazo de 30 dias da Steam começa a correr aqui.
+51. **Preparar a página "Em breve".** Nome, descrição fiel, idiomas, requisitos de sistema e capturas reais.
+52. **Publicar a página** e começar a acumular listas de desejos, por decisão do titular. Adiar este passo não bloqueia as etapas seguintes.
 
-## 81–90 · Qualidade, desempenho e direitos de uso
+**Marco 52 — presença na Steam.**
 
-81. **Congelar recursos da versão 1.0.** Novas ideias entram em uma lista futura; correções e acabamento têm prioridade.
-82. **Testar saves e migrações.** Carregar versões antigas, recuperar falhas e preservar labirinto e técnicas do jogador.
-83. **Testar geração em escala.** Executar milhares de sementes e partidas simuladas para achar mapas inviáveis e erros raros.
-84. **Testar combinações em escala.** Verificar custos, interações, progressão e casos extremos dos componentes.
-85. **Testar equilíbrio com jogadores externos.** Medir mortes, retiradas, builds usadas, itens ignorados e pontos de confusão.
-86. **Corrigir travamentos e bloqueios.** Nenhum erro conhecido impede avançar, salvar, retornar ou concluir a campanha.
-87. **Medir e otimizar desempenho.** Estabelecer metas de FPS, carregamento, memória e tamanho de instalação nos computadores alvo.
-88. **Revisar originalidade e licenças.** Conferir nomes, arte, áudio, fontes, modelos, animações, créditos e permissões de distribuição.
-89. **Testar Windows e Linux.** Instalar builds limpas nos dois sistemas e conferir inicialização, controles, áudio, gráficos, salvamento e atualização.
-90. **Preparar candidata de lançamento.** Build versionada, notas de versão, backup e plano de correção rápida.
+## 53–68 · Progressão, técnicas e itens em escala
 
-## 91–100 · Preparar a Steam e fechar a versão 1.0
+53. **Completar a árvore de proficiências.** Raízes, especializações, escolas e tipos de equipamento como ramos sobrepostos, com requisitos de desbloqueio.
+54. **Criar o treino das escolas de espada:** real, brutal, fluida, rápida e pesada, cada uma avançando pelas ações correspondentes.
+55. **Criar o treino dos tipos de espada:** leve, katana, pesada e outras, crescendo pelo equipamento efetivamente usado.
+56. **Completar a magia pura.** Técnicas arcanas exercitam a raiz de Magia e têm valor próprio.
+57. **Completar o elementalismo.** Fogo, vento e outros elementos com efeitos distintos além da quantidade de dano.
+58. **Unir combate físico e magia.** Esgrima + Elementalismo produz técnicas híbridas utilizáveis e treináveis.
+59. **Ampliar a biblioteca de componentes.** Avanço, ruptura de guarda, ampliação de arco e outros, com ordem e interações previsíveis.
+60. **Completar o editor de técnicas.** Nomear, duplicar, comparar, modificar e recuperar receitas após carregar o jogo.
+61. **Validar a igualdade de ritmo em simulação.** Com esforço comparável, o dano da habilidade praticada cresce no mesmo ritmo total, mesmo fortalecendo ramos diferentes.
+62. **Definir as categorias de itens.** Armas, armaduras, consumíveis, materiais, focos, componentes, relíquias e itens de missão, cada uma com regras próprias.
+63. **Criar modelos-base de itens.** Gerar variações de dados a partir de bases, sem transformar cada item numa cópia numérica.
+64. **Criar outras famílias de armas.** Lança, arco, escudo e foco mágico participam da progressão e das combinações.
+65. **Criar armaduras e acessórios** com compensações de proteção, mobilidade, resistência e espaços.
+66. **Criar consumíveis, materiais, relíquias e itens singulares.** Efeitos especiais mudam estratégias sem invalidar equipamentos comuns.
+67. **Atingir a meta de itens do escopo.** Proposta atual: pelo menos 200 entradas nomeadas, ou o número revisto na etapa 30, cada uma com utilidade, obtenção e diferenças verificadas.
+68. **Testar a diversidade de builds com pessoas de fora.** Pelo menos cinco estilos viáveis completam a mesma incursão por meios diferentes.
 
-91. **Conferir o cadastro Steamworks iniciado com antecedência.** Titular conclui verificação, dados bancários/fiscais e taxa Steam Direct quando decidir publicar.
-92. **Preparar a página da loja.** Nome final, descrição fiel, idiomas, requisitos de sistema, preço proposto, artes e capturas reais.
-93. **Concluir o questionário de conteúdo.** Informar violência e eventual conteúdo gerado com IA que será consumido pelo jogador, conforme o material efetivamente usado.
-94. **Enviar a página para revisão.** Corrigir retornos da Valve e publicar a página “Em breve” com a antecedência exigida.
-95. **Configurar depots e inicialização.** Enviar builds via SteamPipe e verificar instalação, execução e atualização pelo cliente Steam.
-96. **Testar em ramo privado.** Convidados instalam, jogam, salvam, atualizam e concluem a campanha pela distribuição real.
-97. **Concluir checklists e revisão da build.** Enviar a build para análise após a página; atender os apontamentos recebidos.
-98. **Fazer a verificação final.** Checar jogo completo, estabilidade, saves, direitos, créditos, loja, preço, suporte e plano de atualização.
-99. **Aprovar a candidata 1.0.** Titular avalia build e página finais; decisões comerciais e momento da publicação ficam definidos.
-100. **Entregar o jogo completo pronto para lançamento na Steam.** Build 1.0 testada, campanha concluível, conteúdo prometido presente, página e build aprovadas nos fluxos aplicáveis; o titular pode acionar a publicação.
+**Marco 68 — combinações e itens sustentam builds.**
+
+## 69–80 · Mundo, companheiros e estrutura de longo prazo
+
+69. **Criar a economia de expedição.** Saque, gasto e manutenção incentivam risco calculado sem obrigar repetição vazia.
+70. **Criar inimigos de elite e guardiões** que testem posicionamento, preparo e adaptação de build.
+71. **Criar NPCs e companheiros controlados por IA,** com funções e custos diferentes, conforme o tamanho definido nas etapas 3 e 30.
+72. **Criar comandos e comportamento do grupo.** Aliados seguem, lutam, recuam e administram perigo de forma legível.
+73. **Equilibrar a progressão longa.** Simular dezenas de horas de experiência, profundidade e economia para manter tensão sem muro de grind.
+74. **Criar descobertas e objetivos** que conduzam o jogador a setores mais profundos.
+75. **Criar o início e a curva de dificuldade.** Os setores iniciais ensinam na prática; os avançados exigem domínio dos sistemas.
+76. **Implementar a estrutura de longo prazo.** Aplicar a forma da etapa 4 e o final ou a condição de conclusão, quando o usuário decidir.
+77. **Preparar textos e localização.** Português consistente; outros idiomas conforme a decisão da etapa 3.
+78. **Combater a repetição.** Medir, em partidas longas, salas, encontros e recompensas repetidos e acrescentar variação onde a sensação de jogo sem fim se perde.
+79. **Testar uma partida longa do início ao fim** sem ferramentas de desenvolvimento, com pessoas de fora.
+80. **Validar a versão de conteúdo completo.** Todos os sistemas prometidos e a estrutura de longo prazo estão acessíveis.
+
+**Marco 80 — conteúdo completo.**
+
+## 81–90 · Apresentação e acabamento
+
+81. **Completar os equipamentos modulares.** Os equipamentos principais aparecem nos personagens sem exigir um modelo inteiro para cada combinação.
+82. **Completar as animações essenciais.** Locomoção, escolas de golpe, dano, magia, morte e interação correspondem às regras.
+83. **Completar efeitos e áudio.** Impactos, elementos, ambiente e interface comunicam a ação sem esconder perigos.
+84. **Finalizar as interfaces.** Proficiências, editor de técnicas, inventário e mapa claros e rápidos de usar.
+85. **Concluir a acessibilidade básica.** Remapeamento de teclas, escala de texto, volumes separados e sinais que não dependam só de cor.
+86. **Concluir opções e retomada.** Gráficos, áudio, controles e saves funcionam depois de fechar e reabrir o jogo.
+87. **Atualizar a página e o trailer** com o visual final.
+88. **Congelar os recursos da 1.0.** Novas ideias vão para a lista futura; correções e acabamento têm prioridade.
+89. **Testar saves e migrações.** Carregar saves de todas as versões já testadas, recuperar falhas e preservar labirinto e técnicas.
+90. **Testar geração e combinações em escala.** Milhares de sementes e partidas simuladas, mais casos extremos de componentes, custos e progressão.
+
+**Marco 90 — acabamento.**
+
+## 91–100 · Qualidade e lançamento
+
+91. **Testar o equilíbrio com um grupo externo amplo.** Medir mortes, retiradas, builds usadas, itens ignorados e pontos de confusão.
+92. **Corrigir travamentos e bloqueios.** Nenhum erro conhecido impede avançar, salvar, retornar ou concluir.
+93. **Otimizar o desempenho** até as metas da etapa 35 nos computadores alvo.
+94. **Revisar originalidade e licenças.** Nomes, arte, áudio, fontes, modelos, animações (incluindo Mixamo), Godot, créditos e permissões de distribuição.
+95. **Preparar a candidata a lançamento.** Builds limpas instaladas e conferidas no Windows e no Linux; versão, notas, backup e plano de correção rápida.
+96. **Concluir o questionário de conteúdo e a página.** Informar violência e eventual conteúdo gerado com IA usado no jogo; atualizar requisitos e capturas.
+97. **Configurar depots e testar em ramo privado.** Envio pelo SteamPipe; convidados instalam, jogam, salvam e atualizam pela distribuição real.
+98. **Enviar a build para revisão** e atender os apontamentos da Valve.
+99. **Fazer a verificação final e aprovar a candidata.** Jogo completo, estabilidade, saves, direitos, créditos, loja, preço, suporte e plano de atualização; o titular aprova build e página.
+100. **Entregar o jogo completo pronto para lançamento na Steam.** Build 1.0 testada, conteúdo prometido presente, página e build aprovadas nos fluxos aplicáveis; o titular pode acionar a publicação.
+
+## Como trabalhamos
+
+- Antes de cada etapa, o assistente apresenta em poucas linhas **o que será feito, o que ficará verificável no fim e as escolhas que precisam de aprovação**, e espera o "sim" do usuário.
+- Dentro de uma etapa aprovada, as correções e os testes necessários fazem parte da execução. Mudanças relevantes de direção voltam para aprovação.
+- Cada etapa termina com a suíte headless da Godot 4.7.2 passando, os testes novos que a etapa exigir, um commit (a partir da etapa 7) e este plano atualizado.
+- Este arquivo, o [ESCOPO_V1.md](ESCOPO_V1.md) e a [VISAO_JOGO.md](VISAO_JOGO.md) são os documentos vivos. O [PLANEJAMENTO_JOGO.md](PLANEJAMENTO_JOGO.md) está congelado como histórico.
 
 ## Dependências da Steam consultadas em 13/10/2026
 
-- [Steam Direct](https://partner.steamgames.com/steamdirect/): taxa de US$ 100 por produto; para os primeiros títulos, espera de 30 dias após o pagamento e página “Em breve” pública por pelo menos duas semanas antes do lançamento.
+- [Steam Direct](https://partner.steamgames.com/steamdirect/): taxa de US$ 100 por produto; para os primeiros títulos, espera de 30 dias após o pagamento e página "Em breve" pública por pelo menos duas semanas antes do lançamento.
 - [Processo de lançamento](https://partner.steamgames.com/doc/store/releasing): página e build têm checklists e revisões separados; a página é enviada antes da build, e o titular aciona a publicação quando estiver pronto.
 - [Questionário de conteúdo](https://partner.steamgames.com/doc/gettingstarted/contentsurvey): inclui conteúdo maduro e conteúdo gerado por IA que integra o jogo.
 - [SteamPipe](https://partner.steamgames.com/doc/sdk/uploading): ferramenta de envio e teste de builds e depots.
 
-Conferir esses requisitos novamente quando o cadastro e a publicação se aproximarem, pois procedimentos da plataforma podem mudar.
+Conferir esses requisitos novamente na etapa 50 e antes da 96, pois os procedimentos da plataforma podem mudar.
