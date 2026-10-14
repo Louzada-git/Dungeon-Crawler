@@ -166,20 +166,22 @@ func refresh() -> void:
 		return
 	var p = game.player
 	if pages["health"].visible:
-		figure.set_state(p.health, p.bleeding)
+		figure.set_state(p.health / p.max_health * 100.0, p.bleeding)
 		var cond: Array = condition_name(p.health, p.bleeding)
 		summary.text = cond[0]
 		summary.add_theme_color_override("font_color", cond[1])
 		for key in rows:
 			var v: float = p.get(key)
-			rows[key][0].text = "%d / 100" % ceili(v)
+			var top: float = {"health": p.max_health, "stamina": p.max_stamina}.get(key, 100.0)
+			rows[key][0].text = "%d / %d" % [ceili(v), roundi(top)]
+			rows[key][1].max_value = top
 			rows[key][1].value = v
-			UiStyle.set_bar_color(rows[key][1], UiStyle.value_color(v / 100.0))
+			UiStyle.set_bar_color(rows[key][1], UiStyle.value_color(v / top))
 		bleed_value.text = "Sim  ·  −0,5 vida/s" if p.bleeding else "Não"
 		bleed_value.add_theme_color_override("font_color", UiStyle.BAD if p.bleeding else UiStyle.GOOD)
 		var w: float = game.inventory.weight()
-		load_value.text = "%s kg  ·  %s" % [UiStyle.fmt(w), "normal" if w <= InventoryData.COMFORT else "pesada"]
-		load_value.add_theme_color_override("font_color", UiStyle.TEXT if w <= InventoryData.COMFORT else UiStyle.WARN)
+		load_value.text = "%s kg  ·  %s" % [UiStyle.fmt(w), "normal" if w <= game.inventory.comfort else "pesada"]
+		load_value.add_theme_color_override("font_color", UiStyle.TEXT if w <= game.inventory.comfort else UiStyle.WARN)
 		var bandages: int = game.inventory.count("bandage")
 		var rations: int = game.inventory.count("ration")
 		bandage_button.text = "Bandagem  ·  %d   [3]" % bandages
@@ -198,4 +200,4 @@ func refresh() -> void:
 		subtitle.text = ("Labirinto %d" % game.seed) if game.generated else "Expedição às cisternas"
 		info_values["kills"].text = str(game.kills)
 		info_values["hits"].text = str(game.hits_received)
-		info_values["load"].text = "%s de %s kg" % [UiStyle.fmt(game.inventory.weight()), UiStyle.fmt(InventoryData.CAPACITY, 0)]
+		info_values["load"].text = "%s de %s kg" % [UiStyle.fmt(game.inventory.weight()), UiStyle.fmt(game.inventory.capacity, 0)]
