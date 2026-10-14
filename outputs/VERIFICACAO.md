@@ -44,3 +44,20 @@ Base Mixamo `attack (4)` com braços adaptados para empurrar a lança em linha r
 - Arrastar e soltar testado também com eventos reais de mouse na janela renderizada.
 - Capturas conferidas em 1280×800 e 1440×900, renderizadas por software (Mesa llvmpipe, OpenGL 4.5) numa tela virtual: exploração, aviso de ação, inventário com dica, menu de contexto, arrasto, condição com indicadores, aba Personagem, mapa, pausa, barra rápida e final.
 - Ainda falta o teste humano: sensação de uso, tamanho das letras na sua tela e velocidade das dicas.
+
+## Etapas 7 e 8 — Git e organização — 13/10/2026
+
+- Git local com histórico: estado recebido → plano e HUD → organização.
+- Itens, monstros e mundo saem do código para `jogo/data/`; recipientes e monstros ganham ids fixos; `main.gd` cai de 500 para 250 linhas, com os sistemas em `scripts/systems/`.
+- Suíte com **216 verificações, zero falhas**. Novas: catálogos completos e traduzidos, armas com números coerentes, mundo com ids únicos e tudo sobre o piso, monstros usando os dados do tipo, mundo mínimo escrito à mão gerando rotas (base para o gerador procedural) e save antigo sem ids carregando.
+- Comparação de capturas antes e depois: o mundo renderizado é o mesmo.
+
+## Labirinto procedural — 13/10/2026
+
+- Gerador validado em 240 andares (60 sementes × 4 andares): toda sala, baú, monstro e escada alcançável a partir do início; um chefe e um selo por andar; ids únicos; mesma semente gera o mesmo andar e sementes diferentes geram andares diferentes. 7 ms (1º andar) a 91 ms (4º andar) por geração.
+- Montagem em jogo: 1º andar instantâneo, 3º andar (40 salas, 69 monstros) em 0,12 s, 4º andar (60 salas, 139 monstros) em 0,25 s, sem queda de quadros na física.
+- Suíte do labirinto: **37 verificações, zero falhas** — andar validado em jogo, descida selada com o chefe vivo, golpe em área acertando ao redor, fúria, barra do chefe, relicário com o selo, descida e subida, chegada nos lugares certos, vida dos monstros por andar, mistura de tipos, baú esvaziado e monstro morto continuam assim ao voltar, save versão 2 ida e volta, entrega de selo, morte apagando o save da expedição e guardando semente e mapa, tela de recomeço.
+- Suíte do mundo fixo: **242 verificações, zero falhas**.
+- Capturas renderizadas: abrigo gerado, sala de combate, golpe em área do chefe, chefe furioso, mapa do andar, descida aberta, 2º andar, tela de morte.
+- Recomeço após a morte conferido: mesma semente e mapa explorado carregados.
+- Falta: teste humano, equilíbrio de dano e quantidade de monstros, e desempenho em placa de vídeo real.
