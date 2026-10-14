@@ -168,12 +168,71 @@ func start_character(values: Dictionary) -> void:
 	message("Atributos definem o seu potencial. As proficiências crescem com o uso: P mostra o progresso.", 7)
 
 func on_dodged(amount: float) -> void:
-	sheet.award("esquiva", amount * 0.8, floor)
+	sheet.award("acrobacia", amount * 0.8, floor)
+
+## A blow on the adventurer: what the guard held trains Bloqueio, what the armor absorbed trains its branch.
+func on_hit_taken(blocked: float, absorbed: float) -> void:
+	if blocked > 0:
+		sheet.award("bloqueio", blocked * 0.8, floor)
+	var branch: String = CharacterSheet.armor_branch(inventory.armor)
+	if absorbed > 0 and branch != "":
+		sheet.award(branch, absorbed, floor)
+
+## Running trains Atletismo, mostly when something is chasing.
+func on_sprint(distance: float) -> void:
+	if not sheet.enabled:
+		return
+	var chased: bool = false
+	for e in enemies:
+		if e.alive and e.aggro:
+			chased = true
+			break
+	sheet.award("atletismo", distance * (0.15 if chased else 0.03), floor)
+
+## Sneaking close to a monster that has not noticed you trains Furtividade (limited per monster).
+func on_sneak_near(enemy, delta: float) -> void:
+	if not sheet.enabled or enemy.sneak_budget <= 0:
+		return
+	var gain: float = minf(enemy.sneak_budget, 2.0 * delta * (1.0 + 0.25 * (enemy.level - 1)))
+	enemy.sneak_budget -= gain
+	sheet.award("furtividade", gain, enemy.level)
+
+const LOCK_NAMES := ["", "simples", "média", "difícil", "de mestre"]
+
+## Tries to open a locked chest with a lockpick. roll and break_roll: 0..1 to
+## fix the dice (tests), -1 for random.
+func attempt_lockpick(container: Dictionary, roll: float = -1.0, break_roll: float = -1.0) -> bool:
+	var difficulty: int = int(container.get("lock", 0))
+	if difficulty <= 0:
+		return true
+	if inventory.count("gazua") <= 0:
+		message("Fechadura %s. Você precisa de uma gazua." % LOCK_NAMES[difficulty], 3)
+		return false
+	var value: float = randf() if roll < 0 else roll
+	var scale: float = 1.0 + 0.25 * (floor - 1)
+	if value < sheet.pick_chance(difficulty):
+		container.erase("lock")
+		sheet.award("arrombamento", 12.0 * difficulty * scale, floor)
+		sound.play_at("loot", player.global_position, 0.7)
+		message("A fechadura cedeu.", 2)
+		if ui:
+			ui.open_inventory(container)
+		return true
+	sheet.award("arrombamento", 3.0 * difficulty * scale, floor)
+	var snap: float = randf() if break_roll < 0 else break_roll
+	if snap < sheet.pick_break_chance():
+		inventory.remove("gazua")
+		message("A gazua quebrou. Restam %d." % inventory.count("gazua"), 2.5)
+	else:
+		message("Não abriu. Tente de novo.", 2)
+	if ui:
+		ui.refresh_inventory()
+	return false
 
 ## Containers and monsters from the floor description.
 func setup_content() -> void:
 	for entry in layout.world["containers"]:
-		add_loot(str(tr(entry["name"])), DungeonLayout.cell(entry["cell"]), entry["items"], entry.get("chest", true), entry["id"])
+		add_loot(str(tr(entry["name"])), DungeonLayout.cell(entry["cell"]), entry["items"], entry.get("chest", true), entry["id"], int(entry.get("lock", 0)))
 	var index: int = 0
 	for entry in layout.world["enemies"]:
 		var enemy := DungeonEnemy.new()
@@ -187,8 +246,8 @@ func setup_content() -> void:
 		enemies.append(enemy)
 		index += 1
 
-func add_loot(title: String, cell: Vector2i, items: Dictionary, chest: bool = true, id: String = "") -> Dictionary:
-	return ContainerSystem.add(self, title, cell, items, chest, id)
+func add_loot(title: String, cell: Vector2i, items: Dictionary, chest: bool = true, id: String = "", lock: int = 0) -> Dictionary:
+	return ContainerSystem.add(self, title, cell, items, chest, id, lock)
 
 func _process(delta: float) -> void:
 	if player == null or ui == null:
@@ -213,6 +272,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		save_game()
 	elif event.is_action_pressed("interact"):
 		interact()
+	elif event.is_action_pressed("sneak"):
+		player.toggle_sneak()
 	elif event.is_action_pressed("dodge"):
 		player.dodge()
 	elif event is InputEventMouseButton and event.pressed:
@@ -281,7 +342,7 @@ func objective_text() -> String:
 func snapshot_floor() -> Dictionary:
 	var cs: Array = []
 	for c in containers:
-		cs.append({"id": c["id"], "name": c["name"], "pos": c["pos"], "items": c["items"].duplicate(), "chest": c["chest"]})
+		cs.append({"id": c["id"], "name": c["name"], "pos": c["pos"], "items": c["items"].duplicate(), "chest": c["chest"], "lock": int(c.get("lock", 0))})
 	var es: Dictionary = {}
 	for e in enemies:
 		es[e.uid] = {"health": e.health, "alive": e.alive, "pos": [e.position.x, e.position.z], "stuck": e.stuck.duplicate()}
@@ -372,6 +433,11 @@ func interaction_text() -> String:
 			return ("E   DESCER  ·  selada pelo guardião" if boss_alive() else "E   DESCER  ·  para o %dº andar" % (floor + 1))
 	var loot = nearest_container()
 	if not loot.is_empty():
+		var difficulty: int = int(loot.get("lock", 0))
+		if difficulty > 0:
+			if inventory.count("gazua") <= 0:
+				return "E   TRANCADO  ·  %s  ·  fechadura %s, precisa de gazua" % [loot["name"], LOCK_NAMES[difficulty]]
+			return "E   ARROMBAR  ·  %s  ·  fechadura %s, %d%% de chance" % [loot["name"], LOCK_NAMES[difficulty], roundi(sheet.pick_chance(difficulty) * 100)]
 		var empty: bool = loot["items"].is_empty()
 		return ("E   ABRIR  ·  " if empty else "E   VASCULHAR  ·  ") + loot["name"] + ("  (vazio)" if empty else "")
 	return ""
@@ -406,6 +472,9 @@ func interact() -> void:
 			return
 	var loot = nearest_container()
 	if not loot.is_empty():
+		if int(loot.get("lock", 0)) > 0:
+			attempt_lockpick(loot)
+			return
 		sound.play_at("loot", player.global_position, 0.6)
 		ui.open_inventory(loot)
 		Visuals.play(Visuals.animation(loot["node"]), "open", false)
