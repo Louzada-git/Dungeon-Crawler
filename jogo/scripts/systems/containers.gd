@@ -6,12 +6,14 @@ class_name ContainerSystem
 
 const REACH := 2.4
 
-static func add(game, title: String, cell: Vector2i, items: Dictionary, chest: bool = true, id: String = "") -> Dictionary:
+static func add(game, title: String, cell: Vector2i, items: Dictionary, chest: bool = true, id: String = "", lock: int = 0) -> Dictionary:
 	var pos: Vector3 = game.layout.to_world(cell)
 	var clean: Dictionary = {}
 	for key in items:
 		clean[key] = int(items[key])
 	var data: Dictionary = {"id": id if id != "" else unique_id(game), "name": title, "pos": [pos.x, pos.z], "items": clean, "chest": chest}
+	if lock > 0:
+		data["lock"] = lock
 	game.containers.append(data)
 	WorldBuilder.add_container(game, data)
 	return data
