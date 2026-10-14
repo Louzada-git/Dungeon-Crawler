@@ -72,7 +72,7 @@ func _physics_process(delta: float) -> void:
 func _fall() -> void:
 	if ammo == "":
 		return
-	var share: float = float(Items.info(ammo).get("recover", 0.0))
+	var share: float = float(Items.info(ammo).get("recover", 0.0)) + float(weapon.get("recover_bonus", 0.0))
 	game.ammo_recovery[ammo] = float(game.ammo_recovery.get(ammo, 0.0)) + share
 	if game.ammo_recovery[ammo] >= 1.0:
 		game.ammo_recovery[ammo] -= 1.0
