@@ -1,0 +1,484 @@
+{
+ "versao": 1,
+ "id": "cisternas",
+ "name": "MUNDO_CISTERNAS_NOME",
+ "_sobre": "Descrição do mundo fixo atual. Um gerador procedural futuro deve produzir este mesmo formato.",
+ "cell_size": 2.0,
+ "size": [
+  33,
+  27
+ ],
+ "spawn": [
+  4,
+  21
+ ],
+ "camp": [
+  4,
+  20
+ ],
+ "camp_exit": [
+  3,
+  20
+ ],
+ "rooms": [
+  {
+   "id": "abrigo",
+   "name": "SALA_ABRIGO",
+   "rect": [
+    2,
+    18,
+    7,
+    7
+   ],
+   "safe": true
+  },
+  {
+   "id": "galeria",
+   "name": "SALA_GALERIA",
+   "rect": [
+    3,
+    8,
+    8,
+    7
+   ]
+  },
+  {
+   "id": "deposito",
+   "name": "SALA_DEPOSITO",
+   "rect": [
+    16,
+    17,
+    8,
+    7
+   ]
+  },
+  {
+   "id": "salao",
+   "name": "SALA_SALAO",
+   "rect": [
+    16,
+    5,
+    8,
+    8
+   ]
+  },
+  {
+   "id": "camara",
+   "name": "SALA_CAMARA",
+   "rect": [
+    26,
+    2,
+    5,
+    8
+   ]
+  }
+ ],
+ "corridors": [
+  [
+   5,
+   14,
+   2,
+   5
+  ],
+  [
+   8,
+   20,
+   9,
+   2
+  ],
+  [
+   10,
+   10,
+   7,
+   2
+  ],
+  [
+   19,
+   12,
+   2,
+   6
+  ],
+  [
+   23,
+   7,
+   4,
+   2
+  ]
+ ],
+ "blocked": [
+  [
+   6,
+   10
+  ],
+  [
+   7,
+   10
+  ],
+  [
+   19,
+   8
+  ],
+  [
+   20,
+   8
+  ],
+  [
+   19,
+   9
+  ],
+  [
+   20,
+   9
+  ],
+  [
+   20,
+   20
+  ]
+ ],
+ "furniture": [
+  {
+   "cell": [
+    2,
+    22
+   ],
+   "model": "catre",
+   "rotation": 0
+  },
+  {
+   "cell": [
+    2,
+    23
+   ],
+   "model": "catre",
+   "rotation": 0
+  },
+  {
+   "cell": [
+    3,
+    24
+   ],
+   "model": "mesa",
+   "rotation": 0
+  },
+  {
+   "cell": [
+    4,
+    24
+   ],
+   "model": "banco",
+   "rotation": 0
+  },
+  {
+   "cell": [
+    7,
+    24
+   ],
+   "model": "caixote",
+   "rotation": 0
+  },
+  {
+   "cell": [
+    8,
+    24
+   ],
+   "model": "barril",
+   "rotation": 0
+  },
+  {
+   "cell": [
+    8,
+    23
+   ],
+   "model": "saco",
+   "rotation": 0
+  },
+  {
+   "cell": [
+    3,
+    8
+   ],
+   "model": "mesa",
+   "rotation": 0
+  },
+  {
+   "cell": [
+    4,
+    8
+   ],
+   "model": "banco",
+   "rotation": 0
+  },
+  {
+   "cell": [
+    10,
+    8
+   ],
+   "model": "caixote",
+   "rotation": 0
+  },
+  {
+   "cell": [
+    10,
+    9
+   ],
+   "model": "barril",
+   "rotation": 0
+  },
+  {
+   "cell": [
+    3,
+    13
+   ],
+   "model": "catre",
+   "rotation": 0
+  },
+  {
+   "cell": [
+    3,
+    14
+   ],
+   "model": "catre",
+   "rotation": 0
+  },
+  {
+   "cell": [
+    16,
+    23
+   ],
+   "model": "caixote",
+   "rotation": 0
+  },
+  {
+   "cell": [
+    17,
+    23
+   ],
+   "model": "caixote",
+   "rotation": 0
+  },
+  {
+   "cell": [
+    18,
+    23
+   ],
+   "model": "barril",
+   "rotation": 0
+  },
+  {
+   "cell": [
+    19,
+    23
+   ],
+   "model": "barril",
+   "rotation": 0
+  },
+  {
+   "cell": [
+    23,
+    17
+   ],
+   "model": "mesa",
+   "rotation": 90
+  },
+  {
+   "cell": [
+    23,
+    18
+   ],
+   "model": "saco",
+   "rotation": 0
+  },
+  {
+   "cell": [
+    16,
+    5
+   ],
+   "model": "pilar",
+   "rotation": 0
+  },
+  {
+   "cell": [
+    23,
+    5
+   ],
+   "model": "pilar",
+   "rotation": 0
+  },
+  {
+   "cell": [
+    16,
+    12
+   ],
+   "model": "vaso",
+   "rotation": 0
+  },
+  {
+   "cell": [
+    23,
+    12
+   ],
+   "model": "pilar",
+   "rotation": 0
+  },
+  {
+   "cell": [
+    26,
+    2
+   ],
+   "model": "pilar",
+   "rotation": 0
+  },
+  {
+   "cell": [
+    30,
+    2
+   ],
+   "model": "pilar",
+   "rotation": 0
+  },
+  {
+   "cell": [
+    30,
+    4
+   ],
+   "model": "mesa",
+   "rotation": 90
+  },
+  {
+   "cell": [
+    30,
+    8
+   ],
+   "model": "caixote",
+   "rotation": 0
+  }
+ ],
+ "containers": [
+  {
+   "id": "reserva_entrada",
+   "name": "RECIPIENTE_RESERVA",
+   "cell": [
+    6,
+    22
+   ],
+   "items": {
+    "ration": 2,
+    "bandage": 2
+   },
+   "chest": true
+  },
+  {
+   "id": "bau_guarda",
+   "name": "RECIPIENTE_BAU_GUARDA",
+   "cell": [
+    9,
+    12
+   ],
+   "items": {
+    "spear": 1,
+    "bandage": 2,
+    "coin": 12
+   },
+   "chest": true
+  },
+  {
+   "id": "deposito_ferro",
+   "name": "RECIPIENTE_DEPOSITO_FERRO",
+   "cell": [
+    22,
+    22
+   ],
+   "items": {
+    "ore": 8,
+    "ration": 2,
+    "coin": 8
+   },
+   "chest": true
+  },
+  {
+   "id": "mantimentos",
+   "name": "RECIPIENTE_MANTIMENTOS",
+   "cell": [
+    17,
+    6
+   ],
+   "items": {
+    "ration": 2,
+    "bandage": 3
+   },
+   "chest": true
+  },
+  {
+   "id": "relicario",
+   "name": "RECIPIENTE_RELICARIO",
+   "cell": [
+    27,
+    5
+   ],
+   "items": {
+    "seal": 1,
+    "coin": 20
+   },
+   "chest": true,
+   "objective": true
+  }
+ ],
+ "enemies": [
+  {
+   "id": "galeria_1",
+   "type": "corrompido",
+   "cell": [
+    6,
+    12
+   ]
+  },
+  {
+   "id": "galeria_2",
+   "type": "corrompido",
+   "cell": [
+    9,
+    10
+   ]
+  },
+  {
+   "id": "deposito_1",
+   "type": "corrompido",
+   "cell": [
+    19,
+    21
+   ]
+  },
+  {
+   "id": "deposito_2",
+   "type": "corrompido",
+   "cell": [
+    21,
+    18
+   ]
+  },
+  {
+   "id": "salao_1",
+   "type": "corrompido",
+   "cell": [
+    18,
+    10
+   ]
+  },
+  {
+   "id": "salao_2",
+   "type": "corrompido",
+   "cell": [
+    22,
+    7
+   ]
+  },
+  {
+   "id": "camara_guardiao",
+   "type": "guardiao",
+   "cell": [
+    28,
+    7
+   ]
+  }
+ ]
+}
