@@ -46,6 +46,8 @@ var prompt_text: Label
 var toast: PanelContainer
 var toast_label: Label
 var paused_badge: PanelContainer
+var boss_bar: UiBossBar
+var end_buttons: HBoxContainer
 var health_panel: UiHealthWindow
 var map_panel: UiWindow
 var full_map: DungeonMapView
@@ -147,6 +149,8 @@ func _build_hud() -> void:
 	hud.add_child(hotbar)
 	_build_hands()
 	_build_prompts()
+	boss_bar = UiBossBar.new(game)
+	hud.add_child(boss_bar)
 	inventory = UiInventory.new(game, self)
 	hud.add_child(inventory)
 	inventory_panel = inventory.bag_window
@@ -218,6 +222,7 @@ func _build_prompts() -> void:
 	prompt_box.add_theme_stylebox_override("panel", pill)
 	prompt_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	prompt_row.add_child(prompt_box)
+	prompt_box.hide()
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 10)
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -282,7 +287,7 @@ func _build_map() -> void:
 	var legend := HBoxContainer.new()
 	legend.add_theme_constant_override("separation", 18)
 	map_panel.body.add_child(legend)
-	for entry in [["arrow", Color("faf0d6"), "Você"], ["tent", Color("79c9a4"), "Abrigo"], ["chest", Color("c99a5b"), "Recipiente com itens"], ["diamond", Color("4f665f"), "Área explorada"]]:
+	for entry in [["arrow", Color("faf0d6"), "Você"], ["tent", Color("79c9a4"), "Abrigo"], ["chest", Color("c99a5b"), "Recipiente com itens"], ["play", Color("9fdc8f"), "Descida (vermelha: selada)"], ["diamond", Color("4f665f"), "Área explorada"]]:
 		var item := HBoxContainer.new()
 		item.add_theme_constant_override("separation", 6)
 		item.add_child(UiIcon.new(entry[0], entry[1], 16))
@@ -382,12 +387,7 @@ func _build_ending() -> void:
 	var buttons := HBoxContainer.new()
 	buttons.add_theme_constant_override("separation", 8)
 	ending_panel.body.add_child(buttons)
-	var again := UiStyle.button("Nova expedição — reiniciar progresso", func(): game.restart())
-	again.custom_minimum_size.y = 36
-	buttons.add_child(again)
-	var leave := UiStyle.button("Sair", func(): get_tree().quit(), 110)
-	leave.custom_minimum_size.y = 36
-	buttons.add_child(leave)
+	end_buttons = buttons
 
 # --- per frame -----------------------------------------------------------------
 
@@ -419,9 +419,12 @@ func update_hud() -> void:
 	sidebar.set_active("pause", pause_panel.visible)
 	_update_hands()
 	var area: String = game.layout.room_name(game.player.position)
+	if game.generated:
+		area = "%dº andar  ·  %s" % [game.floor, area]
 	if area_label.text != area:
 		area_label.text = area
-	objective.text = "Retorne ao abrigo com o selo" if game.inventory.count("seal") > 0 else "Recupere o selo das cisternas"
+	objective.text = game.objective_text()
+	boss_bar.refresh()
 	_update_prompt()
 	_update_toast()
 	if full_map.is_visible_in_tree():
@@ -555,6 +558,7 @@ func toggle_map() -> void:
 	modal.show()
 	dim.show()
 	map_panel.show()
+	map_panel.set_title("Mapa explorado  ·  %dº andar" % game.floor if game.generated else "Mapa explorado  ·  As Cisternas")
 	full_map.queue_redraw()
 	get_tree().paused = true
 	update_hud()
@@ -580,7 +584,7 @@ func confirm_restart() -> void:
 		return
 	pause_confirm = true
 	pause_title.text = "Recomeçar a expedição?"
-	pause_note.text = "Isso apaga o progresso salvo desta expedição. Clique de novo em “Nova expedição” para confirmar; “Continuar” mantém o progresso."
+	pause_note.text = ("Isso descarta este labirinto, a expedição salva e o mapa conhecido. Clique de novo em “Nova expedição” para confirmar; “Continuar” mantém tudo." if game.generated else "Isso apaga o progresso salvo desta expedição. Clique de novo em “Nova expedição” para confirmar; “Continuar” mantém o progresso.")
 	controls_box.modulate.a = 0.35
 
 func quick_use(id: String) -> void:
@@ -625,16 +629,33 @@ func show_ending(success: bool) -> void:
 	dim.show()
 	ending_panel.show()
 	ending_panel.set_title("Incursão concluída" if success else "Fim da expedição")
-	end_title.text = "Você voltou com o selo" if success else "A expedição terminou"
 	end_title.add_theme_color_override("font_color", UiStyle.ACCENT if success else Color("e08a72"))
-	end_note.text = "Você recuperou o selo e atravessou as cisternas." if success else "Os corredores cobram cada descuido."
+	for child in end_buttons.get_children():
+		child.queue_free()
+	var rows: Array = []
+	if game.generated and not success:
+		end_title.text = "Você morreu no %dº andar" % game.floor
+		end_note.text = "O labirinto continua o mesmo. Você recomeça do zero, mas o mapa que explorou fica com você."
+		rows = [["Andar mais fundo", "%dº" % game.deepest], ["Monstros derrotados", str(game.kills)], ["Selos entregues", str(game.seals_delivered)], ["Golpes recebidos", str(game.hits_received)]]
+		_end_button("Recomeçar no mesmo labirinto", func(): game.restart_same())
+		_end_button("Sair", func(): get_tree().quit(), 110)
+	else:
+		end_title.text = "Você voltou com o selo" if success else "A expedição terminou"
+		end_note.text = "Você recuperou o selo e atravessou as cisternas." if success else "Os corredores cobram cada descuido."
+		rows = [["Monstros derrotados", str(game.kills)], ["Golpes recebidos", str(game.hits_received)], ["Carga trazida", "%s kg" % UiStyle.fmt(game.inventory.weight())], ["Moedas na mochila", str(game.inventory.count("coin"))]]
+		_end_button("Nova expedição — reiniciar progresso", func(): game.restart())
+		_end_button("Sair", func(): get_tree().quit(), 110)
 	for child in end_stats.get_children():
 		child.queue_free()
-	var coins: int = game.inventory.count("coin")
-	for entry in [["Monstros derrotados", str(game.kills)], ["Golpes recebidos", str(game.hits_received)], ["Carga trazida", "%s kg" % UiStyle.fmt(game.inventory.weight())], ["Moedas na mochila", str(coins)]]:
+	for entry in rows:
 		end_stats.add_child(UiStyle.label(entry[0], 14, UiStyle.DIM))
 		end_stats.add_child(UiStyle.label(entry[1], 14, UiStyle.TEXT, "semibold"))
 	get_tree().paused = true
+
+func _end_button(text: String, callback: Callable, width: float = 0.0) -> void:
+	var b := UiStyle.button(text, callback, width)
+	b.custom_minimum_size.y = 36
+	end_buttons.add_child(b)
 
 class HandsCard extends PanelContainer:
 	var ui
