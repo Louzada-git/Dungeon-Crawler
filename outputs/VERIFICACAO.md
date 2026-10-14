@@ -112,3 +112,12 @@ Repetir o 1º andar (1x → 6, 2x → 8, 5x → 10, 10x → 11, 20x → 12, 50x 
 Caminhos de um, dois ou três ramos andam no mesmo ritmo. Trocar de espada no 3º andar agora quase não custa nada, porque Lâminas e Espadas são compartilhadas.
 - Capturas conferidas: as quatro armaduras no corpo, guarda e furtivo com os indicadores, aviso "Arrombar · 20% de chance", baú trancado, baú aberto, dica da cota de malha, janela de proficiências agrupada (início, meio e fim) com dica de ramo.
 - Falta: animações próprias de soco, guarda e agachado (outra IA, conforme `arte/ARMAS_ESPEC.md`), modelos finais das armaduras e o teste humano do equilíbrio.
+
+## Armas com modelos de pacotes — 14/10/2026
+
+- Suíte do mundo fixo: **465 verificações, zero falhas**; suíte do labirinto: **47, zero falhas**; as duas também no executável Linux.
+- Verificação nova: cada uma das 13 armas e munições carrega o modelo real (não os blocos), no comprimento da ficha (±2 cm) e com a empunhadura na origem.
+- Licenças conferidas: RPG Weapons é CC0 (página do autor, o pacote não traz o arquivo); o leia-me do Low Poly Weapon Pack permite uso em jogos e proíbe revenda.
+- Conversão conferida em vista frontal e lateral com eixos: ponta em +Y, fio do machado e da alabarda em +X, corda do arco em −X, empunhadura no cabo.
+- Capturas conferidas: as 12 armas na mão (espada, katana, montante, adaga, machado, maça, martelo, lança, lança longa, alabarda, arco, besta), besta em uso e ícones novos. Lanças e martelo foram afinados depois da primeira captura.
+
