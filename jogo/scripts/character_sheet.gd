@@ -58,12 +58,77 @@ func stamina_regen_mult() -> float:
 
 func dodge_cost() -> float:
 	var cost: float = 25.0 - (attr("agilidade") - 5)
-	cost -= float(ProficiencyTree.section("dominio").get("esquiva_por_nivel", 0.5)) * (level("esquiva") - 1)
-	cost += _perk_sum("esquiva", "dodge_cost")
+	cost -= _per_level("esquiva_por_nivel", 0.3) * (level("acrobacia") - 1)
+	cost += _perk_sum("acrobacia", "dodge_cost")
 	return maxf(10.0, cost)
 
 func heal_mult() -> float:
-	return 1.0 + float(ProficiencyTree.section("dominio").get("cura_por_nivel", 0.03)) * (level("tratamento") - 1) + _perk_sum("tratamento", "heal_mult")
+	return 1.0 + _per_level("cura_por_nivel", 0.02) * (level("tratamento") - 1) + _perk_sum("tratamento", "heal_mult")
+
+func _per_level(key: String, fallback: float) -> float:
+	return float(ProficiencyTree.section("dominio").get(key, fallback))
+
+## Share of a frontal blow the guard holds (fists hold less than a weapon).
+func block_reduction(item_id: String) -> float:
+	var base: float = 0.25 if item_id == "" else 0.4
+	return minf(0.85, base + _per_level("bloqueio_por_nivel", 0.012) * (level("bloqueio") - 1) + _perk_sum("bloqueio", "block_reduction"))
+
+## Stamina per point of damage held by the guard.
+func block_cost_mult() -> float:
+	return maxf(0.2, 1.0 + _perk_sum("bloqueio", "block_cost"))
+
+static func armor_branch(armor_id: String) -> String:
+	var path: Array = Items.DATA.get(armor_id, {}).get("proficiencias", [])
+	return str(path[0]) if not path.is_empty() else ""
+
+## Share of each blow the worn armor absorbs.
+func armor_protection(armor_id: String) -> float:
+	if armor_id == "":
+		return 0.0
+	var branch: String = armor_branch(armor_id)
+	var base: float = float(Items.DATA.get(armor_id, {}).get("protection", 0.0))
+	return minf(0.7, base * (1.0 + _per_level("armadura_por_nivel", 0.02) * (level(branch) - 1)) + _perk_sum(branch, "armor_protection"))
+
+## How much of the armor's penalties still apply (practice and perks lower it).
+func armor_penalty_mult(armor_id: String) -> float:
+	if armor_id == "":
+		return 0.0
+	var branch: String = armor_branch(armor_id)
+	return maxf(0.4, 1.0 - _per_level("penalidade_por_nivel", 0.025) * (level(branch) - 1)) * maxf(0.0, 1.0 + _perk_sum(branch, "armor_penalty"))
+
+func armor_speed_penalty(armor_id: String) -> float:
+	return float(Items.DATA.get(armor_id, {}).get("speed_penalty", 0.0)) * armor_penalty_mult(armor_id)
+
+func armor_regen_penalty(armor_id: String) -> float:
+	return float(Items.DATA.get(armor_id, {}).get("regen_penalty", 0.0)) * armor_penalty_mult(armor_id)
+
+func armor_noise(armor_id: String) -> float:
+	if armor_id == "":
+		return 0.0
+	var branch: String = armor_branch(armor_id)
+	if _perk_sum(branch, "armor_noise") <= -1.0:
+		return 0.0
+	return float(Items.DATA.get(armor_id, {}).get("noise", 0.0)) * armor_penalty_mult(armor_id)
+
+func sprint_cost_mult() -> float:
+	return maxf(0.5, 1.0 - _per_level("corrida_por_nivel", 0.012) * (level("atletismo") - 1)) * maxf(0.2, 1.0 + _perk_sum("atletismo", "sprint_cost"))
+
+## Fraction of the normal sight range at which monsters notice a sneaking adventurer.
+func sneak_detection_mult() -> float:
+	var m: float = 0.5 * maxf(0.5, 1.0 - _per_level("furtivo_por_nivel", 0.015) * (level("furtividade") - 1))
+	return maxf(0.15, m * (1.0 + _perk_sum("furtividade", "detection")))
+
+## Damage multiplier for any weapon against an unaware monster while sneaking.
+func sneak_attack_mult() -> float:
+	return 1.5 + _perk_sum("furtividade", "sneak_bonus")
+
+## Chance to open a lock of difficulty 1 (simple) to 4 (master).
+func pick_chance(difficulty: int) -> float:
+	var chance: float = 0.6 + _per_level("arrombar_por_nivel", 0.04) * (level("arrombamento") - 1) - 0.2 * (difficulty - 1) + _perk_sum("arrombamento", "pick_chance")
+	return clampf(chance, 0.05, 0.95)
+
+func pick_break_chance() -> float:
+	return clampf(0.5 * (1.0 + _perk_sum("arrombamento", "pick_break")), 0.0, 1.0)
 
 # --- branches ------------------------------------------------------------------------
 
@@ -92,7 +157,17 @@ func progress(branch: String) -> float:
 	return clampf((float(xp.get(branch, 0.0)) - a) / (b - a), 0.0, 1.0)
 
 static func path_of(item_id: String) -> Array:
+	if item_id == "":
+		return ProficiencyTree.section("punhos").get("proficiencias", [])
 	return Items.DATA.get(item_id, {}).get("proficiencias", [])
+
+## Empty hands fight with the fists profile of proficiencias.json.
+static func base_stats(item_id: String) -> Dictionary:
+	if item_id == "":
+		var fists: Dictionary = ProficiencyTree.section("punhos").duplicate(true)
+		fists.erase("_sobre")
+		return fists
+	return Items.info(item_id).duplicate(true)
 
 func path_xp(path: Array) -> float:
 	var total: float = 0.0
@@ -145,7 +220,7 @@ func _perk_sum(branch: String, key: String) -> float:
 ## Weapon numbers for this adventurer: base data, plus unlocked perks of the
 ## branches on its path, plus the mastery bonus to damage and stamina cost.
 func weapon_stats(item_id: String) -> Dictionary:
-	var stats: Dictionary = Items.info(item_id).duplicate(true)
+	var stats: Dictionary = base_stats(item_id)
 	if not enabled or not stats.has("damage"):
 		return stats
 	var path: Array = path_of(item_id)
@@ -153,7 +228,7 @@ func weapon_stats(item_id: String) -> Dictionary:
 		for perk in active_perks(branch):
 			var mods: Dictionary = perk.get("mods", {})
 			for key in mods:
-				if key in ["dodge_cost", "heal_mult"]:
+				if not (stats.has(key) or key == "recover_bonus" or key.contains(".")):
 					continue
 				if key.contains("."):
 					var parts: PackedStringArray = key.split(".")
@@ -230,11 +305,15 @@ func restore(data) -> bool:
 			return false
 		values[id] = int(v)
 	var points: Dictionary = {}
+	var renamed: Dictionary = ProficiencyTree.section("migracao")
 	for branch in data["xp"]:
 		var v = data["xp"][branch]
-		if not ProficiencyTree.DATA.has(branch) or not (v is int or v is float) or not is_finite(float(v)) or v < 0:
+		if not (v is int or v is float) or not is_finite(float(v)) or v < 0:
 			return false
-		points[branch] = float(v)
+		# Branches renamed between versions keep their experience; unknown ones are dropped.
+		var id: String = str(renamed.get(branch, branch))
+		if ProficiencyTree.DATA.has(id):
+			points[id] = float(points.get(id, 0.0)) + float(v)
 	attrs = values
 	xp = points
 	return true
