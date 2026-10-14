@@ -1,0 +1,48 @@
+keys,pt_BR
+ITEM_SWORD_NOME,Espada de viajante
+ITEM_SWORD_DESC,Equilibrada e confiável. Um corte custa 17 de fôlego.
+ITEM_SPEAR_NOME,Lança da guarda
+ITEM_SPEAR_DESC,"Estocada longa de 3,2 m em linha reta. Atinge o primeiro alvo e custa 23 de fôlego."
+ITEM_RATION_NOME,Ração de viagem
+ITEM_RATION_DESC,Restaura 35 de saciedade. Comer também ajuda na recuperação do fôlego.
+ITEM_BANDAGE_NOME,Bandagem limpa
+ITEM_BANDAGE_DESC,Estanca o sangramento e recupera 18 de vida.
+ITEM_ORE_NOME,Ferro bruto
+ITEM_ORE_DESC,Material pesado. Leve só o que consegue carregar.
+ITEM_COIN_NOME,Moeda antiga
+ITEM_COIN_DESC,Encontrada entre os pertences da antiga guarnição.
+ITEM_SEAL_NOME,Selo das cisternas
+INIMIGO_CORROMPIDO_NOME,Corrompido
+INIMIGO_GUARDIAO_NOME,Guardião
+MUNDO_CISTERNAS_NOME,As Cisternas
+SALA_ABRIGO,Abrigo da entrada
+SALA_GALERIA,Galeria da guarda
+SALA_DEPOSITO,Depósito esquecido
+SALA_SALAO,Salão das cisternas
+SALA_CAMARA,Câmara do selo
+SALA_PASSAGEM,Passagem subterrânea
+RECIPIENTE_RESERVA,Reserva da entrada
+RECIPIENTE_BAU_GUARDA,Baú da guarda
+RECIPIENTE_DEPOSITO_FERRO,Depósito de ferro
+RECIPIENTE_MANTIMENTOS,Mantimentos esquecidos
+RECIPIENTE_RELICARIO,Relicário das cisternas
+RECIPIENTE_PERTENCES,Pertences do corrompido
+RECIPIENTE_DEIXADOS,Itens deixados
+ITEM_SEAL_DESC,Selo arrancado de um guardião do labirinto. Entregue-o no abrigo.
+ITEM_ESPADA_GUARDA_NOME,Espada da guarda
+ITEM_ESPADA_GUARDA_DESC,"Aço temperado da antiga guarnição. Mais dano, um pouco mais pesada."
+ITEM_LANCA_LONGA_NOME,Lança longa
+ITEM_LANCA_LONGA_DESC,"Haste de 3,7 m. Mantém inimigos à distância, mas cansa."
+ITEM_UNGUENTO_NOME,Unguento de ervas
+ITEM_UNGUENTO_DESC,Pasta amarga que fecha ferimentos e recupera 40 de vida.
+ITEM_TONICO_NOME,Tônico de fôlego
+ITEM_TONICO_DESC,Recupera todo o fôlego de uma vez.
+ITEM_GEMA_NOME,Gema púrpura
+ITEM_GEMA_DESC,"Pedra preciosa leve. Vale muito, não serve para mais nada ainda."
+INIMIGO_ESPREITADOR_NOME,Espreitador
+INIMIGO_BRUTAMONTES_NOME,Brutamontes
+INIMIGO_CHEFE_NOME,Guardião do andar
+MUNDO_LABIRINTO_NOME,O Labirinto
+RECIPIENTE_BAU,Baú
+RECIPIENTE_BAU_CHEFE,Relicário do guardião
+RECIPIENTE_DESPOJOS,Despojos
