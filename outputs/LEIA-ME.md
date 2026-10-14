@@ -1,5 +1,17 @@
 # Dungepm — As Cisternas
 
+## Novo: o labirinto (13/10/2026)
+
+Cada expedição gera um labirinto a partir de uma semente. O 1º andar tem 10 salas; cada andar seguinte é maior (20, 40, 60…).
+
+- **Abrigo** no 1º andar: E no ponto de descanso salva a expedição e entrega os selos que você trouxer.
+- **Chefe do andar:** fica na sala mais distante, guarda o relicário com o selo e a **descida**. A descida só abre quando ele cai. Fique longe do anel vermelho no chão: é o golpe em área. Na metade da vida ele fica furioso.
+- **Monstros:** corrompido, espreitador (rápido e frágil), brutamontes (lento e forte) e guardião de elite. Cada andar deixa todos mais fortes.
+- **Itens novos:** espada da guarda, lança longa, unguento, tônico de fôlego, gemas.
+- **Escadas:** SUBIDA e DESCIDA com E. Os baús abertos e os monstros mortos de cada andar continuam assim quando você volta.
+- **Morte:** recomeça do zero no mesmo labirinto, mas o mapa que você explorou continua aparecendo. "Nova expedição" na pausa sorteia outro labirinto.
+- Um save da versão anterior não é aproveitado: o jogo começa uma expedição nova.
+
 ## Jogar
 
 Abra `linux/Dungepm.x86_64`. É um executável Linux independente; não precisa abrir a Godot nem programar.
