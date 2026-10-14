@@ -15,6 +15,7 @@ const HELP_ROWS := [
 	[["M"], "Mapa explorado (pausa o jogo)"],
 	[["H"], "Condição física"],
 	[["1", "2", "3"], "Mochila · comer · bandagem"],
+	[["4", "5", "6", "7"], "Técnicas da barra  ·  T: montar"],
 	[["F5"], "Salvar  ·  Esc: pausa"],
 ]
 
@@ -49,6 +50,7 @@ var toast_label: Label
 var paused_badge: PanelContainer
 var boss_bar: UiBossBar
 var prof_window: UiProficiencyWindow
+var tech_window: UiTechniqueWindow
 var creation_panel: UiCreationPanel
 var level_banner: UiLevelBanner
 var hands_caption: Label
@@ -125,6 +127,7 @@ func _build_hud() -> void:
 	sidebar.add_tool("inventory", "bag", "Mochila", "I", toggle_inventory)
 	sidebar.add_tool("health", "pulse", "Condição física", "H", toggle_health)
 	sidebar.add_tool("skills", "book", "Proficiências", "P", toggle_proficiencies)
+	sidebar.add_tool("techniques", "golpe", "Técnicas", "T", toggle_techniques)
 	sidebar.add_tool("map", "map", "Mapa explorado", "M", toggle_map)
 	sidebar.add_gap(10)
 	sidebar.add_tool("pause", "gear", "Pausa e controles", "Esc", toggle_pause)
@@ -169,6 +172,9 @@ func _build_hud() -> void:
 	prof_window = UiProficiencyWindow.new(game, self)
 	prof_window.hide()
 	hud.add_child(prof_window)
+	tech_window = UiTechniqueWindow.new(game, self)
+	tech_window.hide()
+	hud.add_child(tech_window)
 	level_banner = UiLevelBanner.new()
 	hud.add_child(level_banner)
 	mini_map = DungeonMapView.new()
@@ -447,6 +453,9 @@ func update_hud() -> void:
 	sidebar.set_active("skills", prof_window.visible)
 	if prof_window.visible:
 		prof_window.refresh()
+	sidebar.set_active("techniques", tech_window.visible)
+	if tech_window.visible:
+		tech_window.refresh()
 	sidebar.set_active("map", map_panel.visible)
 	sidebar.set_active("pause", pause_panel.visible)
 	_update_hands()
@@ -522,7 +531,17 @@ func _update_toast() -> void:
 func _input(event: InputEvent) -> void:
 	if game == null or game.ended or game.choosing_character:
 		return
+	if typing():
+		return
 	if event is InputEventKey and event.pressed and not event.echo:
+		if event.physical_keycode == KEY_T:
+			toggle_techniques()
+			get_viewport().set_input_as_handled()
+			return
+		if not any_panel() and event.physical_keycode in [KEY_4, KEY_5, KEY_6, KEY_7]:
+			game.player.use_technique(event.physical_keycode - KEY_4)
+			get_viewport().set_input_as_handled()
+			return
 		if event.physical_keycode == KEY_H:
 			toggle_health()
 			get_viewport().set_input_as_handled()
@@ -593,6 +612,21 @@ func toggle_health() -> void:
 		health_panel.refresh()
 		health_panel.reset_size()
 		health_panel.move_to(health_panel.position)
+	update_hud()
+
+## A text field has the keyboard (technique name): game keys stay quiet.
+func typing() -> bool:
+	return get_viewport().gui_get_focus_owner() is LineEdit
+
+func toggle_techniques() -> void:
+	if game.ended or game.choosing_character:
+		return
+	tech_window.visible = not tech_window.visible
+	if tech_window.visible:
+		tech_window.open()
+		tech_window.move_to(tech_window.position)
+	else:
+		tech_window.name_edit.release_focus()
 	update_hud()
 
 func toggle_proficiencies() -> void:
