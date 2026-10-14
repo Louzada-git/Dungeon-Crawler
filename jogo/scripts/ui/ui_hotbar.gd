@@ -1,6 +1,7 @@
 extends HBoxContainer
 class_name UiHotbar
-## Quick slots at the bottom of the screen: equipped weapon, ration, bandage.
+## Quick slots at the bottom of the screen: equipped weapon, ration, bandage,
+## then the technique bar (keys 4-7) with its recharge.
 
 var game
 var ui
@@ -15,6 +16,89 @@ func _init(game_ref, ui_ref) -> void:
 	_slot("1", func(): ui.toggle_inventory())
 	_slot("2", func(): ui.quick_use("ration"))
 	_slot("3", func(): ui.quick_use("bandage"))
+	var gap := Control.new()
+	gap.custom_minimum_size.x = 8
+	gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(gap)
+	for i in Techniques.bar_size():
+		_technique_slot(i)
+
+## Technique slots: [button, icon, recharge shade, state] per bar position.
+var tech_slots: Array = []
+
+func _technique_slot(index: int) -> void:
+	var b := SlotButton.new()
+	b.provider = technique_tooltip.bind(index)
+	b.custom_minimum_size = Vector2(52, 60)
+	b.focus_mode = Control.FOCUS_NONE
+	b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	b.pressed.connect(func():
+		if game.techniques.at_slot(index).is_empty():
+			ui.toggle_techniques()
+		else:
+			game.player.use_technique(index)
+	)
+	b.add_theme_stylebox_override("normal", UiStyle.box(Color(0.04, 0.04, 0.037, 0.86), UiStyle.BORDER_SOFT, 1, Vector4(0, 0, 0, 0)))
+	b.add_theme_stylebox_override("hover", UiStyle.box(Color(0.13, 0.125, 0.11, 0.94), UiStyle.ACCENT_DARK, 1, Vector4(0, 0, 0, 0)))
+	b.add_theme_stylebox_override("pressed", UiStyle.box(Color(0.2, 0.18, 0.13, 0.96), UiStyle.ACCENT, 1, Vector4(0, 0, 0, 0)))
+	var icon := UiIcon.new("golpe", UiStyle.ACCENT)
+	b.add_child(icon)
+	icon.position = Vector2(10, 14)
+	icon.size = Vector2(32, 32)
+	var shade := ColorRect.new()
+	shade.color = Color(0, 0, 0, 0.62)
+	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	b.add_child(shade)
+	shade.position = Vector2(1, 1)
+	shade.size = Vector2(50, 0)
+	var key_label := UiStyle.shadowed(UiStyle.label(str(index + 4), 11, UiStyle.ACCENT, "bold"))
+	b.add_child(key_label)
+	key_label.position = Vector2(5, 2)
+	var time := UiStyle.shadowed(UiStyle.label("", 12, UiStyle.TEXT, "bold"))
+	time.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	b.add_child(time)
+	time.position = Vector2(0, 40)
+	time.size = Vector2(52, 16)
+	add_child(b)
+	tech_slots.append({"button": b, "icon": icon, "shade": shade, "time": time})
+
+func refresh_techniques() -> void:
+	var book: TechniqueBook = game.techniques
+	var weapon: String = game.inventory.equipped
+	for i in tech_slots.size():
+		var slot: Dictionary = tech_slots[i]
+		var recipe: Dictionary = book.at_slot(i)
+		var icon: UiIcon = slot["icon"]
+		if recipe.is_empty():
+			icon.set_kind("dot", Color(1, 1, 1, 0.12))
+			slot["shade"].size.y = 0
+			slot["time"].text = ""
+			continue
+		var ok: bool = Techniques.problem(game.sheet, recipe, weapon) == ""
+		var kind: String = str(Techniques.FORMS.get(recipe["form"], {}).get("icone", "golpe"))
+		icon.set_kind(kind, UiStyle.ACCENT if ok else UiStyle.BAD.darkened(0.2))
+		var index: int = book.bar[i]
+		var ratio: float = book.recharge_ratio(index)
+		slot["shade"].size.y = 58.0 * ratio
+		slot["time"].text = UiStyle.fmt(book.remaining(index), 1 if book.remaining(index) < 10 else 0) if ratio > 0.0 else ""
+
+func technique_tooltip(index: int) -> Control:
+	var recipe: Dictionary = game.techniques.at_slot(index)
+	if recipe.is_empty():
+		return UiStyle.tip("Espaço de técnica vazio", "T monta técnicas e põe na barra.\nClique para abrir.")
+	var weapon: String = game.inventory.equipped
+	var problem: String = Techniques.problem(game.sheet, recipe, weapon)
+	var parts: PackedStringArray = [Techniques.form_name(recipe["form"])]
+	for c in recipe["components"]:
+		parts.append(Techniques.component_name(c))
+	var tip := UiStyle.tip(str(recipe["name"]), " + ".join(parts), UiStyle.ACCENT)
+	if problem != "":
+		tip.add_child(UiStyle.label(problem, 12, UiStyle.BAD, "medium"))
+	else:
+		for row in Techniques.summary(Techniques.stats(game.sheet, recipe, weapon)):
+			tip.add_child(UiStyle.label("%s: %s" % [row[0], row[1]], 12, UiStyle.MUTED))
+	tip.add_child(UiStyle.label("Tecla [%d] ou clique: usar na direção do cursor" % (index + 4), 12, UiStyle.ACCENT, "medium"))
+	return tip
 
 func _slot(key: String, callback: Callable) -> void:
 	var b := SlotButton.new()
@@ -61,6 +145,7 @@ func refresh() -> void:
 	_fill(0, weapon, game.inventory.count(ammo) if ammo != "" else -1)
 	_fill(1, "ration", game.inventory.count("ration"))
 	_fill(2, "bandage", game.inventory.count("bandage"))
+	refresh_techniques()
 
 func _fill(index: int, id: String, amount: int) -> void:
 	var slot: Dictionary = slots[index]
