@@ -42,6 +42,8 @@ var deepest: int = 1
 var seals_delivered: int = 0
 var floor_states: Dictionary = {}
 var knowledge: Dictionary = {}
+## Fractions of missed ammunition still owed to the floor (see Projectile._fall).
+var ammo_recovery: Dictionary = {}
 var _skip_load: bool = false
 
 func _ready() -> void:
@@ -243,7 +245,7 @@ func snapshot_floor() -> Dictionary:
 		cs.append({"id": c["id"], "name": c["name"], "pos": c["pos"], "items": c["items"].duplicate(), "chest": c["chest"]})
 	var es: Dictionary = {}
 	for e in enemies:
-		es[e.uid] = {"health": e.health, "alive": e.alive, "pos": [e.position.x, e.position.z]}
+		es[e.uid] = {"health": e.health, "alive": e.alive, "pos": [e.position.x, e.position.z], "stuck": e.stuck.duplicate()}
 	return {"containers": cs, "enemies": es}
 
 func apply_floor_state(state: Dictionary) -> void:
@@ -369,6 +371,25 @@ func interact() -> void:
 		ui.open_inventory(loot)
 		Visuals.play(Visuals.animation(loot["node"]), "open", false)
 
+## Development tool (pause menu): a chest with every weapon and ammunition.
+## Remove before release.
+func spawn_test_arsenal() -> Dictionary:
+	var items: Dictionary = {}
+	for id in Items.DATA:
+		var tag: String = str(Items.DATA[id].get("tag", ""))
+		if tag == "ARMA":
+			items[id] = 1
+		elif tag == "MUNICAO":
+			items[id] = 40
+	var cell: Vector2i = layout.to_cell(player.position)
+	for d in [Vector2i.RIGHT, Vector2i.LEFT, Vector2i.UP, Vector2i.DOWN]:
+		if layout.is_floor(cell + d) and not layout.pathfinder.is_point_solid(cell + d):
+			cell = cell + d
+			break
+	var chest: Dictionary = add_loot(str(tr("RECIPIENTE_ARSENAL")), cell, items, true)
+	message("Arsenal de teste ao seu lado. E para abrir.", 4)
+	return chest
+
 func on_inventory_changed() -> void:
 	if player:
 		player.refresh_weapon()
@@ -384,7 +405,11 @@ func camera_impact(strength: float) -> void:
 func enemy_defeated(enemy: DungeonEnemy) -> void:
 	kills += 1
 	var title: String = str(tr("RECIPIENTE_DESPOJOS" if enemy.boss else "RECIPIENTE_PERTENCES"))
-	add_loot(title, layout.to_cell(enemy.position), EnemyTypes.info(enemy.kind).get("loot", {}), false)
+	var items: Dictionary = EnemyTypes.info(enemy.kind).get("loot", {}).duplicate()
+	for ammo in enemy.stuck:
+		items[ammo] = int(items.get(ammo, 0)) + int(enemy.stuck[ammo])
+	enemy.stuck.clear()
+	add_loot(title, layout.to_cell(enemy.position), items, false)
 	if enemy.boss:
 		if is_instance_valid(stairs_sign):
 			stairs_sign.modulate = Color("9fdc8f")
