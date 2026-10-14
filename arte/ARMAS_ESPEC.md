@@ -1,6 +1,6 @@
 # Armas — especificação para modelos e animações
 
-Esta é a ficha para quem for fazer os modelos 3D e as animações das armas, seja você, outra IA ou um artista. Hoje as armas novas aparecem no jogo como **blocos provisórios**. Quando chegar um arquivo com o nome certo, o jogo passa a usar esse modelo sozinho.
+Esta é a ficha para quem for fazer os modelos 3D e as animações das armas, armaduras e perícias, seja você, outra IA ou um artista. Hoje as armas novas aparecem no jogo como **blocos provisórios**. Quando chegar um arquivo com o nome certo, o jogo passa a usar esse modelo sozinho.
 
 Os números de jogo (dano, alcance, tempos) ficam em `jogo/data/itens.json`. As medidas abaixo são do modelo provisório: servem de referência de tamanho, não de forma final.
 
@@ -44,6 +44,20 @@ Depois de colocar o arquivo, abra o projeto na Godot uma vez para ela importar o
 
 As armas antigas (`sword`, `espada_guarda`, `spear`, `lanca_longa`) já têm modelo próprio. Um arquivo novo com o id delas também as substitui.
 
+### Armaduras e ferramenta
+
+As armaduras ficam presas ao osso `spine` do personagem (a 1,05 m do chão; os ombros ficam a 1,42 m, a cabeça a 1,56 m). Vale a mesma pasta e o mesmo formato das armas: `jogo/assets/armas/<id>.glb`.
+
+| id | Nome | Tipo | Origem (0, 0, 0) | Forma |
+| --- | --- | --- | --- | --- |
+| `gibao` | Gibão acolchoado | leve | no osso da coluna: 0,1 m acima da cintura, no centro do tronco | colete de tecido grosso acolchoado, em gomos verticais, cor de linho; ombreiras macias |
+| `couro` | Armadura de couro | leve | igual | peitoral de couro marrom com cintas, fivela de latão e ombreiras de couro |
+| `cota` | Cota de malha | pesada | igual | túnica de anéis de ferro até a coxa, mangas curtas, cinto de couro |
+| `placas` | Armadura de placas | pesada | igual | peitoral e costeiro de aço, ombreiras grandes, faixas de aço na cintura |
+| `gazua` | Gazua | ferramenta | no cabo | haste fina de 0,14 m com a ponta dobrada, cabo curto escuro |
+
+Regras próprias das armaduras: o modelo veste o tronco do personagem atual (largura de ombro a ombro de cerca de 0,45 m, profundidade de 0,3 m) sem cobrir a cabeça, os braços abaixo do cotovelo e as pernas; +Y para cima, o peito para +Z; até 2.500 triângulos. Se ficar fora do lugar, o campo `corpo` de `itens.json` (`pos` e `escala`) ajusta sem mexer no arquivo. O modelo não se deforma com a animação: é uma peça rígida presa à coluna.
+
 ### Pedido pronto para a IA de modelos
 
 > Crie um modelo 3D low-poly estilizado de **[nome]**, arma medieval para um jogo de câmera isométrica. Exporte em .glb, em escala real (metros), com comprimento total de **[comprimento]**. A origem (0,0,0) fica exatamente **[onde fica o cabo]**. A ponta ou a cabeça da arma aponta para +Y. **[Forma]**. Até 3.000 triângulos, materiais simples (cor base, rugosidade, metálico). Sem luzes, câmeras, esqueleto ou animação. Nome do arquivo: **[id].glb**.
@@ -83,6 +97,17 @@ Depois de colocar os arquivos, me avise: eu acrescento cada um ao `aplicar_mixam
 | `estocada_alabarda` | Alabarda | 0,85 s | 0,34 s (40%) | estocada reta e longa com as duas mãos, com um passo à frente |
 | `disparo_arco` | Arco curto | 0,68 s | 0,35 s (52%) | arco na mão esquerda; a direita puxa a corda até o rosto e solta no impacto |
 | `disparo_besta` | Besta | 1,44 s | 0,25 s (17%) | besta no ombro, dispara logo; o resto da animação é a recarga, puxando a corda de volta |
+
+### Animações do personagem para as perícias novas
+
+| Animação | Quando | Duração | Impacto em | Movimento |
+| --- | --- | --- | --- | --- |
+| `soco` | ataque sem arma | 0,40 s | 0,14 s (35%) | soco reto com a direita, guarda alta com a esquerda |
+| `bloqueio` | segurando o botão direito com arma corpo a corpo ou punhos (repetida) | 1,0 s em loop | — | arma erguida na diagonal na frente do corpo, pernas afastadas, leve balanço |
+| `furtivo` | agachado e parado (repetida) | 1,6 s em loop | — | agachado, joelhos dobrados, tronco inclinado para a frente, arma baixa |
+| `furtivo_andar` | agachado e andando (repetida) | 1,0 s em loop (um ciclo de dois passos) | — | caminhada agachada e lenta, passos curtos, no lugar |
+
+O jogo usa cada uma assim que ela existir no personagem; até lá, ataque, guarda e caminhada normais.
 
 ### Pedido pronto para a IA de animações
 
