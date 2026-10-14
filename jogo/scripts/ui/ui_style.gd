@@ -28,6 +28,8 @@ const SHADOW := Color(0, 0, 0, 0.85)
 const CATEGORIES := {
 	"ARMA": ["Arma", Color("dc9f80"), 0],
 	"MUNICAO": ["Munição", Color("d2b48a"), 1],
+	"ARMADURA": ["Armadura", Color("9fb4c8"), 1],
+	"FERRAMENTA": ["Ferramenta", Color("b7a98f"), 4],
 	"TRATAMENTO": ["Tratamento", Color("8cc6b6"), 2],
 	"ALIMENTO": ["Alimento", Color("bfca7c"), 3],
 	"MATERIAL": ["Material", Color("aaa6c2"), 4],
