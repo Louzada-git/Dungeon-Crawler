@@ -1,5 +1,16 @@
 # Dungepm — As Cisternas
 
+## Novo: armas com modelo de verdade (14/10/2026)
+
+Os blocos provisórios das armas foram trocados por modelos dos pacotes que você mandou:
+
+- **RPG Weapons** (Binbun, CC0): adaga, montante, machado, maça, martelo de guerra, lança e lança longa.
+- **Low Poly Weapon Pack** (Kickin' It Studios): katana, alabarda, arco, besta, flechas e virotes.
+- Nenhum pacote tinha uma katana de verdade; a "Offset Sword" (lâmina curva de um fio, guarda pequena, cabo longo) é a mais próxima.
+- As lanças agora têm modelo do tamanho certo (2,6 m e 3,1 m) em vez do modelo curto esticado.
+- A espada de viajante e a espada da guarda continuam com a espada própria do jogo. Armaduras e gazua seguem em blocos: nenhum pacote trouxe armadura vestível.
+- Os ícones da mochila foram refeitos a partir dos modelos novos. Os créditos estão em `linux/CREDITOS.txt`.
+
 ## Novo: perícias no estilo Oblivion, ainda sem magia (14/10/2026)
 
 A árvore de proficiências agora tem três grupos, como as perícias de Oblivion:
