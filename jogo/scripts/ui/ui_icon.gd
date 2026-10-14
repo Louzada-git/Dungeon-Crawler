@@ -206,6 +206,36 @@ func _draw() -> void:
 			fill([[16, 5], [27, 16], [16, 27], [5, 16]], c)
 		"arrow":
 			fill([[16, 3], [27, 27], [16, 21], [5, 27]], c)
+		# Technique forms
+		"golpe":
+			var outer: Array = ellipse(15, 19, 13, 12, PI * 1.05, PI * 1.85, 14)
+			var inner: Array = ellipse(17, 21, 8, 7, PI * 1.85, PI * 1.05, 14)
+			fill(outer + inner, c)
+		"giro":
+			var ring_outer: Array = ellipse(16, 16, 12, 12, 0.3, TAU - 0.5, 20)
+			var ring_inner: Array = ellipse(16, 16, 7.5, 7.5, TAU - 0.5, 0.3, 20)
+			fill(ring_outer + ring_inner, c)
+			fill([[27, 8], [29, 17], [21, 13]], c)
+		"investida":
+			fill([[4, 13], [19, 13], [19, 7], [29, 16], [19, 25], [19, 19], [4, 19]], c)
+			stroke([[3, 9], [12, 9]], shade(c, 0.2), 1.6)
+			stroke([[3, 23], [12, 23]], shade(c, 0.2), 1.6)
+		"pancada":
+			var burst: Array = []
+			for i in 16:
+				var a: float = -PI / 2 + TAU * i / 16.0
+				var r: float = 13.0 if i % 2 == 0 else 6.0
+				burst.append([16 + cos(a) * r, 16 + sin(a) * r])
+			fill(burst, c)
+		"disparo":
+			stroke([[6, 26], [24, 8]], c, 2.4)
+			fill([[27, 5], [26, 13], [19, 6]], c)
+			fill([[5, 20], [9, 24], [4, 28], [2, 24]], shade(c, 0.15))
+		"soco":
+			fill([[8, 11], [22, 11], [26, 15], [26, 22], [22, 26], [10, 26], [7, 22]], c)
+			for x in [11, 15, 19]:
+				stroke([[x, 11], [x, 16]], shade(c, 0.4), 1.4)
+			fill([[5, 14], [9, 13], [10, 20], [6, 21]], shade(c, 0.1))
 		_:
 			disc(16, 16, 9, c)
 
