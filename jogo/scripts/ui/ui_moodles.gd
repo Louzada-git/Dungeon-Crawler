@@ -1,0 +1,137 @@
+extends VBoxContainer
+class_name UiMoodles
+## Status indicators on the right edge (Project Zomboid "moodles").
+## Each one appears only while the condition is real in the simulation and
+## its tooltip states the actual rule behind it.
+
+const LEVEL_COLORS := [
+	Color("8a8a3a"),  # 1 – mild (olive/yellow)
+	Color("b8762d"),  # 2 – orange
+	Color("b2402c"),  # 3 – red
+	Color("6e1717"),  # 4 – dark red
+]
+const POSITIVE := Color("3f7a3b")
+
+var game
+var tiles: Dictionary = {}
+var _signature: String = ""
+
+func _init(game_ref) -> void:
+	game = game_ref
+	add_theme_constant_override("separation", 6)
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+## Current list of active indicators, most severe first.
+func compute() -> Array:
+	var p = game.player
+	var out: Array = []
+	if p == null or p.health <= 0:
+		return out
+	if p.bleeding:
+		out.append({"id": "bleeding", "icon": "drop", "level": 3, "title": "Sangrando", "text": "Perde 0,5 de vida por segundo até ser tratado.\nUse uma bandagem  [3]."})
+	if p.health < 75:
+		var lv: int = 1 if p.health >= 50 else (2 if p.health >= 25 else (3 if p.health >= 12 else 4))
+		var names := ["Machucado", "Ferido", "Gravemente ferido", "À beira da morte"]
+		out.append({"id": "hurt", "icon": "heart_crack", "level": lv, "title": names[lv - 1], "text": "Vida %d de 100. A vida não se recupera sozinha;\numa bandagem restaura 18." % ceili(p.health)})
+	if p.food <= 0:
+		out.append({"id": "food", "icon": "bread", "level": 4, "title": "Inanição", "text": "Perde 0,2 de vida por segundo e o fôlego recupera devagar.\nComa uma ração  [2]."})
+	elif p.food <= 10:
+		out.append({"id": "food", "icon": "bread", "level": 2, "title": "Faminto", "text": "Saciedade %d. O fôlego recupera 6 por segundo em vez de 16.\nComa uma ração  [2]." % ceili(p.food)})
+	elif p.food <= 30:
+		out.append({"id": "food", "icon": "bread", "level": 1, "title": "Com fome", "text": "Saciedade %d. Ainda sem efeito; abaixo de 10\no fôlego passa a recuperar devagar." % ceili(p.food)})
+	var cost: float = float(Items.info(game.inventory.equipped).get("cost", 10.0))
+	if p.stamina < cost:
+		out.append({"id": "stamina", "icon": "lungs", "level": 3, "title": "Exausto", "text": "Fôlego %d: abaixo dos %d que a arma exige por golpe.\nRecue e recupere o fôlego." % [floori(p.stamina), int(cost)]})
+	elif p.stamina < 25:
+		out.append({"id": "stamina", "icon": "lungs", "level": 2, "title": "Ofegante", "text": "Fôlego %d: abaixo dos 25 necessários para esquivar." % floori(p.stamina)})
+	var w: float = game.inventory.weight()
+	if w > InventoryData.COMFORT:
+		var factor: float = lerpf(1.0, 0.72, (w - InventoryData.COMFORT) / (InventoryData.CAPACITY - InventoryData.COMFORT))
+		var lv2: int = 1 if w <= 15.0 else 2
+		out.append({"id": "load", "icon": "weight", "level": lv2, "title": "Carga pesada" if lv2 == 1 else "Sobrecarregado", "text": "%s kg na mochila: %d%% mais lento.\nAcima de 11 kg o passo pesa; o limite é 18 kg." % [UiStyle.fmt(w), roundi((1.0 - factor) * 100.0)]})
+	var hunters: int = 0
+	for enemy in game.enemies:
+		if enemy.alive and enemy.aggro:
+			hunters += 1
+	if hunters > 0:
+		out.append({"id": "hunted", "icon": "eye", "level": 2 if hunters == 1 else 3, "title": "Perseguido", "text": ("Um monstro está atrás de você." if hunters == 1 else "%d monstros estão atrás de você." % hunters) + "\nNo abrigo eles desistem e não atacam."})
+	if game.is_safe():
+		out.append({"id": "safe", "icon": "tent", "level": 0, "title": "No abrigo", "text": "Monstros não atacam aqui.\nNo ponto de descanso, E salva a expedição."})
+	if game.inventory.count("seal") > 0:
+		out.append({"id": "seal", "icon": "flag", "level": 0, "title": "Selo recuperado", "text": "Leve o selo de volta ao abrigo\npara concluir a incursão."})
+	return out
+
+func refresh() -> void:
+	var list: Array = compute()
+	var parts: PackedStringArray = []
+	for m in list:
+		parts.append("%s:%d:%s" % [m["id"], m["level"], m["text"]])
+	var signature := "|".join(parts)
+	if signature == _signature:
+		return
+	_signature = signature
+	var keep: Dictionary = {}
+	var order: int = 0
+	for m in list:
+		keep[m["id"]] = true
+		var tile: Control = tiles.get(m["id"])
+		var fresh: bool = tile == null
+		if fresh:
+			tile = Tile.new(self)
+			var icon := UiIcon.new(m["icon"], Color("f3eee2"))
+			tile.add_child(icon)
+			icon.position = Vector2(7, 6)
+			icon.size = Vector2(30, 30)
+			add_child(tile)
+			tiles[m["id"]] = tile
+		var previous: int = tile.get_meta("level", -1)
+		tile.set_meta("level", m["level"])
+		tile.set_meta("title", m["title"])
+		tile.set_meta("text", m["text"])
+		tile.tooltip_text = m["title"]
+		move_child(tile, order)
+		order += 1
+		tile.queue_redraw()
+		if fresh or previous != m["level"]:
+			_pop(tile)
+	for id in tiles.keys():
+		if not keep.has(id):
+			tiles[id].queue_free()
+			tiles.erase(id)
+
+func _pop(tile: Control) -> void:
+	tile.scale = Vector2(1.35, 1.35)
+	var tween := tile.create_tween()
+	tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tween.tween_property(tile, "scale", Vector2.ONE, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_property(tile, "rotation", 0.08, 0.06)
+	tween.tween_property(tile, "rotation", -0.08, 0.08)
+	tween.tween_property(tile, "rotation", 0.0, 0.06)
+
+func _draw_tile(tile: Control) -> void:
+	var level: int = tile.get_meta("level", 1)
+	var base: Color = POSITIVE if level == 0 else LEVEL_COLORS[clampi(level - 1, 0, 3)]
+	var r := Rect2(Vector2.ZERO, tile.size)
+	tile.draw_rect(r, base.darkened(0.25))
+	tile.draw_rect(Rect2(2, 2, r.size.x - 4, r.size.y * 0.5 - 2), base.lightened(0.08))
+	tile.draw_rect(Rect2(2, r.size.y * 0.5, r.size.x - 4, r.size.y * 0.5 - 2), base)
+	tile.draw_rect(r, base.lightened(0.35), false, 1.0)
+	tile.draw_rect(r.grow(-1), Color(0, 0, 0, 0.35), false, 1.0)
+	# Severity pips along the bottom edge.
+	if level > 0:
+		for i in level:
+			tile.draw_rect(Rect2(5 + i * 6, r.size.y - 5, 4, 2), Color(1, 1, 1, 0.85))
+
+class Tile extends Control:
+	var owner_list
+	func _init(list) -> void:
+		owner_list = list
+		custom_minimum_size = Vector2(44, 44)
+		mouse_filter = Control.MOUSE_FILTER_STOP
+		pivot_offset = Vector2(22, 22)
+	func _draw() -> void:
+		owner_list._draw_tile(self)
+	func _make_custom_tooltip(_for_text: String) -> Object:
+		var level: int = get_meta("level", 1)
+		var color: Color = Color("8fd07f") if level == 0 else Color("f0b07a").lerp(Color("ff7a66"), clampf((level - 1) / 3.0, 0, 1))
+		return UiStyle.tip(get_meta("title", ""), get_meta("text", ""), color)
