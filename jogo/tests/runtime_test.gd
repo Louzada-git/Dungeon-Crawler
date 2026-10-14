@@ -302,6 +302,7 @@ func run(target, capture: bool) -> void:
  await test_hud()
  await test_weapons()
  await test_proficiencies()
+ await test_skills()
  inv.add("seal")
  p.position = game.camp_position
  game.interact()
@@ -673,7 +674,7 @@ func test_weapons() -> void:
   p.refresh_weapon()
   check(is_instance_valid(p.held_weapon),"Personagem segura a arma: "+id)
   inv.remove(id)
- check(ProficiencyTree.path_text(Items.info("katana")["proficiencias"]) == "Espadas › Katana","Arma indica o ramo de proficiência que treina")
+ check(ProficiencyTree.path_text(Items.info("katana")["proficiencias"]) == "Lâminas › Espadas › Katana","Arma indica o ramo de proficiência que treina")
  var at: Vector3 = game.layout.to_world(Vector2i(5,12))
  p.position = at
  var e0 = game.enemies[0]
@@ -860,7 +861,7 @@ func test_proficiencies() -> void:
  e0.aggro = true
  swing("sword",Vector3.RIGHT)
  var expected: float = 30.0*24.0/65.0
- check(is_equal_approx(e0.health,41.0) and is_equal_approx(float(sheet.xp.get("espadas",0)),expected*0.5) and is_equal_approx(float(sheet.xp.get("espada_reta",0)),expected*0.5),"Golpe ensina Espadas e Espada reta pelo dano causado")
+ check(is_equal_approx(e0.health,41.0) and is_equal_approx(float(sheet.xp.get("laminas",0)),expected*0.4) and is_equal_approx(float(sheet.xp.get("espadas",0)),expected*0.35) and is_equal_approx(float(sheet.xp.get("espada_reta",0)),expected*0.25),"Golpe ensina Lâminas, Espadas e Espada reta pelo dano causado")
  fresh(e0,p.position+Vector3(1.2,0,0))
  e0.aggro = true
  swing("machado",Vector3.RIGHT)
@@ -875,7 +876,7 @@ func test_proficiencies() -> void:
  p.health = p.max_health
  check(p.dodge(),"Esquiva funciona com o custo do personagem")
  p.receive_damage(17,Vector3.RIGHT)
- check(p.health == p.max_health and float(sheet.xp.get("esquiva",0)) > 0,"Escapar de um golpe esquivando ensina Esquiva")
+ check(p.health == p.max_health and float(sheet.xp.get("acrobacia",0)) > 0,"Escapar de um golpe esquivando ensina Acrobacia")
  p.dodge_timer = 0
  p.invulnerable = 0
  p.health = 50
@@ -943,4 +944,256 @@ func test_proficiencies() -> void:
  game.apply_attributes(true)
  inv.restore(saved_inventory)
  p.refresh_weapon()
+ game.ui.close_all()
+
+func ready_player(p) -> void:
+ p.cooldown = 0
+ p.attack_timer = 0
+ p.attack_wait = 0
+ p.hurt_timer = 0
+ p.dodge_timer = 0
+ p.invulnerable = 0
+ p.bleeding = false
+
+func label_text(node: Control) -> String:
+ var texts: Array = []
+ for child in node.find_children("*","Label",true,false):
+  texts.append(child.text)
+ return " | ".join(texts)
+
+## Oblivion-inspired branches: Desarmado, Bloqueio, armors, Atletismo, Furtividade, Arrombamento.
+func test_skills() -> void:
+ get_tree().paused = false
+ var p = game.player
+ var inv = game.inventory
+ var sheet: CharacterSheet = game.sheet
+ var saved_inventory: Dictionary = inv.snapshot()
+ var was_processing: bool = p.is_physics_processing()
+ p.set_physics_process(false)
+ sheet.enabled = true
+ sheet.reset()
+ game.apply_attributes(true)
+ inv.restore({"stacks":{},"equipped":""})
+ var at: Vector3 = game.layout.to_world(Vector2i(5,12))
+ p.position = at
+ p.sneaking = false
+ p.sprinting = false
+ p.aiming = false
+ for e in game.enemies:
+  fresh(e,game.layout.to_world(Vector2i(28,7)))
+ var e0 = game.enemies[0]
+ # --- Tree
+ check(ProficiencyTree.path_text(CharacterSheet.path_of("adaga")) == "Lâminas › Adagas" and ProficiencyTree.path_text(CharacterSheet.path_of("besta")) == "Pontaria › Bestas" and CharacterSheet.path_of("machado") == ["contundentes","machados"],"Lâminas, Contundentes e Pontaria são raízes das armas")
+ check(ProficiencyTree.group_of("katana") == "combate" and ProficiencyTree.group_of("arcos") == "furtividade" and ProficiencyTree.group_of("arrombamento") == "furtividade" and ProficiencyTree.group_of("tratamento") == "sobrevivencia","Ramos agrupados em Combate, Furtividade e Sobrevivência")
+ var old := CharacterSheet.new()
+ check(old.restore({"attrs":{"forca":5,"vigor":5,"agilidade":5,"destreza":5},"xp":{"esquiva":120.0,"ramo_sumido":50.0}}) and is_equal_approx(float(old.xp.get("acrobacia",0)),120.0) and not old.xp.has("esquiva") and not old.xp.has("ramo_sumido"),"Save antigo: Esquiva vira Acrobacia, ramo desconhecido é descartado")
+ # --- Desarmado
+ fresh(e0,at+Vector3(1.1,0,0))
+ e0.aggro = true
+ ready_player(p)
+ p.stamina = p.max_stamina
+ p.facing = Vector3.RIGHT
+ check(p.attack(),"Sem arma, o personagem soca")
+ game.resolve_player_attack()
+ check(is_equal_approx(e0.health,65.0-8.0) and float(sheet.xp.get("desarmado",0)) > 0,"Soco tira 8 de vida e ensina Desarmado")
+ var brawler := CharacterSheet.new()
+ brawler.award("desarmado",ProficiencyTree.xp_for_level(5)+1.0)
+ check(brawler.weapon_stats("")["damage"] > 12.0,"Desarmado nível 5: soco mais forte (%s)" % UiStyle.fmt(brawler.weapon_stats("")["damage"],1))
+ # --- Bloqueio
+ inv.add("sword")
+ inv.equip("sword")
+ ready_player(p)
+ p.facing = Vector3.RIGHT
+ p.aiming = true
+ p.health = p.max_health
+ p.stamina = p.max_stamina
+ check(p.can_block() and "guard" in moodle_ids(),"Botão direito com arma corpo a corpo levanta a guarda")
+ p.receive_damage(20,Vector3.LEFT)
+ check(is_equal_approx(p.health,p.max_health-12.0) and is_equal_approx(p.stamina,p.max_stamina-8.0) and p.hurt_timer == 0,"Guarda segura 40% do golpe de frente, gasta fôlego e não interrompe")
+ check(float(sheet.xp.get("bloqueio",0)) > 0,"Segurar um golpe ensina Bloqueio")
+ ready_player(p)
+ p.health = p.max_health
+ p.receive_damage(20,Vector3.RIGHT)
+ check(is_equal_approx(p.health,p.max_health-20.0),"Golpe pelas costas passa pela guarda")
+ ready_player(p)
+ p.health = p.max_health
+ p.receive_damage(30,Vector3.LEFT,false)
+ check(is_equal_approx(p.health,p.max_health-30.0),"Pancada em área do chefe não é bloqueável")
+ ready_player(p)
+ p.health = p.max_health
+ p.stamina = 2
+ p.receive_damage(20,Vector3.LEFT)
+ check(is_equal_approx(p.health,p.max_health-20.0) and p.stamina == 0,"Sem fôlego, a guarda quebra")
+ inv.unequip()
+ ready_player(p)
+ p.health = p.max_health
+ p.stamina = p.max_stamina
+ p.receive_damage(20,Vector3.LEFT)
+ check(is_equal_approx(p.health,p.max_health-15.0),"Guarda de punhos segura menos (25%)")
+ inv.add("arco")
+ inv.equip("arco")
+ check(not p.can_block(),"Arco não bloqueia")
+ inv.remove("arco")
+ p.aiming = false
+ var shield := CharacterSheet.new()
+ shield.award("bloqueio",ProficiencyTree.xp_for_level(10)+1.0)
+ check(shield.block_reduction("sword") > 0.6 and shield.block_cost_mult() < 0.8,"Bloqueio nível 10: guarda mais firme e mais barata")
+ # --- Armaduras
+ inv.add("cota")
+ check(game.use_item("cota") and inv.armor == "cota","Vestir a cota de malha pelo inventário")
+ check(is_instance_valid(p.worn_model) and p.worn_model.get_parent() == p.armor_mount and p.armor_mount.bone_name == "spine","Armadura vestida aparece no tronco do personagem")
+ check(is_equal_approx(sheet.armor_protection("cota"),0.25) and is_equal_approx(sheet.armor_speed_penalty("cota"),0.06) and is_equal_approx(p.detection_mult(),1.125),"Cota: 25% de proteção, 6% mais lenta e barulhenta")
+ ready_player(p)
+ p.health = p.max_health
+ p.receive_damage(20,Vector3.RIGHT)
+ check(is_equal_approx(p.health,p.max_health-15.0) and float(sheet.xp.get("armadura_pesada",0)) > 0,"Armadura absorve parte do golpe e ensina Armadura pesada")
+ inv.add("sword")
+ inv.equip("sword")
+ ready_player(p)
+ p.aiming = true
+ p.health = p.max_health
+ p.stamina = p.max_stamina
+ p.receive_damage(20,Vector3.LEFT)
+ check(is_equal_approx(p.health,p.max_health-9.0),"Guarda e armadura somam: 20 → 12 → 9")
+ p.aiming = false
+ game.ui.open_inventory()
+ var bag_row = game.ui.inventory.bag_list.row_for("cota")
+ check(bag_row != null and bag_row.tag_text == "VESTIDA" and game.ui.inventory._use_label("cota") == "Tirar","Mochila marca a armadura vestida")
+ game.ui.close_all()
+ var armor_tip: Control = UiItemTooltip.build("cota")
+ check(label_text(armor_tip).contains("Proteção"),"Dica da armadura mostra a proteção")
+ armor_tip.free()
+ game.ui.close_all()
+ check(game.save_game(false),"Save com armadura vestida é gravado")
+ inv.take_off()
+ check(game.load_game() and inv.armor == "cota","Armadura vestida volta do save")
+ var knight := CharacterSheet.new()
+ knight.award("armadura_pesada",ProficiencyTree.xp_for_level(10)+1.0)
+ check(knight.armor_protection("cota") > 0.3 and knight.armor_speed_penalty("cota") < 0.03,"Armadura pesada nível 10: protege mais e pesa menos")
+ inv.add("couro")
+ game.use_item("couro")
+ check(inv.armor == "couro" and is_equal_approx(sheet.armor_speed_penalty("couro"),0.0) and is_equal_approx(sheet.armor_protection("couro"),0.15),"Couro: armadura leve, sem perder velocidade")
+ var scout := CharacterSheet.new()
+ scout.award("armadura_leve",ProficiencyTree.xp_for_level(5)+1.0)
+ check(scout.armor_noise("couro") == 0.0 and scout.armor_protection("couro") > 0.19,"Armadura leve nível 5: silenciosa e mais protetora")
+ inv.remove("couro")
+ check(inv.armor == "" and p.worn_model == null,"Largar a armadura vestida tira ela do corpo")
+ inv.remove("cota")
+ # --- Atletismo
+ for e in game.enemies:
+  e.aggro = false
+ var a0: float = float(sheet.xp.get("atletismo",0))
+ game.on_sprint(10.0)
+ var calm: float = float(sheet.xp.get("atletismo",0))-a0
+ e0.aggro = true
+ game.on_sprint(10.0)
+ var chased: float = float(sheet.xp.get("atletismo",0))-a0-calm
+ e0.aggro = false
+ check(calm > 0 and is_equal_approx(chased,calm*5.0),"Correr ensina Atletismo, cinco vezes mais quando perseguido")
+ var runner := CharacterSheet.new()
+ runner.award("atletismo",ProficiencyTree.xp_for_level(5)+1.0)
+ check(runner.sprint_cost_mult() < 0.75,"Atletismo nível 5: correr cansa menos")
+ # --- Furtividade
+ check(is_equal_approx(p.detection_mult(),1.0),"De pé, sem armadura: alcance de visão normal")
+ p.toggle_sneak()
+ check(p.sneaking and "sneak" in moodle_ids(),"C agacha e mostra o indicador de furtivo")
+ var still: Array = p.locomotion(0.0)
+ var walking: Array = p.locomotion(2.0)
+ check(still[0] == ("furtivo" if p.animator.has_animation("furtivo") else "guard") and walking[0] == ("furtivo_andar" if p.animator.has_animation("furtivo_andar") else "walk"),"Furtivo usa as animações próprias quando existem, senão as provisórias")
+ fresh(e0,at+Vector3(4.0,0,0))
+ e0.visual.rotation.y = atan2(-1.0,0.0)
+ var front: float = p.detection_mult(e0)
+ e0.visual.rotation.y = atan2(1.0,0.0)
+ var behind: float = p.detection_mult(e0)
+ check(is_equal_approx(front,0.5) and is_equal_approx(behind,0.3),"Furtivo: notado a metade da distância de frente, menos ainda por trás")
+ # Live: an unaware monster 5 m away facing the adventurer.
+ fresh(e0,at+Vector3(5.0,0,0))
+ e0.home = e0.position
+ e0.visual.rotation.y = atan2(-1.0,0.0)
+ e0.sneak_budget = 10.0
+ var f0: float = float(sheet.xp.get("furtividade",0))
+ e0.set_physics_process(true)
+ await wait_frames(4)
+ e0.set_physics_process(false)
+ check(not game.is_safe() and not e0.aggro and float(sheet.xp.get("furtividade",0)) > f0 and e0.sneak_budget < 10.0,"Monstro não nota quem passa furtivo a 5 m, e isso ensina Furtividade")
+ e0.sneak_budget = 1.0
+ for i in 20:
+  game.on_sneak_near(e0,1.0)
+ check(e0.sneak_budget == 0.0,"Cada monstro só ensina furtividade até um limite")
+ p.sneaking = false
+ e0.position = at+Vector3(5.0,0,0)
+ e0.set_physics_process(true)
+ await wait_frames(2)
+ e0.set_physics_process(false)
+ check(e0.aggro,"De pé, o mesmo monstro nota a 5 m")
+ p.sneaking = true
+ fresh(e0,at+Vector3(1.2,0,0))
+ inv.equip("sword")
+ var s0: float = float(sheet.xp.get("furtividade",0))
+ swing("sword",Vector3.RIGHT)
+ check(is_equal_approx(e0.health,65.0-24.0*1.5) and float(sheet.xp.get("furtividade",0)) > s0,"Ataque furtivo: dano ×1,5 com qualquer arma e ensina Furtividade")
+ swing("sword",Vector3.RIGHT)
+ check(is_equal_approx(e0.health,65.0-36.0-24.0),"Monstro alerta leva dano normal")
+ p.sneaking = false
+ var shadow := CharacterSheet.new()
+ shadow.award("furtividade",ProficiencyTree.xp_for_level(10)+1.0)
+ check(shadow.sneak_detection_mult() < 0.4 and shadow.sneak_attack_mult() == 2.0,"Furtividade nível 10: menos visto, ataque furtivo ×2")
+ # --- Arrombamento
+ fresh(e0,game.layout.to_world(Vector2i(28,7)))
+ p.position = at
+ var chest: Dictionary = game.add_loot("Baú trancado",game.layout.to_cell(at),{"gema":2},true,"teste_tranca",2)
+ check(game.interaction_text().contains("TRANCADO"),"Baú trancado pede gazua")
+ check(not game.attempt_lockpick(chest) and int(chest.get("lock",0)) == 2,"Sem gazua o baú não abre")
+ game.ui.open_inventory(chest)
+ var panel = game.ui.inventory
+ check(panel.locked() and panel.loot_list.ordered_ids().is_empty() and panel.lock_button.visible,"Baú trancado esconde o que guarda")
+ panel.take("gema",1)
+ panel.take_all()
+ check(inv.count("gema") == 0 and int(chest["items"].get("gema",0)) == 2,"Não dá para tirar itens de um baú trancado")
+ game.ui.close_all()
+ inv.add("gazua",3)
+ check(game.interaction_text().contains("ARROMBAR") and game.interaction_text().contains("40%"),"Com gazua, mostra a chance de abrir (fechadura média: 40%)")
+ var k0: float = float(sheet.xp.get("arrombamento",0))
+ check(not game.attempt_lockpick(chest,0.99,0.99) and inv.count("gazua") == 3 and int(chest["lock"]) == 2,"Tentativa falha sem quebrar a gazua")
+ var k1: float = float(sheet.xp.get("arrombamento",0))
+ check(not game.attempt_lockpick(chest,0.99,0.0) and inv.count("gazua") == 2,"Tentativa falha pode quebrar a gazua")
+ var k2: float = float(sheet.xp.get("arrombamento",0))
+ check(game.attempt_lockpick(chest,0.0) and not chest.has("lock") and game.ui.inventory.is_open,"Fechadura cede e o baú abre")
+ var k3: float = float(sheet.xp.get("arrombamento",0))
+ check(k1 > k0 and k3-k2 > (k1-k0)*3.0,"Tentar ensina Arrombamento; abrir ensina bem mais")
+ game.ui.take_all()
+ check(inv.count("gema") == 2,"Depois de aberto, o baú entrega o conteúdo")
+ game.ui.close_all()
+ check(is_equal_approx(sheet.pick_chance(1),0.6) and is_equal_approx(sheet.pick_chance(4),0.05) and is_equal_approx(sheet.pick_break_chance(),0.5),"Chance cai com a fechadura: simples 60%, de mestre 5%")
+ var thief := CharacterSheet.new()
+ thief.award("arrombamento",ProficiencyTree.xp_for_level(10)+1.0)
+ check(thief.pick_chance(4) > 0.45 and is_equal_approx(thief.pick_break_chance(),0.25),"Arrombamento nível 10: abre fechaduras de mestre e quebra menos gazuas")
+ game.containers.erase(chest)
+ chest["node"].queue_free()
+ var sealed: Dictionary = game.add_loot("Baú selado",game.layout.to_cell(at),{"gema":1},true,"teste_tranca2",3)
+ check(game.save_game(false),"Save com baú trancado é gravado")
+ sealed.erase("lock")
+ game.load_game()
+ var again: Array = game.containers.filter(func(c): return c["id"] == "teste_tranca2")
+ check(again.size() == 1 and int(again[0].get("lock",0)) == 3,"Fechadura continua trancada depois de carregar")
+ for c in again:
+  game.containers.erase(c)
+  c["node"].queue_free()
+ var raw = JSON.parse_string(FileAccess.get_file_as_string(game.save_path))
+ raw["containers"][0]["lock"] = "aberta"
+ var file := FileAccess.open(game.save_path,FileAccess.WRITE)
+ file.store_string(JSON.stringify(raw))
+ file.close()
+ check(not game.load_game(),"Save com fechadura inválida é recusado")
+ # Back to the fixed numbers for the rest of the suite.
+ for e in game.enemies:
+  fresh(e,game.layout.to_world(Vector2i(28,7)))
+ p.sneaking = false
+ p.aiming = false
+ sheet.reset()
+ sheet.enabled = false
+ game.apply_attributes(true)
+ inv.restore(saved_inventory)
+ p.refresh_weapon()
+ p.set_physics_process(was_processing)
  game.ui.close_all()
