@@ -58,7 +58,7 @@ func compute() -> Array:
 	if game.is_safe():
 		out.append({"id": "safe", "icon": "tent", "level": 0, "title": "No abrigo", "text": "Monstros não atacam aqui.\nNo ponto de descanso, E salva a expedição."})
 	if game.inventory.count("seal") > 0:
-		out.append({"id": "seal", "icon": "flag", "level": 0, "title": "Selo recuperado", "text": "Leve o selo de volta ao abrigo\npara concluir a incursão."})
+		out.append({"id": "seal", "icon": "flag", "level": 0, "title": "Selo recuperado", "text": "Leve o selo de volta ao abrigo." if not game.generated else "Entregue o selo no abrigo do 1º andar,\nou arrisque descer com ele."})
 	return out
 
 func refresh() -> void:
