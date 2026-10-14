@@ -1,11 +1,15 @@
 Dungepm — créditos de assets de terceiros
 
+Personagem
+- Characters PSX, por Elbolilloduro (https://elbolilloduro.itch.io/characters-psx) — CC0.
+  O aventureiro é o Character_16, com textura repintada para o jogo.
+
 Armas
 - RPG Weapons, por Binbun (https://binbun3d.itch.io/rpg-weapons) — CC0.
   Adaga, montante, machado de guerra, maça de flanges, martelo de guerra, lança e lança longa.
 - Low Poly Weapon Pack, por Kickin' It Studios (itch.io) — uso livre em jogos.
   Katana, alabarda, arco curto, besta, flecha e virote.
 
-Animações do aventureiro: Mixamo (Adobe).
+Rig e parte das animações do aventureiro: Mixamo (Adobe).
 Fonte: Inter, por The Inter Project Authors — SIL Open Font License 1.1 (ver LICENCA-FONTE-INTER.txt).
 Engine: Godot Engine — licença MIT (ver LICENCA-GODOT.txt e AVISOS-TERCEIROS-GODOT.txt).
