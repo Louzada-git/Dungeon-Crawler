@@ -95,6 +95,22 @@ func _draw() -> void:
 			stroke([[7, 21], [10, 17], [14, 19], [18, 13], [22, 15]], Color(0.55, 0.16, 0.10, 0.95), 1.4)
 			stroke([[22.5, 9.5], [25.5, 12.5]], Color(0.55, 0.16, 0.10, 0.95), 1.6)
 			stroke([[25.5, 9.5], [22.5, 12.5]], Color(0.55, 0.16, 0.10, 0.95), 1.6)
+		"book":
+			# Open book with a ribbon: proficiencies.
+			fill([[16, 8], [27, 5], [28, 24], [16, 27]], c)
+			fill([[16, 8], [5, 5], [4, 24], [16, 27]], shade(c, 0.15))
+			stroke([[16, 8], [16, 27]], Color(0.1, 0.09, 0.08, 0.9), 1.4)
+			for y in [11.0, 15.0, 19.0]:
+				stroke([[19, y], [25, y - 1.2]], shade(c, 0.45), 1.1)
+				stroke([[13, y], [7, y - 1.2]], shade(c, 0.5), 1.1)
+			fill([[21, 25.5], [24, 24.8], [24, 30], [22.5, 28.5], [21, 30]], Color("b8322a"), false)
+		"star":
+			var points: Array = []
+			for i in 10:
+				var a: float = -PI / 2 + TAU * i / 10.0
+				var r: float = 12.5 if i % 2 == 0 else 5.5
+				points.append([16 + cos(a) * r, 17 + sin(a) * r])
+			fill(points, c)
 		"gear":
 			var teeth: Array = []
 			for i in 32:
