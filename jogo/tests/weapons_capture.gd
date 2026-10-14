@@ -51,7 +51,7 @@ func run() -> void:
 	game.camera_rig.zoom = 5.5
 	game.camera.size = 5.5
 	game.inventory.restore({"stacks": {}, "equipped": ""})
-	for id in ["sword", "katana", "montante", "adaga", "machado", "maca", "martelo", "spear", "alabarda", "arco", "besta"]:
+	for id in ["sword", "katana", "montante", "adaga", "machado", "maca", "martelo", "spear", "lanca_longa", "alabarda", "arco", "besta"]:
 		equip(id)
 		p.facing = Vector3(1, 0, -0.35).normalized()
 		p.visual.rotation.y = atan2(p.facing.x, p.facing.z)
