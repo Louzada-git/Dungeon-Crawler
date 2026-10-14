@@ -128,3 +128,12 @@ Caminhos de um, dois ou três ramos andam no mesmo ritmo. Trocar de espada no 3�
 - Capturas conferidas lado a lado (sem e com filtro): abrigo, sala com monstro, perto do personagem e inventário aberto. A primeira versão pegava um só pixel por bloco e quebrava as juntas finas do piso em pontinhos; agora cada bloco é a média dos pixels. O nome do monstro, que virava um borrão vermelho, agora é desenhado nítido acima do filtro.
 - O tremido dos vértices só aparece em movimento; conferir jogando.
 
+## Personagem PSX — 14/10/2026
+
+- Suíte do mundo fixo: **478 verificações, zero falhas**; suíte do labirinto: **47, zero falhas**; as duas também no executável Linux.
+- Verificação nova: arma presa à mão do rig Mixamo com a correção de posição; as verificações existentes de animações (idle, guarda, andar, correr, golpe, estocada, esquiva, dano, morte), armadura no tronco e filtro PSX passam com o personagem novo.
+- Textura: cada pixel foi ligado à sua posição 3D no corpo (pose de repouso com a pele aplicada) e repintado por região; vistas de frente e de lado conferidas.
+- Animações: o modelo antigo e o novo foram renderizados lado a lado no mesmo quadro de dez animações, cada um com uma haste presa à mão como as armas; as poses e a direção da haste batem.
+- Capturas conferidas: as 12 armas na mão, as quatro armaduras e a sala com e sem filtro.
+- As armaduras de blocos ficam um pouco largas no corpo mais magro; são provisórias.
+
