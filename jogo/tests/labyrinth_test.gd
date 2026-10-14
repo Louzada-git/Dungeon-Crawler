@@ -15,6 +15,12 @@ func check(condition: bool, note: String) -> void:
 	else:
 		print("PASS: " + note)
 
+func mean(list: Array) -> float:
+	var total: float = 0.0
+	for v in list:
+		total += float(v)
+	return total / maxf(1.0, list.size())
+
 func frames(n: int) -> void:
 	for i in n:
 		await get_tree().physics_frame
@@ -81,6 +87,32 @@ func run(target) -> void:
 	var chest_id: String = chest.get("id", "")
 	if not chest.is_empty():
 		chest["items"].clear()
+	# Locks: what the floor description says is what the game shows; a picked lock stays open.
+	var described: Dictionary = {}
+	for entry in game.layout.world["containers"]:
+		described[entry["id"]] = int(entry.get("lock", 0))
+	var same_locks: bool = true
+	for c in game.containers:
+		if described.has(c["id"]):
+			same_locks = same_locks and int(c.get("lock", 0)) == described[c["id"]]
+	check(same_locks, "Baús do andar trazem as fechaduras da descrição")
+	var picked: Dictionary = {}
+	var kept: Dictionary = {}
+	for c in game.containers:
+		if c["id"] == chest_id or c["items"].has("seal") or not c.get("chest", true):
+			continue
+		if picked.is_empty():
+			picked = c
+		elif kept.is_empty():
+			kept = c
+	if not picked.is_empty() and not kept.is_empty():
+		picked["lock"] = 2
+		kept["lock"] = 3
+		game.inventory.add("gazua")
+		check(game.attempt_lockpick(picked, 0.0) and not picked.has("lock"), "Arromba um baú do 1º andar")
+		game.ui.close_all()
+	var picked_id: String = picked.get("id", "")
+	var kept_id: String = kept.get("id", "")
 	# Down to floor 2
 	near(game.stairs_down_cell())
 	check(game.interaction_text().contains("2º andar"), "Descida aberta depois do chefe")
@@ -112,7 +144,7 @@ func run(target) -> void:
 			corrupt = e
 	if corrupt:
 		check(is_equal_approx(corrupt.maximum_health, 65.0 * 1.3), "Monstros do 2º andar têm mais vida")
-		var xp_before: float = game.sheet.path_xp(["espadas", "espada_reta"])
+		var xp_before: float = game.sheet.path_xp(CharacterSheet.path_of("sword"))
 		corrupt.position = p.position + Vector3(1.2, 0, 0)
 		corrupt.aggro = true
 		game.inventory.equip("sword")
@@ -123,7 +155,7 @@ func run(target) -> void:
 		p.facing = Vector3.RIGHT
 		p.attack()
 		game.resolve_player_attack()
-		check(game.sheet.path_xp(["espadas", "espada_reta"]) > xp_before, "Golpe no labirinto ensina proficiência")
+		check(game.sheet.path_xp(CharacterSheet.path_of("sword")) > xp_before, "Golpe no labirinto ensina proficiência")
 	var kinds: Dictionary = {}
 	for e in game.enemies:
 		kinds[e.kind] = true
@@ -141,6 +173,10 @@ func run(target) -> void:
 	if chest_id != "":
 		var same: Array = game.containers.filter(func(c): return c["id"] == chest_id)
 		check(same.size() == 1 and same[0]["items"].is_empty(), "Baú esvaziado continua vazio ao voltar")
+	if picked_id != "" and kept_id != "":
+		var opened: Array = game.containers.filter(func(c): return c["id"] == picked_id)
+		var still: Array = game.containers.filter(func(c): return c["id"] == kept_id)
+		check(opened.size() == 1 and int(opened[0].get("lock", 0)) == 0 and still.size() == 1 and int(still[0].get("lock", 0)) == 3, "Fechadura arrombada continua aberta ao voltar; a outra continua trancada")
 	near(game.stairs_down_cell())
 	game.interact()
 	await frames(3)
@@ -187,6 +223,29 @@ func run(target) -> void:
 	var t1 := Time.get_ticks_msec()
 	var d3: Dictionary = LabyrinthGenerator.generate(777, 3)
 	check(LabyrinthGenerator.validate(d3).is_empty() and d3["rooms"].size() == 40, "3º andar gerado e válido (%d ms)" % (Time.get_ticks_msec() - t1))
+	# Locked chests across seeds: deeper floors have harder locks, the boss relic is never locked.
+	var locked_by_floor: Dictionary = {1: [], 3: []}
+	var relic_locked: bool = false
+	var chests: int = 0
+	for s in 6:
+		for fl in [1, 3]:
+			var d: Dictionary = LabyrinthGenerator.generate(3000 + s * 11, fl)
+			for entry in d["containers"]:
+				if not entry.get("chest", true):
+					continue
+				chests += 1
+				var lock: int = int(entry.get("lock", 0))
+				if entry.get("objective", false) and lock > 0:
+					relic_locked = true
+				if lock > 0:
+					locked_by_floor[fl].append(lock)
+	var all_locks: Array = locked_by_floor[1] + locked_by_floor[3]
+	var share: float = float(all_locks.size()) / maxf(1.0, chests)
+	check(share > 0.1 and share < 0.7 and all_locks.all(func(v): return v >= 1 and v <= 4), "Parte dos baús gerados vem trancada (%d%% de %d)" % [roundi(share * 100), chests])
+	check(not relic_locked, "Relicário do chefe nunca vem trancado")
+	var avg1: float = mean(locked_by_floor[1])
+	var avg2: float = mean(locked_by_floor[3])
+	check(avg2 > avg1 + 0.5, "Fechaduras do 3º andar são mais difíceis que as do 1º (%s × %s)" % [UiStyle.fmt(avg1, 2), UiStyle.fmt(avg2, 2)])
 	for path in [game.save_path, game.knowledge_path]:
 		if FileAccess.file_exists(path):
 			DirAccess.remove_absolute(path)
