@@ -1,8 +1,15 @@
-# Planejamento do jogo — documento vivo
+# Planejamento do jogo — histórico (congelado em 13/10/2026)
 
-> **Etapas atuais:** 1 e 2 concluídas. A [visão do jogo](VISAO_JOGO.md) reúne a proposta atual; o [inventário do protótipo](INVENTARIO_PROTOTIPO.md) registra o estado verificado. O próximo trabalho é a etapa 3: fixar o escopo da versão 1.0. As seções antigas abaixo preservam o histórico de produção.
-
-> **Atualização de 13/10/2026:** o [plano de 100 etapas](PLANO_100_ETAPAS.md) registra a direção atual até a versão 1.0. As decisões mais recentes do usuário incluem labirinto procedural persistente por jogador, centenas de itens categorizados, atributos como potencial, proficiências hierárquicas e sobrepostas que liberam habilidades, escolas de espada, magia elemental e técnicas combinadas. Propostas anteriores deste documento que tratam a geração procedural ou a publicação como possibilidades distantes foram superadas por essas decisões.
+> **Este arquivo não é mais o documento vivo.** A direção atual está no [plano de 100 etapas](PLANO_100_ETAPAS.md), no [escopo da 1.0](ESCOPO_V1.md) e na [visão do jogo](VISAO_JOGO.md). O conteúdo abaixo é mantido como registro de produção até 13/10/2026 e não deve ser usado como referência de decisões.
+>
+> **Pontos superados conhecidos:**
+> - A numeração da seção 13 (Etapa 0 a 5) é antiga. A "Etapa 3" daqui (evolução por prática) **não** é a etapa 3 do plano atual (fixar o escopo). O teste de sensação marcado aqui como pendente virou a etapa 6 do plano.
+> - Seções 3 e 14: dungeon feita à mão, geração procedural como possibilidade distante e publicação fora do escopo foram substituídas pelo labirinto procedural persistente por jogador e pelo objetivo de lançar na Steam. Multiplayer continua fora: o jogo é sempre single player.
+> - Seção 17: "ainda não há áudio" está superado; há cinco sons próprios. `outputs/COMO_JOGAR.md` não existe; as instruções estão em `outputs/LEIA-ME.md`.
+> - Seção "Gameplay": "nenhum download Mixamo foi incorporado" está superado; animações do Sword And Shield Pack foram integradas em 13/10/2026 (ver `outputs/VERIFICACAO.md`).
+> - Seções 12 e 17: a biblioteca ativa é `jogo/assets/originais`; os modelos Kenney ainda estão no diretório do projeto, mas não entram na exportação.
+>
+> As decisões mais recentes do usuário incluem labirinto procedural persistente por jogador, centenas de itens categorizados, atributos como potencial, proficiências hierárquicas e sobrepostas que liberam habilidades, escolas de espada, magia elemental e técnicas combinadas.
 
 **Projeto:** Project Dungepm (nome de trabalho)  
 **Estado:** primeira base jogável implementada, 10 de outubro de 2026  
