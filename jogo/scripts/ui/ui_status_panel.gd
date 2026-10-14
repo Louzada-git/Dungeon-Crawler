@@ -1,0 +1,98 @@
+extends PanelContainer
+class_name UiStatusPanel
+## Compact condition panel: icon, value and bar for each vital sign.
+
+signal open_requested
+
+var game
+var cells: Dictionary = {}
+
+const ENTRIES := [
+	["health", "heart", "Vida", "Vida atual. Não se recupera sozinha: bandagens restauram 18."],
+	["stamina", "lungs", "Fôlego", "Gasto ao correr, golpear e esquivar. Recupera parado ou caminhando."],
+	["food", "bread", "Saciedade", "Cai com o tempo, mais rápido correndo. Abaixo de 10, o fôlego recupera devagar."],
+	["load", "weight", "Carga", "Peso na mochila. Acima de 11 kg o passo fica mais lento; limite de 18 kg."],
+]
+
+func _init(game_ref) -> void:
+	game = game_ref
+	custom_minimum_size = Vector2(320, 0)
+	add_theme_stylebox_override("panel", UiStyle.box(UiStyle.PANEL, UiStyle.BORDER_SOFT, 1, Vector4(8, 5, 8, 7)))
+	mouse_filter = Control.MOUSE_FILTER_STOP
+	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	tooltip_text = "Abrir condição física  [H]"
+	gui_input.connect(func(event):
+		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+			open_requested.emit()
+	)
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 5)
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(column)
+	var head := HBoxContainer.new()
+	head.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	column.add_child(head)
+	var title := UiStyle.caps("Condição", 11, UiStyle.MUTED)
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(title)
+	head.add_child(UiStyle.caps("H", 10, UiStyle.DIM))
+	var grid := HBoxContainer.new()
+	grid.add_theme_constant_override("separation", 10)
+	grid.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	column.add_child(grid)
+	for entry in ENTRIES:
+		var cell := Cell.new()
+		cell.title = entry[2]
+		cell.text = entry[3]
+		cell.add_theme_constant_override("separation", 3)
+		cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		cell.mouse_filter = Control.MOUSE_FILTER_PASS
+		cell.tooltip_text = entry[2]
+		grid.add_child(cell)
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 5)
+		row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		cell.add_child(row)
+		var icon := UiIcon.new(entry[1], UiStyle.TEXT, 18)
+		row.add_child(icon)
+		var value := UiStyle.label("", 14, UiStyle.TEXT, "semibold")
+		value.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		value.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		row.add_child(value)
+		var meter := UiStyle.bar(Vector2(0, 5), UiStyle.GOOD)
+		cell.add_child(meter)
+		var caption := UiStyle.caps(entry[2], 9, UiStyle.DIM)
+		cell.add_child(caption)
+		cells[entry[0]] = {"icon": icon, "value": value, "bar": meter, "last": ""}
+
+func refresh() -> void:
+	var p = game.player
+	if p == null:
+		return
+	_set_cell("health", p.health, str(ceili(p.health)), p.health / 100.0)
+	_set_cell("stamina", p.stamina, str(ceili(p.stamina)), p.stamina / 100.0)
+	_set_cell("food", p.food, str(ceili(p.food)), p.food / 100.0)
+	var w: float = game.inventory.weight()
+	var load_ratio: float = 1.0 if w <= InventoryData.COMFORT else (0.45 if w <= 15.0 else 0.15)
+	_set_cell("load", w / InventoryData.CAPACITY * 100.0, UiStyle.fmt(w) + " kg", load_ratio)
+
+func _set_cell(id: String, bar_value: float, text: String, ratio: float) -> void:
+	var cell: Dictionary = cells[id]
+	var color: Color = UiStyle.value_color(ratio)
+	if id == "health" and game.player.bleeding:
+		color = UiStyle.BLOOD
+	var key := "%s|%s" % [text, color.to_html()]
+	cell["bar"].value = bar_value
+	if cell["last"] == key:
+		return
+	cell["last"] = key
+	cell["value"].text = text
+	cell["value"].add_theme_color_override("font_color", UiStyle.TEXT if ratio >= 0.3 else color.lightened(0.2))
+	cell["icon"].set_kind(cell["icon"].kind, UiStyle.TEXT if ratio >= 0.6 else color.lightened(0.15))
+	UiStyle.set_bar_color(cell["bar"], color)
+
+class Cell extends VBoxContainer:
+	var title: String = ""
+	var text: String = ""
+	func _make_custom_tooltip(_for_text: String) -> Object:
+		return UiStyle.tip(title, text + "\nClique para abrir a condição física  [H].")
