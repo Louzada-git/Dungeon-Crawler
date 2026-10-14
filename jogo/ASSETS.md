@@ -11,7 +11,7 @@ Todos os modelos usados pelo jogo estão em `assets/originais/`. Geometria, text
 - Referências visuais e observações: `../arte/REFERENCIAS.md`.
 - Regeneração: `blender --background --factory-startup --python arte/fontes/gerar_modelos.py` a partir da raiz do projeto.
 
-Os arquivos são produção original do projeto, sem dependências de licença de assets de terceiros. Não foi atribuída uma licença pública de redistribuição ao código ou à arte; essa escolha fica com o proprietário do projeto.
+Os modelos de `assets/originais/` são produção original do projeto. As armas vêm de dois pacotes de terceiros (seção "Armas" abaixo). Não foi atribuída uma licença pública de redistribuição ao código ou à arte; essa escolha fica com o proprietário do projeto.
 
 ## Histórico do bloco inicial
 
@@ -31,9 +31,34 @@ A organização do HUD segue a leitura do Project Zomboid (barra lateral, janela
 - **Ícones de interface e silhueta corporal**: desenhos vetoriais originais em `scripts/ui/ui_icon.gd` e `scripts/ui/ui_body_figure.gd`.
 - **Fonte Inter** (`assets/fontes/Inter-*.otf`): © 2016-2023 The Inter Project Authors, [rsms/inter](https://github.com/rsms/inter), versão 4.0, licença SIL Open Font License 1.1. Texto completo em `assets/fontes/OFL.txt`; ele precisa acompanhar o jogo distribuído (já copiado para `outputs/linux/LICENCA-FONTE-INTER.txt`). A OFL permite embutir a fonte em software, inclusive comercial, desde que a fonte não seja vendida sozinha.
 
-## Armas com modelo provisório
+## Armas
 
-Adaga, katana, montante, machado, maça, martelo de guerra, alabarda, arco, besta, flecha, virote, as quatro armaduras (gibão, couro, cota de malha, placas) e a gazua aparecem como **blocos** montados em tempo de execução a partir do campo `blocks` de `data/itens.json` (`Visuals.blocks`). São formas originais e provisórias. Um arquivo `assets/armas/<id>.glb` substitui os blocos automaticamente; a especificação para produzir esses modelos e as animações está em `../arte/ARMAS_ESPEC.md`. Se os modelos vierem de uma ferramenta de IA, registre aqui a ferramenta e os termos de uso, porque a Steam pede essa informação no questionário de conteúdo.
+As armas usam modelos de dois pacotes gratuitos, escolhidos pelo dono do projeto em 14/10/2026 e convertidos para a convenção do jogo (empunhadura na origem, ponta em +Y, metros) por `../arte/fontes/converter_armas.gd`. Os arquivos de origem escolhidos e as licenças estão em `../arte/fontes/pacotes/`. Os créditos vão junto do jogo em `outputs/linux/CREDITOS.txt`.
+
+| Arma (id) | Pacote | Modelo de origem |
+| --- | --- | --- |
+| `adaga` | RPG Weapons (Binbun) | Dagger_06 |
+| `montante` | RPG Weapons | Long_Sword_07 |
+| `machado` | RPG Weapons | Axe_05 |
+| `maca` | RPG Weapons | Mace_07 |
+| `martelo` | RPG Weapons | Hammer_07 (afinado a 65%) |
+| `spear` | RPG Weapons | Spear_05, 2,6 m |
+| `lanca_longa` | RPG Weapons | Spear_07, 3,1 m |
+| `katana` | Low Poly Weapon Pack (Kickin' It Studios) | Offset_Sword |
+| `alabarda` | Low Poly Weapon Pack | Halberd |
+| `arco` | Low Poly Weapon Pack | Bow |
+| `besta` | Low Poly Weapon Pack | Crossbow |
+| `flecha` | Low Poly Weapon Pack | Broadhead_Arrow |
+| `virote` | Low Poly Weapon Pack | Bullet_Arrow |
+
+- **RPG Weapons**, Binbun — [binbun3d.itch.io/rpg-weapons](https://binbun3d.itch.io/rpg-weapons). CC0: uso comercial livre, sem atribuição obrigatória. O pacote baixado não traz arquivo de licença; os termos foram conferidos na página em 14/10/2026.
+- **Low Poly Weapon Pack**, Kickin' It Studios (itch.io). O leia-me do pacote permite usar e modificar em qualquer jogo ou projeto e proíbe revender os modelos como modelos 3D; crédito não é obrigatório, mas é apreciado.
+- Nenhum dos dois foi gerado por IA, até onde as páginas informam.
+- `sword` e `espada_guarda` continuam com a espada original do projeto (`assets/originais/espada.glb`).
+
+## Modelos provisórios
+
+As quatro armaduras (gibão, couro, cota de malha, placas) e a gazua aparecem como **blocos** montados em tempo de execução a partir do campo `blocks` de `data/itens.json` (`Visuals.blocks`). São formas originais e provisórias. Um arquivo `assets/armas/<id>.glb` substitui os blocos automaticamente; a especificação está em `../arte/ARMAS_ESPEC.md`. Se os modelos vierem de uma ferramenta de IA, registre aqui a ferramenta e os termos de uso, porque a Steam pede essa informação no questionário de conteúdo.
 
 ## Animações e sons de gameplay
 
