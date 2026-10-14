@@ -29,7 +29,7 @@ func play(sheet: CharacterSheet, path: Array, kinds: Array, floor: int) -> void:
 		sheet.award_damage(e, e.maximum_health, path)
 
 func _initialize() -> void:
-	var paths := {"Adaga": ["adagas"], "Katana": ["espadas", "katana"], "Martelo": ["contundentes", "martelo"]}
+	var paths := {"Adaga": CharacterSheet.path_of("adaga"), "Katana": CharacterSheet.path_of("katana"), "Martelo": CharacterSheet.path_of("martelo"), "Punhos": CharacterSheet.path_of("")}
 	var sheets: Dictionary = {}
 	for name in paths:
 		sheets[name] = CharacterSheet.new()
@@ -41,22 +41,22 @@ func _initialize() -> void:
 		var kills: Array = floor_kills(777, floor)
 		for name in paths:
 			play(sheets[name], paths[name], kills, floor)
-		play(strong, ["contundentes", "martelo"], kills, floor)
-		play(mixed, ["espadas", "espada_reta"] if floor < 3 else ["espadas", "katana"], kills, floor)
+		play(strong, CharacterSheet.path_of("martelo"), kills, floor)
+		play(mixed, CharacterSheet.path_of("sword") if floor < 3 else CharacterSheet.path_of("katana"), kills, floor)
 		var cells: PackedStringArray = []
 		for name in paths:
 			var s: CharacterSheet = sheets[name]
 			cells.append("%d (+%d%%)" % [s.mastery(paths[name]), roundi((s.damage_mult(paths[name]) - 1) * 100)])
-		cells.append("%d" % strong.mastery(["contundentes", "martelo"]))
-		cells.append("%d" % mixed.mastery(["espadas", "katana"]))
+		cells.append("%d" % strong.mastery(CharacterSheet.path_of("martelo")))
+		cells.append("%d" % mixed.mastery(CharacterSheet.path_of("katana")))
 		print("SIM %d (%d mortes) | %s" % [floor, kills.size(), " | ".join(cells)])
 	# Grinding the first floor again and again.
 	var grinder := CharacterSheet.new()
 	var first: Array = floor_kills(777, 1)
 	var line: PackedStringArray = []
 	for run in range(1, 51):
-		play(grinder, ["espadas", "espada_reta"], first, 1)
+		play(grinder, CharacterSheet.path_of("sword"), first, 1)
 		if run in [1, 2, 5, 10, 20, 50]:
-			line.append("%dx → %d" % [run, grinder.mastery(["espadas", "espada_reta"])])
+			line.append("%dx → %d" % [run, grinder.mastery(CharacterSheet.path_of("sword"))])
 	print("SIM repetir o 1º andar: " + ", ".join(line))
 	quit()
