@@ -62,6 +62,7 @@ var pause_title: Label
 var pause_note: Label
 var controls_box: Control
 var sound_button: Button
+var psx_button: Button
 var pause_confirm: bool = false
 var ending_panel: UiWindow
 var end_title: Label
@@ -346,6 +347,13 @@ func _build_pause() -> void:
 	)
 	sound_button.custom_minimum_size.y = 34
 	left.add_child(sound_button)
+	psx_button = UiStyle.button(psx_label(), func():
+		game.set_psx(not game.psx.enabled)
+		psx_button.text = psx_label()
+	)
+	psx_button.custom_minimum_size.y = 34
+	psx_button.tooltip_text = "Visual de PlayStation: imagem em pixels grandes, cores com pontilhado\ne vértices que tremem. O HUD continua nítido."
+	left.add_child(psx_button)
 	var arsenal := UiStyle.button("Arsenal de teste", func(): game.spawn_test_arsenal(); close_all())
 	arsenal.custom_minimum_size.y = 34
 	arsenal.tooltip_text = "Ferramenta de desenvolvimento: um baú com todas as armas\ne munição aparece ao seu lado. Sai antes do lançamento."
@@ -565,6 +573,9 @@ func open_inventory(container: Dictionary = {}) -> void:
 	inventory.open(container)
 	get_tree().paused = true
 	update_hud()
+
+func psx_label() -> String:
+	return "Filtro PSX: ligado" if game.psx.enabled else "Filtro PSX: desligado"
 
 func toggle_inventory() -> void:
 	if game.ended:
