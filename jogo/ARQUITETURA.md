@@ -12,6 +12,7 @@ Mapa rápido de onde cada coisa vive. Atualizado na etapa 8 (13/10/2026).
 | `textos.csv` | Textos de conteúdo por chave (coluna `pt_BR`). Outro idioma = nova coluna. |
 | `saque.json` | Tabelas de saque por tipo de sala: `[item, peso, mínimo, máximo, andar mínimo]`. |
 | `salas.json` | Nomes de sala por tipo, com gênero, e complementos. |
+| `proficiencias.json` | Ramos de proficiência (raízes e especializações); as armas indicam o caminho que treinam. |
 
 A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrinth_generator.gd` produz esse formato a partir de (semente, andar). O mundo fixo `cisternas.json` continua existindo só para a suíte de testes.
 
@@ -38,8 +39,18 @@ A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrint
 | `systems/item_use.gd` | Comer, tratar, equipar a partir dos dados do item. |
 | `systems/save_system.gd` | Save JSON (versão 2), validação, estado por andar e conhecimento. |
 | `systems/labyrinth_generator.gd` | Gera um andar por semente e o valida (alcance, chefe, selo, ids). |
+| `systems/projectile.gd` | Flechas e virotes em voo: paredes, monstros atravessados, munição presa e recuperável. |
+| `proficiency_tree.gd` | Leitura da árvore de proficiências. |
 | `systems/game_camera.gd`, `systems/aim_marker.gd`, `systems/input_setup.gd` | Câmera, marcador de mira, teclas. |
 | `ui.gd` + `ui/` | HUD: um arquivo por painel (ver comentários no topo de cada um). |
+
+## Armas
+
+- **Estilos** (`style` em `itens.json`): `slash` (arco com `angle` e `targets`), `thrust` (linha reta com `width`; `targets` > 1 atravessa), `smash` (círculo à frente com `area_offset` e `area_radius`) e `shoot` (projétil com `ammo`, `projectile_speed`, `pierce`).
+- **Efeitos:** `sneak_mult` (monstro desprevenido), `bleed` (`dps`, `time`), `crush` (monstros `armored`), `stagger` (segundos), `knockback` (3 é o normal).
+- **Modelo:** `Visuals.item_model(id)` usa `assets/armas/<id>.glb` se existir; senão os `blocks` provisórios; senão o modelo compartilhado de `model`. Na mão: `rotacao_mao`, `escala_mao`, `alinhar_ao_golpe` e `mao` (`esquerda` para o arco).
+- **Animação:** `animacao` é o nome desejado; enquanto o personagem não a tiver, `DungeonPlayer.attack_animation` usa a mais próxima.
+- Especificação para modelos e animações: `../arte/ARMAS_ESPEC.md`.
 
 ## Testes e ferramentas
 
@@ -47,6 +58,7 @@ A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrint
 - `tests/labyrinth_test.gd`: suíte do labirinto. `godot --headless --path jogo -- --test-labirinto --seed=777`.
 - `tests/generator_check.gd`: gera muitos andares e aponta problemas. `godot --headless --path jogo -s res://tests/generator_check.gd -- 60 4`.
 - `tests/labyrinth_capture.gd`: capturas do labirinto (precisa de tela).
+- `tests/weapons_capture.gd`: armas em mãos e em uso (precisa de tela).
 - `tests/hud_capture.gd`: capturas do HUD para revisão (precisa de tela).
 - `tools/render_icons.gd`: gera os ícones dos itens a partir dos modelos.
 
