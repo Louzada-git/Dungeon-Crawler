@@ -15,7 +15,7 @@
   "agilidade": {
    "name": "Agilidade",
    "sigla": "Agi",
-   "text": "Fôlego máximo: +5 por ponto acima de 5. Esquiva custa 1 a menos e o passo fica 1,5% mais rápido por ponto."
+   "text": "Fôlego máximo: +5 por ponto acima de 5. Esquiva custa 0,5 a menos e o passo fica 1,5% mais rápido por ponto."
   },
   "destreza": {
    "name": "Destreza",
@@ -48,7 +48,7 @@
   "dano_por_nivel": 0.04,
   "folego_por_nivel": 0.02,
   "folego_minimo": 0.7,
-  "esquiva_por_nivel": 0.6,
+  "esquiva_por_nivel": 0.3,
   "cura_por_nivel": 0.04,
   "bloqueio_por_nivel": 0.024,
   "armadura_por_nivel": 0.04,
@@ -56,6 +56,17 @@
   "corrida_por_nivel": 0.024,
   "furtivo_por_nivel": 0.03,
   "arrombar_por_nivel": 0.08
+ },
+ "folego": {
+  "_sobre": "Gastos e recuperação de fôlego que não vêm das armas. 15/10/2026: todos os gastos pela metade (armas, objetos e talentos também) e recuperação ×1,3, a pedido de quem testou. Esquiva: 'esquiva' − 'esquiva_por_agilidade' × (Agilidade − 5) − dominio.esquiva_por_nivel × (Acrobacia − 1), no mínimo 'esquiva_minima'. Guarda: 'guarda_por_dano' × dano segurado, no mínimo 'guarda_minima'.",
+  "recuperacao": 20.8,
+  "recuperacao_com_fome": 7.8,
+  "corrida": 8.0,
+  "esquiva": 12.5,
+  "esquiva_por_agilidade": 0.5,
+  "esquiva_minima": 5.0,
+  "guarda_por_dano": 0.5,
+  "guarda_minima": 2.0
  },
  "anti_repeticao": {
   "_sobre": "Acima de margem + por_andar × nível do monstro, a experiência cai pela metade a cada 'meia_vida' níveis.",
@@ -117,9 +128,9 @@
     {
      "nivel": 6,
      "name": "Fio confiável",
-     "text": "−3 de fôlego por golpe",
+     "text": "−1,5 de fôlego por golpe",
      "mods": {
-      "cost": -3
+      "cost": -1.5
      }
     }
    ]
@@ -460,9 +471,9 @@
     {
      "nivel": 5,
      "name": "Esquiva leve",
-     "text": "esquiva custa 5 de fôlego a menos",
+     "text": "esquiva custa 2,5 de fôlego a menos",
      "mods": {
-      "dodge_cost": -5
+      "dodge_cost": -2.5
      }
     }
    ]
@@ -528,9 +539,11 @@
   "tag": "ARMA",
   "damage": 8.0,
   "range": 1.4,
-  "cost": 8.0,
-  "cooldown": 0.45,
+  "cost": 4.0,
+  "cooldown": 0.34,
   "windup": 0.14,
+  "impacto": 0.35,
+  "classe": "leve",
   "style": "slash",
   "angle": 35.0,
   "targets": 1,
