@@ -2,6 +2,10 @@ extends CharacterBody3D
 class_name DungeonPlayer
 
 const INPUT_BUFFER: float = 0.16
+## Share of the time after the blow lands (slowed, no dodge, no turning, no new
+## blow) that is kept: 1/3 since 15/10/2026. The wind-up before the blow and the
+## animation speed are unchanged; the end of the swing animation is cut short.
+const RECOVERY_SCALE: float = 1.0 / 3.0
 var game
 var visual: Node3D
 var animator: AnimationPlayer
@@ -325,15 +329,20 @@ func attack(stats: Dictionary = {}) -> bool:
  attack_facing = facing
  attack_serial += 1
  # A long wind-up (heavy techniques) keeps the adventurer committed until the blow lands.
- cooldown = maxf(float(weapon.get("cooldown",0.62)),float(weapon.get("windup",0.22))+0.15)
- attack_timer = cooldown*0.90
- attack_wait = weapon.get("windup",0.22)
+ var windup: float = float(weapon.get("windup",0.22))
+ var full: float = maxf(float(weapon.get("cooldown",0.62)),windup+0.15)
+ var swing: float = full*0.90
+ # Only RECOVERY_SCALE of what comes after the blow remains.
+ cooldown = windup+(full-windup)*RECOVERY_SCALE
+ attack_timer = windup+maxf(0.0,swing-windup)*RECOVERY_SCALE
+ attack_wait = windup
  var dash: float = float(weapon.get("dash",0.0))
  if dash > 0.0:
   dash_time = maxf(0.12,float(attack_wait))
   dash_velocity = facing.normalized()*dash/dash_time
   dash_fx = 0
- animate_action(attack_animation(weapon),attack_timer)
+ # The animation keeps its pace (the blow lands where it did); moving again cuts its tail.
+ animate_action(attack_animation(weapon),swing)
  game.sound.play_at("swing",global_position,0.65)
  return true
 
