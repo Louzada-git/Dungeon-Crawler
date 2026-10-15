@@ -12,7 +12,7 @@ Mapa rápido de onde cada coisa vive. Atualizado na etapa 8 (13/10/2026).
 | `textos.csv` | Textos de conteúdo por chave (coluna `pt_BR`). Outro idioma = nova coluna. |
 | `saque.json` | Tabelas de saque por tipo de sala: `[item, peso, mínimo, máximo, andar mínimo]`. |
 | `salas.json` | Nomes de sala por tipo, com gênero, e complementos. |
-| `tecnicas.json` | Técnicas: formas, componentes, requisitos por proficiência e regras (espaços por domínio, recarga, barra). |
+| `tecnicas.json` | Habilidades e objetos: efeitos, requisitos por proficiência, cópias, slots, recarga e barra. |
 | `proficiencias.json` | Grupos, ramos de proficiência (raízes e especializações), curva, efeitos por nível, perfil dos punhos e migração de nomes; as armas e armaduras indicam o caminho que treinam. |
 
 A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrinth_generator.gd` produz esse formato a partir de (semente, andar). O mundo fixo `cisternas.json` continua existindo só para a suíte de testes.
@@ -44,8 +44,8 @@ A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrint
 | `proficiency_tree.gd` | Leitura de `proficiencias.json`: atributos, curva, ramos e habilidades. |
 | `character_sheet.gd` | O aventureiro da run: atributos, experiência por ramo, domínio das armas, habilidades desbloqueadas e efeitos dos atributos. |
 | `systems/game_camera.gd`, `systems/aim_marker.gd`, `systems/input_setup.gd` | Câmera, marcador de mira, teclas. |
-| `systems/techniques.gd`, `technique_book.gd` | Técnicas: cálculo, validação e destrave (`Techniques`); receitas, barra e recarga do aventureiro (`TechniqueBook`). |
-| `ui/ui_technique_window.gd` | Editor de técnicas (T). |
+| `systems/techniques.gd`, `technique_book.gd` | Habilidades: cálculo, validação, destrave e cópias (`Techniques`); montagem, barra e recarga do aventureiro (`TechniqueBook`). |
+| `ui/ui_technique_window.gd` | Janela de habilidades (T). |
 | `systems/psx_filter.gd` | Filtro de PlayStation: pós-processamento, materiais com vértices presos à grade e texto do mundo nítido. |
 | `ui.gd` + `ui/` | HUD: um arquivo por painel (ver comentários no topo de cada um). |
 
@@ -96,19 +96,20 @@ A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrint
 - **Gerador:** `LabyrinthGenerator._roll_lock` sorteia fechaduras com um gerador próprio, então ligar ou ajustar fechaduras não muda o resto do andar de uma semente. Tesouro 80%, covil 40%, suprimentos 25%, combate 15%; o relicário do chefe nunca. Dificuldade 1 + (andar − 1) / 2, +1 no tesouro, ±1, entre 1 e 4.
 - **Animações opcionais:** quando o personagem tiver `soco`, `bloqueio`, `furtivo` ou `furtivo_andar`, o jogo usa; até lá, ataque, guarda e caminhada normais.
 
-## Técnicas
+## Habilidades
 
-Decisões de 15/10/2026: só técnicas físicas por enquanto (a magia fica para depois); montar e trocar em qualquer lugar fora de combate; componentes destravam só pela proficiência.
+Decisões de 15/10/2026: só físicas por enquanto (a magia vem depois); montar em qualquer lugar fora de combate; tudo destrava pela proficiência. Modelo do dono do projeto: cada **habilidade** existe uma vez, com características fixas, e tem **slots** onde vão **objetos**; quanto maior o nível, mais slots; objetos vão em qualquer habilidade onde façam sentido; cada cópia de objeto fica em uma habilidade por vez, e a proficiência dá mais cópias.
 
-- **Receita** = forma + componentes nos espaços, com nome dado pelo jogador. Fica em `game.techniques` (`TechniqueBook`): até 12 receitas, barra de 4 (teclas 4 a 7) e recarga por receita.
-- **Números:** `Techniques.stats` parte de `CharacterSheet.weapon_stats` da arma em mãos (domínio e habilidades já aplicados), aplica os efeitos da forma e depois os de cada componente **na ordem dos espaços**. `multiplica` escala o valor atual, inclusive o que componentes anteriores somaram; `soma` acrescenta um valor fixo (`disparo` dá outro valor para armas de disparo); `minimo` garante um piso; `define` troca o valor. Campos com ponto (`bleed.dps`) mexem num grupo.
-- **Formas básicas** (`corte`, `estocada`, `pancada`, `disparo`, `soco`) são o golpe normal da arma; com componentes, viram técnica. **Formas destravadas** por nível de ramo: Corte giratório (Lâminas 4), Investida (Hastes 4), Golpe esmagador (Contundentes 4, só arma contundente), Tiro mirado (Pontaria 4), Sequência de socos (Desarmado 4).
-- **Componentes** (nível 3 ou 4 do ramo): Lâmina afiada, Força, Alcance, Rapidez, Impacto, Avanço, Emboscada, Golpe duplo, Perfurante. Alguns só servem em certos estilos (`estilos`).
-- **Espaços:** 1 + (domínio da arma − 1) / 5, até o máximo da forma (3 nas básicas).
-- **Recarga:** a da forma + 0,75 s por componente. **Treino:** os golpes treinam o caminho da arma como sempre; cada componente usado dá 1,5 de experiência ao ramo que o destravou.
-- **Execução:** `DungeonPlayer.use_technique(slot)` valida (`Techniques.problem`), mira no cursor e chama o mesmo `attack()` do golpe normal com os números da técnica. Novos campos: `hits` (golpes seguidos; em disparos, projéteis em leque), `dash` (avanço durante o preparo). Preparos longos seguram o personagem até o golpe sair.
-- **Fora de combate:** `main.in_combat()` = algum monstro vivo caçando fora do abrigo. Com ele, o editor mostra o aviso e não muda nada; usar técnicas da barra continua livre.
-- **Save e morte:** o save guarda receitas e barra; o conhecimento (`conhecimento.json`) guarda as receitas, que voltam no próximo aventureiro com a barra vazia. Componentes trancados para o novo aventureiro aparecem com o motivo.
+- **Dados** (`tecnicas.json`, versão 2): `formas` = habilidades (`slots` máximos, `slot_a_cada`, `recarga`, `efeitos`, `requer`); `objetos` (`requer`, `copias` = níveis do ramo que dão cada cópia, `estilos` só onde não faria sentido, `efeitos`).
+- **Montagem** em `game.techniques` (`TechniqueBook`): `configs` (habilidade → objetos na ordem dos slots), barra de 4 (teclas 4 a 7, cada habilidade num lugar só) e recarga por habilidade. Mudanças valem na hora.
+- **Números:** `Techniques.stats` parte de `CharacterSheet.weapon_stats` da arma em mãos, aplica os efeitos da habilidade e depois os de cada objeto **na ordem dos slots**. `multiplica` escala o valor atual, inclusive o que objetos anteriores somaram; `soma` acrescenta (`disparo` dá outro valor em armas de disparo); `minimo` garante um piso; `define` troca o valor.
+- **Habilidades básicas** (Corte, Estocada, Pancada, Disparo, Soco) são o golpe normal da arma; slots pelo domínio da arma (1 + (domínio − 1) / 5, até 3). **Destraváveis:** Corte giratório (Lâminas 4), Investida (Hastes 4), Golpe esmagador (Contundentes 4), Tiro mirado (Pontaria 4), Sequência de socos (Desarmado 4); slots pelo nível do ramo: 1 + (nível − nível de destrave) / 4, até 2 (1 na Sequência).
+- **Objetos e cópias:** Lâmina afiada (Lâminas 3/9/15), Força (Contundentes 3/9/15), Alcance (Hastes 3/9), Rapidez (Acrobacia 3/9), Impacto (Bloqueio 3/9), Avanço (Atletismo 3/10), Emboscada (Furtividade 3/10), Golpe duplo (Espadas 4/12), Perfurante (Pontaria 3/10). Cópias em uso acima das que o aventureiro tem tornam a habilidade inválida, com o motivo (acontece depois da morte).
+- **Recarga:** a da habilidade + 0,75 s por objeto. **Treino:** golpes treinam o caminho da arma; cada objeto usado dá 1,5 de experiência ao ramo que o dá.
+- **Execução:** `DungeonPlayer.use_technique(slot)` valida (`Techniques.problem`), mira no cursor e chama o mesmo `attack()` do golpe normal; campos novos `hits` e `dash`.
+- **Fora de combate:** `main.in_combat()`; com monstro caçando, a janela mostra o aviso e não muda nada; a barra continua livre.
+- **Avisos:** subir de nível anuncia habilidade nova e cópia nova de objeto. Os bônus passivos de nível 5 e 10 da proficiência passaram a se chamar **talentos**.
+- **Save e morte:** o save guarda a montagem e a barra (lê também o formato anterior, de receitas com nome); o conhecimento guarda a montagem, que volta no próximo aventureiro com a barra vazia.
 - Captura: `tests/techniques_capture.gd`.
 
 ## Filtro PSX
@@ -129,7 +130,7 @@ Decisões de 15/10/2026: só técnicas físicas por enquanto (a magia fica para 
 - `tests/proficiency_capture.gd`: criação de personagem, janela de proficiências e aviso de nível (precisa de tela).
 - `tests/skills_capture.gd`: armaduras no corpo, guarda, furtivo, baú trancado, dica de armadura e janela agrupada (precisa de tela).
 - `tests/psx_capture.gd`: as mesmas cenas com e sem o filtro PSX (precisa de tela).
-- `tests/techniques_capture.gd`: editor de técnicas, Corte giratório em uso e editor travado em combate (precisa de tela).
+- `tests/techniques_capture.gd`: janela de habilidades, Corte giratório em uso e janela travada em combate (precisa de tela).
 - `tests/hud_capture.gd`: capturas do HUD para revisão (precisa de tela).
 - `tools/render_icons.gd`: gera os ícones dos itens a partir dos modelos.
 
