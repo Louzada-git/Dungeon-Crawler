@@ -35,6 +35,8 @@ var attack_wait: float = 0.0
 ## Technique dash: seconds left and speed.
 var dash_time: float = 0.0
 var dash_velocity: Vector3 = Vector3.ZERO
+## Seconds to the next puff of dust during a dash.
+var dash_fx: float = 0.0
 var attack_weapon: Dictionary = {}
 var attack_facing: Vector3 = Vector3.FORWARD
 var attack_serial: int = 0
@@ -275,6 +277,10 @@ func _physics_process(delta: float) -> void:
   # Technique dash (Investida, Avanço): forward during the wind-up.
   dash_time = maxf(0,dash_time-delta)
   horizontal = dash_velocity
+  dash_fx -= delta
+  if dash_fx <= 0:
+   dash_fx = 0.08
+   Vfx.dust(game,global_position,1,0.15,0.8)
  motion_velocity = horizontal
  impulse = impulse.move_toward(Vector3.ZERO,12*delta)
  velocity = horizontal+impulse
@@ -326,6 +332,7 @@ func attack(stats: Dictionary = {}) -> bool:
  if dash > 0.0:
   dash_time = maxf(0.12,float(attack_wait))
   dash_velocity = facing.normalized()*dash/dash_time
+  dash_fx = 0
  animate_action(attack_animation(weapon),attack_timer)
  game.sound.play_at("swing",global_position,0.65)
  return true
@@ -386,6 +393,7 @@ func dodge() -> bool:
  attack_buffer = 0
  animate_action("dodge",dodge_timer)
  game.sound.play_at("step",global_position,0.55)
+ Vfx.dust(game,global_position-dodge_direction*0.2,2,0.2)
  return true
 
 func toggle_sneak() -> void:
@@ -449,6 +457,8 @@ func receive_damage(amount: float, from: Vector3 = Vector3.ZERO, blockable: bool
   invulnerable = 0.35
   impulse = from.normalized()*0.8
   game.sound.play_at("hit",global_position,0.55)
+  # Sparks where the guard met the blow, between the adventurer and the attacker.
+  Vfx.burst(game,"faisca",Vfx.body_point(self,1.15)-from.normalized()*0.35)
   game.camera_impact(0.05)
   if health <= 0:
    die()
@@ -464,6 +474,7 @@ func receive_damage(amount: float, from: Vector3 = Vector3.ZERO, blockable: bool
  impulse = from.normalized()*1.8
  animate_action("hit",hurt_timer)
  game.sound.play_at("hurt",global_position,0.8)
+ Vfx.burst(game,"sangue",Vfx.body_point(self)+Vfx.jitter(0.1),0.85)
  game.camera_impact(0.10)
  game.hits_received += 1
  if game.hits_received%3==0:
