@@ -1263,7 +1263,7 @@ func test_psx() -> void:
 func teach(sheet: CharacterSheet, branch: String, level: int) -> void:
  sheet.award(branch, ProficiencyTree.xp_for_level(level) - float(sheet.xp.get(branch,0.0)) + 1.0)
 
-## Player-made techniques: form + components, order, slots, use, recharge, lock.
+## Habilidades: one of each, objetos with copies, slots by branch, order, use, lock.
 func test_techniques() -> void:
  get_tree().paused = false
  var p = game.player
@@ -1282,42 +1282,57 @@ func test_techniques() -> void:
  p.sneaking = false
  for e in game.enemies:
   fresh(e,game.layout.to_world(Vector2i(28,7)))
- check(Techniques.FORMS.size() >= 10 and Techniques.COMPONENTS.size() >= 9,"Fichas de formas e componentes carregadas")
- check(Techniques.forms_for("sword").has("corte") and not Techniques.forms_for("sword").has("estocada") and Techniques.forms_for("").has("soco"),"Formas conforme a arma em mãos")
- # Plain Corte = the normal blow, plus a recharge.
- var plain := {"name":"Corte","form":"corte","components":[]}
+ check(Techniques.FORMS.size() >= 10 and Techniques.OBJECTS.size() >= 9,"Habilidades e objetos carregados")
+ check(Techniques.forms_for("sword").has("corte") and not Techniques.forms_for("sword").has("estocada") and Techniques.forms_for("").has("soco"),"Habilidades conforme a arma em mãos")
+ # Basic Corte with no objetos = the normal blow, plus a recharge.
  var base: Dictionary = sheet.weapon_stats("sword")
- var s0: Dictionary = Techniques.stats(sheet,plain,"sword")
- check(Techniques.problem(sheet,plain,"sword") == "" and is_equal_approx(s0["damage"],base["damage"]) and is_equal_approx(s0["cost"],base["cost"]) and is_equal_approx(s0["recarga"],1.5),"Corte sem componentes tem os números do golpe normal")
- check(Techniques.problem(sheet,{"form":"corte_giratorio","components":[]},"sword").contains("Lâminas nível 4"),"Forma trancada diz o que falta")
- check(Techniques.problem(sheet,{"form":"corte","components":["forca"]},"sword").contains("Contundentes nível 3"),"Componente trancado diz o que falta")
- check(Techniques.problem(sheet,{"form":"estocada","components":[]},"sword").contains("não serve"),"Forma de outra arma é recusada")
- # Unlock by proficiency.
- teach(sheet,"laminas",4)
+ var s0: Dictionary = Techniques.stats(sheet,"corte",[],"sword")
+ check(Techniques.problem(sheet,book,"corte","sword") == "" and is_equal_approx(s0["damage"],base["damage"]) and is_equal_approx(s0["cost"],base["cost"]) and is_equal_approx(s0["recarga"],1.5),"Corte sem objetos tem os números do golpe normal")
+ check(Techniques.problem(sheet,book,"corte_giratorio","sword").contains("Lâminas nível 4"),"Habilidade trancada diz o que falta")
+ check(Techniques.copies(sheet,"forca") == 0 and Techniques.problem(sheet,book,"estocada","sword").contains("não serve"),"Sem proficiência não há objetos; habilidade de outra arma é recusada")
+ # Copies by level.
  teach(sheet,"contundentes",3)
- teach(sheet,"acrobacia",3)
- check(Techniques.form_unlocked(sheet,"corte_giratorio") and Techniques.component_unlocked(sheet,"forca") and Techniques.component_unlocked(sheet,"afiada"),"Proficiência destrava formas e componentes")
- check(Techniques.open_slots(sheet,"corte","sword") == 1 + (sheet.mastery(CharacterSheet.path_of("sword"))-1)/5,"Espaços abertos pelo domínio da arma")
+ check(Techniques.copies(sheet,"forca") == 1 and Techniques.next_copy_level(sheet,"forca") == 9,"Contundentes 3: uma cópia de Força; a próxima no nível 9")
+ teach(sheet,"contundentes",9)
+ check(Techniques.copies(sheet,"forca") == 2,"Contundentes 9: duas cópias de Força")
+ # Slots: basic by weapon mastery, unlocked ones by their branch.
+ check(Techniques.open_slots(sheet,"corte","sword") == 1,"Corte começa com 1 slot")
  sheet.award_path(CharacterSheet.path_of("sword"),ProficiencyTree.xp_for_level(11)*3.0)
- check(Techniques.open_slots(sheet,"corte","sword") == 3,"Domínio 11: três espaços")
- # Order: each component acts on what is to its left.
- var a: Dictionary = Techniques.stats(sheet,{"form":"corte","components":["afiada","forca"]},"sword")
- var b: Dictionary = Techniques.stats(sheet,{"form":"corte","components":["forca","afiada"]},"sword")
+ check(Techniques.open_slots(sheet,"corte","sword") == 3,"Domínio 11 na espada: Corte com 3 slots")
+ teach(sheet,"laminas",4)
+ var lam: int = sheet.level("laminas")
+ check(Techniques.form_unlocked(sheet,"corte_giratorio") and Techniques.open_slots(sheet,"corte_giratorio","sword") == mini(2,1 + (lam-4)/4),"Corte giratório destrava e ganha slots pelo nível de Lâminas")
+ teach(sheet,"laminas",3)
+ teach(sheet,"acrobacia",3)
+ teach(sheet,"hastes",3)
+ # Order: each objeto acts on what is to its left.
+ var a: Dictionary = Techniques.stats(sheet,"corte",["afiada","forca"],"sword")
+ var b: Dictionary = Techniques.stats(sheet,"corte",["forca","afiada"],"sword")
  check(is_equal_approx(a["bleed"]["dps"],3.9) and is_equal_approx(b["bleed"]["dps"],3.0) and is_equal_approx(a["damage"],b["damage"]),"Força depois da Lâmina afiada fortalece o sangramento; antes, não")
  var w: float = sheet.weapon_stats("sword")["windup"]
- var c1: Dictionary = Techniques.stats(sheet,{"form":"corte","components":["forca","rapidez"]},"sword")
- var c2: Dictionary = Techniques.stats(sheet,{"form":"corte","components":["rapidez","forca"]},"sword")
+ var c1: Dictionary = Techniques.stats(sheet,"corte",["forca","rapidez"],"sword")
+ var c2: Dictionary = Techniques.stats(sheet,"corte",["rapidez","forca"],"sword")
  check(is_equal_approx(c1["windup"],(w+0.06)*0.6) and is_equal_approx(c2["windup"],w*0.6+0.06),"Rapidez encurta também o preparo que a Força somou antes dela")
- check(is_equal_approx(a["recarga"],1.5+2*0.75),"Cada componente soma recarga")
- check(Techniques.problem(sheet,{"form":"corte","components":["forca","forca"]},"sword").contains("repetido"),"Componente repetido é recusado")
- check(Techniques.problem(sheet,{"form":"pancada","components":["afiada"]},"martelo").contains("não combina"),"Componente que não combina com a arma é recusado")
- # Book and bar.
- var i0: int = book.store({"name":"Corte sangrento","form":"corte","components":["afiada","forca"]})
- var i1: int = book.store({"name":"Giro","form":"corte_giratorio","components":[]})
- book.assign(0,i0)
- book.assign(1,i1)
- check(book.at_slot(0)["name"] == "Corte sangrento" and book.at_slot(1)["form"] == "corte_giratorio","Técnicas salvas e postas na barra")
- # Use in combat: more damage, bleeding, recharge.
+ check(is_equal_approx(a["recarga"],1.5+2*0.75),"Cada objeto soma recarga")
+ # Objetos from other weapons fit where it makes sense.
+ var reach: Dictionary = Techniques.stats(sheet,"corte",["alcance"],"sword")
+ check(Techniques.object_fits("alcance","sword") and is_equal_approx(reach["range"],base["range"]+0.5),"Alcance (das hastes) serve numa habilidade de espada")
+ check(not Techniques.object_fits("afiada","martelo") and not Techniques.object_fits("afiada","") and Techniques.object_fits("afiada","arco"),"Lâmina afiada não faz sentido em pancada nem soco, mas serve em flecha")
+ # Copies: one place at a time.
+ book.set_objects("corte",["afiada","forca"])
+ check(book.in_use("forca") == 1 and Techniques.problem(sheet,book,"corte","sword") == "","Corte com Lâmina afiada e Força")
+ book.set_objects("corte_giratorio",["forca"])
+ check(book.in_use("forca") == 2 and Techniques.problem(sheet,book,"corte_giratorio","sword") == "","Segunda cópia de Força no Corte giratório")
+ sheet.xp["contundentes"] = ProficiencyTree.xp_for_level(3)
+ check(Techniques.problem(sheet,book,"corte","sword").contains("usa 2"),"Com uma cópia só, usar Força em duas habilidades é recusado")
+ teach(sheet,"contundentes",9)
+ book.set_objects("corte_giratorio",[])
+ # Bar and use.
+ book.assign(0,"corte")
+ book.assign(1,"corte_giratorio")
+ book.assign(2,"corte")
+ check(book.at_slot(0) == "" and book.at_slot(2) == "corte" and book.at_slot(1) == "corte_giratorio","Cada habilidade ocupa um lugar só na barra")
+ book.assign(0,"corte")
  var e0 = game.enemies[0]
  fresh(e0,at+Vector3(1.2,0,0))
  e0.aggro = true
@@ -1325,17 +1340,14 @@ func test_techniques() -> void:
  p.stamina = p.max_stamina
  p.facing = Vector3.RIGHT
  var expected: float = a["damage"]
- check(p.use_technique(0,false),"Tecla 4 usa a técnica")
+ var xp_before: float = float(sheet.xp.get("contundentes",0))
+ check(p.use_technique(0,false),"Tecla 4 usa a habilidade")
  game.resolve_player_attack()
- check(is_equal_approx(e0.health,e0.maximum_health-expected) and e0.bleed_time > 0 and is_equal_approx(e0.bleed_dps,3.9),"Corte sangrento: dano montado e sangramento de 3,9/s (vida %s de %s, esperado −%s, sangra %s)" % [UiStyle.fmt(e0.health,2),UiStyle.fmt(e0.maximum_health,2),UiStyle.fmt(expected,2),UiStyle.fmt(e0.bleed_dps,2)])
- check(book.remaining(i0) > 2.9 and float(sheet.xp.get("contundentes",0)) > ProficiencyTree.xp_for_level(3),"Usar inicia a recarga e treina o ramo dos componentes")
+ check(is_equal_approx(e0.health,e0.maximum_health-expected) and e0.bleed_time > 0 and is_equal_approx(e0.bleed_dps,3.9),"Corte com objetos: dano montado e sangramento de 3,9/s")
+ check(book.remaining("corte") > 2.9 and float(sheet.xp.get("contundentes",0)) > xp_before,"Usar inicia a recarga e treina o ramo de cada objeto")
  ready_player(p)
- check(not p.use_technique(0,false),"Técnica recarregando não sai")
+ check(not p.use_technique(0,false),"Habilidade recarregando não sai")
  book.tick(10.0)
- ready_player(p)
- p.stamina = p.max_stamina
- check(p.use_technique(0,false),"Depois da recarga, sai de novo")
- game.resolve_player_attack()
  # Spin hits behind too.
  fresh(e0,at+Vector3(-1.2,0,0))
  e0.aggro = true
@@ -1347,23 +1359,22 @@ func test_techniques() -> void:
  check(e0.health < e0.maximum_health,"Corte giratório acerta quem está atrás")
  # Double hit.
  teach(sheet,"espadas",4)
- var duo: Dictionary = Techniques.stats(sheet,{"form":"corte","components":["duplo"]},"sword")
- var i2: int = book.store({"name":"Duplo","form":"corte","components":["duplo"]})
- book.assign(2,i2)
+ book.set_objects("corte",["duplo"])
+ var duo: Dictionary = Techniques.stats(sheet,"corte",["duplo"],"sword")
  fresh(e0,at+Vector3(1.2,0,0))
  e0.aggro = true
  ready_player(p)
  p.stamina = p.max_stamina
  p.facing = Vector3.RIGHT
- p.use_technique(2,false)
+ book.tick(10.0)
+ p.use_technique(0,false)
  game.resolve_player_attack()
- check(int(duo["hits"]) == 2 and is_equal_approx(e0.health,e0.maximum_health-2.0*duo["damage"]),"Golpe duplo acerta duas vezes com 65%% (vida %s, golpe %s)" % [UiStyle.fmt(e0.health,2),UiStyle.fmt(duo["damage"],2)])
- # Dash (Investida with a spear).
+ check(int(duo["hits"]) == 2 and is_equal_approx(e0.health,e0.maximum_health-2.0*duo["damage"]),"Golpe duplo acerta duas vezes com 65%")
+ # Dash with a spear.
  teach(sheet,"hastes",4)
  inv.add("spear")
  inv.equip("spear")
- var i3: int = book.store({"name":"Investida","form":"investida","components":[]})
- book.assign(3,i3)
+ book.assign(3,"investida")
  fresh(e0,game.layout.to_world(Vector2i(28,7)))
  ready_player(p)
  p.stamina = p.max_stamina
@@ -1371,46 +1382,52 @@ func test_techniques() -> void:
  check(p.use_technique(3,false) and p.dash_time > 0 and is_equal_approx(p.dash_velocity.length()*p.dash_time,2.5),"Investida avança 2,5 m no preparo")
  game.resolve_player_attack()
  p.dash_time = 0
- check(Techniques.problem(sheet,book.at_slot(0),"spear").contains("não serve"),"Técnica de corte não serve na lança")
  ready_player(p)
- check(not p.use_technique(0,false),"Técnica que não serve na arma em mãos não sai")
+ check(not p.use_technique(0,false),"Habilidade de corte não sai com a lança")
  inv.equip("sword")
- # Editor: only out of combat.
+ book.set_objects("corte",["afiada","forca"])
+ # Window: every habilidade, editable out of combat.
  game.ui.toggle_techniques()
  await wait_frames(2)
  var win: UiTechniqueWindow = game.ui.tech_window
- check(win.visible and win.list_box.get_child_count() == book.recipes.size(),"Janela de técnicas lista as conhecidas")
- win.edit(i0)
- check(win.problem_label.text.contains("Pronta") and win.preview.get_child_count() >= 10,"Editor mostra a prévia ao vivo")
+ win.select("corte")
+ check(win.visible and win.list_box.get_child_count() >= Techniques.FORMS.size() and win.problem_label.text.contains("Pronta"),"Janela lista todas as habilidades e mostra a prévia")
  win.move_left(1)
- check(win.draft["components"] == ["forca","afiada"] and is_equal_approx(Techniques.stats(sheet,win.draft,"sword")["bleed"]["dps"],3.0),"Mudar a ordem no editor muda o resultado")
+ check(book.objects("corte") == ["forca","afiada"],"Mudar a ordem na janela muda a habilidade")
+ win.remove_object(0)
+ win.add_object("alcance")
+ check(book.objects("corte") == ["afiada","alcance"],"Tirar e pôr objetos na janela")
+ win.select("corte_giratorio")
+ win.add_object("forca")
+ win.add_object("forca")
+ check(book.objects("corte_giratorio").count("forca") == 1 or Techniques.open_slots(sheet,"corte_giratorio","sword") >= 2,"Slots limitam quantos objetos cabem")
  fresh(e0,at+Vector3(3,0,0))
  e0.aggro = true
  win.refresh(true)
- check(game.in_combat() and win.combat_label.visible and win.save() == -1 and win.save_button.disabled,"Com monstro caçando, o editor não muda nada")
+ var before: Array = book.objects("corte_giratorio").duplicate()
+ win.add_object("rapidez")
+ check(game.in_combat() and win.combat_label.visible and book.objects("corte_giratorio") == before,"Com monstro caçando, a janela não muda nada")
  e0.aggro = false
- win.refresh(true)
- check(win.save() == i0 and book.recipes[i0]["components"] == ["forca","afiada"],"Fora de combate, salva")
- win.start_new()
- win.add_component("rapidez")
- win.name_edit.text = "Rápido"
- win.draft["name"] = "Rápido"
- var before: int = book.recipes.size()
- win.assign(3)
- check(book.recipes.size() == before+1 and book.at_slot(3)["name"] == "Rápido","Pôr na barra salva a técnica nova")
- win.forget()
- check(book.recipes.size() == before and book.at_slot(3).is_empty(),"Esquecer tira da lista e da barra")
+ win.select("sequencia")
+ win.assign(2)
+ check(book.at_slot(2) != "sequencia","Habilidade trancada não vai para a barra")
  game.ui.toggle_techniques()
  # HUD bar.
- book.start(i0,4.0)
+ book.start("corte",4.0)
  book.tick(1.0)
  game.ui.update_hud()
  var hud_slot: Dictionary = game.ui.hotbar.tech_slots[0]
  check(hud_slot["shade"].size.y > 40.0 and hud_slot["time"].text == "3,0","Barra mostra a recarga")
  var tip: Control = game.ui.hotbar.technique_tooltip(0)
- check(label_text(tip).contains("Corte sangrento") and label_text(tip).contains("Tecla [4]"),"Dica da barra mostra a técnica")
+ check(label_text(tip).contains("Corte") and label_text(tip).contains("Objetos:"),"Dica da barra mostra a habilidade e os objetos")
  tip.free()
  book.recharge.clear()
+ # Level-up notices.
+ game.ui.level_banner.queue.clear()
+ game.ui.on_level_up("pontaria",4)
+ var texts: Array = game.ui.level_banner.queue.map(func(q): return str(q))
+ check(" ".join(texts).contains("Nova habilidade: Tiro mirado"),"Subir de nível avisa habilidade nova")
+ game.ui.level_banner.queue.clear()
  # Keys 4-7.
  fresh(e0,at+Vector3(1.2,0,0))
  e0.aggro = true
@@ -1420,17 +1437,20 @@ func test_techniques() -> void:
  key.physical_keycode = KEY_4
  key.pressed = true
  game.ui._input(key)
- check(book.remaining(i0) > 0.0,"Tecla 4 do teclado usa a técnica da barra")
+ check(book.remaining("corte") > 0.0,"Tecla 4 do teclado usa a habilidade da barra")
  game.resolve_player_attack()
- # Save keeps recipes and bar.
+ # Save keeps the setup and the bar; old saves are read.
  var snap: Dictionary = book.snapshot()
  game.ui.close_all()
- check(game.save_game(false),"Save com técnicas é gravado")
+ check(game.save_game(false),"Save com habilidades é gravado")
  book.clear()
- check(game.load_game() and book.snapshot() == snap,"Técnicas e barra voltam do save")
- var sane := TechniqueBook.new()
- sane.restore({"recipes":[{"name":"X","form":"inexistente","components":[]},{"name":"Y","form":"corte","components":["afiada","sumido"]}],"bar":[5,0,-1,"a"]})
- check(sane.recipes.size() == 1 and sane.recipes[0]["components"] == ["afiada"] and sane.bar == [-1,0,-1,-1],"Técnicas de save estranho são limpas sem quebrar")
+ check(game.load_game() and book.snapshot() == snap,"Habilidades e barra voltam do save")
+ var old := TechniqueBook.new()
+ old.restore({"recipes":[{"name":"X","form":"corte","components":["afiada","sumido"]},{"name":"Y","form":"corte","components":["forca"]},{"name":"Z","form":"inexistente","components":[]}],"bar":[1,0,2,"a"]})
+ check(old.objects("corte") == ["afiada"] and old.bar == ["corte","","",""],"Save do formato anterior vira habilidades sem quebrar (uma montagem e um lugar na barra por habilidade)")
+ var weird := TechniqueBook.new()
+ weird.restore({"configs":{"corte":["forca","???"],"nada":["forca"]},"bar":["corte",3,"nada",""]})
+ check(weird.objects("corte") == ["forca"] and weird.bar == ["corte","","",""],"Save estranho é limpo")
  # Back to the fixed numbers.
  for e in game.enemies:
   fresh(e,game.layout.to_world(Vector2i(28,7)))
