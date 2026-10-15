@@ -1,5 +1,17 @@
 # Dungepm — As Cisternas
 
+## Novo: efeitos visuais (15/10/2026)
+
+Os efeitos vêm do Brackeys VFX Bundle que você mandou, reduzidos para o tamanho PSX (poucos pixels por quadro, lidos sem suavizar), então combinam com o filtro.
+
+- **Acertos:** sangue e um clarão a cada golpe que pega. Em monstro blindado, faíscas no lugar do sangue, a não ser que a arma esmague armadura (maça, martelo).
+- **Golpe forte:** ataque furtivo, armadura esmagada e golpes que atordoam muito (Golpe esmagador, Impacto) soltam um estouro dourado maior.
+- **Sangramento:** o monstro pinga sangue enquanto a Lâmina afiada faz efeito.
+- **Você:** sangue quando é ferido; faíscas do lado do golpe quando a guarda segura.
+- **Poeira:** na esquiva, na Investida e no Avanço, e em volta da Pancada no chão. Flecha que bate na parede solta um clarão e poeira.
+- **Morte:** o monstro solta uma fumaça clara ao cair.
+- **Tochas** agora têm chama animada, e a luz delas treme. **Fogueira no abrigo**, dentro do círculo onde você descansa.
+
 ## Novo: habilidades e objetos (15/10/2026)
 
 **T** abre as habilidades. A barra fica nas teclas **4 a 7**.
