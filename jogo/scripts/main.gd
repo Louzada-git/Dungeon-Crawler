@@ -633,11 +633,20 @@ func restart() -> void:
 	get_tree().reload_current_scene()
 
 func run_test_mode() -> void:
+	# The exported game does not carry the tests.
+	if not ResourceLoader.exists("res://tests/runtime_test.gd"):
+		print("Os testes não vão no jogo exportado; rode-os pelo projeto.")
+		get_tree().quit(2)
+		return
 	var harness = load("res://tests/runtime_test.gd").new()
 	add_child(harness)
 	harness.run(self, "--capture" in OS.get_cmdline_user_args())
 
 func run_labyrinth_tests() -> void:
+	if not ResourceLoader.exists("res://tests/labyrinth_test.gd"):
+		print("Os testes não vão no jogo exportado; rode-os pelo projeto.")
+		get_tree().quit(2)
+		return
 	var harness = load("res://tests/labyrinth_test.gd").new()
 	add_child(harness)
 	harness.run(self)
