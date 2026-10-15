@@ -9,7 +9,7 @@ const LOOT_POS := Vector2(570, 8)
 const WIDTH := 500.0
 const HEIGHT := 396.0
 
-enum Action { USE, UNEQUIP, DROP_ONE, DROP_ALL, STORE_ONE, STORE_ALL, TAKE_ONE, TAKE_STACK, TAKE_EVERYTHING, USE_FROM_LOOT }
+enum Action { USE, UNEQUIP, DROP_ONE, DROP_ALL, STORE_ONE, STORE_ALL, TAKE_ONE, TAKE_STACK, TAKE_EVERYTHING, USE_FROM_LOOT, QUICK_ADD, QUICK_REMOVE }
 
 var game
 var ui
@@ -436,6 +436,11 @@ func _open_menu(source: String, id: String, at: Vector2) -> void:
 				menu.add_item("Guardar arma na mochila", Action.UNEQUIP)
 			else:
 				menu.add_item(_use_label(id), Action.USE)
+		var quick: int = game.quick_bar.slot_of(id)
+		if quick >= 0:
+			menu.add_item("Tirar da barra rápida (%d)" % (quick + 1), Action.QUICK_REMOVE)
+		elif game.quick_bar.first_free() >= 0:
+			menu.add_item("Pôr na barra rápida (%d)" % (game.quick_bar.first_free() + 1), Action.QUICK_ADD)
 		menu.add_separator()
 		menu.add_item("Deixar 1 no chão", Action.DROP_ONE)
 		if n > 1:
@@ -486,10 +491,23 @@ func _on_menu(action: int) -> void:
 			take(id, int(loot.get("items", {}).get(id, 0)))
 		Action.TAKE_EVERYTHING:
 			take_all()
+		Action.QUICK_ADD:
+			quick_add(id)
+		Action.QUICK_REMOVE:
+			game.quick_bar.remove(game.quick_bar.slot_of(id))
 		Action.USE_FROM_LOOT:
 			# Take one and use it immediately, as long as it fits.
 			if take_one_and_use(id):
 				_after_change()
+
+## Puts an item in the first free slot of the quick bar.
+func quick_add(id: String) -> void:
+	var slot: int = game.quick_bar.first_free()
+	if slot < 0:
+		game.message("Barra rápida cheia. Arraste o item para cima de um espaço para trocar.", 3)
+		return
+	game.quick_bar.assign(slot, id)
+	game.message("%s no espaço %d da barra rápida." % [Items.info(id).get("name", id), slot + 1], 2)
 
 func take_one_and_use(id: String) -> bool:
 	## Takes one unit and uses it at once; if it is not needed now it stays in the backpack.
