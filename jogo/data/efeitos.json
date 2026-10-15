@@ -1,0 +1,14 @@
+{
+ "versao": 1,
+ "_sobre": "Efeitos visuais (scripts/systems/vfx.gd). 'folha' é uma folha de assets/vfx (grade em assets/vfx/folhas.json). 'tamanho': largura em metros. 'fps': quadros por segundo (a duração sai da folha). 'cor' multiplica a folha e 'brilho' clareia (acima de 1 deixa a fumaça mais clara que a folha); 'alfa' é a opacidade. 'aditivo' soma luz (faíscas, brilho). 'vertical' fica em pé e só gira em volta do eixo Y (chamas); sem ele o quadro encara a câmera. 'repete' anima sem parar (tochas). 'sobe' em metros ao longo da vida; 'desvanece' apaga aos poucos; 'frente' aproxima da câmera para não sumir dentro do corpo.",
+ "efeitos": {
+  "sangue": {"folha": "sangue", "tamanho": 1.1, "fps": 34, "cor": "c4c4c4", "frente": 0.55},
+  "gota": {"folha": "sangue", "tamanho": 0.5, "fps": 34, "cor": "b0b0b0", "frente": 0.45},
+  "impacto": {"folha": "impacto", "tamanho": 0.8, "fps": 34, "aditivo": true, "frente": 0.6},
+  "faisca": {"folha": "impacto", "tamanho": 0.85, "fps": 30, "cor": "ffb04a", "aditivo": true, "frente": 0.6},
+  "golpe_forte": {"folha": "golpe_forte", "tamanho": 1.35, "fps": 24, "aditivo": true, "frente": 0.65},
+  "poeira": {"folha": "fumaca", "tamanho": 0.8, "fps": 24, "cor": "c9b99a", "brilho": 1.6, "alfa": 0.55, "desvanece": true, "sobe": 0.25, "frente": 0.15},
+  "fumaca_morte": {"folha": "fumaca", "tamanho": 1.5, "fps": 16, "cor": "b4b8a8", "brilho": 1.2, "alfa": 0.7, "desvanece": true, "sobe": 0.7, "frente": 0.3},
+  "chama": {"folha": "chama", "tamanho": 0.46, "fps": 14, "aditivo": true, "vertical": true, "repete": true}
+ }
+}
