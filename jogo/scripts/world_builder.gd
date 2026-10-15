@@ -18,7 +18,13 @@ static func prop(world: Node3D, id: String, pos: Vector3, rotation: float = 0.0,
 
 static func environment(game) -> void:
 	var node := WorldEnvironment.new()
+	node.name = "Ambiente"
 	var env := Environment.new()
+	# Dark depth fog, only in third person (main.set_camera_mode): it hides the far
+	# end of long halls and the open sky over the walls.
+	env.fog_light_color = Color("161915")
+	env.fog_density = 0.045
+	env.fog_sky_affect = 0.0
 	env.background_mode = Environment.BG_COLOR
 	env.background_color = Color("161915")
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
@@ -50,11 +56,12 @@ static func clear(game) -> void:
 	for shot in game.get_tree().get_nodes_in_group("projeteis"):
 		shot.queue_free()
 
-## One MultiMeshInstance3D per model for repeated tiles.
-static func _batch(world: Node3D, id: String, transforms: Array) -> void:
+## One MultiMeshInstance3D per model for repeated tiles (`model` when the
+## batch has its own name, like the two sets of front walls).
+static func _batch(world: Node3D, id: String, transforms: Array, model: String = "") -> MultiMeshInstance3D:
 	if transforms.is_empty():
-		return
-	var scene: Node3D = Visuals.model(id, 1.0)
+		return null
+	var scene: Node3D = Visuals.model(model if model != "" else id, 1.0)
 	var mesh_node: MeshInstance3D = null
 	for child in scene.get_children():
 		if child is MeshInstance3D:
@@ -62,7 +69,7 @@ static func _batch(world: Node3D, id: String, transforms: Array) -> void:
 			break
 	if mesh_node == null:
 		scene.free()
-		return
+		return null
 	var local: Transform3D = mesh_node.transform
 	var multimesh := MultiMesh.new()
 	multimesh.transform_format = MultiMesh.TRANSFORM_3D
@@ -77,6 +84,19 @@ static func _batch(world: Node3D, id: String, transforms: Array) -> void:
 		instance.material_override = mesh_node.material_override
 	world.add_child(instance)
 	scene.free()
+	return instance
+
+## Front walls: cut low for the isometric camera (so the room shows), whole in
+## third person (the camera is down among them).
+static func apply_view(world: Node3D, third_person: bool) -> void:
+	if not is_instance_valid(world):
+		return
+	var low = world.get_node_or_null("Lote_parede_frente_baixa")
+	var tall = world.get_node_or_null("Lote_parede_frente_alta")
+	if low:
+		low.visible = not third_person
+	if tall:
+		tall.visible = third_person
 
 static func build(game) -> void:
 	var layout = game.layout
@@ -90,6 +110,9 @@ static func build(game) -> void:
 	var extent := Vector3(layout.size.x * DungeonLayout.CELL + 8, 1, layout.size.y * DungeonLayout.CELL + 8)
 	Visuals.collider(world, extent, Vector3(extent.x * 0.5 - 4, -0.48, extent.z * 0.5 - 4)).name = "Ground"
 	var tiles := {"piso": [], "piso_b": [], "parede": []}
+	# Front walls in two versions: low (isometric cutaway) and whole (third person).
+	var front_low: Array = []
+	var front_tall: Array = []
 	var walls: Dictionary = {}
 	var room_cells: Dictionary = {}
 	for room in layout.rooms:
@@ -110,14 +133,20 @@ static func build(game) -> void:
 				continue
 			walls[adjacent] = true
 			var basis := Basis(Vector3.UP, PI / 2 if offset.x != 0 else 0.0)
+			var at := center + Vector3(offset.x, 0, offset.y)
 			# Keep foreground cutaways while back walls retain human-scale height.
 			if offset.x > 0 or offset.y > 0:
-				basis = basis.scaled(Vector3(1, 0.19, 1))
-			elif (cell.x + cell.y) % 5 == 0 and room_cells.has(cell):
+				front_low.append(Transform3D(basis.scaled(Vector3(1, 0.19, 1)), at))
+				front_tall.append(Transform3D(basis, at))
+				continue
+			if (cell.x + cell.y) % 5 == 0 and room_cells.has(cell):
 				torch(world, center + Vector3(offset.x * 0.75, 1.24, offset.y * 0.75))
-			tiles["parede"].append(Transform3D(basis, center + Vector3(offset.x, 0, offset.y)))
+			tiles["parede"].append(Transform3D(basis, at))
 	for id in tiles:
 		_batch(world, id, tiles[id])
+	_batch(world, "parede_frente_baixa", front_low, "parede")
+	_batch(world, "parede_frente_alta", front_tall, "parede")
+	apply_view(world, game.camera_rig != null and game.camera_rig.third_person())
 	var body := StaticBody3D.new()
 	body.name = "Paredes"
 	world.add_child(body)
