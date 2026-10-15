@@ -183,6 +183,10 @@ static func fmt(value: float, decimals: int = 1) -> String:
 	# Portuguese decimal comma.
 	return (("%." + str(decimals) + "f") % value).replace(".", ",")
 
+## Whole numbers without decimals, others with one ("8,5", "16").
+static func num(value: float) -> String:
+	return "%d" % roundi(value) if is_equal_approx(value, roundf(value)) else fmt(value)
+
 static func build_theme() -> Theme:
 	var t := Theme.new()
 	t.default_font = font("regular")
