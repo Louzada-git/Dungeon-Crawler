@@ -305,6 +305,7 @@ func run(target, capture: bool) -> void:
  await test_proficiencies()
  await test_skills()
  await test_psx()
+ await test_techniques()
  inv.add("seal")
  p.position = game.camp_position
  game.interact()
@@ -1258,3 +1259,186 @@ func test_psx() -> void:
  game.inventory.remove("machado")
  game.inventory.equip("sword")
  DirAccess.remove_absolute(game.settings_path)
+
+func teach(sheet: CharacterSheet, branch: String, level: int) -> void:
+ sheet.award(branch, ProficiencyTree.xp_for_level(level) - float(sheet.xp.get(branch,0.0)) + 1.0)
+
+## Player-made techniques: form + components, order, slots, use, recharge, lock.
+func test_techniques() -> void:
+ get_tree().paused = false
+ var p = game.player
+ var inv = game.inventory
+ var sheet: CharacterSheet = game.sheet
+ var book: TechniqueBook = game.techniques
+ var saved_inventory: Dictionary = inv.snapshot()
+ var was_processing: bool = p.is_physics_processing()
+ p.set_physics_process(false)
+ sheet.enabled = true
+ sheet.reset()
+ book.clear()
+ inv.restore({"stacks":{"sword":1},"equipped":"sword"})
+ var at: Vector3 = game.layout.to_world(Vector2i(5,12))
+ p.position = at
+ p.sneaking = false
+ for e in game.enemies:
+  fresh(e,game.layout.to_world(Vector2i(28,7)))
+ check(Techniques.FORMS.size() >= 10 and Techniques.COMPONENTS.size() >= 9,"Fichas de formas e componentes carregadas")
+ check(Techniques.forms_for("sword").has("corte") and not Techniques.forms_for("sword").has("estocada") and Techniques.forms_for("").has("soco"),"Formas conforme a arma em mãos")
+ # Plain Corte = the normal blow, plus a recharge.
+ var plain := {"name":"Corte","form":"corte","components":[]}
+ var base: Dictionary = sheet.weapon_stats("sword")
+ var s0: Dictionary = Techniques.stats(sheet,plain,"sword")
+ check(Techniques.problem(sheet,plain,"sword") == "" and is_equal_approx(s0["damage"],base["damage"]) and is_equal_approx(s0["cost"],base["cost"]) and is_equal_approx(s0["recarga"],1.5),"Corte sem componentes tem os números do golpe normal")
+ check(Techniques.problem(sheet,{"form":"corte_giratorio","components":[]},"sword").contains("Lâminas nível 4"),"Forma trancada diz o que falta")
+ check(Techniques.problem(sheet,{"form":"corte","components":["forca"]},"sword").contains("Contundentes nível 3"),"Componente trancado diz o que falta")
+ check(Techniques.problem(sheet,{"form":"estocada","components":[]},"sword").contains("não serve"),"Forma de outra arma é recusada")
+ # Unlock by proficiency.
+ teach(sheet,"laminas",4)
+ teach(sheet,"contundentes",3)
+ teach(sheet,"acrobacia",3)
+ check(Techniques.form_unlocked(sheet,"corte_giratorio") and Techniques.component_unlocked(sheet,"forca") and Techniques.component_unlocked(sheet,"afiada"),"Proficiência destrava formas e componentes")
+ check(Techniques.open_slots(sheet,"corte","sword") == 1 + (sheet.mastery(CharacterSheet.path_of("sword"))-1)/5,"Espaços abertos pelo domínio da arma")
+ sheet.award_path(CharacterSheet.path_of("sword"),ProficiencyTree.xp_for_level(11)*3.0)
+ check(Techniques.open_slots(sheet,"corte","sword") == 3,"Domínio 11: três espaços")
+ # Order: each component acts on what is to its left.
+ var a: Dictionary = Techniques.stats(sheet,{"form":"corte","components":["afiada","forca"]},"sword")
+ var b: Dictionary = Techniques.stats(sheet,{"form":"corte","components":["forca","afiada"]},"sword")
+ check(is_equal_approx(a["bleed"]["dps"],3.9) and is_equal_approx(b["bleed"]["dps"],3.0) and is_equal_approx(a["damage"],b["damage"]),"Força depois da Lâmina afiada fortalece o sangramento; antes, não")
+ var w: float = sheet.weapon_stats("sword")["windup"]
+ var c1: Dictionary = Techniques.stats(sheet,{"form":"corte","components":["forca","rapidez"]},"sword")
+ var c2: Dictionary = Techniques.stats(sheet,{"form":"corte","components":["rapidez","forca"]},"sword")
+ check(is_equal_approx(c1["windup"],(w+0.06)*0.6) and is_equal_approx(c2["windup"],w*0.6+0.06),"Rapidez encurta também o preparo que a Força somou antes dela")
+ check(is_equal_approx(a["recarga"],1.5+2*0.75),"Cada componente soma recarga")
+ check(Techniques.problem(sheet,{"form":"corte","components":["forca","forca"]},"sword").contains("repetido"),"Componente repetido é recusado")
+ check(Techniques.problem(sheet,{"form":"pancada","components":["afiada"]},"martelo").contains("não combina"),"Componente que não combina com a arma é recusado")
+ # Book and bar.
+ var i0: int = book.store({"name":"Corte sangrento","form":"corte","components":["afiada","forca"]})
+ var i1: int = book.store({"name":"Giro","form":"corte_giratorio","components":[]})
+ book.assign(0,i0)
+ book.assign(1,i1)
+ check(book.at_slot(0)["name"] == "Corte sangrento" and book.at_slot(1)["form"] == "corte_giratorio","Técnicas salvas e postas na barra")
+ # Use in combat: more damage, bleeding, recharge.
+ var e0 = game.enemies[0]
+ fresh(e0,at+Vector3(1.2,0,0))
+ e0.aggro = true
+ ready_player(p)
+ p.stamina = p.max_stamina
+ p.facing = Vector3.RIGHT
+ var expected: float = a["damage"]
+ check(p.use_technique(0,false),"Tecla 4 usa a técnica")
+ game.resolve_player_attack()
+ check(is_equal_approx(e0.health,e0.maximum_health-expected) and e0.bleed_time > 0 and is_equal_approx(e0.bleed_dps,3.9),"Corte sangrento: dano montado e sangramento de 3,9/s (vida %s de %s, esperado −%s, sangra %s)" % [UiStyle.fmt(e0.health,2),UiStyle.fmt(e0.maximum_health,2),UiStyle.fmt(expected,2),UiStyle.fmt(e0.bleed_dps,2)])
+ check(book.remaining(i0) > 2.9 and float(sheet.xp.get("contundentes",0)) > ProficiencyTree.xp_for_level(3),"Usar inicia a recarga e treina o ramo dos componentes")
+ ready_player(p)
+ check(not p.use_technique(0,false),"Técnica recarregando não sai")
+ book.tick(10.0)
+ ready_player(p)
+ p.stamina = p.max_stamina
+ check(p.use_technique(0,false),"Depois da recarga, sai de novo")
+ game.resolve_player_attack()
+ # Spin hits behind too.
+ fresh(e0,at+Vector3(-1.2,0,0))
+ e0.aggro = true
+ ready_player(p)
+ p.stamina = p.max_stamina
+ p.facing = Vector3.RIGHT
+ check(p.use_technique(1,false),"Corte giratório sai")
+ game.resolve_player_attack()
+ check(e0.health < e0.maximum_health,"Corte giratório acerta quem está atrás")
+ # Double hit.
+ teach(sheet,"espadas",4)
+ var duo: Dictionary = Techniques.stats(sheet,{"form":"corte","components":["duplo"]},"sword")
+ var i2: int = book.store({"name":"Duplo","form":"corte","components":["duplo"]})
+ book.assign(2,i2)
+ fresh(e0,at+Vector3(1.2,0,0))
+ e0.aggro = true
+ ready_player(p)
+ p.stamina = p.max_stamina
+ p.facing = Vector3.RIGHT
+ p.use_technique(2,false)
+ game.resolve_player_attack()
+ check(int(duo["hits"]) == 2 and is_equal_approx(e0.health,e0.maximum_health-2.0*duo["damage"]),"Golpe duplo acerta duas vezes com 65%% (vida %s, golpe %s)" % [UiStyle.fmt(e0.health,2),UiStyle.fmt(duo["damage"],2)])
+ # Dash (Investida with a spear).
+ teach(sheet,"hastes",4)
+ inv.add("spear")
+ inv.equip("spear")
+ var i3: int = book.store({"name":"Investida","form":"investida","components":[]})
+ book.assign(3,i3)
+ fresh(e0,game.layout.to_world(Vector2i(28,7)))
+ ready_player(p)
+ p.stamina = p.max_stamina
+ p.facing = Vector3.RIGHT
+ check(p.use_technique(3,false) and p.dash_time > 0 and is_equal_approx(p.dash_velocity.length()*p.dash_time,2.5),"Investida avança 2,5 m no preparo")
+ game.resolve_player_attack()
+ p.dash_time = 0
+ check(Techniques.problem(sheet,book.at_slot(0),"spear").contains("não serve"),"Técnica de corte não serve na lança")
+ ready_player(p)
+ check(not p.use_technique(0,false),"Técnica que não serve na arma em mãos não sai")
+ inv.equip("sword")
+ # Editor: only out of combat.
+ game.ui.toggle_techniques()
+ await wait_frames(2)
+ var win: UiTechniqueWindow = game.ui.tech_window
+ check(win.visible and win.list_box.get_child_count() == book.recipes.size(),"Janela de técnicas lista as conhecidas")
+ win.edit(i0)
+ check(win.problem_label.text.contains("Pronta") and win.preview.get_child_count() >= 10,"Editor mostra a prévia ao vivo")
+ win.move_left(1)
+ check(win.draft["components"] == ["forca","afiada"] and is_equal_approx(Techniques.stats(sheet,win.draft,"sword")["bleed"]["dps"],3.0),"Mudar a ordem no editor muda o resultado")
+ fresh(e0,at+Vector3(3,0,0))
+ e0.aggro = true
+ win.refresh(true)
+ check(game.in_combat() and win.combat_label.visible and win.save() == -1 and win.save_button.disabled,"Com monstro caçando, o editor não muda nada")
+ e0.aggro = false
+ win.refresh(true)
+ check(win.save() == i0 and book.recipes[i0]["components"] == ["forca","afiada"],"Fora de combate, salva")
+ win.start_new()
+ win.add_component("rapidez")
+ win.name_edit.text = "Rápido"
+ win.draft["name"] = "Rápido"
+ var before: int = book.recipes.size()
+ win.assign(3)
+ check(book.recipes.size() == before+1 and book.at_slot(3)["name"] == "Rápido","Pôr na barra salva a técnica nova")
+ win.forget()
+ check(book.recipes.size() == before and book.at_slot(3).is_empty(),"Esquecer tira da lista e da barra")
+ game.ui.toggle_techniques()
+ # HUD bar.
+ book.start(i0,4.0)
+ book.tick(1.0)
+ game.ui.update_hud()
+ var hud_slot: Dictionary = game.ui.hotbar.tech_slots[0]
+ check(hud_slot["shade"].size.y > 40.0 and hud_slot["time"].text == "3,0","Barra mostra a recarga")
+ var tip: Control = game.ui.hotbar.technique_tooltip(0)
+ check(label_text(tip).contains("Corte sangrento") and label_text(tip).contains("Tecla [4]"),"Dica da barra mostra a técnica")
+ tip.free()
+ book.recharge.clear()
+ # Keys 4-7.
+ fresh(e0,at+Vector3(1.2,0,0))
+ e0.aggro = true
+ ready_player(p)
+ p.stamina = p.max_stamina
+ var key := InputEventKey.new()
+ key.physical_keycode = KEY_4
+ key.pressed = true
+ game.ui._input(key)
+ check(book.remaining(i0) > 0.0,"Tecla 4 do teclado usa a técnica da barra")
+ game.resolve_player_attack()
+ # Save keeps recipes and bar.
+ var snap: Dictionary = book.snapshot()
+ game.ui.close_all()
+ check(game.save_game(false),"Save com técnicas é gravado")
+ book.clear()
+ check(game.load_game() and book.snapshot() == snap,"Técnicas e barra voltam do save")
+ var sane := TechniqueBook.new()
+ sane.restore({"recipes":[{"name":"X","form":"inexistente","components":[]},{"name":"Y","form":"corte","components":["afiada","sumido"]}],"bar":[5,0,-1,"a"]})
+ check(sane.recipes.size() == 1 and sane.recipes[0]["components"] == ["afiada"] and sane.bar == [-1,0,-1,-1],"Técnicas de save estranho são limpas sem quebrar")
+ # Back to the fixed numbers.
+ for e in game.enemies:
+  fresh(e,game.layout.to_world(Vector2i(28,7)))
+ book.clear()
+ sheet.reset()
+ sheet.enabled = false
+ game.apply_attributes(true)
+ inv.restore(saved_inventory)
+ p.refresh_weapon()
+ p.set_physics_process(was_processing)
+ game.ui.close_all()
