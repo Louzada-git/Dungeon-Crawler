@@ -1,5 +1,5 @@
 extends SceneTree
-# Technique editor, bar with recharge and a technique in use, for review.
+# Habilidades window, bar with recharge and a habilidade in use, for review.
 #   godot --path . --rendering-driver opengl3 -s res://tests/techniques_capture.gd -- --seed=4242
 var out: String
 var game
@@ -37,17 +37,16 @@ func run() -> void:
 	sheet.award_path(CharacterSheet.path_of("sword"), ProficiencyTree.xp_for_level(7) * 3.0)
 	game.ui.level_banner.queue.clear()
 	var book = game.techniques
-	book.store({"name": "Corte sangrento", "form": "corte", "components": ["afiada", "forca"]})
-	book.store({"name": "Giro", "form": "corte_giratorio", "components": ["rapidez"]})
-	book.store({"name": "Arremetida", "form": "corte", "components": ["avanco"]})
-	book.assign(0, 0)
-	book.assign(1, 1)
-	book.assign(2, 2)
+	teach("hastes", 3)
+	book.set_objects("corte", ["afiada", "forca", "alcance"])
+	book.set_objects("corte_giratorio", ["rapidez"])
+	book.assign(0, "corte")
+	book.assign(1, "corte_giratorio")
 	var room: Rect2i = game.layout.rooms[1]["rect"]
 	p.position = game.layout.to_world(room.get_center())
 	game.camera_rig.snap()
 	game.ui.toggle_techniques()
-	game.ui.tech_window.edit(0)
+	game.ui.tech_window.select("corte")
 	await frames(6)
 	await shot("01-editor")
 	game.ui.toggle_techniques()
