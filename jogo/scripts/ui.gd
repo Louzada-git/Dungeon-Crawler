@@ -6,7 +6,7 @@ extends CanvasLayer
 const HELP_ROWS := [
 	[["W", "A", "S", "D"], "Mover (setas também)"],
 	[["Shift"], "Correr — gasta fôlego"],
-	[["Espaço"], "Esquivar — 25 de fôlego"],
+	[["Espaço"], "Esquivar — 12,5 de fôlego"],
 	[["Botão dir."], "Mirar e erguer a guarda"],
 	[["C"], "Andar furtivo (agachado)"],
 	[["Botão esq."], "Atacar na direção do cursor"],
@@ -487,12 +487,12 @@ func _update_hands() -> void:
 		hands_icon.texture = null
 		hands_fallback.visible = true
 		hands_name.text = "Mãos vazias"
-		hands_stats.text = "Punhos  ·  Dano %d  ·  Fôlego %d" % [roundi(float(data.get("damage", 8))), roundi(float(data.get("cost", 8)))]
+		hands_stats.text = "Punhos  ·  Dano %d  ·  Fôlego %s" % [roundi(float(data.get("damage", 8))), UiStyle.num(float(data.get("cost", 4)))]
 		return
 	hands_fallback.visible = false
 	hands_icon.texture = UiStyle.item_icon(id)
 	hands_name.text = str(data.get("name", id))
-	hands_stats.text = "Dano %d  ·  Alcance %s m  ·  Fôlego %d" % [roundi(float(data.get("damage", 0))), UiStyle.fmt(float(data.get("range", 1.5))), roundi(float(data.get("cost", 10)))]
+	hands_stats.text = "Dano %d  ·  Alcance %s m  ·  Fôlego %s" % [roundi(float(data.get("damage", 0))), UiStyle.fmt(float(data.get("range", 1.5))), UiStyle.num(float(data.get("cost", 10)))]
 	var ammo: String = str(data.get("ammo", ""))
 	if ammo != "":
 		hands_stats.text = "Dano %d  ·  Alcance %s m  ·  %ss: %d" % [roundi(float(data.get("damage", 0))), UiStyle.fmt(float(data.get("range", 1.5)), 0), str(Items.info(ammo).get("name", ammo)), game.inventory.count(ammo)]
