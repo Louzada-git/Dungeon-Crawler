@@ -55,15 +55,17 @@ A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrint
 
 - **Estilos** (`style` em `itens.json`): `slash` (arco com `angle` e `targets`), `thrust` (linha reta com `width`; `targets` > 1 atravessa), `smash` (círculo à frente com `area_offset` e `area_radius`) e `shoot` (projétil com `ammo`, `projectile_speed`, `pierce`).
 - **Efeitos:** `sneak_mult` (monstro desprevenido), `bleed` (`dps`, `time`), `crush` (monstros `armored`), `stagger` (segundos), `knockback` (3 é o normal).
+- **Tempo do golpe:** `windup` é o preparo até o golpe acertar; `cooldown` é o golpe inteiro. Desde 15/10/2026 só fica `DungeonPlayer.RECOVERY_SCALE` (1/3) do que vem depois do acerto: a espera até o próximo golpe, a lentidão, a trava de virar e a de esquivar. O preparo não muda, e a animação continua no mesmo ritmo (o impacto cai no mesmo ponto); andar ou parar corta o fim dela. Na besta, o recarregamento cai de 1,35 s para 0,45 s.
 - **Modelo:** `Visuals.item_model(id)` usa `assets/armas/<id>.glb` se existir; senão os `blocks` provisórios; senão o modelo compartilhado de `model`. Na mão: `rotacao_mao`, `escala_mao`, `alinhar_ao_golpe` e `mao` (`esquerda` para o arco).
 - **Animação:** `animacao` é o nome desejado; enquanto o personagem não a tiver, `DungeonPlayer.attack_animation` usa a mais próxima.
 - Especificação para modelos e animações: `../arte/ARMAS_ESPEC.md`.
 
 ## Atributos e proficiências
 
-- **Atributos** (Força, Vigor, Agilidade, Destreza) são escolhidos no início de cada run (painel "Novo aventureiro"). Mudam carga, vida, fôlego, esquiva e passo, e definem o potencial de cada ramo: velocidade de aprendizado (0,6 + 0,08 × atributo) e nível máximo (10 + 4 × atributo).
+- **Atributos** (Força, Vigor, Agilidade, Destreza) são escolhidos no início de cada run (painel "Novo aventureiro"): 25 pontos (`criacao.pontos`), começando em 5 cada, ou seja, 5 livres; de 2 a 9 por atributo. Mudam carga, vida, fôlego, esquiva e passo, e definem o potencial de cada ramo: velocidade de aprendizado (0,6 + 0,08 × atributo) e nível máximo (10 + 4 × atributo).
+- **Arma inicial:** o mesmo painel deixa escolher qualquer arma de `itens.json` (as que têm `style`) ou os punhos; `main.choose_weapon` troca a espada pela escolhida. Arco e besta vêm com `criacao.municao_inicial` (20) flechas ou virotes.
 - **Árvore** (`proficiencias.json`, versão 3), inspirada nas perícias de Oblivion e agrupada em três `grupos`:
-  - *Combate:* Lâminas › (Espadas › Espada reta, Katana, Montante; Adagas), Contundentes › (Maça, Martelo, Machados), Hastes › (Lança, Alabarda), Desarmado, Bloqueio, Armadura pesada, Atletismo.
+  - *Combate:* Lâminas › (Espadas › Espada reta, Katana, Montante; Adagas), Contundentes › (Maça, Martelo, Machados, Desarmado), Hastes › (Lança, Alabarda), Bloqueio, Armadura pesada, Atletismo.
   - *Furtividade:* Furtividade, Pontaria › (Arcos, Bestas), Armadura leve, Acrobacia, Arrombamento.
   - *Sobrevivência:* Tratamento.
   - Fora por enquanto: magia, Alquimia, Reparo (precisa de durabilidade por item), Comércio e Oratória (precisam de mercadores).
@@ -72,7 +74,7 @@ A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrint
 | Ramo | Treina com |
 | --- | --- |
 | Caminho da arma | dano causado (o monstro inteiro vale o seu `xp` em `inimigos.json`, +25% por andar); sangramento também conta |
-| Desarmado | socos (sem arma equipada; perfil `punhos` em `proficiencias.json`) |
+| Contundentes › Desarmado | socos (sem arma equipada; perfil `punhos` em `proficiencias.json`). Desde 15/10/2026 o soco é contundente: treina e usa os talentos de Contundentes, como a maça e o martelo |
 | Bloqueio | dano segurado pela guarda (botão direito com arma corpo a corpo ou punhos, golpe de frente) |
 | Armadura leve / pesada | dano absorvido pela armadura vestida |
 | Atletismo | metros corridos fora do abrigo; ×5 quando algum monstro está te perseguindo |
@@ -81,8 +83,8 @@ A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrint
 | Arrombamento | cada tentativa com gazua; abrir ensina 4× mais que falhar |
 | Tratamento | curar um ferimento real |
 
-- **Divisão:** a experiência de um golpe se divide pelo caminho da arma sem contar duas vezes (`divisao`: 1 ramo 100%; 2 ramos 50/50; 3 ramos 40/35/25, da raiz para a ponta). **Domínio** de uma arma = nível que a soma da experiência do caminho alcança, por isso armas de um, dois ou três ramos evoluem no mesmo ritmo, e praticar uma espada ajuda as outras pela raiz. Cada nível de domínio dá +2% de dano e −1% de fôlego.
-- **Efeitos por nível** (`dominio`): guarda +1,2%/nível; proteção da armadura +2%/nível e penalidades −2,5%/nível; corrida −1,2% de fôlego/nível; distância de detecção agachado −1,5%/nível; chance de arrombar +4 pontos/nível; esquiva −0,3 de fôlego/nível; cura +2%/nível.
+- **Divisão:** a experiência de um golpe se divide pelo caminho da arma sem contar duas vezes (`divisao`: 1 ramo 100%; 2 ramos 50/50; 3 ramos 40/35/25, da raiz para a ponta). **Domínio** de uma arma = nível que a soma da experiência do caminho alcança, por isso armas de um, dois ou três ramos evoluem no mesmo ritmo, e praticar uma espada ajuda as outras pela raiz. Cada nível de domínio dá +4% de dano e −2% de fôlego (até −30%).
+- **Efeitos por nível** (`dominio`, dobrados em 15/10/2026): guarda +2,4%/nível; proteção da armadura +4%/nível e penalidades −5%/nível; corrida −2,4% de fôlego/nível; distância de detecção agachado −3%/nível; chance de arrombar +8 pontos/nível; esquiva −0,6 de fôlego/nível; cura +4%/nível. Os limites de cada função da ficha continuam (guarda até 85%, proteção até 70%, penalidade até 40% do original, esquiva no mínimo 10 de fôlego etc.), agora alcançados na metade dos níveis.
 - **Habilidades** (`perks`) destravam por nível de ramo. As das armas mudam os números da arma (`CharacterSheet.weapon_stats`); as outras entram nas funções da ficha (`block_reduction`, `armor_protection`, `armor_penalty_mult`, `armor_noise`, `sprint_cost_mult`, `sneak_detection_mult`, `sneak_attack_mult`, `pick_chance`, `pick_break_chance`, `dodge_cost`, `heal_mult`).
 - **Anti-repetição:** acima de 3 + 4 × andar do monstro, a experiência cai pela metade a cada 1,5 nível.
 - **Save antigo:** `migracao` renomeia ramos (Esquiva → Acrobacia); ramos desconhecidos são descartados.
@@ -105,8 +107,8 @@ Decisões de 15/10/2026: só físicas por enquanto (a magia vem depois); montar 
 - **Dados** (`tecnicas.json`, versão 2): `formas` = habilidades (`slots` máximos, `slot_a_cada`, `recarga`, `efeitos`, `requer`); `objetos` (`requer`, `copias` = níveis do ramo que dão cada cópia, `estilos` só onde não faria sentido, `efeitos`).
 - **Montagem** em `game.techniques` (`TechniqueBook`): `configs` (habilidade → objetos na ordem dos slots), barra de 4 (teclas 4 a 7, cada habilidade num lugar só) e recarga por habilidade. Mudanças valem na hora.
 - **Números:** `Techniques.stats` parte de `CharacterSheet.weapon_stats` da arma em mãos, aplica os efeitos da habilidade e depois os de cada objeto **na ordem dos slots**. `multiplica` escala o valor atual, inclusive o que objetos anteriores somaram; `soma` acrescenta (`disparo` dá outro valor em armas de disparo); `minimo` garante um piso; `define` troca o valor.
-- **Habilidades básicas** (Corte, Estocada, Pancada, Disparo, Soco) são o golpe normal da arma; slots pelo domínio da arma (1 + (domínio − 1) / 5, até 3). **Destraváveis:** Corte giratório (Lâminas 4), Investida (Hastes 4), Golpe esmagador (Contundentes 4), Tiro mirado (Pontaria 4), Sequência de socos (Desarmado 4); slots pelo nível do ramo: 1 + (nível − nível de destrave) / 4, até 2 (1 na Sequência).
-- **Objetos e cópias:** Lâmina afiada (Lâminas 3/9/15), Força (Contundentes 3/9/15), Alcance (Hastes 3/9), Rapidez (Acrobacia 3/9), Impacto (Bloqueio 3/9), Avanço (Atletismo 3/10), Emboscada (Furtividade 3/10), Golpe duplo (Espadas 4/12), Perfurante (Pontaria 3/10). Cópias em uso acima das que o aventureiro tem tornam a habilidade inválida, com o motivo (acontece depois da morte).
+- **Habilidades básicas** (Corte, Estocada, Pancada, Disparo, Soco) são o golpe normal da arma; slots pelo domínio da arma (1 + (domínio − 1) / 5, até 3). **Destraváveis:** Corte giratório (Lâminas 4), Investida (Hastes 4), Golpe esmagador (Contundentes 4), Tiro mirado (Pontaria 4), Sequência de socos (Desarmado 4); o Golpe esmagador aceita os punhos, que são contundentes; slots pelo nível do ramo: 1 + (nível − nível de destrave) / 4, até 2 (1 na Sequência).
+- **Objetos e cópias:** um por ramo de proficiência (25). Raízes e ramos sem arma: Lâmina afiada (Lâminas 3/9/15), Força (Contundentes 3/9/15), Alcance (Hastes 3/9), Rapidez (Acrobacia 3/9), Impacto (Bloqueio 3/9), Avanço (Atletismo 3/10), Emboscada (Furtividade 3/10), Perfurante (Pontaria 3/10), Ombrada (Armadura pesada 3/9), Leveza (Armadura leve 3/9), Fresta (Arrombamento 3/9), Bálsamo (Tratamento 3/9). Especializações, nos níveis 4 e 12: Golpe duplo (Espadas), Equilíbrio (Espada reta), Saque rápido (Katana), Varredura (Montante), Ponto vital (Adagas), Cravos (Maça), Tremor (Martelo, só pancada), Talho fundo (Machados), Ponta rápida (Lança), Gancho (Alabarda), Soco-inglês (Desarmado), Saraivada (Arcos, só disparo), Disparo pesado (Bestas, só disparo). Campo novo `cura` (vida por acerto, em `Combat.apply_hit`). A janela mostra primeiro os objetos que o aventureiro tem e rola o resto. Cópias em uso acima das que o aventureiro tem tornam a habilidade inválida, com o motivo (acontece depois da morte).
 - **Recarga:** a da habilidade + 0,75 s por objeto. **Treino:** golpes treinam o caminho da arma; cada objeto usado dá 1,5 de experiência ao ramo que o dá.
 - **Execução:** `DungeonPlayer.use_technique(slot)` valida (`Techniques.problem`), mira no cursor e chama o mesmo `attack()` do golpe normal; campos novos `hits` e `dash`.
 - **Fora de combate:** `main.in_combat()`; com monstro caçando, a janela mostra o aviso e não muda nada; a barra continua livre.
