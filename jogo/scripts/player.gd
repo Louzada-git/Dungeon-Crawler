@@ -330,32 +330,31 @@ func attack(stats: Dictionary = {}) -> bool:
  game.sound.play_at("swing",global_position,0.65)
  return true
 
-## Uses the technique on bar slot `slot` (keys 4-7) toward the cursor
+## Uses the habilidade on bar slot `slot` (keys 4-7) toward the cursor
 ## (aim = false keeps the current facing; used by tests).
 func use_technique(slot: int, aim: bool = true) -> bool:
  var book: TechniqueBook = game.techniques
- var recipe: Dictionary = book.at_slot(slot)
- if recipe.is_empty():
-  game.message("Espaço %d da barra vazio. T monta técnicas." % (slot+4),2)
+ var form_id: String = book.at_slot(slot)
+ if form_id == "":
+  game.message("Espaço %d da barra vazio. T abre as habilidades." % (slot+4),2)
   return false
  if health <= 0 or hurt_timer > 0 or dodge_timer > 0 or cooldown > 0:
   return false
  var weapon: String = game.inventory.equipped
- var problem: String = Techniques.problem(game.sheet,recipe,weapon)
+ var problem: String = Techniques.problem(game.sheet,book,form_id,weapon)
  if problem != "":
   game.message(problem,2.5)
   return false
- var index: int = book.bar[slot]
- if book.remaining(index) > 0:
-  game.message("%s recarrega em %s s." % [recipe["name"],UiStyle.fmt(book.remaining(index))],1.5)
+ if book.remaining(form_id) > 0:
+  game.message("%s recarrega em %s s." % [Techniques.form_name(form_id),UiStyle.fmt(book.remaining(form_id))],1.5)
   return false
  if aim:
   aim_mouse()
- var stats: Dictionary = Techniques.stats(game.sheet,recipe,weapon)
+ var stats: Dictionary = Techniques.stats(game.sheet,form_id,book.objects(form_id),weapon)
  if not attack(stats):
   return false
- book.start(index,float(stats.get("recarga",1.5)))
- game.on_technique_used(recipe)
+ book.start(form_id,float(stats.get("recarga",1.5)))
+ game.on_technique_used(form_id)
  return true
 
 ## The animation made for the weapon when the rig has it; else the closest existing one.
