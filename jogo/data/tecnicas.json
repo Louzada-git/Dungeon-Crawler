@@ -1,6 +1,6 @@
 {
  "versao": 2,
- "_sobre": "Habilidades montadas pelo jogador. Cada habilidade existe uma vez, com características fixas (a forma), e tem slots onde vão objetos. Os números partem da arma em mãos (CharacterSheet.weapon_stats); depois vêm os efeitos da habilidade e, na ordem dos slots, os de cada objeto, que age sobre o que já está montado à esquerda: 'multiplica' escala os valores atuais (inclusive o que objetos anteriores somaram), 'soma' acrescenta um valor fixo. Habilidades e objetos destravam por nível de ramo ('requer'). Slots: 1 + (nível do ramo da habilidade - nível em que destravou) / 'slot_a_cada', até 'slots'; nas habilidades básicas o nível é o domínio da arma em mãos. Objetos: cada nível em 'copias' (no ramo de 'requer') dá mais uma cópia; cada cópia fica em uma habilidade por vez. 'estilos' limita só onde o objeto não faz sentido. Todo ramo de proficiência dá um objeto.",
+ "_sobre": "Habilidades montadas pelo jogador. Cada habilidade existe uma vez, com características fixas (a forma), e tem slots onde vão objetos. Os números partem da arma em mãos (CharacterSheet.weapon_stats); depois vêm os efeitos da habilidade e, na ordem dos slots, os de cada objeto, que age sobre o que já está montado à esquerda: 'multiplica' escala os valores atuais (inclusive o que objetos anteriores somaram), 'soma' acrescenta um valor fixo. Habilidades e objetos destravam por nível de ramo ('requer'). Slots: 1 + (nível do ramo da habilidade - nível em que destravou) / 'slot_a_cada', até 'slots'; nas habilidades básicas o nível é o domínio da arma em mãos. Objetos: cada nível em 'copias' (no ramo de 'requer') dá mais uma cópia; cada cópia fica em uma habilidade por vez. 'estilos' limita só onde o objeto não faz sentido. Todo ramo de proficiência dá um objeto. Fôlego dos objetos pela metade em 15/10/2026, como o resto.",
  "regras": {
   "slot_a_cada_basica": 5,
   "recarga_por_objeto": 0.75,
@@ -241,7 +241,7 @@
     },
     {
      "campo": "cost",
-     "soma": 3
+     "soma": 1.5
     }
    ],
    "estilos": [
@@ -272,7 +272,7 @@
     },
     {
      "campo": "cost",
-     "soma": 4
+     "soma": 2.0
     },
     {
      "campo": "windup",
@@ -303,7 +303,7 @@
     },
     {
      "campo": "cost",
-     "soma": 2
+     "soma": 1.0
     }
    ],
    "copias": [
@@ -353,7 +353,7 @@
     },
     {
      "campo": "cost",
-     "soma": 3
+     "soma": 1.5
     }
    ],
    "copias": [
@@ -374,7 +374,7 @@
     },
     {
      "campo": "cost",
-     "soma": 5
+     "soma": 2.5
     }
    ],
    "estilos": [
@@ -402,7 +402,7 @@
     },
     {
      "campo": "cost",
-     "soma": 2
+     "soma": 1.0
     }
    ],
    "copias": [
@@ -452,7 +452,7 @@
     },
     {
      "campo": "cost",
-     "soma": 2
+     "soma": 1.0
     }
    ],
    "copias": [
@@ -515,7 +515,7 @@
     },
     {
      "campo": "cost",
-     "soma": 3
+     "soma": 1.5
     }
    ],
    "estilos": [
@@ -567,7 +567,7 @@
     },
     {
      "campo": "cost",
-     "soma": 2
+     "soma": 1.0
     }
    ],
    "estilos": [
@@ -595,7 +595,7 @@
     },
     {
      "campo": "cost",
-     "soma": 3
+     "soma": 1.5
     }
    ],
    "estilos": [
@@ -619,7 +619,7 @@
     },
     {
      "campo": "cost",
-     "soma": 2
+     "soma": 1.0
     }
    ],
    "copias": [
@@ -661,7 +661,7 @@
     },
     {
      "campo": "cost",
-     "soma": 2
+     "soma": 1.0
     }
    ],
    "copias": [
@@ -707,7 +707,7 @@
     },
     {
      "campo": "cost",
-     "soma": 4
+     "soma": 2.0
     }
    ],
    "copias": [
@@ -772,11 +772,11 @@
    "requer": {
     "armadura_leve": 3
    },
-   "texto": "−4 de fôlego no golpe.",
+   "texto": "−2 de fôlego no golpe.",
    "efeitos": [
     {
      "campo": "cost",
-     "soma": -4
+     "soma": -2.0
     }
    ],
    "copias": [
@@ -798,7 +798,7 @@
     },
     {
      "campo": "cost",
-     "soma": 2
+     "soma": 1.0
     }
    ],
    "copias": [
@@ -819,7 +819,7 @@
     },
     {
      "campo": "cost",
-     "soma": 3
+     "soma": 1.5
     }
    ],
    "copias": [
