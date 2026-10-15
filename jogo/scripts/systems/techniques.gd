@@ -216,7 +216,7 @@ static func summary(s: Dictionary) -> Array:
 		rows.append(["Raio", "%s m" % UiStyle.fmt(s.get("area_radius", 1.6))])
 	if int(s.get("pierce", 1)) > 1:
 		rows.append(["Atravessa", "%d inimigos" % int(s["pierce"])])
-	rows.append(["Fôlego", UiStyle.fmt(s["cost"], 0)])
+	rows.append(["Fôlego", UiStyle.num(s["cost"])])
 	rows.append(["Preparo", "%s s" % UiStyle.fmt(s["windup"], 2)])
 	rows.append(["Recarga", "%s s" % UiStyle.fmt(s.get("recarga", 0.0))])
 	var extra: PackedStringArray = []
