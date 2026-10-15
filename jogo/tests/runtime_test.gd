@@ -307,6 +307,7 @@ func run(target, capture: bool) -> void:
  await test_psx()
  await test_techniques()
  await test_vfx()
+ await test_balance()
  inv.add("seal")
  p.position = game.camp_position
  game.interact()
@@ -942,20 +943,38 @@ func test_proficiencies() -> void:
  tip.free()
  var panel: UiCreationPanel = game.ui.creation_panel
  panel.reset()
- panel._change("forca",1)
- check(panel.start_button.disabled == false and panel.values["forca"] == 5,"Criação não passa do total de pontos")
+ check(panel.total == 25 and panel.spent() == 20 and panel.start_button.disabled and label_text(panel).contains("Pontos livres: 5"),"Criação começa com 5 pontos livres a mais (25 no total)")
+ for i in 3:
+  panel._change("forca",1)
+ panel._change("vigor",1)
+ panel._change("vigor",1)
+ check(panel.values["forca"] == 8 and panel.values["vigor"] == 7 and not panel.start_button.disabled,"Os 5 pontos livres vão em qualquer atributo")
+ panel._change("agilidade",1)
+ check(panel.values["agilidade"] == 5,"Criação não passa do total de pontos")
  panel._change("vigor",-1)
  panel._change("forca",1)
+ check(panel.values["forca"] == 9 and panel.values["vigor"] == 6 and not panel.start_button.disabled,"Criação move pontos entre atributos")
  panel._change("forca",1)
- check(panel.values["forca"] == 6 and panel.values["vigor"] == 4 and not panel.start_button.disabled,"Criação move pontos entre atributos")
+ check(panel.values["forca"] == 9,"Atributo não passa do máximo")
  panel._change("agilidade",-1)
  check(panel.start_button.disabled,"Criação exige gastar todos os pontos")
+ # Starting weapon: any weapon, or the fists.
+ check(UiCreationPanel.weapon_ids().size() == 14 and panel.weapon == "sword" and panel.weapon_buttons["sword"].button_pressed,"Criação oferece todas as 13 armas e os punhos, com a espada marcada")
+ panel.pick_weapon("katana")
+ check(panel.choice()["arma"] == "katana" and panel.weapon_buttons["katana"].button_pressed and not panel.weapon_buttons["sword"].button_pressed and panel.weapon_label.text.contains("Katana"),"Escolher a katana marca só ela e mostra o que ela treina")
+ panel.pick_weapon("arco")
+ check(panel.weapon_label.text.contains("20 flechas"),"Arco avisa que vem com flechas")
  panel.reset()
  game.choosing_character = true
  game.ui.show_creation()
- check(get_tree().paused and panel.visible,"Criação de personagem pausa e aparece")
- panel.confirmed.emit({"forca":6,"vigor":4,"agilidade":5,"destreza":5})
- check(not get_tree().paused and not game.choosing_character and sheet.attr("forca") == 6 and sheet.xp.is_empty(),"Começar expedição aplica os atributos e zera a experiência")
+ check(get_tree().paused and panel.visible and panel.weapon == "sword","Criação de personagem pausa e aparece")
+ panel.confirmed.emit({"forca":8,"vigor":7,"agilidade":5,"destreza":5,"arma":"katana"})
+ check(not get_tree().paused and not game.choosing_character and sheet.attr("forca") == 8 and sheet.attr("vigor") == 7 and sheet.xp.is_empty(),"Começar expedição aplica os atributos e zera a experiência")
+ check(inv.equipped == "katana" and inv.count("sword") == 0 and inv.count("katana") == 1,"Começa com a arma escolhida em mãos, no lugar da espada")
+ game.choose_weapon("besta")
+ check(inv.equipped == "besta" and inv.count("virote") == 20,"Besta escolhida vem com 20 virotes")
+ game.choose_weapon("")
+ check(inv.equipped == "" and CharacterSheet.path_of(inv.equipped) == ["contundentes","desarmado"],"Punhos: começa sem arma em mãos, treinando Contundentes › Desarmado")
  # Back to the fixed numbers for the rest of the suite.
  sheet.reset()
  sheet.enabled = false
@@ -1593,3 +1612,95 @@ func test_vfx() -> void:
  p.health = p.max_health
  p.stamina = p.max_stamina
  p.set_physics_process(was_processing)
+
+## 15/10/2026: fists are blunt, an objeto for every branch, a third of the
+## recovery after a blow, and twice the bonus per level.
+func test_balance() -> void:
+ get_tree().paused = false
+ var p = game.player
+ var inv = game.inventory
+ var sheet: CharacterSheet = game.sheet
+ var saved_inventory: Dictionary = inv.snapshot()
+ var was_processing: bool = p.is_physics_processing()
+ p.set_physics_process(false)
+ sheet.enabled = true
+ sheet.reset()
+ var room: Rect2i = game.layout.rooms[1]["rect"]
+ p.position = game.layout.to_world(room.get_center())
+ var foe = game.enemies[0]
+ fresh(foe,p.position+Vector3(1.0,0,0))
+ foe.visible = true
+ # Fists are blunt.
+ check(ProficiencyTree.DATA["desarmado"].get("parent","") == "contundentes" and CharacterSheet.path_of("") == ["contundentes","desarmado"] and ProficiencyTree.group_of("desarmado") == "combate","Soco é contundente: Desarmado fica dentro de Contundentes")
+ sheet.award_path(CharacterSheet.path_of(""),100.0)
+ check(float(sheet.xp.get("contundentes",0)) > 0 and float(sheet.xp.get("desarmado",0)) > 0,"Socar treina Contundentes e Desarmado")
+ teach(sheet,"contundentes",5)
+ check(float(sheet.weapon_stats("")["stagger"]) >= float(ProficiencyTree.section("punhos")["stagger"])+0.3,"Talento de Contundentes (Atordoar) vale no soco")
+ check(Techniques.form_fits("golpe_esmagador","") and Techniques.form_unlocked(sheet,"golpe_esmagador") and Techniques.problem(sheet,game.techniques,"golpe_esmagador","") == "","Golpe esmagador serve com os punhos")
+ # One objeto per branch.
+ var with_object: Dictionary = {}
+ for id in Techniques.OBJECTS:
+  with_object[Techniques.object_branch(id)] = true
+ check(ProficiencyTree.DATA.keys().all(func(b): return with_object.has(b)) and Techniques.OBJECTS.size() == ProficiencyTree.DATA.size(),"Todo ramo de proficiência dá um objeto (%d)" % Techniques.OBJECTS.size())
+ var base: Dictionary = sheet.weapon_stats("sword")
+ var s1: Dictionary = Techniques.stats(sheet,"corte",["ponto_vital","forca"],"sword")
+ var s2: Dictionary = Techniques.stats(sheet,"corte",["forca","ponto_vital"],"sword")
+ check(is_equal_approx(s1["damage"],(base["damage"]+4.0)*1.3) and s1["damage"] > s2["damage"],"Ponto vital antes da Força rende mais (soma antes de multiplicar)")
+ var axe: Dictionary = Techniques.stats(sheet,"corte",["talho"],"machado")
+ check(is_equal_approx(axe["bleed"]["dps"],float(sheet.weapon_stats("machado")["bleed"]["dps"])*1.6),"Talho fundo multiplica o sangramento do machado")
+ var dry: Dictionary = Techniques.stats(sheet,"corte",["talho"],"sword")
+ check(not dry.has("bleed"),"Talho fundo sem nada sangrando antes não faz nada")
+ var hammer: Dictionary = Techniques.stats(sheet,"pancada",["tremor"],"martelo")
+ check(is_equal_approx(hammer["area_radius"],float(sheet.weapon_stats("martelo")["area_radius"])+0.5) and not Techniques.object_fits("tremor","sword"),"Tremor aumenta o raio da pancada e só serve em pancadas")
+ check(is_equal_approx(Techniques.stats(sheet,"corte",["fresta"],"sword")["crush"],1.4),"Fresta: a espada passa a valer ×1,4 em blindado")
+ var volley: Dictionary = Techniques.stats(sheet,"disparo",["saraivada"],"arco")
+ check(int(volley["hits"]) == 3 and is_equal_approx(volley["damage"],float(sheet.weapon_stats("arco")["damage"])*0.5) and not Techniques.object_fits("saraivada","sword"),"Saraivada: três projéteis com metade do dano, só em disparos")
+ p.health = 50.0
+ Combat.apply_hit(game,foe,Techniques.stats(sheet,"corte",["balsamo"],"sword"),Vector3.RIGHT)
+ check(is_equal_approx(p.health,52.0),"Bálsamo: cada acerto recupera 2 de vida")
+ p.health = p.max_health
+ check(Techniques.summary(Techniques.stats(sheet,"corte",["balsamo"],"sword")).any(func(r): return str(r[1]).contains("cura 2")),"Prévia mostra a cura por acerto")
+ # The habilidades window lists all objetos, the ones you have first, in a scroll.
+ inv.restore({"stacks":{"sword":1},"equipped":"sword"})
+ p.refresh_weapon()
+ game.ui.toggle_techniques()
+ var win = game.ui.tech_window
+ win.select("corte")
+ var order: Array = win.object_order("sword")
+ check(order.size() == Techniques.OBJECTS.size() and Techniques.copies(sheet,order[0]) > 0 and Techniques.copies(sheet,order[-1]) == 0 and win.object_box.get_child_count() == order.size() and win.object_box.get_parent() is ScrollContainer,"Janela lista todos os objetos com rolagem, os que você tem primeiro")
+ game.ui.toggle_techniques()
+ # A third of the recovery after the blow; the wind-up stays.
+ ready_player(p)
+ p.stamina = p.max_stamina
+ var w: Dictionary = sheet.weapon_stats("sword")
+ var full: float = maxf(float(w["cooldown"]),float(w["windup"])+0.15)
+ p.facing = Vector3.LEFT
+ check(p.attack(),"Golpe para medir a recuperação")
+ check(is_equal_approx(p.attack_wait,float(w["windup"])) and is_equal_approx(p.cooldown,float(w["windup"])+(full-float(w["windup"]))/3.0),"Espera até o próximo golpe: preparo igual e o resto em um terço")
+ check(is_equal_approx(p.attack_timer,float(w["windup"])+(full*0.9-float(w["windup"]))/3.0),"Lentidão, virar e esquivar depois do golpe: um terço do tempo de antes")
+ if p.animator and p.animator.is_playing() and p.animator.speed_scale > 0.0:
+  var anim: Animation = p.animator.get_animation(p.animator.current_animation)
+  check(is_equal_approx(p.animator.get_playing_speed()/p.animator.speed_scale,anim.length/(full*0.9)),"Animação do golpe no mesmo ritmo (o impacto cai no mesmo ponto)")
+ p.set_physics_process(true)
+ await get_tree().create_timer(full*0.9*0.75).timeout
+ check(p.attack_timer <= 0.0 and p.dodge(),"Esquiva liberada antes do fim do tempo antigo")
+ p.set_physics_process(false)
+ # Twice the bonus per level.
+ sheet.reset()
+ var path: Array = CharacterSheet.path_of("sword")
+ sheet.award_path(path,ProficiencyTree.xp_for_level(6)+1.0)
+ check(sheet.mastery(path) == 6 and is_equal_approx(sheet.damage_mult(path),1.2) and is_equal_approx(sheet.cost_mult(path),0.9),"Bônus por nível dobrado: domínio 6 dá +20% de dano e −10% de fôlego")
+ teach(sheet,"acrobacia",6)
+ check(is_equal_approx(sheet.dodge_cost(),17.0),"Acrobacia 6: esquiva 0,6 de fôlego mais barata por nível (25 − 3 − 5 do talento)")
+ teach(sheet,"bloqueio",6)
+ check(is_equal_approx(sheet.block_reduction("sword"),0.4+0.024*5),"Bloqueio 6: guarda segura 2,4% a mais por nível")
+ # Back to the fixed numbers.
+ fresh(foe,game.layout.to_world(Vector2i(28,7)))
+ sheet.reset()
+ sheet.enabled = false
+ game.apply_attributes(true)
+ inv.restore(saved_inventory)
+ p.refresh_weapon()
+ ready_player(p)
+ p.set_physics_process(was_processing)
+ game.ui.level_banner.queue.clear()
