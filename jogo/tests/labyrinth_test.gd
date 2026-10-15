@@ -207,8 +207,8 @@ func run(target) -> void:
 	check(known_cells > 20, "Mapa do 1º andar foi explorado (%d células)" % known_cells)
 	var packed = SaveSystem.parse_knowledge(SaveSystem.pack_knowledge(game.knowledge))
 	check(packed[1].size() == known_cells and packed.has(2), "Conhecimento de todos os andares ida e volta pelo formato salvo")
-	game.techniques.store({"name": "Lembrada", "form": "corte", "components": ["afiada"]})
-	game.techniques.assign(0, 0)
+	game.techniques.set_objects("corte", ["afiada"])
+	game.techniques.assign(0, "corte")
 	p.position = game.layout.to_world(game.layout.rooms[2]["rect"].get_center())
 	p.invulnerable = 0
 	p.receive_damage(500, Vector3.RIGHT)
@@ -219,7 +219,7 @@ func run(target) -> void:
 	check(not known.has("sheet"), "Proficiências não sobrevivem à morte: o próximo aventureiro começa do zero")
 	var next := TechniqueBook.new()
 	next.restore(known.get("tecnicas", {}), false)
-	check(next.recipes.size() == 1 and next.recipes[0]["name"] == "Lembrada" and next.bar.all(func(v): return v == -1), "Receitas de técnica sobrevivem à morte como conhecimento; a barra começa vazia")
+	check(next.objects("corte") == ["afiada"] and next.bar.all(func(v): return v == ""), "A montagem das habilidades sobrevive à morte como conhecimento; a barra começa vazia")
 	var labels: Array = []
 	for b in game.ui.end_buttons.get_children():
 		labels.append(b.text)
