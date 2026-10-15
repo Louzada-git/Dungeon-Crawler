@@ -1,12 +1,20 @@
 # Dungepm — As Cisternas
 
+## Novo: atualização depois do teste (15/10/2026)
+
+- **Fôlego** (pedido do Bruno): tudo gasta metade do fôlego, ou seja, golpes, objetos, esquiva (12,5), corrida e guarda. E o fôlego volta 1,3× mais rápido.
+- **Delay pelo peso da arma** (pedido do Pedro): o corte para um terço tirava quase todo o delay. Agora cada arma tem o seu. As **leves** (adaga, katana) são rápidas e batem pouco. As **médias** (espadas, machado, maça, lança, arco) ficam no meio. As **pesadas** (montante, martelo, alabarda, lança longa, besta) batem muito e mantêm um delay alto: o martelo espera 0,68 s depois do golpe (eram 0,25 s na versão que vocês jogaram). A dica de cada arma mostra o peso e o delay.
+- **Esquiva na metade do delay:** dá para esquivar a partir da metade do delay depois do golpe. A esquiva corta a lentidão do golpe, mas o próximo golpe ainda espera o tempo dele.
+- **Sem atordoamento em cadeia:** antes, cada golpe cancelava o ataque do monstro, e ele nunca conseguia atacar. Agora, depois de atordoado, o monstro fica **firme** por um tempo: ainda leva dano, mas termina o ataque. Esquive ou segure na guarda.
+- **Danos balanceados:** as armas ficaram com dano por segundo parecido. Cada uma compensa com outra vantagem: alcance, área, sangramento, atordoamento ou ataque furtivo. Os monstros têm cerca de 25% mais vida e um pouco mais de dano. Valores novos em `jogo/BALANCO.md`.
+
 ## Novo: ajustes de 15/10/2026
 
 - **+5 pontos de atributo:** o novo aventureiro tem 25 pontos. Começa com 5 em cada e sobram 5 livres para pôr onde quiser (de 2 a 9 por atributo).
 - **Arma inicial à escolha:** no mesmo painel você escolhe qualquer uma das 13 armas, ou começa de punhos. Arco e besta vêm com 20 flechas ou virotes.
 - **Soco é contundente:** Desarmado agora fica dentro de Contundentes. Socar treina Contundentes e Desarmado, os talentos de Contundentes (como Atordoar) valem no soco, e o Golpe esmagador funciona de mãos vazias.
 - **Um objeto por proficiência:** são 25 objetos, um para cada ramo. Os novos: Equilíbrio (Espada reta), Saque rápido (Katana), Varredura (Montante), Ponto vital (Adagas), Cravos (Maça), Tremor (Martelo), Talho fundo (Machados), Ponta rápida (Lança), Gancho (Alabarda), Soco-inglês (Desarmado), Ombrada (Armadura pesada), Saraivada (Arcos), Disparo pesado (Bestas), Leveza (Armadura leve), Fresta (Arrombamento) e Bálsamo (Tratamento, recupera vida a cada acerto). Os de especialização chegam nos níveis 4 e 12; os outros, no 3 e no 9. Na janela de habilidades, os que você tem aparecem primeiro e o resto rola.
-- **Recuperação do ataque em um terço:** depois que o golpe acerta, o tempo em que você fica lento, sem virar, sem esquivar e esperando o próximo golpe caiu para um terço. O preparo antes do golpe é o mesmo. A besta recarrega em 0,45 s em vez de 1,35 s.
+- **Recuperação do ataque menor:** primeiro caiu para um terço em todas as armas; depois do teste, passou a depender do peso da arma (ver acima).
 - **Bônus por nível dobrado:** cada nível de domínio dá +4% de dano e −2% de fôlego (até −30%). Os bônus por nível de Bloqueio, armaduras, Atletismo, Furtividade, Arrombamento, Acrobacia e Tratamento também dobraram. Os talentos dos níveis 5 e 10 não mudaram.
 
 ## Novo: efeitos visuais (15/10/2026)
