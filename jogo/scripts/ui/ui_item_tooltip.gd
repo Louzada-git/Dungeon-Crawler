@@ -70,9 +70,12 @@ static func _weapon_rows(grid: GridContainer, data: Dictionary) -> void:
 	_row(grid, "Fôlego por golpe", UiStyle.num(float(data.get("cost", 10))))
 	var windup: float = float(data.get("windup", 0.22))
 	var delay: float = maxf(float(data.get("cooldown", 0.62)), windup + 0.15) - windup
+	var heavy: float = DungeonPlayer.weight_delay(data)
 	_row(grid, "Peso do golpe", {"leve": "Leve", "media": "Médio", "pesada": "Pesado"}.get(str(data.get("classe", "media")), "Médio"))
 	_row(grid, "Preparação", "%s s" % UiStyle.fmt(windup, 2))
-	_row(grid, "Delay depois do golpe", "%s s  ·  esquiva em %s s" % [UiStyle.fmt(delay, 2), UiStyle.fmt(delay * DungeonPlayer.DODGE_AFTER, 2)])
+	_row(grid, "Delay depois do golpe", "%s s  ·  esquiva em %s s" % [UiStyle.fmt(delay + heavy, 2), UiStyle.fmt(delay * DungeonPlayer.DODGE_AFTER, 2)])
+	if heavy > 0.0:
+		_row(grid, "", "inclui %s s do peso (só para golpear de novo)" % UiStyle.fmt(heavy, 2))
 	var targets: int = int(data.get("targets", 1))
 	match style:
 		"thrust":
