@@ -17,8 +17,12 @@ var knowledge_path: String = KNOWLEDGE_PATH
 var inventory = InventoryData.new()
 ## The adventurer of this run: attributes and proficiencies.
 var sheet := CharacterSheet.new()
-## Habilidades set up by the player (objetos in slots, bar 4-7, recharges).
+## Habilidades set up by the player (objetos in slots, bar of 4, recharges).
 var techniques := TechniqueBook.new()
+## Quick bar, keys 1 to 9: any item in any slot.
+var quick_bar := QuickBar.new()
+## Keys of the habilidade bar, chosen by the player (user settings); never the number row.
+var technique_keys: Array = []
 ## True while the "new adventurer" panel waits for the player.
 var choosing_character: bool = false
 var layout: DungeonLayout
@@ -90,6 +94,8 @@ func _ready() -> void:
 	inventory.add("ration", 3)
 	inventory.add("bandage", 3)
 	inventory.equip("sword")
+	quick_bar.defaults("sword")
+	load_technique_keys()
 	player = DungeonPlayer.new()
 	player.game = self
 	add_child(player)
@@ -115,6 +121,7 @@ func _ready() -> void:
 	ui.game = self
 	add_child(ui)
 	inventory.changed.connect(on_inventory_changed)
+	quick_bar.changed.connect(ui.update_hud)
 	sheet.level_up.connect(ui.on_level_up)
 	sheet.perk_unlocked.connect(ui.on_perk_unlocked)
 	var loaded: bool = false
@@ -200,10 +207,16 @@ func start_character(values: Dictionary) -> void:
 	choosing_character = false
 	message("Atributos definem o seu potencial. As proficiências crescem com o uso: P mostra o progresso.", 7)
 
-## Swaps the starting sword for the chosen weapon (bows and crossbows come with ammunition).
+## Swaps the starting sword for the chosen weapon (bows and crossbows come with
+## ammunition); the weapon takes the sword's place in the quick bar.
 func choose_weapon(id: String) -> void:
 	if id != "" and not Items.DATA.get(id, {}).has("style"):
 		return
+	var slot: int = quick_bar.slot_of("sword")
+	if slot >= 0 and id != "sword":
+		quick_bar.remove(slot)
+		if id != "":
+			quick_bar.assign(slot, id)
 	if inventory.count("sword") > 0 and id != "sword":
 		inventory.remove("sword", inventory.count("sword"))
 	if id == "":
@@ -217,6 +230,41 @@ func choose_weapon(id: String) -> void:
 		inventory.equip(id)
 	if player:
 		player.refresh_weapon()
+
+# --- habilidade keys ---------------------------------------------------------------
+
+func load_technique_keys() -> void:
+	technique_keys = InputSetup.TECHNIQUE_KEYS.duplicate()
+	var saved = load_setting("teclas", "habilidades", [])
+	if saved is Array:
+		for i in mini(saved.size(), technique_keys.size()):
+			var code = saved[i]
+			if (code is int or code is float) and InputSetup.reserved(int(code)) == "" and not int(code) in technique_keys.slice(0, i):
+				technique_keys[i] = int(code)
+
+## Bar position used by a key, or -1.
+func technique_slot_for_key(code: int) -> int:
+	return technique_keys.find(code)
+
+## Binds a key to bar position `slot`. Returns "" when done, else why not.
+## A key already on another position swaps with it.
+func set_technique_key(slot: int, code: int) -> String:
+	if slot < 0 or slot >= technique_keys.size():
+		return "Posição inválida."
+	var why: String = InputSetup.reserved(code)
+	if why != "":
+		return "%s já é usada: %s." % [InputSetup.key_name(code), why]
+	var other: int = technique_slot_for_key(code)
+	if other >= 0 and other != slot:
+		technique_keys[other] = technique_keys[slot]
+	technique_keys[slot] = code
+	save_setting("teclas", "habilidades", technique_keys.duplicate())
+	if ui:
+		ui.refresh_technique_keys()
+	return ""
+
+func technique_key_name(slot: int) -> String:
+	return InputSetup.key_name(int(technique_keys[slot])) if slot >= 0 and slot < technique_keys.size() else "?"
 
 func on_dodged(amount: float) -> void:
 	sheet.award("acrobacia", amount * 0.8, floor)
