@@ -13,7 +13,7 @@ Mixamo, textura repintada como aventureiro medieval e as animações do aventure
 | `repintar_textura.py` | Repinta por região do corpo, mantendo as dobras do original como sombreado; pele, rosto e cabelo ficam |
 | `transferir_animacoes.gd` | Godot: leva as 13 animações do rig próprio (`aventureiro_mixamo.glb`) para o rig Mixamo e exporta o `.glb`; imprime as correções dos pontos de mão e tronco (`MOUNT`) usadas em `DungeonPlayer.MOUNTS` |
 
-Refazer: num projeto Godot à parte com `p/Character_16.fbx`, `p/aventureiro_psx.png` e `p/aventureiro_mixamo.glb`
+Refazer: num projeto Godot à parte com `p/Character_16.fbx`, `p/aventureiro_psx.png` e `p/aventureiro_mixamo.glb` (de `origem_animacoes/`, com as texturas)
 (+ texturas), rode `exportar_triangulos.gd`, depois `python3 mapear_textura.py <pasta> 512`,
 `python3 repintar_textura.py <pasta> p/Character_16_original.png p/aventureiro_psx.png` e por fim
 `godot --headless --path . -s res://transferir_animacoes.gd -- <saída>/aventureiro_psx.glb`.
