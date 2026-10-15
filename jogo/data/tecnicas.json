@@ -1,6 +1,6 @@
 {
  "versao": 2,
- "_sobre": "Habilidades montadas pelo jogador. Cada habilidade existe uma vez, com características fixas (a forma), e tem slots onde vão objetos. Os números partem da arma em mãos (CharacterSheet.weapon_stats); depois vêm os efeitos da habilidade e, na ordem dos slots, os de cada objeto, que age sobre o que já está montado à esquerda: 'multiplica' escala os valores atuais (inclusive o que objetos anteriores somaram), 'soma' acrescenta um valor fixo. Habilidades e objetos destravam por nível de ramo ('requer'). Slots: 1 + (nível do ramo da habilidade - nível em que destravou) / 'slot_a_cada', até 'slots'; nas habilidades básicas o nível é o domínio da arma em mãos. Objetos: cada nível em 'copias' (no ramo de 'requer') dá mais uma cópia; cada cópia fica em uma habilidade por vez. 'estilos' limita só onde o objeto não faz sentido.",
+ "_sobre": "Habilidades montadas pelo jogador. Cada habilidade existe uma vez, com características fixas (a forma), e tem slots onde vão objetos. Os números partem da arma em mãos (CharacterSheet.weapon_stats); depois vêm os efeitos da habilidade e, na ordem dos slots, os de cada objeto, que age sobre o que já está montado à esquerda: 'multiplica' escala os valores atuais (inclusive o que objetos anteriores somaram), 'soma' acrescenta um valor fixo. Habilidades e objetos destravam por nível de ramo ('requer'). Slots: 1 + (nível do ramo da habilidade - nível em que destravou) / 'slot_a_cada', até 'slots'; nas habilidades básicas o nível é o domínio da arma em mãos. Objetos: cada nível em 'copias' (no ramo de 'requer') dá mais uma cópia; cada cópia fica em uma habilidade por vez. 'estilos' limita só onde o objeto não faz sentido. Todo ramo de proficiência dá um objeto.",
  "regras": {
   "slot_a_cada_basica": 5,
   "recarga_por_objeto": 0.75,
@@ -132,14 +132,15 @@
    "icone": "pancada",
    "estilos": [
     "slash",
-    "smash"
+    "smash",
+    "punhos"
    ],
    "ramo_arma": "contundentes",
    "recarga": 5.0,
    "requer": {
     "contundentes": 4
    },
-   "texto": "Ergue a arma contundente e desce com tudo: lento, mas atordoa e empurra longe.",
+   "texto": "Ergue a arma contundente (ou o punho) e desce com tudo: lento, mas atordoa e empurra longe.",
    "efeitos": [
     {
      "campo": "damage",
@@ -457,6 +458,373 @@
    "copias": [
     3,
     10
+   ]
+  },
+  "equilibrio": {
+   "name": "Equilíbrio",
+   "requer": {
+    "espada_reta": 4
+   },
+   "texto": "+10% de dano e −10% de fôlego no golpe.",
+   "efeitos": [
+    {
+     "campo": "damage",
+     "multiplica": 1.1
+    },
+    {
+     "campo": "cost",
+     "multiplica": 0.9
+    }
+   ],
+   "copias": [
+    4,
+    12
+   ]
+  },
+  "saque": {
+   "name": "Saque rápido",
+   "requer": {
+    "katana": 4
+   },
+   "texto": "Preparo 0,06 s mais curto. É uma soma: vale o mesmo em qualquer arma, e a Rapidez depois dele ainda encurta o resto.",
+   "efeitos": [
+    {
+     "campo": "windup",
+     "soma": -0.06
+    }
+   ],
+   "copias": [
+    4,
+    12
+   ]
+  },
+  "varredura": {
+   "name": "Varredura",
+   "requer": {
+    "montante": 4
+   },
+   "texto": "Arco 50° mais largo e +1 alvo. Gasta mais fôlego. Não serve em disparos.",
+   "efeitos": [
+    {
+     "campo": "angle",
+     "soma": 25.0
+    },
+    {
+     "campo": "targets",
+     "soma": 1
+    },
+    {
+     "campo": "cost",
+     "soma": 3
+    }
+   ],
+   "estilos": [
+    "slash",
+    "thrust",
+    "smash",
+    "punhos"
+   ],
+   "copias": [
+    4,
+    12
+   ]
+  },
+  "ponto_vital": {
+   "name": "Ponto vital",
+   "requer": {
+    "adagas": 4
+   },
+   "texto": "+4 de dano fixo. Vale mais antes da Força, que multiplica o que já está montado.",
+   "efeitos": [
+    {
+     "campo": "damage",
+     "soma": 4.0
+    }
+   ],
+   "copias": [
+    4,
+    12
+   ]
+  },
+  "cravos": {
+   "name": "Cravos",
+   "requer": {
+    "maca": 4
+   },
+   "texto": "Rasga a carne: sangra 2 por segundo durante 3 s e atordoa 0,2 s a mais. Não serve em disparos.",
+   "efeitos": [
+    {
+     "campo": "bleed.dps",
+     "soma": 2.0
+    },
+    {
+     "campo": "bleed.time",
+     "minimo": 3.0
+    },
+    {
+     "campo": "stagger",
+     "soma": 0.2
+    },
+    {
+     "campo": "cost",
+     "soma": 2
+    }
+   ],
+   "estilos": [
+    "slash",
+    "thrust",
+    "smash",
+    "punhos"
+   ],
+   "copias": [
+    4,
+    12
+   ]
+  },
+  "tremor": {
+   "name": "Tremor",
+   "requer": {
+    "martelo": 4
+   },
+   "texto": "Raio da pancada no chão +0,5 m. Só em pancadas.",
+   "efeitos": [
+    {
+     "campo": "area_radius",
+     "soma": 0.5,
+     "base": 1.6
+    },
+    {
+     "campo": "cost",
+     "soma": 3
+    }
+   ],
+   "estilos": [
+    "smash"
+   ],
+   "copias": [
+    4,
+    12
+   ]
+  },
+  "talho": {
+   "name": "Talho fundo",
+   "requer": {
+    "machados": 4
+   },
+   "texto": "Sangramento já montado ×1,6. Precisa vir depois do que faz sangrar (Lâmina afiada, Cravos ou a própria arma, como o machado).",
+   "efeitos": [
+    {
+     "campo": "bleed.dps",
+     "multiplica": 1.6
+    },
+    {
+     "campo": "cost",
+     "soma": 2
+    }
+   ],
+   "copias": [
+    4,
+    12
+   ]
+  },
+  "ponta_rapida": {
+   "name": "Ponta rápida",
+   "requer": {
+    "lanca": 4
+   },
+   "texto": "Recuperação depois do golpe 25% mais curta.",
+   "efeitos": [
+    {
+     "campo": "cooldown",
+     "multiplica": 0.75
+    }
+   ],
+   "copias": [
+    4,
+    12
+   ]
+  },
+  "gancho": {
+   "name": "Gancho",
+   "requer": {
+    "alabarda": 4
+   },
+   "texto": "+1 alvo e atordoa 0,2 s a mais.",
+   "efeitos": [
+    {
+     "campo": "targets",
+     "soma": 1
+    },
+    {
+     "campo": "stagger",
+     "soma": 0.2
+    },
+    {
+     "campo": "cost",
+     "soma": 2
+    }
+   ],
+   "copias": [
+    4,
+    12
+   ]
+  },
+  "soco_ingles": {
+   "name": "Soco-inglês",
+   "requer": {
+    "desarmado": 4
+   },
+   "texto": "+5 de dano fixo e atordoa 0,2 s a mais.",
+   "efeitos": [
+    {
+     "campo": "damage",
+     "soma": 5.0
+    },
+    {
+     "campo": "stagger",
+     "soma": 0.2
+    }
+   ],
+   "copias": [
+    4,
+    12
+   ]
+  },
+  "ombrada": {
+   "name": "Ombrada",
+   "requer": {
+    "armadura_pesada": 3
+   },
+   "texto": "O peso do corpo no golpe: +10% de dano e empurra bem mais longe. Gasta mais fôlego.",
+   "efeitos": [
+    {
+     "campo": "damage",
+     "multiplica": 1.1
+    },
+    {
+     "campo": "knockback",
+     "soma": 3.0
+    },
+    {
+     "campo": "cost",
+     "soma": 4
+    }
+   ],
+   "copias": [
+    3,
+    9
+   ]
+  },
+  "saraivada": {
+   "name": "Saraivada",
+   "requer": {
+    "arcos": 4
+   },
+   "texto": "Três projéteis em leque, cada um com 50% do dano montado. Gasta uma munição por projétil.",
+   "efeitos": [
+    {
+     "campo": "hits",
+     "soma": 2
+    },
+    {
+     "campo": "damage",
+     "multiplica": 0.5
+    }
+   ],
+   "estilos": [
+    "shoot"
+   ],
+   "copias": [
+    4,
+    12
+   ]
+  },
+  "disparo_pesado": {
+   "name": "Disparo pesado",
+   "requer": {
+    "bestas": 4
+   },
+   "texto": "Dano ×1,4 e o tiro empurra; prepara 0,15 s mais devagar.",
+   "efeitos": [
+    {
+     "campo": "damage",
+     "multiplica": 1.4
+    },
+    {
+     "campo": "knockback",
+     "soma": 3.0
+    },
+    {
+     "campo": "windup",
+     "soma": 0.15
+    }
+   ],
+   "estilos": [
+    "shoot"
+   ],
+   "copias": [
+    4,
+    12
+   ]
+  },
+  "leveza": {
+   "name": "Leveza",
+   "requer": {
+    "armadura_leve": 3
+   },
+   "texto": "−4 de fôlego no golpe.",
+   "efeitos": [
+    {
+     "campo": "cost",
+     "soma": -4
+    }
+   ],
+   "copias": [
+    3,
+    9
+   ]
+  },
+  "fresta": {
+   "name": "Fresta",
+   "requer": {
+    "arrombamento": 3
+   },
+   "texto": "Acha a fresta da armadura: ×1,4 em monstros blindados (soma ao esmagar da arma).",
+   "efeitos": [
+    {
+     "campo": "crush",
+     "soma": 0.4,
+     "base": 1.0
+    },
+    {
+     "campo": "cost",
+     "soma": 2
+    }
+   ],
+   "copias": [
+    3,
+    9
+   ]
+  },
+  "balsamo": {
+   "name": "Bálsamo",
+   "requer": {
+    "tratamento": 3
+   },
+   "texto": "Cada acerto recupera 2 de vida.",
+   "efeitos": [
+    {
+     "campo": "cura",
+     "soma": 2.0
+    },
+    {
+     "campo": "cost",
+     "soma": 3
+    }
+   ],
+   "copias": [
+    3,
+    9
    ]
   }
  }
