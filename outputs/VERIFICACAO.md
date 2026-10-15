@@ -158,3 +158,9 @@ Caminhos de um, dois ou três ramos andam no mesmo ritmo. Trocar de espada no 3�
 - O executável não leva mais testes, ferramentas nem documentos. As suítes rodam pelo projeto: **520 verificações** no mundo fixo e **48** no labirinto, zero falhas. O executável foi aberto e rodou sem erros; pedir os testes a ele responde que eles não vão no jogo exportado.
 - `empacotar.sh` gera quatro pacotes: `Dungepm-linux.tar.xz` (jogar), `Dungepm-jogo.zip` (projeto da Godot), `Dungepm-revisao.zip` (capturas) e `Dungepm-documentos-e-arte.zip` (planejamento, verificação e fontes de arte).
 
+## Efeitos visuais — 15/10/2026
+
+- Suíte do mundo fixo: **543 verificações, zero falhas**; suíte do labirinto: **50, zero falhas**.
+- Verificações novas: todo efeito com folha pequena e curta; tochas com chama animada e material único; fogueira no abrigo com luz; luzes tremendo sem passar da força original; andar contra a fogueira para ao lado dela (0,64 m) e ainda deixa descansar; acerto comum com sangue e clarão, sem estouro forte; estouro forte em atordoamento forte e ataque furtivo; faíscas no blindado e sangue quando a arma esmaga a armadura; gotas durante o sangramento; faíscas na guarda do lado de onde veio o golpe; sangue no aventureiro ferido; poeira na esquiva; fumaça na morte; filtro PSX sem trocar o material dos efeitos; efeitos que somem sozinhos; no labirinto, tochas e fogueira no 1º andar e luzes tremendo no 2º, sem fogueira.
+- Capturas conferidas (`revisao/efeitos/`): tochas, fogueira, sangue, golpe forte, faíscas e poeira, anel de poeira, fumaça e sangramento, e o mesmo acerto sem o filtro. Ajustes feitos depois de olhar: poeira e fumaça clareadas (escuras pareciam sombra), sangue subido para o peito, chama da tocha aditiva, maior e acima do copo da tocha.
+- Falta: ver os efeitos em movimento, jogando, e decidir se o sangue fica do jeito que está (vermelho vivo).
