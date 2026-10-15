@@ -2,7 +2,7 @@ extends RefCounted
 class_name WorldBuilder
 ## Builds the 3D scene of a floor from its description: floor and wall tiles
 ## (as MultiMeshes, so floors with hundreds of rooms stay light), colliders,
-## torches, furniture, shelter, stairs and containers.
+## torches, furniture, shelter (with its campfire), stairs and containers.
 
 const FURNITURE_SIZE := {
 	"mesa": Vector3(1.4, 0.8, 0.75), "catre": Vector3(0.85, 0.55, 1.95), "banco": Vector3(1.03, 0.48, 0.38),
@@ -84,6 +84,9 @@ static func build(game) -> void:
 	world.name = "Dungeon"
 	game.add_child(world)
 	game.world_root = world
+	var flicker := Vfx.Flicker.new()
+	flicker.name = "LuzesTremulas"
+	world.add_child(flicker)
 	var extent := Vector3(layout.size.x * DungeonLayout.CELL + 8, 1, layout.size.y * DungeonLayout.CELL + 8)
 	Visuals.collider(world, extent, Vector3(extent.x * 0.5 - 4, -0.48, extent.z * 0.5 - 4)).name = "Ground"
 	var tiles := {"piso": [], "piso_b": [], "parede": []}
@@ -149,6 +152,7 @@ static func build(game) -> void:
 		world.add_child(camp_ring)
 		camp_ring.position = game.camp_position + Vector3(0, 0.06, 0)
 		_sign(world, "ABRIGO", game.camp_position + Vector3(0, 1.8, 0), Color("c7d1b3"))
+		campfire(world, game.camp_position)
 	if layout.world.get("stairs_up") != null:
 		var up: Vector2i = DungeonLayout.cell(layout.world["stairs_up"])
 		prop(world, "escada", layout.to_world(up), PI).name = "EscadaSobe"
@@ -191,14 +195,72 @@ static func torch(world: Node3D, pos: Vector3) -> void:
 	light.light_color = Color("ffd394")
 	light.light_energy = 1.3
 	light.omni_range = 4.5
-	var flame := MeshInstance3D.new()
-	var shape := SphereMesh.new()
-	shape.radius = 0.055
-	shape.height = 0.20
-	flame.mesh = shape
-	flame.material_override = Visuals.material(Color("ffce79"), true)
-	world.add_child(flame)
-	flame.position = light.position
+	_tremble(world, light)
+	Vfx.flame(world, pos + Vector3(0, 0.64, 0))
+
+## Lights registered here tremble like fire (Vfx.Flicker, one per floor).
+static func _tremble(world: Node3D, light: OmniLight3D) -> void:
+	var flicker = world.get_node_or_null("LuzesTremulas")
+	if flicker:
+		flicker.add(light)
+
+const LOG_COLOR := Color("4a3322")
+
+## Campfire in the shelter, in the middle of the resting ring: three crossed
+## logs, embers, flames and a warm light. A small collider keeps the adventurer
+## beside the fire instead of in it (resting works up to 1,6 m away).
+static func campfire(world: Node3D, pos: Vector3) -> Node3D:
+	var fire := Node3D.new()
+	fire.name = "Fogueira"
+	world.add_child(fire)
+	fire.position = pos
+	var body := StaticBody3D.new()
+	var shape := CollisionShape3D.new()
+	var cylinder := CylinderShape3D.new()
+	cylinder.radius = 0.3
+	cylinder.height = 0.5
+	shape.shape = cylinder
+	shape.position.y = 0.25
+	body.add_child(shape)
+	fire.add_child(body)
+	var wood := StandardMaterial3D.new()
+	wood.albedo_color = LOG_COLOR
+	wood.roughness = 0.95
+	var piece := CylinderMesh.new()
+	piece.top_radius = 0.065
+	piece.bottom_radius = 0.075
+	piece.height = 0.78
+	piece.radial_segments = 6
+	piece.rings = 1
+	for i in 3:
+		var part := MeshInstance3D.new()
+		part.mesh = piece
+		part.material_override = wood
+		fire.add_child(part)
+		# Lying down, crossed at the centre and a little raised there.
+		part.basis = Basis(Vector3.UP, TAU * i / 3.0 + 0.3) * Basis(Vector3.RIGHT, PI / 2 - 0.22)
+		part.position = Vector3(0, 0.09, 0)
+	var embers := MeshInstance3D.new()
+	var disc := CylinderMesh.new()
+	disc.top_radius = 0.26
+	disc.bottom_radius = 0.30
+	disc.height = 0.04
+	disc.radial_segments = 8
+	embers.mesh = disc
+	embers.material_override = Visuals.material(Color("8a2f12"), true)
+	embers.position.y = 0.02
+	fire.add_child(embers)
+	Vfx.flame(fire, Vector3(0, 0.05, 0), 1.6)
+	Vfx.flame(fire, Vector3(0.09, 0.04, 0.06), 1.15)
+	Vfx.flame(fire, Vector3(-0.08, 0.04, -0.05), 1.25)
+	var light := OmniLight3D.new()
+	fire.add_child(light)
+	light.position = Vector3(0, 0.7, 0)
+	light.light_color = Color("ffb067")
+	light.light_energy = 1.7
+	light.omni_range = 6.0
+	_tremble(world, light)
+	return fire
 
 static func add_container(game, data: Dictionary) -> Node3D:
 	var holder := Node3D.new()
