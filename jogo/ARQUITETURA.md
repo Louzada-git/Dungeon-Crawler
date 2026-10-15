@@ -13,6 +13,7 @@ Mapa rápido de onde cada coisa vive. Atualizado na etapa 8 (13/10/2026).
 | `saque.json` | Tabelas de saque por tipo de sala: `[item, peso, mínimo, máximo, andar mínimo]`. |
 | `salas.json` | Nomes de sala por tipo, com gênero, e complementos. |
 | `tecnicas.json` | Habilidades e objetos: efeitos, requisitos por proficiência, cópias, slots, recarga e barra. |
+| `efeitos.json` | Efeitos visuais: folha, tamanho, velocidade, cor, brilho, mistura aditiva, se fica em pé, se repete, se sobe e se desvanece. |
 | `proficiencias.json` | Grupos, ramos de proficiência (raízes e especializações), curva, efeitos por nível, perfil dos punhos e migração de nomes; as armas e armaduras indicam o caminho que treinam. |
 
 A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrinth_generator.gd` produz esse formato a partir de (semente, andar). O mundo fixo `cisternas.json` continua existindo só para a suíte de testes.
@@ -31,7 +32,7 @@ A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrint
 | --- | --- |
 | `main.gd` | Raiz do jogo: monta o mundo a partir dos dados, guarda o estado da expedição e liga os sistemas. Mantém a API usada pelo HUD e pelos testes. |
 | `layout.gd` | Grade de piso, salas, sala segura e navegação, lidas da descrição do mundo. |
-| `world_builder.gd` | Ambiente, pisos, paredes, tochas, mobília e recipientes em 3D. |
+| `world_builder.gd` | Ambiente, pisos, paredes, tochas, fogueira do abrigo, mobília e recipientes em 3D. |
 | `items.gd`, `enemy_types.gd` | Leitura dos catálogos; textos traduzidos em `Items.info()`. |
 | `inventory.gd` | Mochila: pilhas, peso, equipar, transferir. |
 | `player.gd`, `enemy.gd` | Personagem e monstros (movimento, golpes, IA). O modelo do personagem é `DungeonPlayer.MODEL`; `MOUNTS` diz em que osso ficam as mãos e o tronco em rigs com outros nomes (Mixamo) e a correção que mantém armas e armaduras no lugar. |
@@ -47,6 +48,7 @@ A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrint
 | `systems/techniques.gd`, `technique_book.gd` | Habilidades: cálculo, validação, destrave e cópias (`Techniques`); montagem, barra e recarga do aventureiro (`TechniqueBook`). |
 | `ui/ui_technique_window.gd` | Janela de habilidades (T). |
 | `systems/psx_filter.gd` | Filtro de PlayStation: pós-processamento, materiais com vértices presos à grade e texto do mundo nítido. |
+| `systems/vfx.gd` | Efeitos visuais (`Vfx`): sangue, clarões, faíscas, poeira, fumaça, chamas e o tremor das luzes de fogo. |
 | `ui.gd` + `ui/` | HUD: um arquivo por painel (ver comentários no topo de cada um). |
 
 ## Armas
@@ -120,6 +122,15 @@ Decisões de 15/10/2026: só físicas por enquanto (a magia vem depois); montar 
 - **Liga/desliga:** botão "Filtro PSX" na pausa; `main.set_psx` guarda a escolha em `user://configuracoes.cfg` (`[video] psx`). Desligar devolve os materiais originais, guardados em metadados de cada nó. Padrão: ligado.
 - Captura de comparação: `tests/psx_capture.gd`.
 
+## Efeitos visuais
+
+- **Folhas:** `assets/vfx/*.png`, pequenas (32 a 69 px por quadro), feitas a partir do Brackeys VFX Bundle por `../arte/fontes/vfx/preparar_vfx.py`; a grade de cada uma fica em `assets/vfx/folhas.json`. O importador está com `detect_3d/compress_to=0`, para o editor não comprimir as folhas.
+- **Desenho:** cada efeito é um `MeshInstance3D` com `QuadMesh` e o `ShaderMaterial` de `Vfx.SHADER`, que vira o quadro para a câmera (ou só em volta do eixo Y, nas chamas), escolhe o quadro da folha e lê sem suavizar. O filtro PSX não troca esse material; a imagem final passa pelo pós-processamento como o resto.
+- **Efeitos de uma vez** (`Vfx.burst`): cópia do material com o quadro avançado por um `Tween`; o nó entra no grupo `efeitos` e se apaga quando a folha acaba. Ficam um pouco à frente do corpo, na direção da câmera, para não sumirem dentro dele.
+- **Chamas** (`Vfx.flame`): grupo `chamas`, um material só para todas; o quadro sai do tempo e da posição, sem script por tocha. As luzes de tocha e da fogueira tremem por `Vfx.Flicker` (um nó por andar, `LuzesTremulas`), 15 vezes por segundo e só perto da câmera.
+- **Onde aparecem:** acerto em monstro (`Combat.apply_hit` → `Vfx.enemy_hit`: sangue e clarão; faíscas em blindado sem arma que esmaga; estouro grande em ataque furtivo, armadura esmagada ou atordoamento forte); sangramento (gota a cada 0,5 s); morte (fumaça); aventureiro ferido (sangue) e guarda (faíscas do lado do golpe); esquiva e avanço (poeira); pancada no chão (anel de poeira); flecha na parede (clarão e poeira).
+- Captura: `tests/vfx_capture.gd`.
+
 ## Testes e ferramentas
 
 O jogo exportado não leva `tests/`, `tools/` nem documentos (`export_presets.cfg`: `exclude_filter`); as suítes rodam pelo projeto. Pacotes de entrega: `../empacotar.sh` (jogo, revisão, documentos e arte separados). Capturas de revisão ficam em `../revisao/`.
@@ -133,6 +144,7 @@ O jogo exportado não leva `tests/`, `tools/` nem documentos (`export_presets.cf
 - `tests/skills_capture.gd`: armaduras no corpo, guarda, furtivo, baú trancado, dica de armadura e janela agrupada (precisa de tela).
 - `tests/psx_capture.gd`: as mesmas cenas com e sem o filtro PSX (precisa de tela).
 - `tests/techniques_capture.gd`: janela de habilidades, Corte giratório em uso e janela travada em combate (precisa de tela).
+- `tests/vfx_capture.gd`: tochas, fogueira, sangue, golpe forte, faíscas, poeira, fumaça e o mesmo acerto sem o filtro (precisa de tela).
 - `tests/hud_capture.gd`: capturas do HUD para revisão (precisa de tela).
 - `tools/render_icons.gd`: gera os ícones dos itens a partir dos modelos.
 
