@@ -44,7 +44,7 @@ A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrint
 | `systems/projectile.gd` | Flechas e virotes em voo: paredes, monstros atravessados, munição presa e recuperável. |
 | `proficiency_tree.gd` | Leitura de `proficiencias.json`: atributos, curva, ramos e habilidades. |
 | `character_sheet.gd` | O aventureiro da run: atributos, experiência por ramo, domínio das armas, habilidades desbloqueadas e efeitos dos atributos. |
-| `systems/game_camera.gd`, `systems/aim_marker.gd`, `systems/input_setup.gd` | Câmera, marcador de mira, teclas. `InputSetup` também tem as teclas padrão da barra de habilidades (Q, R, F, G), o nome curto de cada tecla (inclusive "Num 1") e quem já usa cada tecla. |
+| `systems/game_camera.gd`, `systems/aim_marker.gd`, `systems/input_setup.gd` | Câmera (isométrica ou terceira pessoa), marcador de mira, teclas. `InputSetup` também tem as teclas padrão da barra de habilidades (Q, R, F, G), o nome curto de cada tecla (inclusive "Num 1") e quem já usa cada tecla. |
 | `quick_bar.gd` | Barra rápida (`QuickBar`): 9 espaços nas teclas 1 a 9, qualquer item em qualquer espaço; usar equipa ou guarda arma, veste ou tira armadura, come, trata. Vai no save. |
 | `systems/techniques.gd`, `technique_book.gd` | Habilidades: cálculo, validação, destrave e cópias (`Techniques`); montagem, barra e recarga do aventureiro (`TechniqueBook`). |
 | `ui/ui_technique_window.gd` | Janela de habilidades (T). |
@@ -126,6 +126,16 @@ Decisões de 15/10/2026: só físicas por enquanto (a magia vem depois); montar 
 - **Texto do mundo:** cada `Label3D` sai da câmera (`layers = 0`) e é desenhado como `Label` 2D nítido na posição projetada, com o mesmo tamanho na tela (`font_size × pixel_size × altura da janela / camera.size`).
 - **Liga/desliga:** botão "Filtro PSX" na pausa; `main.set_psx` guarda a escolha em `user://configuracoes.cfg` (`[video] psx`). Desligar devolve os materiais originais, guardados em metadados de cada nó. Padrão: ligado.
 - Captura de comparação: `tests/psx_capture.gd`.
+
+## Câmera
+
+- **Dois modos** (`GameCamera.mode`, botão "Câmera" na pausa, salvo em `user://configuracoes.cfg`, `[video] camera`): `iso` (ortográfica isométrica, padrão) e `terceira` (perspectiva, atrás do personagem).
+- **Terceira pessoa:** pivô na altura do ombro (1,55 m), giro (`yaw`) e inclinação (`pitch`, de −1,15 a 0,35 rad) pelo mouse, `SpringArm3D` de 2 a 6 m (roda do mouse) que bate nas paredes (camada 1), 0,45 m à direita do ombro. `GameCamera.forward()` e `move_direction()` dão a direção do olhar e do andar; `DungeonPlayer.aim_mouse` vira o personagem para onde a câmera olha, então golpes, tiros e habilidades vão para a mira (`ui.crosshair`).
+- **Paredes da frente:** `WorldBuilder` monta dois lotes (`Lote_parede_frente_baixa` cortado a 19% para a isométrica e `Lote_parede_frente_alta` inteiro) e `WorldBuilder.apply_view` mostra um ou outro. As colisões são as mesmas.
+- **Névoa:** o `WorldEnvironment` ("Ambiente") liga uma névoa escura só na terceira pessoa, escondendo o fundo dos corredores e o céu aberto sobre as paredes.
+- **Cursor:** `main.update_cursor` prende o mouse na terceira pessoa e solta quando `ui.cursor_needed()` (mochila, mapa, pausa, janelas H, P e T, fim da run, criação ou Alt).
+- **Texto do mundo** com o filtro PSX: em perspectiva, o tamanho segue a distância e um texto atrás de parede some (raio da câmera até o rótulo).
+- Captura: `tests/terceira_capture.gd`.
 
 ## Efeitos visuais
 
