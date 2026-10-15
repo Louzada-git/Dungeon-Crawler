@@ -182,3 +182,11 @@ Caminhos de um, dois ou três ramos andam no mesmo ritmo. Trocar de espada no 3�
 - Tabela de balanço (`jogo/BALANCO.md`, gerada por `jogo/tools/tabela_balanco.py`): dano por segundo num alvo entre 35 (arco) e 49 (espada da guarda), soco 24; um corrompido do 1º andar cai em 1,5 a 2,2 s de golpes com qualquer arma.
 - Captura conferida: dicas da adaga, espada, martelo e besta com peso, preparo, delay e esquiva. Descrições de itens que citavam o fôlego antigo foram corrigidas.
 - Falta: jogar de novo. A firmeza deixa o combate bem mais difícil do que na versão testada, porque agora o monstro termina o ataque mesmo apanhando.
+
+## Barra rápida, teclas das habilidades e delay do peso — 15/10/2026
+
+- Pedidos: barra de 1 a 9 com qualquer item; teclas das habilidades escolhidas pelo jogador (não números, teclado numérico pode); delay depois do ataque pelo peso da arma (0,1 s por kg), só para golpear.
+- Suíte do mundo fixo: **622 verificações, zero falhas**; suíte do labirinto: **50, zero falhas**.
+- Verificações novas: 9 espaços com arma, rações e bandagens no começo; barra cabendo na tela sem cobrir o cartão da arma; tecla 2 come; katana em qualquer espaço equipa e, de novo, guarda; tecla 1 volta à espada; armadura veste e tira; munição só mostra a quantidade; espaço vazio explica; pilha acabada mostra 0; arrastar da mochila põe e tira do espaço antigo; mochila aberta + item selecionado + número põe sem usar; menu do item mostra a posição e põe no primeiro livre; botão direito tira; save e save estranho; teclas Q, R, F, G; número de cima, E e T recusados com o motivo; Num 1 aceito, troca de lugar com o outro espaço, fica salva, aparece na barra e usa a habilidade; tecla 4 não usa mais habilidade; janela T espera a tecla, aceita V, cancela com Esc, recusa número com o motivo e mostra as teclas nos botões; lista de controles com as teclas atuais; martelo com +0,65 s até o próximo golpe, sem golpe mas com esquiva nesse tempo; dica do martelo com o delay do peso.
+- Capturas conferidas (`revisao/barra/`): barra com arma, comida, katana, arco com flechas, armadura vestida, tônico e unguento, e as teclas Q, Num 1, F, G; janela T esperando a tecla do 3º espaço; lista de controles.
+- Tabela de balanço refeita com o delay do peso (`jogo/BALANCO.md`): dano por segundo num alvo de 24 a 33, soco 18; um corrompido cai em 2 a 3,4 s de golpes.
