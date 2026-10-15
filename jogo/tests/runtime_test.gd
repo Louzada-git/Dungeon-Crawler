@@ -147,6 +147,8 @@ func run(target, capture: bool) -> void:
  check(not p.attack(),"Ataque sem fôlego é recusado")
  p.stamina = 100
  p.attack_timer = 0
+ p.attack_wait = 0
+ p.dodge_lock = 0
  p.health = 100
  p.hurt_timer = 0
  check(p.dodge() and p.invulnerable > 0,"Esquiva consome fôlego e concede invulnerabilidade curta")
@@ -220,7 +222,8 @@ func run(target, capture: bool) -> void:
  p.facing = Vector3.RIGHT
  p.attack()
  game.resolve_player_attack()
- check(enemy.health==36 and second.health==65,"Lança acerta o primeiro alvo, sem atravessá-lo")
+ var spear_hit: float = 65.0-float(Items.info("spear")["damage"])
+ check(enemy.health==spear_hit and second.health==65,"Lança acerta o primeiro alvo, sem atravessá-lo")
  p.cooldown = 0
  p.attack_timer = 0
  p.attack_wait = 0
@@ -240,7 +243,7 @@ func run(target, capture: bool) -> void:
   enemy.position = p.position+sample
   p.attack()
   game.resolve_player_attack()
-  var expected: float = 36 if sample == Vector3(3.05,0,0) else 65
+  var expected: float = spear_hit if sample == Vector3(3.05,0,0) else 65.0
   check(enemy.health == expected,"Alcance linear da lança: "+str(sample))
  check(p.animator.current_animation == "mixamo_stab","Estocada usa o movimento adaptado do Mixamo")
  # Real windup, committed aim, and inventory swap while the strike is pending.
@@ -448,7 +451,7 @@ func test_hud() -> void:
  p.bleeding = true
  p.health = 40
  p.food = 9
- p.stamina = 20
+ p.stamina = 10
  var list: Array = game.ui.moodles.compute()
  var by_id: Dictionary = {}
  for m in list:
@@ -456,8 +459,8 @@ func test_hud() -> void:
  check(by_id.has("bleeding") and list[0]["id"] == "bleeding","Sangramento aparece primeiro entre os indicadores")
  check(by_id.has("hurt") and by_id["hurt"]["level"] == 2,"Vida 40 mostra nível 2 de ferimento")
  check(by_id.has("food") and by_id["food"]["level"] == 2,"Saciedade 9 mostra fome com efeito no fôlego")
- check(by_id.has("stamina") and by_id["stamina"]["title"] == "Ofegante","Fôlego 20 bloqueia esquiva e mostra Ofegante")
- p.stamina = 10
+ check(by_id.has("stamina") and by_id["stamina"]["title"] == "Ofegante","Fôlego 10 bloqueia esquiva (12,5) e mostra Ofegante")
+ p.stamina = 5
  check(game.ui.moodles.compute().filter(func(m): return m["id"] == "stamina")[0]["title"] == "Exausto","Fôlego abaixo do custo da arma mostra Exausto")
  inv.add("ore",5)
  check("load" in moodle_ids(),"Carga acima de 11 kg mostra indicador de peso")
@@ -620,6 +623,7 @@ func fresh(enemy, pos: Vector3) -> void:
  enemy.health = enemy.maximum_health
  enemy.aggro = false
  enemy.stagger = 0
+ enemy.firm = 0
  enemy.windup = 0
  enemy.bleed_time = 0
  enemy.bleed_dps = 0
@@ -703,16 +707,17 @@ func test_weapons() -> void:
  # Dagger: sneak attack on an unaware monster.
  fresh(e0,at+Vector3(1.1,0,0))
  swing("adaga",Vector3.RIGHT)
- check(is_equal_approx(e0.health,65.0-15.0*2.5),"Adaga: dano ×2,5 em monstro desprevenido")
+ var dagger: float = float(Items.info("adaga")["damage"])
+ check(is_equal_approx(e0.health,e0.maximum_health-dagger*2.5),"Adaga: dano ×2,5 em monstro desprevenido")
  swing("adaga",Vector3.RIGHT)
- check(is_equal_approx(e0.health,65.0-15.0*2.5-15.0),"Adaga: dano normal quando o monstro já está alerta")
+ check(is_equal_approx(e0.health,e0.maximum_health-dagger*2.5-dagger),"Adaga: dano normal quando o monstro já está alerta")
  inv.remove("adaga")
  # Katana: up to two targets in a narrow arc.
  fresh(e0,at+Vector3(1.2,0,0.2))
  fresh(e1,at+Vector3(1.5,0,-0.3))
  fresh(e2,at+Vector3(1.8,0,0.1))
  swing("katana",Vector3.RIGHT)
- var hit_count: int = [e0,e1,e2].filter(func(e): return e.health < 65.0).size()
+ var hit_count: int = [e0,e1,e2].filter(func(e): return e.health < e.maximum_health).size()
  check(hit_count == 2,"Katana acerta até dois alvos")
  inv.remove("katana")
  # Axe: bleeding keeps hurting after the hit.
@@ -720,11 +725,12 @@ func test_weapons() -> void:
  fresh(e1,at+Vector3(-3,0,0))
  fresh(e2,at+Vector3(-3,0,2))
  swing("machado",Vector3.RIGHT)
- check(is_equal_approx(e0.health,39.0) and e0.bleed_time > 4.9,"Machado: golpe abre sangramento")
+ var axe_left: float = e0.maximum_health-float(Items.info("machado")["damage"])
+ check(is_equal_approx(e0.health,axe_left) and e0.bleed_time > 4.9,"Machado: golpe abre sangramento")
  e0.tick_bleed(1.0)
- check(is_equal_approx(e0.health,34.0),"Sangramento tira 5 de vida por segundo")
+ check(is_equal_approx(e0.health,axe_left-5.0),"Sangramento tira 5 de vida por segundo")
  e0.tick_bleed(5.0)
- check(e0.bleed_time == 0 and e0.health >= 13.9 and e0.alive,"Sangramento acaba depois do tempo")
+ check(e0.bleed_time == 0 and e0.health >= axe_left-25.1 and e0.alive,"Sangramento acaba depois do tempo")
  e0.health = 3
  e0.apply_bleed(5,5)
  var kills_before: int = game.kills
@@ -734,34 +740,37 @@ func test_weapons() -> void:
  # Mace: crushes armor and stuns longer.
  fresh(guard,at+Vector3(1.2,0,0))
  swing("maca",Vector3.RIGHT)
- check(is_equal_approx(guard.health,95.0-28.0*1.5) and guard.armored,"Maça: dano ×1,5 em monstro blindado")
+ var mace: float = float(Items.info("maca")["damage"])
+ check(is_equal_approx(guard.health,guard.maximum_health-mace*1.5) and guard.armored,"Maça: dano ×1,5 em monstro blindado")
  check(guard.stagger >= 0.89,"Maça atordoa por mais tempo")
  fresh(e0,at+Vector3(1.2,0,0))
  fresh(guard,game.layout.to_world(Vector2i(28,7)))
  swing("maca",Vector3.RIGHT)
- check(is_equal_approx(e0.health,65.0-28.0),"Maça: dano normal em monstro sem armadura")
+ check(is_equal_approx(e0.health,e0.maximum_health-mace),"Maça: dano normal em monstro sem armadura")
  inv.remove("maca")
  # War hammer: area in front, nothing behind.
  fresh(e0,at+Vector3(1.3,0,1.0))
  fresh(e1,at+Vector3(2.2,0,-0.6))
  fresh(e2,at+Vector3(-1.5,0,0))
  swing("martelo",Vector3.RIGHT)
- check(is_equal_approx(e0.health,65.0-44.0) and is_equal_approx(e1.health,65.0-44.0),"Martelo acerta todos na área à frente")
- check(is_equal_approx(e2.health,65.0),"Martelo não acerta quem está atrás")
+ var hammer_left: float = e0.maximum_health-float(Items.info("martelo")["damage"])
+ check(is_equal_approx(e0.health,hammer_left) and is_equal_approx(e1.health,hammer_left),"Martelo acerta todos na área à frente")
+ check(is_equal_approx(e2.health,e2.maximum_health),"Martelo não acerta quem está atrás")
  inv.remove("martelo")
  # Halberd: pierces two in a line.
  fresh(e0,at+Vector3(1.3,0,0))
  fresh(e1,at+Vector3(2.4,0,0))
  fresh(e2,at+Vector3(3.3,0,0))
  swing("alabarda",Vector3.RIGHT)
- check(is_equal_approx(e0.health,32.0) and is_equal_approx(e1.health,32.0) and is_equal_approx(e2.health,65.0),"Alabarda atravessa o primeiro e acerta o segundo")
+ var halberd_left: float = e0.maximum_health-float(Items.info("alabarda")["damage"])
+ check(is_equal_approx(e0.health,halberd_left) and is_equal_approx(e1.health,halberd_left) and is_equal_approx(e2.health,e2.maximum_health),"Alabarda atravessa o primeiro e acerta o segundo")
  inv.remove("alabarda")
  # Montante: wide arc, four targets.
  fresh(e0,at+Vector3(1.2,0,1.2))
  fresh(e1,at+Vector3(1.6,0,0))
  fresh(e2,at+Vector3(1.2,0,-1.2))
  swing("montante",Vector3.RIGHT)
- check([e0,e1,e2].all(func(e): return is_equal_approx(e.health,25.0)),"Montante acerta em arco largo")
+ check([e0,e1,e2].all(func(e): return is_equal_approx(e.health,e.maximum_health-float(Items.info("montante")["damage"]))),"Montante acerta em arco largo")
  inv.remove("montante")
  # Bow: needs arrows, spends one on release, projectile flies and sticks.
  fresh(e0,at+Vector3(6.0,0,0))
@@ -778,7 +787,7 @@ func test_weapons() -> void:
  check(swing("arco",Vector3.RIGHT) and inv.count("flecha") == 4,"Disparo gasta uma flecha")
  check(get_tree().get_nodes_in_group("projeteis").size() == 1,"Flecha voa como projétil")
  await wait_frames(30)
- check(is_equal_approx(e0.health,43.0) and int(e0.stuck.get("flecha",0)) == 1,"Flecha acerta à distância e fica presa no monstro")
+ check(is_equal_approx(e0.health,e0.maximum_health-float(Items.info("arco")["damage"])) and int(e0.stuck.get("flecha",0)) == 1,"Flecha acerta à distância e fica presa no monstro")
  check(get_tree().get_nodes_in_group("projeteis").is_empty(),"Projétil some depois de acertar")
  e0.receive_damage(999,Vector3.RIGHT)
  check(int(game.containers[-1]["items"].get("flecha",0)) == 1,"Flecha presa volta com os pertences do monstro")
@@ -799,7 +808,8 @@ func test_weapons() -> void:
  inv.add("virote",3)
  swing("besta",Vector3.RIGHT)
  await wait_frames(30)
- check(is_equal_approx(e0.health,20.0) and is_equal_approx(e1.health,20.0) and is_equal_approx(e2.health,65.0),"Besta atravessa dois inimigos")
+ var bolt_left: float = e0.maximum_health-float(Items.info("besta")["damage"])
+ check(is_equal_approx(e0.health,bolt_left) and is_equal_approx(e1.health,bolt_left) and is_equal_approx(e2.health,e2.maximum_health),"Besta atravessa dois inimigos")
  check(int(e1.stuck.get("virote",0)) == 1 and int(e0.stuck.get("virote",0)) == 0,"Virote fica preso no último atingido")
  # Stuck ammunition survives a save.
  game.ui.close_all()
@@ -815,6 +825,7 @@ func test_weapons() -> void:
   texts.append(node.text)
  var joined: String = " | ".join(texts)
  check(joined.contains("Contundentes › Martelo") and joined.contains("Pancada") and joined.contains("Duas mãos"),"Dica do martelo mostra família, golpe e empunhadura")
+ check(joined.contains("Pesado") and joined.contains("Delay depois do golpe") and joined.contains("0,68 s") and joined.contains("esquiva em 0,34 s") and joined.contains("16"),"Dica do martelo mostra o peso, o delay, quando a esquiva volta e o fôlego")
  tip.free()
  # Test arsenal
  var chest: Dictionary = game.spawn_test_arsenal()
@@ -879,8 +890,8 @@ func test_proficiencies() -> void:
  fresh(e0,p.position+Vector3(1.2,0,0))
  e0.aggro = true
  swing("sword",Vector3.RIGHT)
- var expected: float = 30.0*24.0/65.0
- check(is_equal_approx(e0.health,41.0) and is_equal_approx(float(sheet.xp.get("laminas",0)),expected*0.4) and is_equal_approx(float(sheet.xp.get("espadas",0)),expected*0.35) and is_equal_approx(float(sheet.xp.get("espada_reta",0)),expected*0.25),"Golpe ensina Lâminas, Espadas e Espada reta pelo dano causado")
+ var expected: float = 30.0*24.0/e0.maximum_health
+ check(is_equal_approx(e0.health,e0.maximum_health-24.0) and is_equal_approx(float(sheet.xp.get("laminas",0)),expected*0.4) and is_equal_approx(float(sheet.xp.get("espadas",0)),expected*0.35) and is_equal_approx(float(sheet.xp.get("espada_reta",0)),expected*0.25),"Golpe ensina Lâminas, Espadas e Espada reta pelo dano causado")
  fresh(e0,p.position+Vector3(1.2,0,0))
  e0.aggro = true
  swing("machado",Vector3.RIGHT)
@@ -891,6 +902,8 @@ func test_proficiencies() -> void:
  p.stamina = p.max_stamina
  p.dodge_timer = 0
  p.attack_timer = 0
+ p.attack_wait = 0
+ p.dodge_lock = 0
  p.hurt_timer = 0
  p.health = p.max_health
  check(p.dodge(),"Esquiva funciona com o custo do personagem")
@@ -914,7 +927,7 @@ func test_proficiencies() -> void:
  sheet.reset({"forca":9,"vigor":4,"agilidade":4,"destreza":3})
  game.apply_attributes(true)
  check(is_equal_approx(inv.capacity,24.0) and is_equal_approx(inv.comfort,15.0),"Força 9: mochila de 24 kg, conforto até 15 kg")
- check(is_equal_approx(p.max_health,94.0) and is_equal_approx(p.max_stamina,95.0) and is_equal_approx(p.dodge_cost(),26.0),"Vigor e Agilidade 4: vida 94, fôlego 95, esquiva custa 26")
+ check(is_equal_approx(p.max_health,94.0) and is_equal_approx(p.max_stamina,95.0) and is_equal_approx(p.dodge_cost(),13.0),"Vigor e Agilidade 4: vida 94, fôlego 95, esquiva custa 13")
  inv.add("ore",12)
  check(inv.weight() > 18.0,"Com Força 9 cabe mais de 18 kg")
  sheet.award_path(["espadas","espada_reta"],777.0)
@@ -987,6 +1000,7 @@ func ready_player(p) -> void:
  p.cooldown = 0
  p.attack_timer = 0
  p.attack_wait = 0
+ p.dodge_lock = 0
  p.hurt_timer = 0
  p.dodge_timer = 0
  p.invulnerable = 0
@@ -1032,7 +1046,7 @@ func test_skills() -> void:
  p.facing = Vector3.RIGHT
  check(p.attack(),"Sem arma, o personagem soca")
  game.resolve_player_attack()
- check(is_equal_approx(e0.health,65.0-8.0) and float(sheet.xp.get("desarmado",0)) > 0,"Soco tira 8 de vida e ensina Desarmado")
+ check(is_equal_approx(e0.health,e0.maximum_health-8.0) and float(sheet.xp.get("desarmado",0)) > 0,"Soco tira 8 de vida e ensina Desarmado")
  var brawler := CharacterSheet.new()
  brawler.award("desarmado",ProficiencyTree.xp_for_level(5)+1.0)
  check(brawler.weapon_stats("")["damage"] > 12.0,"Desarmado nível 5: soco mais forte (%s)" % UiStyle.fmt(brawler.weapon_stats("")["damage"],1))
@@ -1046,7 +1060,7 @@ func test_skills() -> void:
  p.stamina = p.max_stamina
  check(p.can_block() and "guard" in moodle_ids(),"Botão direito com arma corpo a corpo levanta a guarda")
  p.receive_damage(20,Vector3.LEFT)
- check(is_equal_approx(p.health,p.max_health-12.0) and is_equal_approx(p.stamina,p.max_stamina-8.0) and p.hurt_timer == 0,"Guarda segura 40% do golpe de frente, gasta fôlego e não interrompe")
+ check(is_equal_approx(p.health,p.max_health-12.0) and is_equal_approx(p.stamina,p.max_stamina-4.0) and p.hurt_timer == 0,"Guarda segura 40% do golpe de frente, gasta fôlego (metade do dano segurado) e não interrompe")
  check(float(sheet.xp.get("bloqueio",0)) > 0,"Segurar um golpe ensina Bloqueio")
  ready_player(p)
  p.health = p.max_health
@@ -1168,9 +1182,9 @@ func test_skills() -> void:
  inv.equip("sword")
  var s0: float = float(sheet.xp.get("furtividade",0))
  swing("sword",Vector3.RIGHT)
- check(is_equal_approx(e0.health,65.0-24.0*1.5) and float(sheet.xp.get("furtividade",0)) > s0,"Ataque furtivo: dano ×1,5 com qualquer arma e ensina Furtividade")
+ check(is_equal_approx(e0.health,e0.maximum_health-24.0*1.5) and float(sheet.xp.get("furtividade",0)) > s0,"Ataque furtivo: dano ×1,5 com qualquer arma e ensina Furtividade")
  swing("sword",Vector3.RIGHT)
- check(is_equal_approx(e0.health,65.0-36.0-24.0),"Monstro alerta leva dano normal")
+ check(is_equal_approx(e0.health,e0.maximum_health-36.0-24.0),"Monstro alerta leva dano normal")
  p.sneaking = false
  var shadow := CharacterSheet.new()
  shadow.award("furtividade",ProficiencyTree.xp_for_level(10)+1.0)
@@ -1669,29 +1683,84 @@ func test_balance() -> void:
  var order: Array = win.object_order("sword")
  check(order.size() == Techniques.OBJECTS.size() and Techniques.copies(sheet,order[0]) > 0 and Techniques.copies(sheet,order[-1]) == 0 and win.object_box.get_child_count() == order.size() and win.object_box.get_parent() is ScrollContainer,"Janela lista todos os objetos com rolagem, os que você tem primeiro")
  game.ui.toggle_techniques()
- # A third of the recovery after the blow; the wind-up stays.
+ # Delay after the blow by weight: heavy weapons keep a long one; the dodge comes back halfway.
  ready_player(p)
  p.stamina = p.max_stamina
  var w: Dictionary = sheet.weapon_stats("sword")
- var full: float = maxf(float(w["cooldown"]),float(w["windup"])+0.15)
+ var cycle: float = maxf(float(w["cooldown"]),float(w["windup"])+0.15)
  p.facing = Vector3.LEFT
- check(p.attack(),"Golpe para medir a recuperação")
- check(is_equal_approx(p.attack_wait,float(w["windup"])) and is_equal_approx(p.cooldown,float(w["windup"])+(full-float(w["windup"]))/3.0),"Espera até o próximo golpe: preparo igual e o resto em um terço")
- check(is_equal_approx(p.attack_timer,float(w["windup"])+(full*0.9-float(w["windup"]))/3.0),"Lentidão, virar e esquivar depois do golpe: um terço do tempo de antes")
+ check(p.attack(),"Golpe para medir o delay")
+ check(is_equal_approx(p.attack_wait,float(w["windup"])) and is_equal_approx(p.cooldown,cycle) and is_equal_approx(p.attack_timer,cycle*0.9),"Golpe inteiro como nos dados: preparo, delay e lentidão")
+ check(is_equal_approx(p.dodge_lock,float(w["windup"])+(cycle-float(w["windup"]))*0.5),"Esquiva volta na metade do delay depois do golpe")
+ check(not p.dodge(),"Sem esquiva antes da metade do delay")
  if p.animator and p.animator.is_playing() and p.animator.speed_scale > 0.0:
   var anim: Animation = p.animator.get_animation(p.animator.current_animation)
-  check(is_equal_approx(p.animator.get_playing_speed()/p.animator.speed_scale,anim.length/(full*0.9)),"Animação do golpe no mesmo ritmo (o impacto cai no mesmo ponto)")
+  check(is_equal_approx(p.animator.get_playing_speed()/p.animator.speed_scale,anim.length/(float(w["windup"])/float(w["impacto"]))),"Animação do golpe acerta no fim do preparo (dura preparo / impacto)")
  p.set_physics_process(true)
- await get_tree().create_timer(full*0.9*0.75).timeout
- check(p.attack_timer <= 0.0 and p.dodge(),"Esquiva liberada antes do fim do tempo antigo")
+ await get_tree().create_timer(p.dodge_lock+0.03).timeout
+ var still_slow: bool = p.attack_timer > 0.0
+ check(still_slow and p.dodge() and p.attack_timer == 0.0,"Esquiva na metade do delay corta a lentidão do golpe")
  p.set_physics_process(false)
+ var delays: Dictionary = {}
+ for id in ["adaga","katana","sword","maca","montante","martelo","besta"]:
+  var data: Dictionary = Items.info(id)
+  delays[id] = float(data["cooldown"])-float(data["windup"])
+ check(Items.info("martelo")["classe"] == "pesada" and Items.info("adaga")["classe"] == "leve" and delays["martelo"] > delays["sword"]*2.0 and delays["montante"] > delays["sword"]*1.8 and delays["adaga"] < delays["sword"] and float(Items.info("martelo")["cooldown"]) >= 1.25,"Armas pesadas têm muito dano e delay alto; leves, pouco dano e delay curto")
+ # Stamina: costs halved, regeneration ×1,3.
+ check(is_equal_approx(float(Items.info("sword")["cost"]),8.5) and is_equal_approx(float(Items.info("martelo")["cost"]),16.0) and is_equal_approx(float(ProficiencyTree.section("punhos")["cost"]),4.0),"Fôlego das armas pela metade (espada 8,5, martelo 16, soco 4)")
+ check(is_equal_approx(sheet.dodge_cost(),12.5) and is_equal_approx(sheet.block_cost(20.0),10.0) and is_equal_approx(sheet.block_cost(1.0),2.0) and is_equal_approx(sheet.stamina_rule("corrida",0),8.0),"Esquiva 12,5, guarda metade do dano segurado (mínimo 2), corrida 8 por segundo")
+ check(is_equal_approx(Techniques.OBJECTS["forca"]["efeitos"][2]["soma"],2.0) and is_equal_approx(float(ProficiencyTree.DATA["espada_reta"]["perks"][0]["mods"]["cost"]),-1.5),"Fôlego dos objetos e talentos pela metade")
+ ready_player(p)
+ p.stamina = 40.0
+ p.food = 80.0
+ inv.restore({"stacks":{"sword":1},"equipped":"sword"})
+ p.set_physics_process(true)
+ await get_tree().create_timer(0.5).timeout
+ p.set_physics_process(false)
+ var gained: float = p.stamina-40.0
+ check(gained > 20.8*0.5*0.85 and gained < 20.8*0.5*1.15,"Fôlego volta 20,8 por segundo, 1,3× o de antes (%s em 0,5 s)" % UiStyle.fmt(gained))
+ # Firmness: a stunned monster then holds its attack against blows for a while.
+ fresh(foe,p.position+Vector3(1.0,0,0))
+ foe.visible = true
+ Combat.apply_hit(game,foe,{"damage":1.0},Vector3.RIGHT)
+ check(foe.stagger > 0.0 and is_equal_approx(foe.firm,foe.stagger+float(EnemyTypes.info(foe.kind)["firmeza"])),"Primeiro golpe atordoa e deixa o monstro firme por um tempo")
+ foe.stagger = 0.0
+ foe.windup = 0.4
+ Combat.apply_hit(game,foe,{"damage":1.0,"stagger":1.0},Vector3.RIGHT)
+ check(foe.windup > 0.0 and foe.stagger == 0.0,"Monstro firme leva o dano mas não perde o ataque (sem atordoamento em cadeia)")
+ foe.firm = 0.0
+ Combat.apply_hit(game,foe,{"damage":1.0},Vector3.RIGHT)
+ check(foe.windup == 0.0 and foe.stagger > 0.0,"Passada a firmeza, um golpe volta a interromper")
+ # In play: hitting nonstop with the sword no longer keeps a monster from striking back.
+ fresh(foe,p.position+Vector3(1.2,0,0))
+ foe.visible = true
+ foe.aggro = true
+ foe.health = 100000.0
+ ready_player(p)
+ p.health = p.max_health
+ p.stamina = p.max_stamina
+ p.invulnerable = 0.0
+ var swings: int = 0
+ foe.set_physics_process(true)
+ p.set_physics_process(true)
+ for i in 180:
+  await get_tree().physics_frame
+  p.stamina = p.max_stamina
+  if p.cooldown <= 0.0 and p.hurt_timer <= 0.0:
+   p.facing = (foe.position-p.position).normalized()
+   if p.attack():
+    swings += 1
+ foe.set_physics_process(false)
+ p.set_physics_process(false)
+ check(swings >= 4 and p.health < p.max_health,"Golpear sem parar não impede mais o monstro de revidar (%d golpes, vida %d)" % [swings,roundi(p.health)])
+ p.health = p.max_health
  # Twice the bonus per level.
  sheet.reset()
  var path: Array = CharacterSheet.path_of("sword")
  sheet.award_path(path,ProficiencyTree.xp_for_level(6)+1.0)
  check(sheet.mastery(path) == 6 and is_equal_approx(sheet.damage_mult(path),1.2) and is_equal_approx(sheet.cost_mult(path),0.9),"Bônus por nível dobrado: domínio 6 dá +20% de dano e −10% de fôlego")
  teach(sheet,"acrobacia",6)
- check(is_equal_approx(sheet.dodge_cost(),17.0),"Acrobacia 6: esquiva 0,6 de fôlego mais barata por nível (25 − 3 − 5 do talento)")
+ check(is_equal_approx(sheet.dodge_cost(),8.5),"Acrobacia 6: esquiva 0,3 de fôlego mais barata por nível (12,5 − 1,5 − 2,5 do talento)")
  teach(sheet,"bloqueio",6)
  check(is_equal_approx(sheet.block_reduction("sword"),0.4+0.024*5),"Bloqueio 6: guarda segura 2,4% a mais por nível")
  # Back to the fixed numbers.
