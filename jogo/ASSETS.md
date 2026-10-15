@@ -60,9 +60,23 @@ As armas usam modelos de dois pacotes gratuitos, escolhidos pelo dono do projeto
 - Nenhum dos dois foi gerado por IA, até onde as páginas informam.
 - `sword` e `espada_guarda` continuam com a espada original do projeto (`assets/originais/espada.glb`).
 
+## Efeitos visuais
+
+Sangue, clarão de acerto, faíscas, golpe forte, poeira, fumaça e as chamas das tochas e da fogueira vêm do **Brackeys VFX Bundle** (CC0), que junta texturas de outros autores:
+
+| Folha do jogo (`assets/vfx/`) | Original no pacote | Autor |
+| --- | --- | --- |
+| `sangue.png` | `predrawn/blood_impact_6x5.png` | CodeManu ([VFX Free Pack](https://codemanu.itch.io/vfx-free-pack)) |
+| `impacto.png` | `predrawn/impact_white_6x4.png` | CodeManu |
+| `golpe_forte.png` | `predrawn/big_hit_6x5.png` | CodeManu |
+| `chama.png` | `flipbooks/flame_01_16x4.tga` | Thomas Iché ([flipbooks gratuitos da Unity](https://unity.com/blog/engine-platform/free-vfx-image-sequences-flipbooks)) |
+| `fumaca.png` | `flipbooks/cloud_01_8x8.tga` | Thomas Iché |
+
+As folhas foram recortadas, reduzidas para tamanho PSX (32 a 69 px por quadro) e remontadas por `../arte/fontes/vfx/preparar_vfx.py`, que lê os originais guardados em `../arte/fontes/vfx/originais/` (com o arquivo de licença e créditos do pacote). CC0 não exige crédito; mesmo assim os autores estão em `outputs/linux/CREDITOS.txt`.
+
 ## Pacotes recebidos e ainda não usados
 
-Recebidos em 14/10/2026. Nada destes pacotes está no jogo ainda; registrado aqui para quando forem usados.
+Recebidos em 14/10/2026. Nada destes pacotes está no jogo ainda; registrado aqui para quando forem usados. Em 15/10/2026 o dono do projeto autorizou o uso de tudo o que enviou. Isso não muda a licença de quem fez cada pacote: os marcados como **sem licença** ou **origem não identificada** precisam ter o autor e os termos confirmados antes de entrar na versão vendida na Steam.
 
 | Pacote | Autor | Licença | Observação |
 | --- | --- | --- | --- |
@@ -70,11 +84,12 @@ Recebidos em 14/10/2026. Nada destes pacotes está no jogo ainda; registrado aqu
 | Characters PSX | [Elbolilloduro](https://elbolilloduro.itch.io/characters-psx) | CC0 | Em uso: `Character_16` é o aventureiro. Os outros 112 (9 monstros) ainda não |
 | Fantasy Props MegaKit | [Quaternius](https://quaternius.com) | CC0 | Versão gratuita |
 | Universal Animation Library | Quaternius | CC0 | 43 animações num esqueleto próprio |
-| Brackeys VFX Bundle | Brackeys (texturas de Picster, Kenney, Thomas Iché, CodeManu) | CC0 | Fogo, fumaça, faíscas, sequências animadas |
+| Brackeys VFX Bundle | Brackeys (texturas de Picster, Kenney, Thomas Iché, CodeManu) | CC0 | **Em uso** (seção "Efeitos visuais"). O resto (explosões, vórtice, anéis, magia) fica para quando a magia entrar |
 | 3D Fantasy Weapons Pack | Polyy | CC0, **gerado por IA** | Exige declaração de IA na Steam |
 | Victorian Study | FoxDev | Crédito a "FoxDev" em projetos comerciais | Mobília vitoriana |
 | Models + 512 (props de masmorra) | desconhecido | **sem licença** | Não usar sem confirmar a origem |
 | LowPolyDungeon_FBX | desconhecido | **sem licença** | Veio sem texturas |
+| PSX Modular Medieval | **origem não identificada** | **sem licença no arquivo** | Kit de vila medieval PSX: 193 modelos (GLB e FBX) em paredes de reboco e pedra, pisos, vigas, telhados (azul, vermelho, palha), portas, janelas, escadas, trepadeiras e um mercado (barracas, barris, caixotes, cestos, comida). 9 texturas |
 
 ## Modelos provisórios
 
