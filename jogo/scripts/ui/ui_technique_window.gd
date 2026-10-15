@@ -3,7 +3,8 @@ class_name UiTechniqueWindow
 ## Habilidades (T). Left: every habilidade, open or still locked. Right: the
 ## chosen one — fixed traits, its slots (more with the level of its branch),
 ## the objetos the adventurer owns (copies free / total), a live preview and the
-## bar (keys 4-7). Changes apply at once, only out of combat. Does not pause.
+## bar (keys chosen by the player, changed here too). Changes apply at once,
+## only out of combat. Does not pause.
 
 var game
 var ui
@@ -19,10 +20,15 @@ var preview: GridContainer
 var problem_label: Label
 var combat_label: Label
 var assign_box: HBoxContainer
+## Buttons that change the key of each bar position, and the line under them.
+var key_buttons: Array = []
+var key_hint: Label
+## Bar position waiting for a key press (-1 when none); ui._input feeds capture_key.
+var capturing: int = -1
 var _signature: String = ""
 
 func _init(game_ref, ui_ref) -> void:
-	super._init("Habilidades", UiIcon.new("golpe", UiStyle.ACCENT), 840, 610)
+	super._init("Habilidades", UiIcon.new("golpe", UiStyle.ACCENT), 840, 670)
 	game = game_ref
 	ui = ui_ref
 	position = Vector2(80, 70)
@@ -93,17 +99,69 @@ func _init(game_ref, ui_ref) -> void:
 	var actions := HBoxContainer.new()
 	actions.add_theme_constant_override("separation", 4)
 	right.add_child(actions)
-	actions.add_child(UiStyle.label("Na barra:", 13, UiStyle.MUTED))
+	var on_bar := UiStyle.label("Na barra:", 13, UiStyle.MUTED)
+	on_bar.custom_minimum_size.x = 64
+	actions.add_child(on_bar)
 	assign_box = HBoxContainer.new()
 	assign_box.add_theme_constant_override("separation", 3)
 	actions.add_child(assign_box)
 	for i in Techniques.bar_size():
-		var b := UiStyle.button(str(i + 4), assign.bind(i))
-		b.custom_minimum_size = Vector2(34, 32)
+		var b := UiStyle.button("", assign.bind(i))
+		b.custom_minimum_size = Vector2(76, 32)
+		b.clip_text = true
 		assign_box.add_child(b)
 	var off := UiStyle.button("Tirar da barra", func(): unassign())
 	off.custom_minimum_size.y = 32
 	assign_box.add_child(off)
+	# The keys of the four bar positions: the player's choice (not the number row,
+	# which is the quick bar; the numeric keypad is fine).
+	var keys_row := HBoxContainer.new()
+	keys_row.add_theme_constant_override("separation", 4)
+	right.add_child(keys_row)
+	var keys_title := UiStyle.label("Teclas:", 13, UiStyle.MUTED)
+	keys_title.custom_minimum_size.x = 64
+	keys_row.add_child(keys_title)
+	for i in Techniques.bar_size():
+		var k := UiStyle.button("", start_capture.bind(i))
+		k.custom_minimum_size = Vector2(98, 30)
+		k.clip_text = true
+		k.tooltip_text = "Trocar a tecla do %dº espaço da barra" % (i + 1)
+		keys_row.add_child(k)
+		key_buttons.append(k)
+	key_hint = UiStyle.label("", 12, UiStyle.DIM)
+	key_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	key_hint.custom_minimum_size.x = 540
+	right.add_child(key_hint)
+
+func start_capture(slot: int) -> void:
+	capturing = slot
+	_show_keys()
+
+## The key pressed while waiting. Esc cancels; the number row and the game's own
+## keys are refused; a key already on another position swaps with it.
+func capture_key(code: int) -> void:
+	var slot: int = capturing
+	capturing = -1
+	if code == KEY_ESCAPE:
+		_show_keys()
+		return
+	var why: String = game.set_technique_key(slot, code)
+	_show_keys(why)
+
+func _show_keys(problem: String = "") -> void:
+	for i in key_buttons.size():
+		key_buttons[i].text = "aperte…" if i == capturing else "%dº  %s" % [i + 1, game.technique_key_name(i)]
+	for i in assign_box.get_child_count() - 1:
+		assign_box.get_child(i).text = game.technique_key_name(i)
+	if problem != "":
+		key_hint.text = problem
+		key_hint.add_theme_color_override("font_color", UiStyle.BAD)
+	elif capturing >= 0:
+		key_hint.text = "Aperte a tecla para o %dº espaço (Esc cancela). Os números de cima são da barra rápida; os do teclado numérico podem." % (capturing + 1)
+		key_hint.add_theme_color_override("font_color", UiStyle.ACCENT)
+	else:
+		key_hint.text = "Clique numa tecla para trocar. Os números de cima são da barra rápida; o teclado numérico pode."
+		key_hint.add_theme_color_override("font_color", UiStyle.DIM)
 
 func locked() -> bool:
 	return game.in_combat()
@@ -202,6 +260,7 @@ func refresh(force: bool = false) -> void:
 	_signature = sig
 	var off: bool = not editable()
 	combat_label.visible = locked()
+	_show_keys()
 	_fill_list()
 	var form: Dictionary = Techniques.FORMS.get(selected, {})
 	var unlocked: bool = Techniques.form_unlocked(game.sheet, selected)
@@ -306,7 +365,7 @@ func _fill_list() -> void:
 			var keys: PackedStringArray = []
 			for s in book.bar.size():
 				if book.bar[s] == form_id:
-					keys.append(str(s + 4))
+					keys.append(game.technique_key_name(s))
 			var line: String
 			if unlocked:
 				line = "%d objeto%s%s" % [book.objects(form_id).size(), "" if book.objects(form_id).size() == 1 else "s", ("  ·  barra [%s]" % ",".join(keys)) if not keys.is_empty() else ""]
