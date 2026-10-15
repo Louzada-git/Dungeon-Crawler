@@ -1,5 +1,12 @@
 # Dungepm — As Cisternas
 
+## Novo: barra rápida, teclas das habilidades e delay do peso (15/10/2026)
+
+- **Barra rápida de 1 a 9:** qualquer item em qualquer espaço. Arma equipa (apertando de novo, guarda e fica de punhos), armadura veste e tira, comida come, curativo aplica. Munição fica na barra só para mostrar quantas restam. Começa com a arma inicial no 1, rações no 2 e bandagens no 3.
+- **Pôr itens na barra:** arraste da mochila para o espaço, ou use o menu do item (botão direito: "Pôr na barra rápida"), ou selecione o item com a mochila aberta e aperte o número. Botão direito no espaço tira o item. O espaço fica mesmo quando o item acaba (mostra 0).
+- **Teclas das habilidades à sua escolha:** começam em **Q, R, F e G**. Para trocar, abra **T**, clique na tecla do espaço e aperte a nova. Vale qualquer tecla livre, inclusive o **teclado numérico** (Num 1, Num 2…). Os números de cima ficam para a barra rápida. Se a tecla já estiver em outro espaço, os dois trocam. A escolha fica salva.
+- **Delay do peso** (sugestão do Pedro): depois do golpe, cada kg da arma soma 0,1 s antes de poder golpear de novo. Martelo (6,5 kg): +0,65 s; espada (2,4 kg): +0,24 s; adaga (0,8 kg): +0,08 s. Nesse tempo você anda normal e pode esquivar, só não golpeia. Os danos foram reacertados depois disso, e o chefe ficou com 500 de vida.
+
 ## Novo: atualização depois do teste (15/10/2026)
 
 - **Fôlego** (pedido do Bruno): tudo gasta metade do fôlego, ou seja, golpes, objetos, esquiva (12,5), corrida e guarda. E o fôlego volta 1,3× mais rápido.
@@ -31,7 +38,7 @@ Os efeitos vêm do Brackeys VFX Bundle que você mandou, reduzidos para o tamanh
 
 ## Novo: habilidades e objetos (15/10/2026)
 
-**T** abre as habilidades. A barra fica nas teclas **4 a 7**.
+**T** abre as habilidades. A barra de habilidades usa as teclas que você escolher (padrão Q, R, F e G).
 
 - **Habilidades:** cada uma existe uma vez, com características fixas. As básicas (Corte, Estocada, Pancada, Disparo, Soco) são o golpe da arma em mãos. Subindo proficiência destravam: **Corte giratório** (Lâminas 4), **Investida** (Hastes 4, avança 2,5 m), **Golpe esmagador** (Contundentes 4), **Tiro mirado** (Pontaria 4) e **Sequência de socos** (Desarmado 4).
 - **Slots:** quanto maior o nível, mais slots. Nas básicas conta o domínio da arma (2 no domínio 6, 3 no 11). Nas destravadas conta o ramo dela: o Corte giratório ganha o 2º slot com Lâminas 8.
@@ -141,11 +148,10 @@ Explore as cinco salas, gerencie comida e bandagens, encontre o selo e retorne a
 | Inventário | I ou Tab |
 | Mapa explorado | M |
 | Condição física | H |
-| Comer / usar bandagem | 2 / 3 |
-| Abrir equipamento | 1 |
+| Barra rápida (qualquer item) | 1 a 9 |
 | Proficiências | P |
-| Habilidades: montar | T |
-| Habilidades: usar | 4, 5, 6, 7 |
+| Habilidades: montar e trocar teclas | T |
+| Habilidades: usar | Q, R, F, G (ou as que você escolher) |
 | Aproximar / afastar câmera | Roda do mouse |
 | Pausar | Esc |
 | Salvar no abrigo | F5 |
