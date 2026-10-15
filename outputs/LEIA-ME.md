@@ -1,17 +1,18 @@
 # Dungepm — As Cisternas
 
-## Novo: técnicas (15/10/2026)
+## Novo: habilidades e objetos (15/10/2026)
 
-Agora você monta as próprias técnicas e usa pela barra, nas teclas **4 a 7**. **T** abre o editor.
+**T** abre as habilidades. A barra fica nas teclas **4 a 7**.
 
-- **Forma:** o golpe base. Corte, Estocada, Pancada, Disparo e Soco são o golpe normal da arma em mãos. Praticar destrava formas novas: **Corte giratório** (Lâminas 4) corta em volta; **Investida** (Hastes 4) avança 2,5 m e golpeia; **Golpe esmagador** (Contundentes 4, maça, martelo ou machado) é lento, atordoa e empurra; **Tiro mirado** (Pontaria 4) segura a mira por mais dano e atravessa; **Sequência de socos** (Desarmado 4) dá três socos.
-- **Componentes** vão nos espaços e destravam com as proficiências: Lâmina afiada (sangramento), Força (+30% de dano), Alcance, Rapidez (preparo mais curto), Impacto (atordoa e empurra), Avanço, Emboscada (×1,5 em quem não te viu), Golpe duplo e Perfurante.
-- **A ordem importa:** cada componente age sobre o que está à esquerda dele. Lâmina afiada e depois Força dá um sangramento mais forte; Força e depois Lâmina afiada, não. O ◀ no editor troca a ordem e a prévia mostra o resultado na hora.
-- **Espaços:** 1 com a arma nova, 2 com domínio 6 e 3 com domínio 11 naquela arma.
-- Cada técnica tem **recarga**, mostrada na barra. Componentes custam fôlego e recarga.
-- Montar e trocar só **fora de combate**: com um monstro te caçando, o editor trava. Usar técnicas da barra continua livre.
-- As técnicas que você criou contam como conhecimento: se morrer, o próximo aventureiro lembra delas (a barra começa vazia, e o que ele ainda não destravou aparece trancado).
-- Magia ainda não entrou, como combinado.
+- **Habilidades:** cada uma existe uma vez, com características fixas. As básicas (Corte, Estocada, Pancada, Disparo, Soco) são o golpe da arma em mãos. Subindo proficiência destravam: **Corte giratório** (Lâminas 4), **Investida** (Hastes 4, avança 2,5 m), **Golpe esmagador** (Contundentes 4), **Tiro mirado** (Pontaria 4) e **Sequência de socos** (Desarmado 4).
+- **Slots:** quanto maior o nível, mais slots. Nas básicas conta o domínio da arma (2 no domínio 6, 3 no 11). Nas destravadas conta o ramo dela: o Corte giratório ganha o 2º slot com Lâminas 8.
+- **Objetos** vão nos slots e vêm da proficiência: Lâmina afiada, Força, Alcance, Rapidez, Impacto, Avanço, Emboscada, Golpe duplo e Perfurante. Cada cópia fica em uma habilidade por vez. Subir mais o ramo dá outra cópia (Força: nos níveis 3, 9 e 15 de Contundentes).
+- **Qualquer objeto em qualquer habilidade onde faça sentido:** o Alcance da lança serve no Corte da espada. Só fica de fora o que não faz sentido, como sangramento num soco.
+- **A ordem importa:** cada objeto age sobre o que está à esquerda dele. Lâmina afiada e depois Força deixa o sangramento mais forte; o contrário, não. O ◀ troca a ordem, e a prévia mostra o resultado na hora.
+- Dá para editar as habilidades quando quiser, **fora de combate**. As mudanças valem na hora.
+- Subir de nível avisa quando chega uma habilidade nova ou uma cópia nova de objeto. Os bônus passivos de nível 5 e 10 agora se chamam **talentos**, para não confundir.
+- Se você morrer, o próximo aventureiro lembra como você montou as habilidades; o que ele ainda não destravou aparece trancado.
+- Magia ainda não entrou. Quando entrar, os objetos dela também vão poder ir nas habilidades físicas.
 
 ## Novo: personagem PSX (14/10/2026)
 
@@ -53,7 +54,7 @@ O que mudou no jogo:
 - **C para andar agachado:** passo lento e quase silencioso. Um monstro que te veria a 7,5 m só te nota a 3,75 m de frente, e a 2,25 m se você chegar por trás. Golpe agachado em quem não te viu: dano ×1,5 com qualquer arma (com a adaga, soma ao bônus dela). Treina Furtividade.
 - **Correr** treina Atletismo, bem mais quando algo está te perseguindo.
 - **Baús trancados:** parte dos baús vem com fechadura (simples, média, difícil ou de mestre), mais nos de tesouro e em andares fundos. O conteúdo fica escondido até você abrir. Com uma **gazua**, E tenta arrombar e mostra a chance; uma tentativa que falha pode quebrar a gazua. Você começa com 2 gazuas no abrigo. Treina Arrombamento.
-- Cada novo ramo destrava uma habilidade no nível 5 (alguns também no 10), por exemplo Guarda firme (bloquear gasta menos fôlego), Silenciosa (armadura leve sem barulho), Golpe pelas costas (ataque furtivo ×2) e Mão leve (gazuas quebram menos).
+- Cada novo ramo destrava um talento no nível 5 (alguns também no 10), por exemplo Guarda firme (bloquear gasta menos fôlego), Silenciosa (armadura leve sem barulho), Golpe pelas costas (ataque furtivo ×2) e Mão leve (gazuas quebram menos).
 
 Ainda não entrou: magia e Alquimia, Reparo (precisa de desgaste por item), Comércio e Oratória (precisam de mercadores). Personagens sem arte própria para agachar e bloquear usam as animações de guarda e caminhada por enquanto.
 
@@ -114,8 +115,8 @@ Explore as cinco salas, gerencie comida e bandagens, encontre o selo e retorne a
 | Comer / usar bandagem | 2 / 3 |
 | Abrir equipamento | 1 |
 | Proficiências | P |
-| Técnicas: montar | T |
-| Técnicas: usar | 4, 5, 6, 7 |
+| Habilidades: montar | T |
+| Habilidades: usar | 4, 5, 6, 7 |
 | Aproximar / afastar câmera | Roda do mouse |
 | Pausar | Esc |
 | Salvar no abrigo | F5 |
