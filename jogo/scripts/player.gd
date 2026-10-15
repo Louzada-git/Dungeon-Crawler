@@ -2,10 +2,8 @@ extends CharacterBody3D
 class_name DungeonPlayer
 
 const INPUT_BUFFER: float = 0.16
-## Share of the time after the blow lands (slowed, no dodge, no turning, no new
-## blow) that is kept: 1/3 since 15/10/2026. The wind-up before the blow and the
-## animation speed are unchanged; the end of the swing animation is cut short.
-const RECOVERY_SCALE: float = 1.0 / 3.0
+## The dodge comes back after this share of the delay that follows the blow.
+const DODGE_AFTER: float = 0.5
 var game
 var visual: Node3D
 var animator: AnimationPlayer
@@ -48,6 +46,8 @@ var resolved_serial: int = -1
 var attack_buffer: float = 0.0
 var cooldown: float = 0.0
 var dodge_timer: float = 0.0
+## Seconds until the dodge is free again after a blow (half of its delay).
+var dodge_lock: float = 0.0
 var dodge_direction: Vector3
 var invulnerable: float = 0.0
 var walking: bool = false
@@ -224,6 +224,7 @@ func _physics_process(delta: float) -> void:
  cooldown = maxf(0,cooldown-delta)
  game.techniques.tick(delta)
  invulnerable = maxf(0,invulnerable-delta)
+ dodge_lock = maxf(0,dodge_lock-delta)
  attack_timer = maxf(0,attack_timer-delta)
  hurt_timer = maxf(0,hurt_timer-delta)
  if attack_wait > 0:
@@ -257,9 +258,10 @@ func _physics_process(delta: float) -> void:
  var speed: float = 3.5
  if sprinting:
   speed = 5.7
-  stamina = maxf(0,stamina-16*delta*game.sheet.sprint_cost_mult())
+  stamina = maxf(0,stamina-game.sheet.stamina_rule("corrida",8.0)*delta*game.sheet.sprint_cost_mult())
  elif attack_timer <= 0 and dodge_timer <= 0 and hurt_timer <= 0:
-  stamina = minf(max_stamina,stamina+(16.0 if food > 10 else 6.0)*game.sheet.stamina_regen_mult()*(1.0-game.sheet.armor_regen_penalty(armor))*delta)
+  var regen: float = game.sheet.stamina_rule("recuperacao",20.8) if food > 10 else game.sheet.stamina_rule("recuperacao_com_fome",7.8)
+  stamina = minf(max_stamina,stamina+regen*game.sheet.stamina_regen_mult()*(1.0-game.sheet.armor_regen_penalty(armor))*delta)
  if sneaking:
   speed *= 0.55
  speed *= 1.0 - game.sheet.armor_speed_penalty(armor)
@@ -328,21 +330,21 @@ func attack(stats: Dictionary = {}) -> bool:
  attack_weapon = weapon.duplicate()
  attack_facing = facing
  attack_serial += 1
+ # "cooldown" is the whole blow; heavy weapons carry a long delay after it lands.
  # A long wind-up (heavy techniques) keeps the adventurer committed until the blow lands.
  var windup: float = float(weapon.get("windup",0.22))
- var full: float = maxf(float(weapon.get("cooldown",0.62)),windup+0.15)
- var swing: float = full*0.90
- # Only RECOVERY_SCALE of what comes after the blow remains.
- cooldown = windup+(full-windup)*RECOVERY_SCALE
- attack_timer = windup+maxf(0.0,swing-windup)*RECOVERY_SCALE
+ cooldown = maxf(float(weapon.get("cooldown",0.62)),windup+0.15)
+ attack_timer = cooldown*0.90
  attack_wait = windup
+ # The dodge comes back halfway through the delay after the blow.
+ dodge_lock = windup+(cooldown-windup)*DODGE_AFTER
  var dash: float = float(weapon.get("dash",0.0))
  if dash > 0.0:
   dash_time = maxf(0.12,float(attack_wait))
   dash_velocity = facing.normalized()*dash/dash_time
   dash_fx = 0
- # The animation keeps its pace (the blow lands where it did); moving again cuts its tail.
- animate_action(attack_animation(weapon),swing)
+ # The swing animation lands on the wind-up: it lasts windup / "impacto" (its share before the hit).
+ animate_action(attack_animation(weapon),windup/clampf(float(weapon.get("impacto",0.39)),0.1,0.9))
  game.sound.play_at("swing",global_position,0.65)
  return true
 
@@ -390,8 +392,10 @@ func dodge_cost() -> float:
 
 func dodge() -> bool:
  var cost: float = dodge_cost()
- if stamina < cost or dodge_timer > 0 or attack_timer > 0 or hurt_timer > 0 or health <= 0:
+ if stamina < cost or dodge_timer > 0 or dodge_lock > 0 or attack_wait > 0 or hurt_timer > 0 or health <= 0:
   return false
+ # Dodging out of the delay after a blow cuts it (the next blow still waits its time).
+ attack_timer = 0
  var input = Input.get_vector("left","right","up","down")
  if test_direction != Vector2.ZERO:
   input = test_direction
@@ -449,7 +453,7 @@ func receive_damage(amount: float, from: Vector3 = Vector3.ZERO, blockable: bool
   toward.y = 0
   if facing.dot(toward.normalized()) >= cos(deg_to_rad(70.0)):
    var reduction: float = game.sheet.block_reduction(game.inventory.equipped)
-   var cost: float = maxf(4.0,amount*reduction*game.sheet.block_cost_mult())
+   var cost: float = game.sheet.block_cost(amount*reduction)
    if stamina >= cost:
     stamina -= cost
     blocked = amount*reduction
@@ -478,6 +482,7 @@ func receive_damage(amount: float, from: Vector3 = Vector3.ZERO, blockable: bool
  hurt_timer = 0.23
  attack_timer = 0
  attack_wait = 0
+ dodge_lock = 0
  attack_buffer = 0
  dash_time = 0
  impulse = from.normalized()*1.8
@@ -502,6 +507,7 @@ func reset_transients() -> void:
  attack_buffer = 0
  cooldown = 0
  dodge_timer = 0
+ dodge_lock = 0
  hurt_timer = 0
  invulnerable = 0
  dash_time = 0
