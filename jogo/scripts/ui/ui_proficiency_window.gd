@@ -125,7 +125,7 @@ func refresh() -> void:
 		for branch in path:
 			for perk in sheet.active_perks(branch):
 				perks.append("%s (%s)" % [perk["name"], perk["text"]])
-		weapon_perks.text = ("Desbloqueado: " + "; ".join(perks)) if not perks.is_empty() else "Nenhuma habilidade desbloqueada ainda nesta arma."
+		weapon_perks.text = ("Talentos: " + "; ".join(perks)) if not perks.is_empty() else "Nenhum talento desbloqueado ainda nesta arma."
 	for branch in rows:
 		rows[branch].active = branch in path
 		rows[branch].queue_redraw()
