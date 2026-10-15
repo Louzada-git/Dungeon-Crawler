@@ -122,6 +122,8 @@ Decisões de 15/10/2026: só físicas por enquanto (a magia vem depois); montar 
 
 ## Testes e ferramentas
 
+O jogo exportado não leva `tests/`, `tools/` nem documentos (`export_presets.cfg`: `exclude_filter`); as suítes rodam pelo projeto. Pacotes de entrega: `../empacotar.sh` (jogo, revisão, documentos e arte separados). Capturas de revisão ficam em `../revisao/`.
+
 - `tests/runtime_test.gd`: suíte no mundo fixo. `godot --headless --path jogo -- --test`.
 - `tests/labyrinth_test.gd`: suíte do labirinto. `godot --headless --path jogo -- --test-labirinto --seed=777`.
 - `tests/generator_check.gd`: gera muitos andares e aponta problemas. `godot --headless --path jogo -s res://tests/generator_check.gd -- 60 4`.
