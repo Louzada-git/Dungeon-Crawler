@@ -15,7 +15,7 @@ Os modelos de `assets/originais/` são produção original do projeto. As armas 
 
 ## Histórico do bloco inicial
 
-A pasta `assets/kenney/` conserva os modelos usados no primeiro bloco funcional, com o texto original da licença CC0. Estão fora do carregamento e da exportação atual.
+A pasta `../arte/historico/kenney/` conserva os modelos usados no primeiro bloco funcional, com o texto original da licença CC0. Ficam fora do jogo.
 
 Fonte anterior: [Kenney — Mini Dungeon](https://kenney.nl/assets/mini-dungeon), CC0. Não existem modelos desse pacote na cena jogável atual.
 
@@ -33,7 +33,7 @@ A organização do HUD segue a leitura do Project Zomboid (barra lateral, janela
 
 ## Personagem
 
-O aventureiro é o `Character_16` do pacote [Characters PSX](https://elbolilloduro.itch.io/characters-psx), de Elbolilloduro, licença CC0 (conferida na página do autor em 14/10/2026). O rig é o esqueleto padrão do Mixamo; a [FAQ da Adobe](https://helpx.adobe.com/creative-cloud/faq/mixamo-faq.html) permite usar personagens e animações do Mixamo em jogos comerciais. A textura foi repintada para este projeto (roupa medieval; rosto, mãos e cabelo do original) e as animações são as do aventureiro anterior, transferidas para o novo esqueleto. Arquivo: `assets/originais/aventureiro_psx.glb`; fontes e ferramentas em `../arte/fontes/personagem_psx/`. O modelo anterior (`aventureiro_mixamo.glb`, criação própria) continua no projeto como fonte das animações.
+O aventureiro é o `Character_16` do pacote [Characters PSX](https://elbolilloduro.itch.io/characters-psx), de Elbolilloduro, licença CC0 (conferida na página do autor em 14/10/2026). O rig é o esqueleto padrão do Mixamo; a [FAQ da Adobe](https://helpx.adobe.com/creative-cloud/faq/mixamo-faq.html) permite usar personagens e animações do Mixamo em jogos comerciais. A textura foi repintada para este projeto (roupa medieval; rosto, mãos e cabelo do original) e as animações são as do aventureiro anterior, transferidas para o novo esqueleto. Arquivo: `assets/originais/aventureiro_psx.glb`; fontes e ferramentas em `../arte/fontes/personagem_psx/`. O modelo anterior (`aventureiro_mixamo.glb`, criação própria) fica fora do jogo, em `../arte/fontes/personagem_psx/origem_animacoes/`, como fonte das animações.
 
 ## Armas
 
