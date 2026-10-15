@@ -1,8 +1,8 @@
 keys,pt_BR
 ITEM_SWORD_NOME,Espada de viajante
-ITEM_SWORD_DESC,Equilibrada e confiável. Um corte custa 17 de fôlego.
+ITEM_SWORD_DESC,"Equilibrada e confiável: peso médio, corta até três em arco."
 ITEM_SPEAR_NOME,Lança da guarda
-ITEM_SPEAR_DESC,"Estocada longa de 3,2 m em linha reta. Atinge o primeiro alvo e custa 23 de fôlego."
+ITEM_SPEAR_DESC,"Estocada longa de 3,2 m em linha reta. Atinge o primeiro alvo."
 ITEM_RATION_NOME,Ração de viagem
 ITEM_RATION_DESC,Restaura 35 de saciedade. Comer também ajuda na recuperação do fôlego.
 ITEM_BANDAGE_NOME,Bandagem limpa
@@ -30,7 +30,7 @@ RECIPIENTE_PERTENCES,Pertences do corrompido
 RECIPIENTE_DEIXADOS,Itens deixados
 ITEM_SEAL_DESC,Selo arrancado de um guardião do labirinto. Entregue-o no abrigo.
 ITEM_ESPADA_GUARDA_NOME,Espada da guarda
-ITEM_ESPADA_GUARDA_DESC,"Aço temperado da antiga guarnição. Mais dano, um pouco mais pesada."
+ITEM_ESPADA_GUARDA_DESC,"Aço temperado da antiga guarnição. Um pouco mais de dano e de peso que a espada de viajante."
 ITEM_LANCA_LONGA_NOME,Lança longa
 ITEM_LANCA_LONGA_DESC,"Haste de 3,7 m. Mantém inimigos à distância, mas cansa."
 ITEM_UNGUENTO_NOME,Unguento de ervas
