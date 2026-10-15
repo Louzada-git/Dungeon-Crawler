@@ -1,5 +1,14 @@
 # Dungepm — As Cisternas
 
+## Novo: ajustes de 15/10/2026
+
+- **+5 pontos de atributo:** o novo aventureiro tem 25 pontos. Começa com 5 em cada e sobram 5 livres para pôr onde quiser (de 2 a 9 por atributo).
+- **Arma inicial à escolha:** no mesmo painel você escolhe qualquer uma das 13 armas, ou começa de punhos. Arco e besta vêm com 20 flechas ou virotes.
+- **Soco é contundente:** Desarmado agora fica dentro de Contundentes. Socar treina Contundentes e Desarmado, os talentos de Contundentes (como Atordoar) valem no soco, e o Golpe esmagador funciona de mãos vazias.
+- **Um objeto por proficiência:** são 25 objetos, um para cada ramo. Os novos: Equilíbrio (Espada reta), Saque rápido (Katana), Varredura (Montante), Ponto vital (Adagas), Cravos (Maça), Tremor (Martelo), Talho fundo (Machados), Ponta rápida (Lança), Gancho (Alabarda), Soco-inglês (Desarmado), Ombrada (Armadura pesada), Saraivada (Arcos), Disparo pesado (Bestas), Leveza (Armadura leve), Fresta (Arrombamento) e Bálsamo (Tratamento, recupera vida a cada acerto). Os de especialização chegam nos níveis 4 e 12; os outros, no 3 e no 9. Na janela de habilidades, os que você tem aparecem primeiro e o resto rola.
+- **Recuperação do ataque em um terço:** depois que o golpe acerta, o tempo em que você fica lento, sem virar, sem esquivar e esperando o próximo golpe caiu para um terço. O preparo antes do golpe é o mesmo. A besta recarrega em 0,45 s em vez de 1,35 s.
+- **Bônus por nível dobrado:** cada nível de domínio dá +4% de dano e −2% de fôlego (até −30%). Os bônus por nível de Bloqueio, armaduras, Atletismo, Furtividade, Arrombamento, Acrobacia e Tratamento também dobraram. Os talentos dos níveis 5 e 10 não mudaram.
+
 ## Novo: efeitos visuais (15/10/2026)
 
 Os efeitos vêm do Brackeys VFX Bundle que você mandou, reduzidos para o tamanho PSX (poucos pixels por quadro, lidos sem suavizar), então combinam com o filtro.
@@ -60,7 +69,7 @@ A árvore de proficiências agora tem três grupos, como as perícias de Oblivio
 
 O que mudou no jogo:
 
-- **Socar:** sem arma em mãos, o botão esquerdo dá um soco (8 de dano, rápido e barato). Treina Desarmado.
+- **Socar:** sem arma em mãos, o botão esquerdo dá um soco (8 de dano, rápido e barato). Treina Contundentes › Desarmado.
 - **Guarda:** segurar o botão direito com arma corpo a corpo (ou de punhos) segura 40% dos golpes que vêm de frente (25% com os punhos), gastando fôlego. Golpe pelas costas passa. Sem fôlego, a guarda quebra. A pancada em área do chefe não dá para segurar. Treina Bloqueio.
 - **Armaduras:** gibão acolchoado e couro (leves), cota de malha e armadura de placas (pesadas). Vestir e tirar pelo inventário; a armadura aparece no corpo do personagem. As pesadas protegem mais, mas deixam o passo mais lento, o fôlego volta mais devagar e os monstros te notam de mais longe. O dano que a armadura absorve treina Armadura leve ou pesada, e o treino reduz essas desvantagens.
 - **C para andar agachado:** passo lento e quase silencioso. Um monstro que te veria a 7,5 m só te nota a 3,75 m de frente, e a 2,25 m se você chegar por trás. Golpe agachado em quem não te viu: dano ×1,5 com qualquer arma (com a adaga, soma ao bônus dela). Treina Furtividade.
@@ -72,9 +81,9 @@ Ainda não entrou: magia e Alquimia, Reparo (precisa de desgaste por item), Com�
 
 ## Novo: atributos e proficiências (14/10/2026)
 
-- **Novo aventureiro:** no começo de cada run você distribui 20 pontos entre Força, Vigor, Agilidade e Destreza (de 2 a 9 cada). Eles mudam carga, vida, fôlego e esquiva, e definem quão rápido e até onde cada proficiência pode crescer.
+- **Novo aventureiro:** no começo de cada run você distribui 25 pontos entre Força, Vigor, Agilidade e Destreza (de 2 a 9 cada) e escolhe a arma inicial. Eles mudam carga, vida, fôlego e esquiva, e definem quão rápido e até onde cada proficiência pode crescer.
 - **Proficiências crescem com o uso:** acertar monstros treina o caminho da arma (por exemplo Lâminas › Espadas › Katana), esquivar de um golpe treina Acrobacia, tratar um ferimento treina Tratamento.
-- **Domínio da arma:** cada nível dá +2% de dano e −1% de fôlego por golpe. Armas que compartilham a raiz se ajudam: praticar com a espada reta também adianta a katana.
+- **Domínio da arma:** cada nível dá +4% de dano e −2% de fôlego por golpe. Armas que compartilham a raiz se ajudam: praticar com a espada reta também adianta a katana.
 - **Habilidades:** cada ramo desbloqueia uma habilidade no nível 5 ou 6, como Corte amplo (+1 alvo), Ferida funda (sangramento mais forte) e Recolher flechas.
 - **P** abre a janela de proficiências. Ela não pausa o jogo. Um aviso no alto da tela mostra cada nível novo.
 - Morrer leva o aventureiro junto: o próximo começa do zero, no mesmo labirinto e com o mapa que você já conhece.
