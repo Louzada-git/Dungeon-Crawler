@@ -150,3 +150,11 @@ Caminhos de um, dois ou três ramos andam no mesmo ritmo. Trocar de espada no 3�
 - Verificações do modelo novo: cópias de Força nos níveis 3 e 9 de Contundentes; Corte com 1 slot que vira 3 no domínio 11; Corte giratório destravado e com slots pelo nível de Lâminas; Alcance (das hastes) numa habilidade de espada; Lâmina afiada recusada em pancada e soco e aceita em flecha; segunda cópia de Força em outra habilidade; uso acima das cópias recusado com o motivo; cada habilidade num lugar só da barra; ordem, recarga, treino, giro, golpe duplo, investida e lança recusando corte como antes; janela listando todas as habilidades, trocando ordem, tirando e pondo objetos, travada em combate e sem pôr habilidade trancada na barra; barra e dica; aviso de habilidade nova ao subir de nível; tecla 4; save; save do formato anterior e save estranho lidos sem quebrar; montagem sobrevivendo à morte com a barra vazia.
 - Captura conferida: janela com Corte (Lâmina afiada, Força e Alcance), cópias livres de cada objeto e habilidades trancadas com o requisito.
 
+## Organização dos arquivos — 15/10/2026
+
+- Pedido do dono do projeto: o que não importa para jogar fica fora do arquivo do jogo.
+- Capturas de revisão foram de `outputs/` para `revisao/` e vão num pacote próprio. `outputs/` ficou com o executável Linux, o guia de jogo e esta verificação.
+- Modelos antigos do Kenney (fora de uso) foram para `arte/historico/kenney/`; o modelo anterior do aventureiro, que só serve de fonte das animações, foi para `arte/fontes/personagem_psx/origem_animacoes/`.
+- O executável não leva mais testes, ferramentas nem documentos. As suítes rodam pelo projeto: **520 verificações** no mundo fixo e **48** no labirinto, zero falhas. O executável foi aberto e rodou sem erros; pedir os testes a ele responde que eles não vão no jogo exportado.
+- `empacotar.sh` gera quatro pacotes: `Dungepm-linux.tar.xz` (jogar), `Dungepm-jogo.zip` (projeto da Godot), `Dungepm-revisao.zip` (capturas) e `Dungepm-documentos-e-arte.zip` (planejamento, verificação e fontes de arte).
+
