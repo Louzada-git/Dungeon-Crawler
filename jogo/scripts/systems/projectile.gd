@@ -65,6 +65,9 @@ func _physics_process(delta: float) -> void:
 	global_position = end
 	traveled += step
 	if not wall.is_empty() or traveled >= max_distance:
+		if not wall.is_empty():
+			Vfx.burst(game, "impacto", end, 0.5)
+			Vfx.burst(game, "poeira", end - direction * 0.1, 0.6)
 		_fall()
 		queue_free()
 
