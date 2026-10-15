@@ -15,7 +15,7 @@ const HELP_ROWS := [
 	[["M"], "Mapa explorado (pausa o jogo)"],
 	[["H"], "Condição física"],
 	[["1", "2", "3"], "Mochila · comer · bandagem"],
-	[["4", "5", "6", "7"], "Técnicas da barra  ·  T: montar"],
+	[["4", "5", "6", "7"], "Habilidades da barra  ·  T: montar"],
 	[["F5"], "Salvar  ·  Esc: pausa"],
 ]
 
@@ -127,7 +127,7 @@ func _build_hud() -> void:
 	sidebar.add_tool("inventory", "bag", "Mochila", "I", toggle_inventory)
 	sidebar.add_tool("health", "pulse", "Condição física", "H", toggle_health)
 	sidebar.add_tool("skills", "book", "Proficiências", "P", toggle_proficiencies)
-	sidebar.add_tool("techniques", "golpe", "Técnicas", "T", toggle_techniques)
+	sidebar.add_tool("techniques", "golpe", "Habilidades", "T", toggle_techniques)
 	sidebar.add_tool("map", "map", "Mapa explorado", "M", toggle_map)
 	sidebar.add_gap(10)
 	sidebar.add_tool("pause", "gear", "Pausa e controles", "Esc", toggle_pause)
@@ -625,8 +625,6 @@ func toggle_techniques() -> void:
 	if tech_window.visible:
 		tech_window.open()
 		tech_window.move_to(tech_window.position)
-	else:
-		tech_window.name_edit.release_focus()
 	update_hud()
 
 func toggle_proficiencies() -> void:
@@ -656,11 +654,20 @@ func _on_creation_confirmed(values: Dictionary) -> void:
 
 func on_level_up(branch: String, level: int) -> void:
 	level_banner.push("%s  ·  nível %d" % [ProficiencyTree.display_name(branch), level])
+	# Habilidades and objetos that this level gives.
+	for form_id in Techniques.FORMS:
+		var req: Dictionary = Techniques.FORMS[form_id].get("requer", {})
+		if int(req.get(branch, -1)) == level:
+			level_banner.push("Nova habilidade: %s" % Techniques.form_name(form_id), "T para montar  ·  " + str(Techniques.FORMS[form_id].get("texto", "")))
+	for id in Techniques.OBJECTS:
+		if Techniques.object_branch(id) == branch and level in Techniques.OBJECTS[id].get("copias", []).map(func(v): return int(v)):
+			var n: int = Techniques.copies(game.sheet, id)
+			level_banner.push("Objeto: %s" % Techniques.object_name(id), "%s  ·  agora %d %s" % [str(Techniques.OBJECTS[id].get("texto", "")), n, "cópia" if n == 1 else "cópias"])
 	if game.sound:
 		game.sound.play_at("loot", game.player.global_position, 0.4)
 
 func on_perk_unlocked(branch: String, perk: Dictionary) -> void:
-	level_banner.push("Desbloqueado: %s" % perk.get("name", ""), "%s  ·  %s" % [ProficiencyTree.display_name(branch), perk.get("text", "")])
+	level_banner.push("Talento: %s" % perk.get("name", ""), "%s  ·  %s" % [ProficiencyTree.display_name(branch), perk.get("text", "")])
 
 func toggle_map() -> void:
 	if game.ended:
