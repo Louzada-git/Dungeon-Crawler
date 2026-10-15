@@ -306,6 +306,7 @@ func run(target, capture: bool) -> void:
  await test_skills()
  await test_psx()
  await test_techniques()
+ await test_vfx()
  inv.add("seal")
  p.position = game.camp_position
  game.interact()
@@ -1462,3 +1463,133 @@ func test_techniques() -> void:
  p.refresh_weapon()
  p.set_physics_process(was_processing)
  game.ui.close_all()
+
+## Live one-shot effects of one kind (Vfx.burst).
+func effects(id: String) -> Array:
+ return get_tree().get_nodes_in_group("efeitos").filter(func(n): return str(n.get_meta("efeito","")) == id and not n.is_queued_for_deletion())
+
+## Effects (Brackeys VFX in PSX size): torches, campfire, hits, bleeding, guard, dodge, death.
+func test_vfx() -> void:
+ get_tree().paused = false
+ var p = game.player
+ var was_processing: bool = p.is_physics_processing()
+ p.set_physics_process(false)
+ check(Vfx.EFFECTS.size() >= 8 and Vfx.EFFECTS.keys().all(func(id): return not Vfx.sheet_of(id).is_empty() and ResourceLoader.exists("res://assets/vfx/%s.png" % Vfx.info(id)["folha"])),"Todo efeito tem sua folha em assets/vfx")
+ var sheet_tex: Texture2D = load("res://assets/vfx/sangue.png")
+ check(sheet_tex.get_width() <= 512 and Vfx.duration("sangue") > 0.3 and Vfx.duration("sangue") < 1.5,"Folhas pequenas (tamanho PSX) e efeitos curtos")
+ # Torches and campfire.
+ var flames: Array = get_tree().get_nodes_in_group("chamas")
+ check(flames.size() > 3 and flames.all(func(f): return f.material_override is ShaderMaterial and float(f.material_override.get_shader_parameter("fps")) > 0.0),"Tochas com chama animada em vez da bolinha")
+ check(flames.all(func(f): return f.material_override == flames[0].material_override),"Todas as chamas dividem um material (leve em andares grandes)")
+ var fire: Node3D = game.world_root.get_node_or_null("Fogueira")
+ check(fire != null and fire.global_position.distance_to(game.camp_position) < 0.1 and fire.find_children("*","OmniLight3D",true,false).size() == 1,"Fogueira no abrigo, com luz")
+ # Walking into the fire stops beside it, still close enough to rest.
+ var was_walking: bool = p.is_physics_processing()
+ p.set_physics_process(true)
+ ready_player(p)
+ p.position = game.camp_position + Vector3(1.5,0,0)
+ p.motion_velocity = Vector3.ZERO
+ p.test_direction = Vector2(-0.5,-0.5)
+ await wait_frames(60)
+ p.test_direction = Vector2.ZERO
+ await wait_frames(5)
+ var gap: float = Vector2(p.position.x-game.camp_position.x,p.position.z-game.camp_position.z).length()
+ check(gap > 0.45 and gap < 1.6 and game.interaction_text().to_lower().contains("descansar"),"Andar contra a fogueira para do lado dela, ainda perto para descansar (%s m)" % UiStyle.fmt(gap,2))
+ p.set_physics_process(was_walking)
+ var flicker = game.world_root.get_node_or_null("LuzesTremulas")
+ check(flicker != null and flicker.lights.size() >= flames.size() - 2,"Luzes das tochas e da fogueira registradas para tremer")
+ var near_light: OmniLight3D = fire.find_children("*","OmniLight3D",true,false)[0]
+ p.position = game.camp_position + Vector3(1.5,0,0)
+ game.camera_rig.snap()
+ var energies: Array = []
+ for i in 8:
+  await get_tree().create_timer(0.07).timeout
+  energies.append(near_light.light_energy)
+ check(energies.max() - energies.min() > 0.02 and energies.max() <= float(near_light.get_meta("energia")) * 1.01,"Luz da fogueira treme sem passar da força original")
+ # Hits on a monster.
+ var foe = game.enemies[0]
+ var room: Rect2i = game.layout.rooms[1]["rect"]
+ p.position = game.layout.to_world(room.get_center())
+ fresh(foe,p.position+Vector3(1.2,0,0))
+ foe.visible = true
+ foe.aggro = true
+ p.sneaking = false
+ var blood: int = effects("sangue").size()
+ var flashes: int = effects("impacto").size()
+ var strong: int = effects("golpe_forte").size()
+ Combat.apply_hit(game,foe,{"damage":1.0},Vector3.RIGHT)
+ check(effects("sangue").size() == blood+1 and effects("impacto").size() == flashes+1 and effects("golpe_forte").size() == strong,"Acerto comum: sangue e clarão, sem o estouro forte")
+ var hit_node: Node3D = effects("sangue")[-1]
+ check(absf(hit_node.global_position.y - (foe.global_position.y+1.15)) < 1.0 and hit_node.material_override != Vfx.material("sangue"),"Sangue na altura do peito e com material próprio (o quadro avança só nele)")
+ Combat.apply_hit(game,foe,{"damage":1.0,"stagger":1.5},Vector3.RIGHT)
+ check(effects("golpe_forte").size() == strong+1,"Golpe que atordoa forte mostra o estouro grande")
+ foe.aggro = false
+ strong = effects("golpe_forte").size()
+ Combat.apply_hit(game,foe,{"damage":1.0,"sneak_mult":1.5},Vector3.RIGHT)
+ check(effects("golpe_forte").size() == strong+1,"Ataque furtivo também mostra o estouro grande")
+ foe.armored = true
+ var sparks: int = effects("faisca").size()
+ blood = effects("sangue").size()
+ Combat.apply_hit(game,foe,{"damage":1.0},Vector3.RIGHT)
+ check(effects("faisca").size() == sparks+1 and effects("sangue").size() == blood,"Blindado: faíscas em vez de sangue")
+ Combat.apply_hit(game,foe,{"damage":1.0,"crush":1.5},Vector3.RIGHT)
+ check(effects("sangue").size() == blood+1,"Arma que esmaga armadura tira sangue do blindado")
+ foe.armored = bool(foe.stats.get("armored",false))
+ # Bleeding drips while it lasts.
+ var drops: int = effects("gota").size()
+ foe.apply_bleed(3.0,4.0)
+ foe.tick_bleed(0.3)
+ foe.tick_bleed(0.3)
+ check(effects("gota").size() >= drops+1,"Monstro sangrando pinga sangue")
+ foe.bleed_time = 0
+ foe.bleed_dps = 0
+ # The adventurer: blood when hurt, sparks on the guard, dust on the dodge.
+ ready_player(p)
+ p.health = p.max_health
+ p.stamina = p.max_stamina
+ p.facing = Vector3.RIGHT
+ p.aiming = true
+ sparks = effects("faisca").size()
+ p.receive_damage(10,Vector3.LEFT)
+ check(effects("faisca").size() == sparks+1,"Golpe na guarda solta faíscas")
+ # On screen (ignoring the push toward the camera) the sparks sit toward the attacker.
+ var spark_node: Node3D = effects("faisca")[-1]
+ var view: Vector3 = get_viewport().get_camera_3d().global_transform.basis.z
+ var offset: Vector3 = spark_node.global_position - Vfx.body_point(p)
+ offset -= view * offset.dot(view)
+ check(offset.dot(Vector3.RIGHT) > 0.1,"Faíscas do lado de onde veio o golpe")
+ p.aiming = false
+ ready_player(p)
+ blood = effects("sangue").size()
+ p.receive_damage(10,Vector3.LEFT)
+ check(effects("sangue").size() == blood+1,"Aventureiro ferido sangra")
+ ready_player(p)
+ p.stamina = p.max_stamina
+ var dust: int = effects("poeira").size()
+ p.test_direction = Vector2(1,0)
+ p.dodge()
+ p.test_direction = Vector2.ZERO
+ check(effects("poeira").size() >= dust+2,"Esquiva levanta poeira")
+ # Death: smoke (the belongings it drops are taken away again).
+ var containers: int = game.containers.size()
+ var kills: int = game.kills
+ foe.health = 1.0
+ foe.receive_damage(5.0,Vector3.RIGHT)
+ check(not foe.alive and not effects("fumaca_morte").is_empty(),"Monstro morto solta fumaça")
+ while game.containers.size() > containers:
+  var extra: Dictionary = game.containers.pop_back()
+  if is_instance_valid(extra.get("node")):
+   extra["node"].queue_free()
+ game.kills = kills
+ # PSX filter leaves effect materials alone.
+ if game.psx.enabled:
+  check(game.psx.psx_material(Vfx.material("sangue")) == Vfx.material("sangue"),"Filtro PSX não troca o material dos efeitos")
+ # One-shot effects free themselves.
+ await get_tree().create_timer(1.3).timeout
+ check(get_tree().get_nodes_in_group("efeitos").filter(func(n): return not n.is_queued_for_deletion()).is_empty(),"Efeitos somem sozinhos quando acabam")
+ check(not get_tree().get_nodes_in_group("chamas").is_empty(),"Chamas das tochas continuam")
+ fresh(foe,game.layout.to_world(Vector2i(28,7)))
+ ready_player(p)
+ p.health = p.max_health
+ p.stamina = p.max_stamina
+ p.set_physics_process(was_processing)
