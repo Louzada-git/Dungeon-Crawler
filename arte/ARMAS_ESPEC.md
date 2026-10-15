@@ -66,7 +66,7 @@ Regras próprias das armaduras: o modelo veste o tronco do personagem atual (lar
 
 ### Como o jogo usa
 
-- Desde 14/10/2026 o personagem é `jogo/assets/originais/aventureiro_psx.glb`, que já usa o **esqueleto padrão do Mixamo** (`mixamorig_*`). As animações atuais vieram do modelo anterior (`aventureiro_mixamo.glb`) por `arte/fontes/personagem_psx/transferir_animacoes.gd`.
+- Desde 14/10/2026 o personagem é `jogo/assets/originais/aventureiro_psx.glb`, que já usa o **esqueleto padrão do Mixamo** (`mixamorig_*`). As animações atuais vieram do modelo anterior (`arte/fontes/personagem_psx/origem_animacoes/aventureiro_mixamo.glb`) por `arte/fontes/personagem_psx/transferir_animacoes.gd`.
 - Cada arma diz o nome da animação que quer no campo `animacao` de `itens.json`. **Enquanto a animação não existir, o jogo usa a mais próxima que já tem**: corte para golpes, estocada para hastes e besta, guarda para o arco.
 - O jogo **estica ou encolhe a animação** para caber na duração abaixo. O que importa é a proporção: o golpe precisa acertar no momento indicado.
 
