@@ -282,7 +282,7 @@ A orientação mais recente do usuário substitui o protótipo inicialmente cent
 - `jogo/ASSETS.md`: fontes, licenças e adaptações dos modelos.
 - `outputs/linux/Dungepm.x86_64`: versão Linux independente do editor.
 - `outputs/COMO_JOGAR.md`: controles, regras provisórias e limites da entrega.
-- `outputs/base-jogavel.png`, `outputs/inventario.png`, `outputs/mapa.png`, `outputs/combate.png`: capturas da aplicação real.
+- `revisao/`: capturas de revisão de cada etapa (fora do pacote do jogo).
 
 ### O que já existe
 
