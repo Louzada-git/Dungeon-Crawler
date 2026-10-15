@@ -295,10 +295,14 @@ func _drop(label: Label3D) -> void:
 		label.remove_meta("psx_layers")
 
 ## Screen size in pixels of text that is `height` metres tall.
-func text_pixels(height: float, camera: Camera3D) -> int:
+func text_pixels(height: float, camera: Camera3D, at: Vector3 = Vector3.ZERO) -> int:
 	var view: float = float(get_viewport().get_visible_rect().size.y)
-	var world: float = camera.size if camera.projection == Camera3D.PROJECTION_ORTHOGONAL else 10.0
-	return maxi(9, roundi(height * view / maxf(world, 0.01)))
+	var world: float = camera.size
+	if camera.projection != Camera3D.PROJECTION_ORTHOGONAL:
+		# Perspective (third person): height the view covers at that distance.
+		var distance: float = maxf(0.5, camera.global_position.distance_to(at))
+		world = 2.0 * distance * tan(deg_to_rad(camera.fov) * 0.5)
+	return clampi(roundi(height * view / maxf(world, 0.01)), 9, 40)
 
 func _process(_delta: float) -> void:
 	if _labels.is_empty():
@@ -313,10 +317,14 @@ func _process(_delta: float) -> void:
 			_labels.erase(key)
 			continue
 		var show: bool = enabled and camera != null and label.is_visible_in_tree() and label.text != "" and not camera.is_position_behind(label.global_position)
+		# Third person (perspective): a wall between the camera and the text hides it.
+		if show and camera.projection != Camera3D.PROJECTION_ORTHOGONAL:
+			var query := PhysicsRayQueryParameters3D.create(camera.global_position, label.global_position, 1)
+			show = camera.get_world_3d().direct_space_state.intersect_ray(query).is_empty()
 		flat.visible = show
 		if not show:
 			continue
-		var px: int = text_pixels(label.font_size * label.pixel_size, camera)
+		var px: int = text_pixels(label.font_size * label.pixel_size, camera, label.global_position)
 		if px != entry["size"]:
 			entry["size"] = px
 			flat.add_theme_font_size_override("font_size", px)
