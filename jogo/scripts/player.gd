@@ -196,6 +196,10 @@ func _process(_delta: float) -> void:
 func aim_mouse() -> void:
  if game.camera == null:
   return
+ # Third person: blows and aim go where the camera looks.
+ if game.third_person():
+  facing = game.camera_rig.forward()
+  return
  var mouse = get_viewport().get_mouse_position()
  var point = Plane(Vector3.UP,0.65).intersects_ray(game.camera.project_ray_origin(mouse),game.camera.project_ray_normal(mouse))
  if point != null:
@@ -246,7 +250,8 @@ func _physics_process(delta: float) -> void:
   input_axis = Vector2.ZERO
  if test_direction != Vector2.ZERO:
   input_axis = test_direction
- var direction = Vector3(input_axis.x+input_axis.y,0,input_axis.y-input_axis.x).normalized()
+ # Isometric: screen-aligned; third person: relative to where the camera looks.
+ var direction: Vector3 = game.camera_rig.move_direction(input_axis) if game.camera_rig else Vector3(input_axis.x+input_axis.y,0,input_axis.y-input_axis.x).normalized()
  aiming = Input.is_action_pressed("aim") and hurt_timer <= 0
  walking = direction.length_squared() > 0.01
  if attack_timer <= 0 and dodge_timer <= 0:
@@ -408,7 +413,8 @@ func dodge() -> bool:
  var input = Input.get_vector("left","right","up","down")
  if test_direction != Vector2.ZERO:
   input = test_direction
- dodge_direction = Vector3(input.x+input.y,0,input.y-input.x).normalized() if input.length()>0 else facing
+ var dir: Vector3 = game.camera_rig.move_direction(input) if game.camera_rig else Vector3(input.x+input.y,0,input.y-input.x).normalized()
+ dodge_direction = dir if input.length()>0 else facing
  stamina -= cost
  dodge_timer = 0.25
  invulnerable = 0.20
