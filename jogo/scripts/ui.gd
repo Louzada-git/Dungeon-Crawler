@@ -14,8 +14,8 @@ const HELP_ROWS := [
 	[["I", "Tab"], "Mochila (pausa o jogo)"],
 	[["M"], "Mapa explorado (pausa o jogo)"],
 	[["H"], "Condição física"],
-	[["1", "2", "3"], "Mochila · comer · bandagem"],
-	[["4", "5", "6", "7"], "Habilidades da barra  ·  T: montar"],
+	[["1", "…", "9"], "Barra rápida: qualquer item (arraste da mochila)"],
+	[["@habilidades"], "Habilidades da barra  ·  T: montar e trocar teclas"],
 	[["F5"], "Salvar  ·  Esc: pausa"],
 ]
 
@@ -63,6 +63,8 @@ var pause_panel: UiWindow
 var pause_title: Label
 var pause_note: Label
 var controls_box: Control
+## Key caps of the habilidade row in the controls list.
+var technique_help_keys: HBoxContainer
 var sound_button: Button
 var psx_button: Button
 var pause_confirm: bool = false
@@ -157,7 +159,8 @@ func _build_hud() -> void:
 	moodles.position = Vector2(1386, 160)
 	hud.add_child(moodles)
 	hotbar = UiHotbar.new(game, self)
-	hotbar.position = Vector2(720 - 99, 900 - 72)
+	# Centered, clear of the "em mãos" card on the left (it ends at x 342).
+	hotbar.position = Vector2(maxf(352.0, roundf(720.0 - hotbar.bar_width() * 0.5)), 900 - 72)
 	hud.add_child(hotbar)
 	_build_hands()
 	_build_prompts()
@@ -288,6 +291,7 @@ func _build_modals() -> void:
 	creation_panel = UiCreationPanel.new()
 	_centered(creation_panel)
 	creation_panel.confirmed.connect(_on_creation_confirmed)
+	refresh_technique_keys()
 
 func _centered(window: UiWindow) -> void:
 	window.position = (Vector2(1440, 900) - window.custom_minimum_size) * 0.5
@@ -393,8 +397,12 @@ func _build_pause() -> void:
 		keys.add_theme_constant_override("separation", 3)
 		keys.custom_minimum_size.x = 170
 		keys.alignment = BoxContainer.ALIGNMENT_END
-		for key in entry[0]:
-			keys.add_child(UiStyle.keycap(key, 12))
+		if entry[0][0] == "@habilidades":
+			# The player's own keys, filled by refresh_technique_keys.
+			technique_help_keys = keys
+		else:
+			for key in entry[0]:
+				keys.add_child(UiStyle.keycap(key, 12))
 		grid.add_child(keys)
 		grid.add_child(UiStyle.label(entry[1], 13, UiStyle.TEXT))
 
@@ -533,13 +541,19 @@ func _input(event: InputEvent) -> void:
 		return
 	if typing():
 		return
+	# Choosing a key for a habilidade slot (T window): the next key press is it.
+	if tech_window != null and tech_window.capturing >= 0 and event is InputEventKey and event.pressed and not event.echo:
+		tech_window.capture_key(event.physical_keycode)
+		get_viewport().set_input_as_handled()
+		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.physical_keycode == KEY_T:
 			toggle_techniques()
 			get_viewport().set_input_as_handled()
 			return
-		if not any_panel() and event.physical_keycode in [KEY_4, KEY_5, KEY_6, KEY_7]:
-			game.player.use_technique(event.physical_keycode - KEY_4)
+		var tech_slot: int = game.technique_slot_for_key(event.physical_keycode)
+		if not any_panel() and tech_slot >= 0:
+			game.player.use_technique(tech_slot)
 			get_viewport().set_input_as_handled()
 			return
 		if event.physical_keycode == KEY_H:
@@ -550,13 +564,21 @@ func _input(event: InputEvent) -> void:
 			toggle_proficiencies()
 			get_viewport().set_input_as_handled()
 			return
-		if not any_panel() and event.physical_keycode in [KEY_1, KEY_2, KEY_3]:
-			if event.physical_keycode == KEY_1:
-				toggle_inventory()
-			else:
-				quick_use("ration" if event.physical_keycode == KEY_2 else "bandage")
-			get_viewport().set_input_as_handled()
-			return
+		if event.physical_keycode >= KEY_1 and event.physical_keycode <= KEY_9:
+			var quick: int = event.physical_keycode - KEY_1
+			# Backpack open with an item selected: the number puts it in that slot.
+			var picked: String = inventory.bag_list.selected_id if inventory.is_open else ""
+			if picked == "" and inventory.is_open:
+				picked = inventory.loot_list.selected_id
+			if picked != "":
+				game.quick_bar.assign(quick, picked)
+				game.message("%s no espaço %d da barra rápida." % [Items.info(picked).get("name", picked), quick + 1], 2)
+				get_viewport().set_input_as_handled()
+				return
+			if not any_panel():
+				press_quick(quick)
+				get_viewport().set_input_as_handled()
+				return
 	if event.is_action_pressed("inventory"):
 		toggle_inventory()
 		get_viewport().set_input_as_handled()
@@ -707,6 +729,26 @@ func confirm_restart() -> void:
 	pause_title.text = "Recomeçar a expedição?"
 	pause_note.text = ("Isso descarta este labirinto, a expedição salva e o mapa conhecido. Clique de novo em “Nova expedição” para confirmar; “Continuar” mantém tudo." if game.generated else "Isso apaga o progresso salvo desta expedição. Clique de novo em “Nova expedição” para confirmar; “Continuar” mantém o progresso.")
 	controls_box.modulate.a = 0.35
+
+## Presses quick bar slot `index` (key or click): equips, wears, eats, treats.
+func press_quick(index: int) -> void:
+	if game.ended or game.choosing_character:
+		return
+	game.quick_bar.use(game, index)
+	refresh_inventory()
+	update_hud()
+
+## The habilidade keys changed: bar labels, the controls list and the T window.
+func refresh_technique_keys() -> void:
+	if hotbar:
+		hotbar.refresh_techniques()
+	if technique_help_keys:
+		for child in technique_help_keys.get_children():
+			child.queue_free()
+		for i in game.technique_keys.size():
+			technique_help_keys.add_child(UiStyle.keycap(game.technique_key_name(i), 12))
+	if tech_window and tech_window.visible:
+		tech_window.refresh(true)
 
 func quick_use(id: String) -> void:
 	if game.ended or (any_panel() and not inventory.is_open):
