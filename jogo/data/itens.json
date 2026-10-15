@@ -1,6 +1,6 @@
 {
  "versao": 1,
- "_sobre": "Catálogo de itens. name/description são chaves de data/textos.csv. Armas: style slash|thrust|smash|shoot; efeitos opcionais sneak_mult, bleed, crush, stagger, knockback, pierce. 'blocks' é o modelo provisório de blocos; um arquivo assets/armas/<id>.glb substitui os blocos automaticamente. 'proficiencias' é o caminho de ramos que a arma treina. 'cooldown' é o golpe inteiro, do clique até poder golpear de novo; 'windup' é o preparo até acertar; a esquiva libera na metade do que vem depois do acerto. 'impacto' é a fração da animação do golpe em que ele acerta (a animação dura windup / impacto). 'classe' (leve, media, pesada) diz o peso do golpe: armas pesadas têm muito dano por golpe e delay alto. Balanço de 15/10/2026: tools/tabela_balanco.py.",
+ "_sobre": "Catálogo de itens. name/description são chaves de data/textos.csv. Armas: style slash|thrust|smash|shoot; efeitos opcionais sneak_mult, bleed, crush, stagger, knockback, pierce. 'blocks' é o modelo provisório de blocos; um arquivo assets/armas/<id>.glb substitui os blocos automaticamente. 'proficiencias' é o caminho de ramos que a arma treina. 'cooldown' é o golpe inteiro, do clique até poder golpear de novo, mais 0,1 s por kg de 'weight' (só para golpear de novo: sem lentidão, a esquiva fica livre); 'windup' é o preparo até acertar; a esquiva libera na metade do que vem depois do acerto. 'impacto' é a fração da animação do golpe em que ele acerta (a animação dura windup / impacto). 'classe' (leve, media, pesada) diz o peso do golpe: armas pesadas têm muito dano por golpe e delay alto. Balanço de 15/10/2026: tools/tabela_balanco.py.",
  "itens": {
   "sword": {
    "tag": "ARMA",
@@ -29,7 +29,7 @@
   "spear": {
    "tag": "ARMA",
    "weight": 3.6,
-   "damage": 28.0,
+   "damage": 29.0,
    "range": 3.2,
    "cost": 11.5,
    "cooldown": 0.68,
@@ -93,7 +93,7 @@
   "espada_guarda": {
    "tag": "ARMA",
    "weight": 3.0,
-   "damage": 26.0,
+   "damage": 27.0,
    "range": 2.2,
    "cost": 9.5,
    "cooldown": 0.53,
@@ -172,7 +172,7 @@
   "adaga": {
    "tag": "ARMA",
    "weight": 0.8,
-   "damage": 12.0,
+   "damage": 10.0,
    "range": 1.5,
    "cost": 4.5,
    "cooldown": 0.3,
@@ -196,7 +196,7 @@
   "katana": {
    "tag": "ARMA",
    "weight": 1.4,
-   "damage": 18.0,
+   "damage": 17.0,
    "range": 2.0,
    "cost": 8.5,
    "cooldown": 0.38,
@@ -220,7 +220,7 @@
   "montante": {
    "tag": "ARMA",
    "weight": 5.5,
-   "damage": 46.0,
+   "damage": 47.0,
    "range": 2.6,
    "cost": 15.0,
    "cooldown": 1.04,
@@ -245,7 +245,7 @@
   "machado": {
    "tag": "ARMA",
    "weight": 2.8,
-   "damage": 23.0,
+   "damage": 22.0,
    "range": 1.9,
    "cost": 9.0,
    "cooldown": 0.57,
@@ -272,7 +272,7 @@
   "maca": {
    "tag": "ARMA",
    "weight": 3.2,
-   "damage": 26.0,
+   "damage": 27.0,
    "range": 1.8,
    "cost": 9.5,
    "cooldown": 0.6,
@@ -298,7 +298,7 @@
   "martelo": {
    "tag": "ARMA",
    "weight": 6.5,
-   "damage": 55.0,
+   "damage": 56.0,
    "range": 2.9,
    "cost": 16.0,
    "cooldown": 1.28,
@@ -325,7 +325,7 @@
   "alabarda": {
    "tag": "ARMA",
    "weight": 5.0,
-   "damage": 34.0,
+   "damage": 36.0,
    "range": 3.5,
    "cost": 12.5,
    "cooldown": 0.88,
@@ -351,7 +351,7 @@
   "arco": {
    "tag": "ARMA",
    "weight": 1.2,
-   "damage": 22.0,
+   "damage": 18.0,
    "range": 14.0,
    "cost": 5.0,
    "cooldown": 0.63,
@@ -391,7 +391,7 @@
   "besta": {
    "tag": "ARMA",
    "weight": 4.0,
-   "damage": 50.0,
+   "damage": 43.0,
    "range": 16.0,
    "cost": 4.0,
    "cooldown": 1.4,
