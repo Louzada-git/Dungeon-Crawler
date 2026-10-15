@@ -1,5 +1,12 @@
 # Dungepm — As Cisternas
 
+## Novo: câmera em terceira pessoa (15/10/2026)
+
+- **Esc → Câmera** troca entre **isométrica** (a de sempre) e **terceira pessoa**. A escolha fica salva.
+- Em terceira pessoa a câmera fica atrás do personagem, um pouco por cima do ombro direito. O **mouse vira a câmera**, **W** anda para onde ela olha, e golpes, tiros e habilidades vão para a **mira no meio da tela**. A roda do mouse aproxima e afasta.
+- As paredes da frente aparecem inteiras (na isométrica elas ficam cortadas para mostrar a sala). Uma névoa escura esconde o fundo dos corredores, e a câmera encosta nas paredes em vez de atravessá-las.
+- O cursor solta sozinho quando você abre a mochila, o mapa, a pausa ou as janelas H, P e T. Segure **Alt** para soltá-lo sem abrir nada (para clicar na barra rápida, por exemplo).
+
 ## Novo: barra rápida, teclas das habilidades e delay do peso (15/10/2026)
 
 - **Barra rápida de 1 a 9:** qualquer item em qualquer espaço. Arma equipa (apertando de novo, guarda e fica de punhos), armadura veste e tira, comida come, curativo aplica. Munição fica na barra só para mostrar quantas restam. Começa com a arma inicial no 1, rações no 2 e bandagens no 3.
@@ -153,6 +160,8 @@ Explore as cinco salas, gerencie comida e bandagens, encontre o selo e retorne a
 | Habilidades: montar e trocar teclas | T |
 | Habilidades: usar | Q, R, F, G (ou as que você escolher) |
 | Aproximar / afastar câmera | Roda do mouse |
+| Câmera isométrica ou terceira pessoa | Esc → Câmera |
+| Terceira pessoa: virar a câmera / soltar o cursor | Mouse / segurar Alt |
 | Pausar | Esc |
 | Salvar no abrigo | F5 |
 
