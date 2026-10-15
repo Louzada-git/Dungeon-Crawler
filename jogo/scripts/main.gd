@@ -190,12 +190,33 @@ func apply_attributes(fill: bool) -> void:
 	if ui:
 		ui.update_hud()
 
-## Called by the "new adventurer" panel.
+## Called by the "new adventurer" panel: attributes and, in "arma", the
+## starting weapon (any weapon id, "" for bare fists) instead of the sword.
 func start_character(values: Dictionary) -> void:
 	sheet.reset(values)
+	if values.has("arma"):
+		choose_weapon(str(values["arma"]))
 	apply_attributes(true)
 	choosing_character = false
 	message("Atributos definem o seu potencial. As proficiências crescem com o uso: P mostra o progresso.", 7)
+
+## Swaps the starting sword for the chosen weapon (bows and crossbows come with ammunition).
+func choose_weapon(id: String) -> void:
+	if id != "" and not Items.DATA.get(id, {}).has("style"):
+		return
+	if inventory.count("sword") > 0 and id != "sword":
+		inventory.remove("sword", inventory.count("sword"))
+	if id == "":
+		inventory.unequip()
+	else:
+		if inventory.count(id) == 0:
+			inventory.add(id)
+		var ammo: String = str(Items.DATA[id].get("ammo", ""))
+		if ammo != "" and inventory.count(ammo) == 0:
+			inventory.add(ammo, UiCreationPanel.starting_ammo())
+		inventory.equip(id)
+	if player:
+		player.refresh_weapon()
 
 func on_dodged(amount: float) -> void:
 	sheet.award("acrobacia", amount * 0.8, floor)
