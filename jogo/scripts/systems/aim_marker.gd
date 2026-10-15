@@ -10,7 +10,8 @@ func _ready() -> void:
 	visible = false
 
 func refresh(game) -> void:
-	visible = game.player.aiming and not game.ui.any_panel() and not game.ended
+	# Third person aims with the crosshair in the middle of the screen instead.
+	visible = game.player.aiming and not game.ui.any_panel() and not game.ended and not game.third_person()
 	if not visible:
 		return
 	var mouse = get_viewport().get_mouse_position()
