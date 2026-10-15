@@ -1,14 +1,17 @@
 extends RefCounted
 class_name Techniques
-## Player-made techniques (data/tecnicas.json): a form plus components in slots.
-## The numbers start from the weapon in hand (CharacterSheet.weapon_stats); the
-## form's effects apply, then each component in slot order acts on what is
-## already assembled to its left ("multiplica" scales current values, including
-## what earlier components added; "soma" adds a fixed amount).
+## Habilidades (data/tecnicas.json). Each one exists once, with fixed traits,
+## and has slots for objetos. The numbers start from the weapon in hand
+## (CharacterSheet.weapon_stats); the habilidade's effects apply, then each
+## objeto in slot order acts on what is already assembled to its left
+## ("multiplica" scales current values, including what earlier objetos added;
+## "soma" adds a fixed amount). Habilidades and objetos unlock by branch level;
+## each level in an objeto's "copias" gives one more copy, and a copy sits in
+## one habilidade at a time.
 
 static var RAW: Dictionary = _load()
 static var FORMS: Dictionary = RAW.get("formas", {})
-static var COMPONENTS: Dictionary = RAW.get("componentes", {})
+static var OBJECTS: Dictionary = RAW.get("objetos", {})
 static var RULES: Dictionary = RAW.get("regras", {})
 
 static func _load() -> Dictionary:
@@ -30,8 +33,8 @@ static func style_of(weapon_id: String) -> String:
 static func form_name(form_id: String) -> String:
 	return str(FORMS.get(form_id, {}).get("name", form_id))
 
-static func component_name(id: String) -> String:
-	return str(COMPONENTS.get(id, {}).get("name", id))
+static func object_name(id: String) -> String:
+	return str(OBJECTS.get(id, {}).get("name", id))
 
 ## "Lâminas nível 4" for a requirement dictionary; "" when there is none.
 static func requirement_text(req: Dictionary) -> String:
@@ -49,10 +52,11 @@ static func meets(sheet: CharacterSheet, req: Dictionary) -> bool:
 static func form_unlocked(sheet: CharacterSheet, form_id: String) -> bool:
 	return FORMS.has(form_id) and meets(sheet, FORMS[form_id].get("requer", {}))
 
-static func component_unlocked(sheet: CharacterSheet, id: String) -> bool:
-	return COMPONENTS.has(id) and meets(sheet, COMPONENTS[id].get("requer", {}))
+## Is it one of the basic habilidades (the weapon's own blow, always open)?
+static func basic(form_id: String) -> bool:
+	return not FORMS.get(form_id, {}).has("requer")
 
-## Does the weapon in hand fit the form (style and, for some forms, weapon branch)?
+## Does the weapon in hand fit the habilidade (style and, for some, weapon branch)?
 static func form_fits(form_id: String, weapon_id: String) -> bool:
 	var form: Dictionary = FORMS.get(form_id, {})
 	if not style_of(weapon_id) in form.get("estilos", []):
@@ -60,21 +64,60 @@ static func form_fits(form_id: String, weapon_id: String) -> bool:
 	var branch: String = str(form.get("ramo_arma", ""))
 	return branch == "" or branch in CharacterSheet.path_of(weapon_id)
 
-static func component_fits(id: String, weapon_id: String) -> bool:
-	var styles: Array = COMPONENTS.get(id, {}).get("estilos", [])
+static func object_fits(id: String, weapon_id: String) -> bool:
+	var styles: Array = OBJECTS.get(id, {}).get("estilos", [])
 	return styles.is_empty() or style_of(weapon_id) in styles
 
-## Slots open for this weapon: 1 + (mastery - 1) / espaco_a_cada_dominio, capped by the form.
+## Branch and level that open the objeto's copies.
+static func object_branch(id: String) -> String:
+	var req: Dictionary = OBJECTS.get(id, {}).get("requer", {})
+	return str(req.keys()[0]) if not req.is_empty() else ""
+
+## Copies the adventurer has of an objeto (one per level reached in "copias").
+static func copies(sheet: CharacterSheet, id: String) -> int:
+	var branch: String = object_branch(id)
+	if branch == "":
+		return 0
+	var n: int = 0
+	for lv in OBJECTS[id].get("copias", [OBJECTS[id]["requer"][branch]]):
+		if sheet.level(branch) >= int(lv):
+			n += 1
+	return n
+
+## Level of the branch where the next copy comes; -1 when there is no more.
+static func next_copy_level(sheet: CharacterSheet, id: String) -> int:
+	var branch: String = object_branch(id)
+	for lv in OBJECTS.get(id, {}).get("copias", []):
+		if sheet.level(branch) < int(lv):
+			return int(lv)
+	return -1
+
+## Level that grows a habilidade's slots: weapon mastery for the basic ones,
+## else the branch that unlocked it.
+static func slot_level(sheet: CharacterSheet, form_id: String, weapon_id: String) -> int:
+	if basic(form_id):
+		var path: Array = CharacterSheet.path_of(weapon_id)
+		return sheet.mastery(path) if not path.is_empty() else 1
+	var req: Dictionary = FORMS[form_id]["requer"]
+	return sheet.level(str(req.keys()[0]))
+
+## Level where the habilidade starts counting slots (1 for the basic ones).
+static func start_level(form_id: String) -> int:
+	var req: Dictionary = FORMS.get(form_id, {}).get("requer", {})
+	return int(req.values()[0]) if not req.is_empty() else 1
+
+static func slot_step(form_id: String) -> int:
+	return maxi(1, int(FORMS.get(form_id, {}).get("slot_a_cada", rule("slot_a_cada_basica", 5))))
+
 static func open_slots(sheet: CharacterSheet, form_id: String, weapon_id: String) -> int:
-	var every: int = maxi(1, int(rule("espaco_a_cada_dominio", 5)))
-	var mastery: int = sheet.mastery(CharacterSheet.path_of(weapon_id)) if not CharacterSheet.path_of(weapon_id).is_empty() else 1
-	return mini(int(FORMS.get(form_id, {}).get("espacos", 1)), 1 + (mastery - 1) / every)
+	var lv: int = slot_level(sheet, form_id, weapon_id)
+	return clampi(1 + maxi(0, lv - start_level(form_id)) / slot_step(form_id), 1, int(FORMS.get(form_id, {}).get("slots", 1)))
 
-## Mastery needed for slot number n (1-based).
-static func mastery_for_slot(n: int) -> int:
-	return 1 + (n - 1) * maxi(1, int(rule("espaco_a_cada_dominio", 5)))
+## Level (of the habilidade's own measure) that opens slot n (1-based).
+static func level_for_slot(form_id: String, n: int) -> int:
+	return start_level(form_id) + (n - 1) * slot_step(form_id)
 
-## Forms that suit a weapon style, basic first.
+## Habilidades for a weapon style, basic first.
 static func forms_for(weapon_id: String) -> Array:
 	var out: Array = []
 	for id in FORMS:
@@ -82,50 +125,46 @@ static func forms_for(weapon_id: String) -> Array:
 			out.append(id)
 	return out
 
-## Why a technique cannot be used with this weapon now; "" when it can.
-static func problem(sheet: CharacterSheet, recipe: Dictionary, weapon_id: String) -> String:
-	var form_id: String = str(recipe.get("form", ""))
+## Why a habilidade cannot be used with this weapon now; "" when it can.
+static func problem(sheet: CharacterSheet, book, form_id: String, weapon_id: String) -> String:
 	if not FORMS.has(form_id):
-		return "Forma desconhecida."
+		return "Habilidade desconhecida."
 	var form: Dictionary = FORMS[form_id]
 	if not form_unlocked(sheet, form_id):
-		return "%s ainda trancado: precisa de %s." % [form_name(form_id), requirement_text(form.get("requer", {}))]
+		return "%s ainda trancada: precisa de %s." % [form_name(form_id), requirement_text(form.get("requer", {}))]
 	if not form_fits(form_id, weapon_id):
 		return "%s não serve para %s." % [form_name(form_id), "as mãos vazias" if weapon_id == "" else str(Items.info(weapon_id).get("name", weapon_id)).to_lower()]
-	var comps: Array = recipe.get("components", [])
+	var objs: Array = book.objects(form_id)
 	var slots: int = open_slots(sheet, form_id, weapon_id)
-	if comps.size() > slots:
-		return "Só %d %s com o domínio atual desta arma." % [slots, "espaço" if slots == 1 else "espaços"]
-	var seen: Dictionary = {}
-	for id in comps:
-		if not COMPONENTS.has(id):
-			return "Componente desconhecido."
-		if seen.has(id):
-			return "%s repetido." % component_name(id)
-		seen[id] = true
-		if not component_unlocked(sheet, id):
-			return "%s ainda trancado: precisa de %s." % [component_name(id), requirement_text(COMPONENTS[id].get("requer", {}))]
-		if not component_fits(id, weapon_id):
-			return "%s não combina com esta arma." % component_name(id)
+	if objs.size() > slots:
+		return "%s tem %d %s agora; tire objetos." % [form_name(form_id), slots, "slot" if slots == 1 else "slots"]
+	for id in objs:
+		if not OBJECTS.has(id):
+			return "Objeto desconhecido."
+		if not object_fits(id, weapon_id):
+			return "%s não faz sentido com esta arma." % object_name(id)
+		var have: int = copies(sheet, id)
+		var used: int = book.in_use(id)
+		if used > have:
+			return "%s: você tem %d %s e usa %d." % [object_name(id), have, "cópia" if have == 1 else "cópias", used]
 	return ""
 
-## Final numbers of the technique with this weapon: weapon_stats + form + components.
-static func stats(sheet: CharacterSheet, recipe: Dictionary, weapon_id: String) -> Dictionary:
+## Final numbers with this weapon: weapon_stats + habilidade + objetos in order.
+static func stats(sheet: CharacterSheet, form_id: String, objs: Array, weapon_id: String) -> Dictionary:
 	var s: Dictionary = sheet.weapon_stats(weapon_id).duplicate(true)
 	if not s.has("damage"):
 		return s
 	s["hits"] = 1
 	s["dash"] = 0.0
 	var style: String = style_of(weapon_id)
-	var form: Dictionary = FORMS.get(str(recipe.get("form", "")), {})
+	var form: Dictionary = FORMS.get(form_id, {})
 	for effect in form.get("efeitos", []):
 		apply(s, effect, style)
-	var comps: Array = recipe.get("components", [])
-	for id in comps:
-		for effect in COMPONENTS.get(id, {}).get("efeitos", []):
+	for id in objs:
+		for effect in OBJECTS.get(id, {}).get("efeitos", []):
 			apply(s, effect, style)
-	s["recarga"] = float(form.get("recarga", 1.5)) + rule("recarga_por_componente", 0.75) * comps.size()
-	s["technique"] = str(recipe.get("name", form_name(str(recipe.get("form", "")))))
+	s["recarga"] = float(form.get("recarga", 1.5)) + rule("recarga_por_objeto", 0.75) * objs.size()
+	s["technique"] = form_name(form_id)
 	s["cost"] = maxf(1.0, float(s.get("cost", 10.0)))
 	s["windup"] = maxf(0.05, float(s.get("windup", 0.22)))
 	return s
@@ -160,7 +199,7 @@ static func apply(s: Dictionary, effect: Dictionary, style: String) -> void:
 		current = maxf(current, float(effect["minimo"]))
 	target[key] = int(roundi(current)) if key in ["targets", "pierce", "hits"] else current
 
-## Short lines describing the technique for the editor and tooltips.
+## Short lines describing the result for the editor and tooltips.
 static func summary(s: Dictionary) -> Array:
 	var rows: Array = []
 	if not s.has("damage"):
