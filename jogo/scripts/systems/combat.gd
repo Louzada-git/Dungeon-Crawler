@@ -70,7 +70,10 @@ static func apply_hit(game, enemy, weapon: Dictionary, direction: Vector3, damag
 		hit["knockback"] = float(weapon["knockback"])
 	var before: float = enemy.health
 	var path: Array = weapon.get("proficiencias", [])
+	# Strong blows (sneak attacks, crushed armour, heavy stuns) get a bigger burst.
+	var strong: bool = note != "" or float(weapon.get("stagger", 0.0)) >= 1.1 or float(weapon.get("knockback", 3.0)) >= 6.0
 	enemy.receive_damage(amount, direction, hit)
+	Vfx.enemy_hit(game, enemy, strong, weapon.has("crush"))
 	# Practice: the monster teaches in proportion to the damage that landed.
 	var dealt: float = clampf(minf(amount, before), 0.0, before)
 	game.sheet.award_damage(enemy, dealt, path)
@@ -97,6 +100,7 @@ static func _smash(game, weapon: Dictionary) -> void:
 	wave.tween_property(ring, "scale", Vector3.ONE, 0.12)
 	wave.parallel().tween_property(ring.material_override, "albedo_color:a", 0.0, 0.4)
 	wave.tween_callback(ring.queue_free)
+	Vfx.dust_ring(game, center, radius)
 	var hits: Array = []
 	for enemy in game.enemies:
 		if not enemy.alive:
