@@ -38,6 +38,8 @@ As etapas têm tamanhos diferentes: decidir a regra de morte cabe numa conversa,
 
 - **14/10/2026 · Perícias no estilo Oblivion, sem magia.** Árvore em grupos (Combate, Furtividade, Sobrevivência) com Lâminas e Pontaria como raízes; Desarmado, Bloqueio com guarda no botão direito, armaduras leves e pesadas com Armadura leve/pesada, Atletismo, Furtividade (C agacha, ataque furtivo), Acrobacia (antiga Esquiva) e Arrombamento com baús trancados e gazuas. Antecipa parte das etapas 42 (armaduras básicas), 53 (árvore), 64 (escudo/guarda) e 65 (armaduras). Ficaram para depois: magia, Alquimia, Reparo, Comércio e Oratória.
 
+- **15/10/2026 · Efeitos visuais.** Sangue, clarão, faíscas, golpe forte, poeira, fumaça e chamas animadas das tochas e da fogueira nova do abrigo, com o Brackeys VFX Bundle (CC0) reduzido para o tamanho PSX (`scripts/systems/vfx.gd`, `data/efeitos.json`). O dono do projeto liberou o uso de todos os pacotes enviados; o PSX Modular Medieval (kit de vila) foi inventariado e ainda não entrou. Antecipa parte das etapas 39 (sinais visuais de impacto, defesa e esquiva) e 83 (efeitos).
+
 - **14/10/2026 · Atributos e proficiências.** Etapas 17, 18 e 19 concluídas; habilidades por nível de ramo antecipam parte da 26, e a janela de proficiências, parte da 28. Técnicas montáveis continuam nas etapas 21 a 25.
 
 ## Marcos
