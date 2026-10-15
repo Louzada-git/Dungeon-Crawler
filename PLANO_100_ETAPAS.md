@@ -92,12 +92,12 @@ As etapas têm tamanhos diferentes: decidir a regra de morte cabe numa conversa,
 18. **Modelar as proficiências numa planilha — concluída em 14/10/2026** como simulação com o código real (`tests/progression_sim.gd`). Simular, antes de programar, a divisão do progresso entre ramos, a soma de contribuições sem dupla contagem, a igualdade de ritmo e a regra contra grind.
 19. **Implementar as proficiências da fatia — concluída em 14/10/2026** para todas as armas, Esquiva e Tratamento. Os dois ramos da etapa 13, com experiência por uso relevante e persistência.
 20. **Criar etiquetas de itens.** Tipo, material, peso, alcance e afinidades ligam itens a proficiências e técnicas. O treino por tipo de arma depende delas.
-21. **Definir a ficha de técnica.** Alcance, origem do dano, tempo, custo, alvo, animação, requisitos e espaços como dados verificáveis.
-22. **Converter os golpes atuais em técnicas.** Corte e estocada viram fichas, sem perder o comportamento já ajustado e testado.
-23. **Implementar espaços e componentes mínimos.** Três ou quatro componentes, incluindo imbuimento de fogo; a ordem altera o resultado de forma previsível.
+21. **Definir a ficha de técnica — concluída em 15/10/2026** (`data/tecnicas.json`). Alcance, origem do dano, tempo, custo, alvo, animação, requisitos e espaços como dados verificáveis.
+22. **Converter os golpes atuais em técnicas — concluída em 15/10/2026**: corte, estocada, pancada, disparo e soco são as formas básicas. Corte e estocada viram fichas, sem perder o comportamento já ajustado e testado.
+23. **Implementar espaços e componentes mínimos — concluída em 15/10/2026, sem o fogo** (nove componentes físicos; a ordem altera o resultado; o imbuimento de fogo espera a magia). Três ou quatro componentes, incluindo imbuimento de fogo; a ordem altera o resultado de forma previsível.
 24. **Implementar a magia mínima.** Uma magia pura e uma de fogo, cada uma treinando os ramos corretos.
-25. **Montar técnicas e equipar na barra.** Editor mínimo com validação, custo e motivo de incompatibilidade.
-26. **Liberar algo por domínio.** Pelo menos um componente e uma técnica destravados por proficiência.
+25. **Montar técnicas e equipar na barra — concluída em 15/10/2026** (editor T, barra 4 a 7, só fora de combate). Editor mínimo com validação, custo e motivo de incompatibilidade.
+26. **Liberar algo por domínio — concluída em 15/10/2026** (formas e componentes por nível de ramo; espaços pelo domínio da arma). Pelo menos um componente e uma técnica destravados por proficiência.
 27. **Fechar o ciclo de incursão.** Retirada ou morte, retorno à base e nova incursão no mesmo labirinto. Na morte, a run recomeça na mesma semente e o conhecimento acumulado aparece no mapa e nas descrições.
 28. **Criar uma interface mínima para proficiências e técnicas.** Pode ser feia, mas precisa ser compreensível.
 29. **Testar a fatia com pessoas.** O usuário e de três a cinco pessoas de fora jogam. Medir se entendem as combinações, se escolhem caminhos diferentes e se querem voltar.
