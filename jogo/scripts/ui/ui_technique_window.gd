@@ -14,6 +14,7 @@ var traits_label: Label
 var unlock_label: Label
 var slot_box: HBoxContainer
 var object_box: GridContainer
+var object_scroll: ScrollContainer
 var preview: GridContainer
 var problem_label: Label
 var combat_label: Label
@@ -65,12 +66,17 @@ func _init(game_ref, ui_ref) -> void:
 	slot_box = HBoxContainer.new()
 	slot_box.add_theme_constant_override("separation", 6)
 	right.add_child(slot_box)
-	right.add_child(UiStyle.caps("Objetos  ·  livres / cópias  ·  ganhe mais subindo a proficiência", 10, UiStyle.DIM))
+	right.add_child(UiStyle.caps("Objetos  ·  livres / cópias  ·  um por proficiência; ganhe mais subindo o nível", 10, UiStyle.DIM))
+	# One objeto per proficiency branch: the ones you have come first, the rest scroll.
+	object_scroll = ScrollContainer.new()
+	object_scroll.custom_minimum_size.y = 132
+	object_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	right.add_child(object_scroll)
 	object_box = GridContainer.new()
 	object_box.columns = 3
 	object_box.add_theme_constant_override("h_separation", 4)
 	object_box.add_theme_constant_override("v_separation", 4)
-	right.add_child(object_box)
+	object_scroll.add_child(object_box)
 	var rule2 := ColorRect.new()
 	rule2.color = UiStyle.BORDER_SOFT
 	rule2.custom_minimum_size.y = 1
@@ -111,6 +117,19 @@ func open() -> void:
 func select(form_id: String) -> void:
 	selected = form_id
 	refresh(true)
+
+## Objetos you have and that fit the weapon first, then the others you have,
+## then the ones still locked (in data order inside each group).
+func object_order(weapon: String) -> Array:
+	var groups: Array = [[], [], []]
+	for id in Techniques.OBJECTS:
+		if Techniques.copies(game.sheet, id) <= 0:
+			groups[2].append(id)
+		elif Techniques.object_fits(id, weapon):
+			groups[0].append(id)
+		else:
+			groups[1].append(id)
+	return groups[0] + groups[1] + groups[2]
 
 func editable() -> bool:
 	return not locked() and Techniques.form_unlocked(game.sheet, selected)
@@ -231,25 +250,30 @@ func refresh(force: bool = false) -> void:
 			cell.add_child(empty)
 	# Objetos
 	_clear(object_box)
-	for id in Techniques.OBJECTS:
+	for id in object_order(weapon):
 		var have: int = Techniques.copies(game.sheet, id)
 		var free: int = have - book.in_use(id)
 		var fits: bool = Techniques.object_fits(id, weapon)
 		var label: String
 		if have == 0:
-			label = "%s  ·  %s" % [Techniques.object_name(id), Techniques.requirement_text(Techniques.OBJECTS[id].get("requer", {}))]
+			var branch: String = Techniques.object_branch(id)
+			label = "%s  ·  %s %d" % [Techniques.object_name(id), ProficiencyTree.display_name(branch), int(Techniques.OBJECTS[id]["requer"][branch])]
 		else:
 			label = "%s  %d/%d" % [Techniques.object_name(id), maxi(free, 0), have]
 		var b := UiStyle.button(label, add_object.bind(id))
 		var next: int = Techniques.next_copy_level(game.sheet, id)
-		var tip: String = str(Techniques.OBJECTS[id].get("texto", ""))
-		if next > 0:
+		var tip: String = "%s (%s)\n%s" % [Techniques.object_name(id), ProficiencyTree.display_name(Techniques.object_branch(id)), str(Techniques.OBJECTS[id].get("texto", ""))]
+		if have == 0:
+			tip += "\nDestrava com %s." % Techniques.requirement_text(Techniques.OBJECTS[id].get("requer", {}))
+		elif next > 0:
 			tip += "\nPróxima cópia: %s nível %d." % [ProficiencyTree.display_name(Techniques.object_branch(id)), next]
 		if not fits:
 			tip += "\nNão faz sentido com a arma em mãos."
 		b.tooltip_text = tip
 		b.disabled = off or free <= 0 or not fits
 		b.custom_minimum_size = Vector2(178, 28)
+		b.clip_text = true
+		b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		object_box.add_child(b)
 	# Preview
 	_clear(preview)
