@@ -10,6 +10,11 @@ Armas
 - Low Poly Weapon Pack, por Kickin' It Studios (itch.io) — uso livre em jogos.
   Katana, alabarda, arco curto, besta, flecha e virote.
 
+Efeitos visuais
+- Brackeys VFX Bundle, por Brackeys — CC0.
+  Sangue, clarão de acerto e golpe forte: VFX Free Pack, por CodeManu (https://codemanu.itch.io/vfx-free-pack).
+  Chamas e fumaça: flipbooks gratuitos de Thomas Iché (Unity).
+
 Rig e parte das animações do aventureiro: Mixamo (Adobe).
 Fonte: Inter, por The Inter Project Authors — SIL Open Font License 1.1 (ver LICENCA-FONTE-INTER.txt).
 Engine: Godot Engine — licença MIT (ver LICENCA-GODOT.txt e AVISOS-TERCEIROS-GODOT.txt).
