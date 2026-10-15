@@ -1,5 +1,18 @@
 # Dungepm — As Cisternas
 
+## Novo: técnicas (15/10/2026)
+
+Agora você monta as próprias técnicas e usa pela barra, nas teclas **4 a 7**. **T** abre o editor.
+
+- **Forma:** o golpe base. Corte, Estocada, Pancada, Disparo e Soco são o golpe normal da arma em mãos. Praticar destrava formas novas: **Corte giratório** (Lâminas 4) corta em volta; **Investida** (Hastes 4) avança 2,5 m e golpeia; **Golpe esmagador** (Contundentes 4, maça, martelo ou machado) é lento, atordoa e empurra; **Tiro mirado** (Pontaria 4) segura a mira por mais dano e atravessa; **Sequência de socos** (Desarmado 4) dá três socos.
+- **Componentes** vão nos espaços e destravam com as proficiências: Lâmina afiada (sangramento), Força (+30% de dano), Alcance, Rapidez (preparo mais curto), Impacto (atordoa e empurra), Avanço, Emboscada (×1,5 em quem não te viu), Golpe duplo e Perfurante.
+- **A ordem importa:** cada componente age sobre o que está à esquerda dele. Lâmina afiada e depois Força dá um sangramento mais forte; Força e depois Lâmina afiada, não. O ◀ no editor troca a ordem e a prévia mostra o resultado na hora.
+- **Espaços:** 1 com a arma nova, 2 com domínio 6 e 3 com domínio 11 naquela arma.
+- Cada técnica tem **recarga**, mostrada na barra. Componentes custam fôlego e recarga.
+- Montar e trocar só **fora de combate**: com um monstro te caçando, o editor trava. Usar técnicas da barra continua livre.
+- As técnicas que você criou contam como conhecimento: se morrer, o próximo aventureiro lembra delas (a barra começa vazia, e o que ele ainda não destravou aparece trancado).
+- Magia ainda não entrou, como combinado.
+
 ## Novo: personagem PSX (14/10/2026)
 
 O aventureiro agora é um personagem do pacote Characters PSX (Character_16, CC0), com a roupa repintada: túnica verde de lã, mangas de linho, braçadeiras e cinto de couro com fivela, alça de bolsa, calça marrom e botas. Rosto, mãos e cabelo são do original. Ele faz os mesmos movimentos de antes (andar, correr, golpes, estocada, esquiva, guarda, dano e morte) e segura as armas e veste as armaduras no mesmo lugar.
@@ -101,6 +114,8 @@ Explore as cinco salas, gerencie comida e bandagens, encontre o selo e retorne a
 | Comer / usar bandagem | 2 / 3 |
 | Abrir equipamento | 1 |
 | Proficiências | P |
+| Técnicas: montar | T |
+| Técnicas: usar | 4, 5, 6, 7 |
 | Aproximar / afastar câmera | Roda do mouse |
 | Pausar | Esc |
 | Salvar no abrigo | F5 |
