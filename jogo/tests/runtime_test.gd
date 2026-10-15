@@ -312,6 +312,7 @@ func run(target, capture: bool) -> void:
  await test_vfx()
  await test_balance()
  await test_quick_bar()
+ await test_third_person()
  inv.add("seal")
  p.position = game.camp_position
  game.interact()
@@ -1928,6 +1929,90 @@ func test_quick_bar() -> void:
  bar.defaults("sword")
  inv.restore(saved_inventory)
  p.refresh_weapon()
+ ready_player(p)
+ p.set_physics_process(was_processing)
+ game.ui.close_all()
+
+## Third-person camera option: camera behind the character, mouse look, walls whole.
+func test_third_person() -> void:
+ get_tree().paused = false
+ var p = game.player
+ var rig: GameCamera = game.camera_rig
+ var was_processing: bool = p.is_physics_processing()
+ p.set_physics_process(false)
+ game.ui.close_all()
+ check(rig.mode == GameCamera.ISO and game.camera.projection == Camera3D.PROJECTION_ORTHOGONAL and not game.third_person(),"Câmera começa isométrica")
+ var low = game.world_root.get_node_or_null("Lote_parede_frente_baixa")
+ var tall = game.world_root.get_node_or_null("Lote_parede_frente_alta")
+ check(low != null and tall != null and low.visible and not tall.visible,"Isométrica: paredes da frente cortadas baixas")
+ # Pause button switches to third person and remembers.
+ game.ui.toggle_pause()
+ game.ui.camera_button.pressed.emit()
+ game.ui.toggle_pause()
+ await wait_frames(2)
+ check(game.third_person() and game.camera == rig.third_camera and game.camera.current and game.camera.projection == Camera3D.PROJECTION_PERSPECTIVE,"Botão da pausa liga a terceira pessoa (câmera em perspectiva)")
+ check(not low.visible and tall.visible and game.get_node("Ambiente").environment.fog_enabled,"Terceira pessoa: paredes inteiras e névoa escura")
+ check(game.load_setting("video","camera","") == GameCamera.THIRD and game.ui.camera_button.text == "Câmera: terceira pessoa","Escolha da câmera fica salva")
+ check(game.ui.crosshair.visible and not game.ui.cursor_needed(),"Mira no meio da tela e cursor preso ao mouse")
+ game.ui.toggle_inventory()
+ check(game.ui.cursor_needed() and not game.ui.crosshair.visible,"Mochila aberta solta o cursor")
+ game.ui.toggle_inventory()
+ game.ui.toggle_techniques()
+ game.ui.update_hud()
+ check(game.ui.cursor_needed(),"Janela de habilidades também solta o cursor")
+ game.ui.toggle_techniques()
+ # Camera relative movement, aim and blows.
+ rig.look_along(Vector3.RIGHT)
+ check(rig.forward().distance_to(Vector3.RIGHT) < 0.01 and rig.move_direction(Vector2(0,-1)).distance_to(Vector3.RIGHT) < 0.01 and rig.move_direction(Vector2(1,0)).distance_to(Vector3(0,0,1)) < 0.01,"W anda para onde a câmera olha; D para a direita dela")
+ p.facing = Vector3.LEFT
+ p.aim_mouse()
+ check(p.facing.distance_to(Vector3.RIGHT) < 0.01,"Mirar e golpear vão para onde a câmera olha")
+ ready_player(p)
+ p.stamina = p.max_stamina
+ p.test_direction = Vector2(1,0)
+ p.dodge()
+ p.test_direction = Vector2.ZERO
+ check(p.dodge_direction.distance_to(Vector3(0,0,1)) < 0.01,"Esquiva também segue a câmera")
+ p.dodge_timer = 0.0
+ var yaw0: float = rig.yaw
+ rig.look(Vector2(100,0))
+ check(rig.yaw < yaw0,"Mouse para a direita gira a câmera")
+ rig.look(Vector2(0,-100000))
+ var top: float = rig.pitch
+ rig.look(Vector2(0,100000))
+ check(is_equal_approx(top,GameCamera.MAX_PITCH) and is_equal_approx(rig.pitch,GameCamera.MIN_PITCH),"Olhar para cima e para baixo tem limite")
+ rig.pitch = -0.26
+ rig.zoom_by(100.0)
+ var far: float = rig.arm_length
+ rig.zoom_by(-100.0)
+ check(is_equal_approx(far,GameCamera.MAX_ARM) and is_equal_approx(rig.arm_length,GameCamera.MIN_ARM),"Roda do mouse aproxima e afasta, com limite")
+ rig.arm_length = 3.3
+ rig.look(Vector2.ZERO)
+ # The arm stops at walls: put a wall right behind the character.
+ var spot: Vector2i = Vector2i(-1,-1)
+ for cell in game.layout.floors:
+  if not game.layout.is_floor(cell+Vector2i.RIGHT) and game.layout.is_floor(cell+Vector2i.LEFT) and game.layout.is_floor(cell+Vector2i.LEFT*2):
+   spot = cell
+   break
+ check(spot != Vector2i(-1,-1),"Achou um canto com parede para testar a câmera")
+ p.position = game.layout.to_world(spot)+Vector3(0.3,0,0)
+ rig.snap()
+ rig.look_along(Vector3.LEFT)
+ rig.pitch = 0.0
+ rig.look(Vector2.ZERO)
+ await wait_frames(6)
+ var pulled: float = rig.arm.get_hit_length()
+ check(pulled < rig.arm_length-0.4,"Câmera não atravessa a parede atrás do personagem (braço encolhe para %s m)" % UiStyle.fmt(pulled))
+ rig.pitch = -0.26
+ rig.look(Vector2.ZERO)
+ # Back to isometric.
+ game.set_camera_mode(GameCamera.ISO)
+ await wait_frames(2)
+ check(not game.third_person() and game.camera == rig.iso_camera and game.camera.current and low.visible and not tall.visible and not game.get_node("Ambiente").environment.fog_enabled and not game.ui.crosshair.visible,"Volta para a isométrica: câmera, paredes, névoa e mira como antes")
+ check(rig.move_direction(Vector2(1,0)).distance_to(Vector3(1,0,-1).normalized()) < 0.01,"Isométrica: teclas como antes")
+ DirAccess.remove_absolute(game.settings_path)
+ p.position = game.layout.to_world(Vector2i(5,12))
+ rig.snap()
  ready_player(p)
  p.set_physics_process(was_processing)
  game.ui.close_all()
