@@ -1,0 +1,45 @@
+{
+ "_sobre": "Gerado por arte/fontes/vfx/preparar_vfx.py; não editar à mão.",
+ "folhas": {
+  "sangue": {
+   "colunas": 5,
+   "linhas": 5,
+   "quadros": 24,
+   "largura": 69,
+   "altura": 60,
+   "origem": "blood_impact_6x5.png"
+  },
+  "impacto": {
+   "colunas": 4,
+   "linhas": 4,
+   "quadros": 14,
+   "largura": 48,
+   "altura": 62,
+   "origem": "impact_white_6x4.png"
+  },
+  "golpe_forte": {
+   "colunas": 4,
+   "linhas": 3,
+   "quadros": 11,
+   "largura": 64,
+   "altura": 64,
+   "origem": "big_hit_6x5.png"
+  },
+  "chama": {
+   "colunas": 4,
+   "linhas": 4,
+   "quadros": 16,
+   "largura": 32,
+   "altura": 64,
+   "origem": "flame_01_16x4.png"
+  },
+  "fumaca": {
+   "colunas": 4,
+   "linhas": 4,
+   "quadros": 16,
+   "largura": 48,
+   "altura": 48,
+   "origem": "cloud_01_8x8.png"
+  }
+ }
+}
