@@ -31,6 +31,9 @@ var health_label: Label3D
 var windup: float = 0.0
 var cooldown: float = 0.0
 var stagger: float = 0.0
+## Seconds it stays steady after a stun: blows still hurt but no longer stop it
+## (the stun plus "firmeza" from inimigos.json). Stops endless stun-locks.
+var firm: float = 0.0
 var committed: Vector3 = Vector3.FORWARD
 var path: Array[Vector2i] = []
 var repath: float = 0
@@ -124,6 +127,7 @@ func _physics_process(delta: float) -> void:
 	health_label.modulate = Color("ff8f7a") if bleed_time > 0 else Color("ecb9a7")
 	cooldown = maxf(0, cooldown - delta)
 	stagger = maxf(0, stagger - delta)
+	firm = maxf(0, firm - delta)
 	memory = maxf(0, memory - delta)
 	attack_recovery = maxf(0, attack_recovery - delta)
 	if stagger > 0:
@@ -225,15 +229,19 @@ func receive_damage(amount: float, direction: Vector3 = Vector3.ZERO, hit: Dicti
 	if not alive:
 		return
 	health -= amount
-	# Bosses flinch briefly instead of being stun-locked.
+	# Bosses flinch briefly instead of being stun-locked; the others are stunned
+	# and lose their attack, then stay steady for a while.
+	var steady: bool = not boss and firm > 0.0
 	if boss:
 		stagger = 0.12 if hit.has("stagger") else 0.06
-	else:
+	elif not steady:
 		stagger = float(hit.get("stagger", 0.25))
-	impulse = direction.normalized() * float(stats.get("knockback", 3.0)) * float(hit.get("knockback", 3.0)) / 3.0
-	if animator.has_animation("hit") and not (boss and windup > 0):
-		animator.play("hit", 0.04, animator.get_animation("hit").length / maxf(0.25, minf(stagger, 0.6)))
-	if not boss:
+		firm = stagger + float(stats.get("firmeza", 1.0))
+	if not steady:
+		impulse = direction.normalized() * float(stats.get("knockback", 3.0)) * float(hit.get("knockback", 3.0)) / 3.0
+		if animator.has_animation("hit") and not (boss and windup > 0):
+			animator.play("hit", 0.04, animator.get_animation("hit").length / maxf(0.25, minf(stagger, 0.6)))
+	if not boss and not steady:
 		windup = 0
 		telegraph.visible = false
 	aggro = true
