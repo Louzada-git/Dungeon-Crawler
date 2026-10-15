@@ -13,7 +13,7 @@ from mathutils import Vector
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "jogo/assets/originais/aventureiro.glb"
 RAW = ROOT / "arte/fontes/mixamo"
-OUTPUT = ROOT / "jogo/assets/originais/aventureiro_mixamo.glb"
+OUTPUT = ROOT / "arte/fontes/personagem_psx/origem_animacoes/aventureiro_mixamo.glb"
 
 MOTIONS = {
     "mixamo_stab": "sword and shield attack (4).fbx",
