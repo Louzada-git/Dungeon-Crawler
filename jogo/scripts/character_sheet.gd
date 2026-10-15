@@ -56,11 +56,15 @@ func speed_mult() -> float:
 func stamina_regen_mult() -> float:
 	return 1.0 + 0.06 * (attr("destreza") - 5)
 
+## Stamina rule from proficiencias.json "folego" (costs halved and regeneration ×1,3 on 15/10/2026).
+func stamina_rule(key: String, fallback: float) -> float:
+	return float(ProficiencyTree.section("folego").get(key, fallback))
+
 func dodge_cost() -> float:
-	var cost: float = 25.0 - (attr("agilidade") - 5)
+	var cost: float = stamina_rule("esquiva", 12.5) - stamina_rule("esquiva_por_agilidade", 0.5) * (attr("agilidade") - 5)
 	cost -= _per_level("esquiva_por_nivel", 0.3) * (level("acrobacia") - 1)
 	cost += _perk_sum("acrobacia", "dodge_cost")
-	return maxf(10.0, cost)
+	return maxf(stamina_rule("esquiva_minima", 5.0), cost)
 
 func heal_mult() -> float:
 	return 1.0 + _per_level("cura_por_nivel", 0.02) * (level("tratamento") - 1) + _perk_sum("tratamento", "heal_mult")
@@ -76,6 +80,10 @@ func block_reduction(item_id: String) -> float:
 ## Stamina per point of damage held by the guard.
 func block_cost_mult() -> float:
 	return maxf(0.2, 1.0 + _perk_sum("bloqueio", "block_cost"))
+
+## Stamina the guard spends to hold `held` damage.
+func block_cost(held: float) -> float:
+	return maxf(stamina_rule("guarda_minima", 2.0), held * stamina_rule("guarda_por_dano", 0.5) * block_cost_mult())
 
 static func armor_branch(armor_id: String) -> String:
 	var path: Array = Items.DATA.get(armor_id, {}).get("proficiencias", [])
