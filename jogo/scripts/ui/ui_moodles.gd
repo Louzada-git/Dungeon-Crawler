@@ -46,9 +46,9 @@ func compute() -> Array:
 		out.append({"id": "ammo", "icon": "arrow", "level": 2, "title": "Sem munição", "text": "%s sem %ss. Procure nos baús, no chão\nonde os disparos erraram e nos corpos dos monstros." % [str(held.get("name", "")), str(Items.info(ammo).get("name", ammo)).to_lower()]})
 	var cost: float = float(held.get("cost", 10.0))
 	if p.stamina < cost:
-		out.append({"id": "stamina", "icon": "lungs", "level": 3, "title": "Exausto", "text": "Fôlego %d: abaixo dos %d que a arma exige por golpe.\nRecue e recupere o fôlego." % [floori(p.stamina), int(cost)]})
+		out.append({"id": "stamina", "icon": "lungs", "level": 3, "title": "Exausto", "text": "Fôlego %d: abaixo dos %s que a arma exige por golpe.\nRecue e recupere o fôlego." % [floori(p.stamina), UiStyle.num(cost)]})
 	elif p.stamina < p.dodge_cost():
-		out.append({"id": "stamina", "icon": "lungs", "level": 2, "title": "Ofegante", "text": "Fôlego %d: abaixo dos %d necessários para esquivar." % [floori(p.stamina), ceili(p.dodge_cost())]})
+		out.append({"id": "stamina", "icon": "lungs", "level": 2, "title": "Ofegante", "text": "Fôlego %d: abaixo dos %s necessários para esquivar." % [floori(p.stamina), UiStyle.num(p.dodge_cost())]})
 	var w: float = game.inventory.weight()
 	if w > game.inventory.comfort:
 		var factor: float = lerpf(1.0, 0.72, (w - game.inventory.comfort) / (game.inventory.capacity - game.inventory.comfort))
