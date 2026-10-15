@@ -534,11 +534,12 @@
   }
  ],
  "punhos": {
-  "_sobre": "Golpe de mãos vazias (sem arma equipada). O soco é contundente: treina Contundentes › Desarmado.",
+  "_sobre": "Golpe de mãos vazias (sem arma equipada). O soco é contundente: treina Contundentes › Desarmado. 'weight' serve só para o delay entre golpes (0,1 s por kg).",
   "name": "Punhos",
   "tag": "ARMA",
   "damage": 8.0,
   "range": 1.4,
+  "weight": 1.0,
   "cost": 4.0,
   "cooldown": 0.34,
   "windup": 0.14,
