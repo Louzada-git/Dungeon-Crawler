@@ -192,7 +192,7 @@ func refresh() -> void:
 		var weapon: Dictionary = Items.info(game.inventory.equipped)
 		info_values["weapon"].text = weapon.get("name", "Mãos vazias")
 		info_values["damage"].text = ("%d  ·  %s m" % [int(weapon["damage"]), UiStyle.fmt(float(weapon.get("range", 1.5)))]) if weapon.has("damage") else "—"
-		info_values["cost"].text = str(int(weapon.get("cost", 10)))
+		info_values["cost"].text = UiStyle.num(float(weapon.get("cost", 10)))
 		info_values["area"].text = game.layout.room_name(p.position)
 		info_values["objective"].text = game.objective_text()
 		info_values["depth"].text = "%dº  (agora no %dº)" % [game.deepest, game.floor] if game.generated else "—"
