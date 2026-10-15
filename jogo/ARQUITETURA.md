@@ -7,7 +7,7 @@ Mapa rápido de onde cada coisa vive. Atualizado na etapa 8 (13/10/2026).
 | Arquivo | Conteúdo |
 | --- | --- |
 | `itens.json` | Catálogo de itens: categoria, peso, modelo, números de combate e efeitos de consumo. `name`/`description` são chaves de texto. |
-| `inimigos.json` | Tipos de monstro: vida, dano, preparo do golpe, velocidade, recuo, escala, espólio. |
+| `inimigos.json` | Tipos de monstro: vida, dano, preparo do golpe, velocidade, recuo, escala, espólio e `firmeza` (tempo sem poder ser atordoado de novo depois de um atordoamento). |
 | `mundos/cisternas.json` | Descrição do mundo atual: salas, corredores, bloqueios, mobília, recipientes, monstros, início e abrigo. Cada recipiente e monstro tem `id` fixo. |
 | `textos.csv` | Textos de conteúdo por chave (coluna `pt_BR`). Outro idioma = nova coluna. |
 | `saque.json` | Tabelas de saque por tipo de sala: `[item, peso, mínimo, máximo, andar mínimo]`. |
@@ -55,7 +55,7 @@ A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrint
 
 - **Estilos** (`style` em `itens.json`): `slash` (arco com `angle` e `targets`), `thrust` (linha reta com `width`; `targets` > 1 atravessa), `smash` (círculo à frente com `area_offset` e `area_radius`) e `shoot` (projétil com `ammo`, `projectile_speed`, `pierce`).
 - **Efeitos:** `sneak_mult` (monstro desprevenido), `bleed` (`dps`, `time`), `crush` (monstros `armored`), `stagger` (segundos), `knockback` (3 é o normal).
-- **Tempo do golpe:** `windup` é o preparo até o golpe acertar; `cooldown` é o golpe inteiro. Desde 15/10/2026 só fica `DungeonPlayer.RECOVERY_SCALE` (1/3) do que vem depois do acerto: a espera até o próximo golpe, a lentidão, a trava de virar e a de esquivar. O preparo não muda, e a animação continua no mesmo ritmo (o impacto cai no mesmo ponto); andar ou parar corta o fim dela. Na besta, o recarregamento cai de 1,35 s para 0,45 s.
+- **Tempo do golpe:** `windup` é o preparo até o golpe acertar; `cooldown` é o golpe inteiro. O delay depois do acerto (`cooldown` − `windup`) depende do peso da arma (`classe`: leve, media, pesada); armas pesadas têm muito dano por golpe e delay alto. Lentidão e trava de virar duram 90% do `cooldown`; a esquiva volta na metade do delay (`DungeonPlayer.DODGE_AFTER`) e corta a lentidão. A animação dura `windup` / `impacto` para acertar no fim do preparo. Números e tabela em `BALANCO.md`.
 - **Modelo:** `Visuals.item_model(id)` usa `assets/armas/<id>.glb` se existir; senão os `blocks` provisórios; senão o modelo compartilhado de `model`. Na mão: `rotacao_mao`, `escala_mao`, `alinhar_ao_golpe` e `mao` (`esquerda` para o arco).
 - **Animação:** `animacao` é o nome desejado; enquanto o personagem não a tiver, `DungeonPlayer.attack_animation` usa a mais próxima.
 - Especificação para modelos e animações: `../arte/ARMAS_ESPEC.md`.
@@ -63,6 +63,7 @@ A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrint
 ## Atributos e proficiências
 
 - **Atributos** (Força, Vigor, Agilidade, Destreza) são escolhidos no início de cada run (painel "Novo aventureiro"): 25 pontos (`criacao.pontos`), começando em 5 cada, ou seja, 5 livres; de 2 a 9 por atributo. Mudam carga, vida, fôlego, esquiva e passo, e definem o potencial de cada ramo: velocidade de aprendizado (0,6 + 0,08 × atributo) e nível máximo (10 + 4 × atributo).
+- **Fôlego** (`folego` em `proficiencias.json`): recuperação 20,8/s (7,8 com fome), corrida 8/s, esquiva 12,5 (−0,5 por Agilidade acima de 5, −0,3 por nível de Acrobacia, mínimo 5), guarda metade do dano segurado (mínimo 2). Gastos pela metade e recuperação ×1,3 em 15/10/2026, junto com os custos das armas, dos objetos e dos talentos.
 - **Arma inicial:** o mesmo painel deixa escolher qualquer arma de `itens.json` (as que têm `style`) ou os punhos; `main.choose_weapon` troca a espada pela escolhida. Arco e besta vêm com `criacao.municao_inicial` (20) flechas ou virotes.
 - **Árvore** (`proficiencias.json`, versão 3), inspirada nas perícias de Oblivion e agrupada em três `grupos`:
   - *Combate:* Lâminas › (Espadas › Espada reta, Katana, Montante; Adagas), Contundentes › (Maça, Martelo, Machados, Desarmado), Hastes › (Lança, Alabarda), Bloqueio, Armadura pesada, Atletismo.
@@ -84,7 +85,7 @@ A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrint
 | Tratamento | curar um ferimento real |
 
 - **Divisão:** a experiência de um golpe se divide pelo caminho da arma sem contar duas vezes (`divisao`: 1 ramo 100%; 2 ramos 50/50; 3 ramos 40/35/25, da raiz para a ponta). **Domínio** de uma arma = nível que a soma da experiência do caminho alcança, por isso armas de um, dois ou três ramos evoluem no mesmo ritmo, e praticar uma espada ajuda as outras pela raiz. Cada nível de domínio dá +4% de dano e −2% de fôlego (até −30%).
-- **Efeitos por nível** (`dominio`, dobrados em 15/10/2026): guarda +2,4%/nível; proteção da armadura +4%/nível e penalidades −5%/nível; corrida −2,4% de fôlego/nível; distância de detecção agachado −3%/nível; chance de arrombar +8 pontos/nível; esquiva −0,6 de fôlego/nível; cura +4%/nível. Os limites de cada função da ficha continuam (guarda até 85%, proteção até 70%, penalidade até 40% do original, esquiva no mínimo 10 de fôlego etc.), agora alcançados na metade dos níveis.
+- **Efeitos por nível** (`dominio`, dobrados em 15/10/2026): guarda +2,4%/nível; proteção da armadura +4%/nível e penalidades −5%/nível; corrida −2,4% de fôlego/nível; distância de detecção agachado −3%/nível; chance de arrombar +8 pontos/nível; esquiva −0,3 de fôlego/nível (a esquiva custa a metade desde a revisão do fôlego); cura +4%/nível. Os limites de cada função da ficha continuam (guarda até 85%, proteção até 70%, penalidade até 40% do original, esquiva no mínimo 10 de fôlego etc.), agora alcançados na metade dos níveis.
 - **Habilidades** (`perks`) destravam por nível de ramo. As das armas mudam os números da arma (`CharacterSheet.weapon_stats`); as outras entram nas funções da ficha (`block_reduction`, `armor_protection`, `armor_penalty_mult`, `armor_noise`, `sprint_cost_mult`, `sneak_detection_mult`, `sneak_attack_mult`, `pick_chance`, `pick_break_chance`, `dodge_cost`, `heal_mult`).
 - **Anti-repetição:** acima de 3 + 4 × andar do monstro, a experiência cai pela metade a cada 1,5 nível.
 - **Save antigo:** `migracao` renomeia ramos (Esquiva → Acrobacia); ramos desconhecidos são descartados.
