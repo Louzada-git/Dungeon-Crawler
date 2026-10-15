@@ -145,7 +145,7 @@ func run(target) -> void:
 		if e.kind == "corrompido" and corrupt == null:
 			corrupt = e
 	if corrupt:
-		check(is_equal_approx(corrupt.maximum_health, 65.0 * 1.3), "Monstros do 2º andar têm mais vida")
+		check(is_equal_approx(corrupt.maximum_health, float(EnemyTypes.info("corrompido")["health"]) * 1.3), "Monstros do 2º andar têm mais vida")
 		var xp_before: float = game.sheet.path_xp(CharacterSheet.path_of("sword"))
 		corrupt.position = p.position + Vector3(1.2, 0, 0)
 		corrupt.aggro = true
