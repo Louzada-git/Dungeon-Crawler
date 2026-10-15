@@ -41,6 +41,7 @@ func run(target) -> void:
 	check(game.layout.rooms.size() == 10 and game.layout.world["mode"] == "labirinto", "1º andar tem 10 salas geradas")
 	check(game.is_safe() and game.interaction_text() == "" or game.is_safe(), "Começa no abrigo, área segura")
 	check(LabyrinthGenerator.validate(game.layout.world).is_empty(), "Andar em jogo passa na validação do gerador")
+	check(game.world_root.get_node_or_null("Fogueira") != null and game.get_tree().get_nodes_in_group("chamas").filter(func(f): return game.world_root.is_ancestor_of(f)).size() > 3, "Andar gerado tem tochas com chama e a fogueira do abrigo")
 	for e in game.enemies:
 		e.set_physics_process(false)
 	# Boss
@@ -134,6 +135,7 @@ func run(target) -> void:
 	check(flying == 1 and get_tree().get_nodes_in_group("projeteis").is_empty(), "Flecha em voo some ao trocar de andar")
 	game.inventory.equip("sword")
 	check(game.floor == 2 and game.layout.rooms.size() == 20, "Escada leva ao 2º andar, com 20 salas")
+	check(game.world_root.get_node_or_null("Fogueira") == null and game.world_root.get_node_or_null("LuzesTremulas").lights.size() > 3, "2º andar sem abrigo não tem fogueira; luzes das tochas tremem")
 	check(build_ms < 4000, "Andar 2 monta em menos de 4 s (%d ms)" % build_ms)
 	check(game.layout.is_floor(game.layout.to_cell(p.position)) and game.layout.rooms[0]["rect"].has_point(game.layout.to_cell(p.position)), "Chega na entrada do 2º andar")
 	check(not game.has_shelter() and game.stairs_up_cell() != null, "Andares fundos têm subida e não têm abrigo")
