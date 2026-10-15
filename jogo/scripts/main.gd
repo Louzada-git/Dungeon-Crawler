@@ -122,6 +122,7 @@ func _ready() -> void:
 	add_child(ui)
 	inventory.changed.connect(on_inventory_changed)
 	quick_bar.changed.connect(ui.update_hud)
+	set_camera_mode(str(load_setting("video", "camera", GameCamera.ISO)), false)
 	sheet.level_up.connect(ui.on_level_up)
 	sheet.perk_unlocked.connect(ui.on_perk_unlocked)
 	var loaded: bool = false
@@ -147,6 +148,40 @@ func save_setting(section: String, key: String, value: Variant) -> void:
 	cfg.load(settings_path)
 	cfg.set_value(section, key, value)
 	cfg.save(settings_path)
+
+## "iso" (isometric, the default) or "terceira" (third person behind the
+## character, turned by the mouse). Switches the camera, the front walls (whole
+## in third person), the fog and the cursor, and remembers the choice.
+func set_camera_mode(value: String, remember: bool = true) -> void:
+	var third: bool = value == GameCamera.THIRD
+	if third and not camera_rig.third_person():
+		camera_rig.look_along(player.facing if player else Vector3.FORWARD)
+	camera_rig.set_mode(value)
+	camera = camera_rig.camera
+	WorldBuilder.apply_view(world_root, third)
+	var env_node = get_node_or_null("Ambiente")
+	if env_node and env_node.environment:
+		env_node.environment.fog_enabled = third
+	if remember:
+		save_setting("video", "camera", camera_rig.mode)
+	update_cursor()
+	if ui:
+		ui.on_camera_mode()
+
+func third_person() -> bool:
+	return camera_rig != null and camera_rig.third_person()
+
+## Third person: the mouse turns the camera (cursor captured) unless a window,
+## a menu or Alt needs the cursor.
+func update_cursor() -> void:
+	var captured: bool = third_person() and not ended and not choosing_character and ui != null and not ui.cursor_needed()
+	var wanted: int = Input.MOUSE_MODE_CAPTURED if captured else Input.MOUSE_MODE_VISIBLE
+	if Input.mouse_mode != wanted:
+		Input.mouse_mode = wanted
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventMouseMotion and third_person() and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		camera_rig.look(event.relative)
 
 ## Turns the PlayStation-style filter on or off and remembers the choice.
 func set_psx(on: bool) -> void:
@@ -372,6 +407,7 @@ func _process(delta: float) -> void:
 	for loot in containers:
 		loot["ring"].visible = not loot["items"].is_empty()
 	aim_marker.refresh(self)
+	update_cursor()
 	ui.update_hud()
 
 func _unhandled_input(event: InputEvent) -> void:
