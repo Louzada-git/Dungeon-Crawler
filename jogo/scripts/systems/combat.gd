@@ -3,7 +3,8 @@ class_name Combat
 ## Resolves the player's committed strike. Weapon styles come from the item
 ## data: slash (arc), thrust (straight line, pierces "targets"), smash (area in
 ## front) and shoot (projectile with ammunition). Effects: sneak_mult (unaware
-## monsters), bleed, crush (armored monsters), stagger and knockback.
+## monsters), bleed, crush (armored monsters), stagger, knockback and cura
+## (health back to the adventurer for each blow that lands).
 
 static func resolve_player_attack(game) -> void:
 	var player = game.player
@@ -77,6 +78,9 @@ static func apply_hit(game, enemy, weapon: Dictionary, direction: Vector3, damag
 	# Practice: the monster teaches in proportion to the damage that landed.
 	var dealt: float = clampf(minf(amount, before), 0.0, before)
 	game.sheet.award_damage(enemy, dealt, path)
+	# Bálsamo (Tratamento): each blow that lands heals the adventurer.
+	if weapon.has("cura") and dealt > 0.0 and game.player.health > 0.0:
+		game.player.health = minf(game.player.max_health, game.player.health + float(weapon["cura"]))
 	if sneak:
 		var value: float = float(EnemyTypes.info(enemy.kind).get("xp", 20)) * (1.0 + 0.25 * (enemy.level - 1))
 		game.sheet.award("furtividade", value * 0.3 * dealt / enemy.maximum_health, enemy.level)
