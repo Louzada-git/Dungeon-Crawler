@@ -1,7 +1,7 @@
 extends RefCounted
 class_name TechniqueBook
 ## The adventurer's habilidades: which objetos sit in each one (in slot order),
-## the bar (keys 4-7) pointing at habilidades and their recharge. The
+## the bar (4 positions, keys in main.technique_keys) pointing at habilidades and their recharge. The
 ## arrangement is knowledge: it survives death (main.write_knowledge); the bar
 ## and recharges do not.
 
