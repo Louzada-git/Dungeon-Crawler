@@ -8,6 +8,7 @@ const HELP_ROWS := [
 	[["Shift"], "Correr — gasta fôlego"],
 	[["Espaço"], "Esquivar — 12,5 de fôlego"],
 	[["Botão dir."], "Mirar e erguer a guarda"],
+	[["Mouse"], "Terceira pessoa: virar a câmera  ·  Alt solta o cursor"],
 	[["C"], "Andar furtivo (agachado)"],
 	[["Botão esq."], "Atacar na direção do cursor"],
 	[["E"], "Vasculhar, abrir baú, descansar"],
@@ -67,6 +68,9 @@ var controls_box: Control
 var technique_help_keys: HBoxContainer
 var sound_button: Button
 var psx_button: Button
+var camera_button: Button
+## Third person: small cross in the middle of the screen, where blows and shots go.
+var crosshair: Control
 var pause_confirm: bool = false
 var ending_panel: UiWindow
 var end_title: Label
@@ -158,6 +162,7 @@ func _build_hud() -> void:
 	moodles = UiMoodles.new(game)
 	moodles.position = Vector2(1386, 160)
 	hud.add_child(moodles)
+	_build_crosshair()
 	hotbar = UiHotbar.new(game, self)
 	# Centered, clear of the "em mãos" card on the left (it ends at x 342).
 	hotbar.position = Vector2(maxf(352.0, roundf(720.0 - hotbar.bar_width() * 0.5)), 900 - 72)
@@ -364,6 +369,12 @@ func _build_pause() -> void:
 	psx_button.custom_minimum_size.y = 34
 	psx_button.tooltip_text = "Visual de PlayStation: imagem em pixels grandes, cores com pontilhado\ne vértices que tremem. O HUD continua nítido."
 	left.add_child(psx_button)
+	camera_button = UiStyle.button(camera_label(), func():
+		game.set_camera_mode(GameCamera.ISO if game.third_person() else GameCamera.THIRD)
+	)
+	camera_button.custom_minimum_size.y = 34
+	camera_button.tooltip_text = "Isométrica: vista de cima, mira pelo cursor.\nTerceira pessoa: câmera atrás do personagem, o mouse vira a câmera e\nos golpes vão para onde ela olha. Alt solta o cursor; janelas também."
+	left.add_child(camera_button)
 	var arsenal := UiStyle.button("Arsenal de teste", func(): game.spawn_test_arsenal(); close_all())
 	arsenal.custom_minimum_size.y = 34
 	arsenal.tooltip_text = "Ferramenta de desenvolvimento: um baú com todas as armas\ne munição aparece ao seu lado. Sai antes do lançamento."
@@ -450,6 +461,8 @@ func _process(delta: float) -> void:
 func update_hud() -> void:
 	if game == null or game.player == null or status_panel == null:
 		return
+	if crosshair:
+		crosshair.visible = game.third_person() and not cursor_needed()
 	status_panel.refresh()
 	moodles.refresh()
 	hotbar.refresh()
@@ -614,6 +627,42 @@ func open_inventory(container: Dictionary = {}) -> void:
 	inventory.open(container)
 	get_tree().paused = true
 	update_hud()
+
+func camera_label() -> String:
+	return "Câmera: terceira pessoa" if game.third_person() else "Câmera: isométrica"
+
+## The camera changed: button text, crosshair, controls list.
+func on_camera_mode() -> void:
+	if camera_button:
+		camera_button.text = camera_label()
+	update_hud()
+
+## Third person: the cursor is needed (not captured) while a window, a menu or Alt is up.
+func cursor_needed() -> bool:
+	if any_panel() or game.choosing_character or game.ended:
+		return true
+	for w in [tech_window, prof_window, health_panel]:
+		if w != null and w.visible:
+			return true
+	return Input.is_key_pressed(KEY_ALT)
+
+func _build_crosshair() -> void:
+	crosshair = Control.new()
+	crosshair.name = "Mira"
+	crosshair.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	crosshair.position = Vector2(720, 450)
+	crosshair.draw.connect(func():
+		var c := Color(0.92, 0.88, 0.76, 0.85)
+		var shade := Color(0, 0, 0, 0.6)
+		for d in [Vector2(1, 1), Vector2.ZERO]:
+			var col: Color = shade if d != Vector2.ZERO else c
+			crosshair.draw_rect(Rect2(Vector2(-1, -9) + d, Vector2(2, 6)), col)
+			crosshair.draw_rect(Rect2(Vector2(-1, 3) + d, Vector2(2, 6)), col)
+			crosshair.draw_rect(Rect2(Vector2(-9, -1) + d, Vector2(6, 2)), col)
+			crosshair.draw_rect(Rect2(Vector2(3, -1) + d, Vector2(6, 2)), col)
+	)
+	hud.add_child(crosshair)
+	crosshair.visible = false
 
 func psx_label() -> String:
 	return "Filtro PSX: ligado" if game.psx.enabled else "Filtro PSX: desligado"
