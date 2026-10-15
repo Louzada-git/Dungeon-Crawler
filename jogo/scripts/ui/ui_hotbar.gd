@@ -33,7 +33,7 @@ func _technique_slot(index: int) -> void:
 	b.focus_mode = Control.FOCUS_NONE
 	b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	b.pressed.connect(func():
-		if game.techniques.at_slot(index).is_empty():
+		if game.techniques.at_slot(index) == "":
 			ui.toggle_techniques()
 		else:
 			game.player.use_technique(index)
@@ -67,35 +67,33 @@ func refresh_techniques() -> void:
 	var weapon: String = game.inventory.equipped
 	for i in tech_slots.size():
 		var slot: Dictionary = tech_slots[i]
-		var recipe: Dictionary = book.at_slot(i)
+		var form_id: String = book.at_slot(i)
 		var icon: UiIcon = slot["icon"]
-		if recipe.is_empty():
+		if form_id == "":
 			icon.set_kind("dot", Color(1, 1, 1, 0.12))
 			slot["shade"].size.y = 0
 			slot["time"].text = ""
 			continue
-		var ok: bool = Techniques.problem(game.sheet, recipe, weapon) == ""
-		var kind: String = str(Techniques.FORMS.get(recipe["form"], {}).get("icone", "golpe"))
+		var ok: bool = Techniques.problem(game.sheet, book, form_id, weapon) == ""
+		var kind: String = str(Techniques.FORMS.get(form_id, {}).get("icone", "golpe"))
 		icon.set_kind(kind, UiStyle.ACCENT if ok else UiStyle.BAD.darkened(0.2))
-		var index: int = book.bar[i]
-		var ratio: float = book.recharge_ratio(index)
+		var ratio: float = book.recharge_ratio(form_id)
 		slot["shade"].size.y = 58.0 * ratio
-		slot["time"].text = UiStyle.fmt(book.remaining(index), 1 if book.remaining(index) < 10 else 0) if ratio > 0.0 else ""
+		slot["time"].text = UiStyle.fmt(book.remaining(form_id), 1 if book.remaining(form_id) < 10 else 0) if ratio > 0.0 else ""
 
 func technique_tooltip(index: int) -> Control:
-	var recipe: Dictionary = game.techniques.at_slot(index)
-	if recipe.is_empty():
-		return UiStyle.tip("Espaço de técnica vazio", "T monta técnicas e põe na barra.\nClique para abrir.")
+	var book: TechniqueBook = game.techniques
+	var form_id: String = book.at_slot(index)
+	if form_id == "":
+		return UiStyle.tip("Espaço de habilidade vazio", "T abre as habilidades; lá você põe uma na barra.\nClique para abrir.")
 	var weapon: String = game.inventory.equipped
-	var problem: String = Techniques.problem(game.sheet, recipe, weapon)
-	var parts: PackedStringArray = [Techniques.form_name(recipe["form"])]
-	for c in recipe["components"]:
-		parts.append(Techniques.component_name(c))
-	var tip := UiStyle.tip(str(recipe["name"]), " + ".join(parts), UiStyle.ACCENT)
+	var problem: String = Techniques.problem(game.sheet, book, form_id, weapon)
+	var objs: Array = book.objects(form_id)
+	var tip := UiStyle.tip(Techniques.form_name(form_id), ("Objetos: " + ", ".join(objs.map(func(o): return Techniques.object_name(o)))) if not objs.is_empty() else "Sem objetos", UiStyle.ACCENT)
 	if problem != "":
 		tip.add_child(UiStyle.label(problem, 12, UiStyle.BAD, "medium"))
 	else:
-		for row in Techniques.summary(Techniques.stats(game.sheet, recipe, weapon)):
+		for row in Techniques.summary(Techniques.stats(game.sheet, form_id, objs, weapon)):
 			tip.add_child(UiStyle.label("%s: %s" % [row[0], row[1]], 12, UiStyle.MUTED))
 	tip.add_child(UiStyle.label("Tecla [%d] ou clique: usar na direção do cursor" % (index + 4), 12, UiStyle.ACCENT, "medium"))
 	return tip
