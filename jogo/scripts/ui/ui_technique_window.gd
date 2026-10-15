@@ -285,7 +285,7 @@ func refresh(force: bool = false) -> void:
 			preview.add_child(UiStyle.label(row[1], 13, UiStyle.TEXT, "medium"))
 		if base.has("damage"):
 			preview.add_child(UiStyle.label("Golpe normal", 12, UiStyle.DIM))
-			preview.add_child(UiStyle.label("dano %s, fôlego %s, preparo %s s" % [UiStyle.fmt(base["damage"]), UiStyle.fmt(base.get("cost", 10.0), 0), UiStyle.fmt(base.get("windup", 0.22), 2)], 12, UiStyle.DIM))
+			preview.add_child(UiStyle.label("dano %s, fôlego %s, preparo %s s" % [UiStyle.fmt(base["damage"]), UiStyle.num(float(base.get("cost", 10.0))), UiStyle.fmt(base.get("windup", 0.22), 2)], 12, UiStyle.DIM))
 	problem_label.text = problem if problem != "" else "Pronta para usar com a arma em mãos."
 	problem_label.add_theme_color_override("font_color", UiStyle.BAD if problem != "" else UiStyle.GOOD)
 	for b in assign_box.get_children():
