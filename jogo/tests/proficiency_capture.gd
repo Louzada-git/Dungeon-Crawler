@@ -39,8 +39,15 @@ func run() -> void:
 	panel._change("forca", 1)
 	panel._change("destreza", -1)
 	panel._change("forca", 1)
+	# The 5 free points and a starting weapon.
+	panel._change("agilidade", 1)
+	panel._change("agilidade", 1)
+	panel._change("vigor", 1)
+	panel._change("destreza", 1)
+	panel._change("destreza", 1)
+	panel.pick_weapon("katana")
 	await shot("01-novo-aventureiro")
-	panel.confirmed.emit(panel.values.duplicate())
+	panel.confirmed.emit(panel.choice())
 	await frames(5)
 	var sheet = game.sheet
 	sheet.award_path(["espadas", "espada_reta"], 1400.0)
@@ -48,6 +55,7 @@ func run() -> void:
 	sheet.award_path(["contundentes", "martelo"], 450.0)
 	sheet.award("acrobacia", 120.0)
 	sheet.award("tratamento", 40.0)
+	sheet.award_path(["contundentes", "desarmado"], 200.0)
 	game.ui.level_banner.queue.clear()
 	game.ui.level_banner._time = 0
 	game.ui.toggle_proficiencies()
