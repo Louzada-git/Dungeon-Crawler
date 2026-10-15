@@ -311,6 +311,7 @@ func run(target, capture: bool) -> void:
  await test_techniques()
  await test_vfx()
  await test_balance()
+ await test_quick_bar()
  inv.add("seal")
  p.position = game.camp_position
  game.interact()
@@ -783,6 +784,8 @@ func test_weapons() -> void:
  check(not swing("arco",Vector3.RIGHT),"Arco sem flechas não dispara")
  inv.add("flecha",5)
  game.ui.update_hud()
+ game.quick_bar.assign(0,"arco")
+ game.ui.update_hud()
  check(game.ui.hotbar.slots[0]["count"].text == "5","Barra rápida mostra as flechas do arco")
  check(swing("arco",Vector3.RIGHT) and inv.count("flecha") == 4,"Disparo gasta uma flecha")
  check(get_tree().get_nodes_in_group("projeteis").size() == 1,"Flecha voa como projétil")
@@ -825,7 +828,7 @@ func test_weapons() -> void:
   texts.append(node.text)
  var joined: String = " | ".join(texts)
  check(joined.contains("Contundentes › Martelo") and joined.contains("Pancada") and joined.contains("Duas mãos"),"Dica do martelo mostra família, golpe e empunhadura")
- check(joined.contains("Pesado") and joined.contains("Delay depois do golpe") and joined.contains("0,68 s") and joined.contains("esquiva em 0,34 s") and joined.contains("16"),"Dica do martelo mostra o peso, o delay, quando a esquiva volta e o fôlego")
+ check(joined.contains("Pesado") and joined.contains("Delay depois do golpe") and joined.contains("1,33 s") and joined.contains("esquiva em 0,34 s") and joined.contains("inclui 0,65 s do peso") and joined.contains("16"),"Dica do martelo mostra o peso, o delay (com 0,65 s do peso), quando a esquiva volta e o fôlego")
  tip.free()
  # Test arsenal
  var chest: Dictionary = game.spawn_test_arsenal()
@@ -838,6 +841,7 @@ func test_weapons() -> void:
  for e in [e0,e1,e2,guard]:
   fresh(e,game.layout.to_world(Vector2i(28,7)))
  inv.restore(saved_inventory)
+ game.quick_bar.defaults("sword")
  p.refresh_weapon()
  game.ui.close_all()
 
@@ -1462,16 +1466,16 @@ func test_techniques() -> void:
  var texts: Array = game.ui.level_banner.queue.map(func(q): return str(q))
  check(" ".join(texts).contains("Nova habilidade: Tiro mirado"),"Subir de nível avisa habilidade nova")
  game.ui.level_banner.queue.clear()
- # Keys 4-7.
+ # The first bar key (Q unless the player changed it).
  fresh(e0,at+Vector3(1.2,0,0))
  e0.aggro = true
  ready_player(p)
  p.stamina = p.max_stamina
  var key := InputEventKey.new()
- key.physical_keycode = KEY_4
+ key.physical_keycode = game.technique_keys[0]
  key.pressed = true
  game.ui._input(key)
- check(book.remaining("corte") > 0.0,"Tecla 4 do teclado usa a habilidade da barra")
+ check(book.remaining("corte") > 0.0,"Tecla do 1º espaço (%s) usa a habilidade da barra" % game.technique_key_name(0))
  game.resolve_player_attack()
  # Save keeps the setup and the bar; old saves are read.
  var snap: Dictionary = book.snapshot()
@@ -1690,7 +1694,7 @@ func test_balance() -> void:
  var cycle: float = maxf(float(w["cooldown"]),float(w["windup"])+0.15)
  p.facing = Vector3.LEFT
  check(p.attack(),"Golpe para medir o delay")
- check(is_equal_approx(p.attack_wait,float(w["windup"])) and is_equal_approx(p.cooldown,cycle) and is_equal_approx(p.attack_timer,cycle*0.9),"Golpe inteiro como nos dados: preparo, delay e lentidão")
+ check(is_equal_approx(p.attack_wait,float(w["windup"])) and is_equal_approx(p.cooldown,cycle+float(w["weight"])*0.1) and is_equal_approx(p.attack_timer,cycle*0.9),"Golpe inteiro como nos dados, mais 0,1 s por kg antes do próximo golpe; a lentidão não conta o peso")
  check(is_equal_approx(p.dodge_lock,float(w["windup"])+(cycle-float(w["windup"]))*0.5),"Esquiva volta na metade do delay depois do golpe")
  check(not p.dodge(),"Sem esquiva antes da metade do delay")
  if p.animator and p.animator.is_playing() and p.animator.speed_scale > 0.0:
@@ -1706,6 +1710,24 @@ func test_balance() -> void:
   var data: Dictionary = Items.info(id)
   delays[id] = float(data["cooldown"])-float(data["windup"])
  check(Items.info("martelo")["classe"] == "pesada" and Items.info("adaga")["classe"] == "leve" and delays["martelo"] > delays["sword"]*2.0 and delays["montante"] > delays["sword"]*1.8 and delays["adaga"] < delays["sword"] and float(Items.info("martelo")["cooldown"]) >= 1.25,"Armas pesadas têm muito dano e delay alto; leves, pouco dano e delay curto")
+ # The weight delay: the hammer waits 0,65 s more for the next blow, moving and dodging freely.
+ inv.restore({"stacks":{"martelo":1},"equipped":"martelo"})
+ p.refresh_weapon()
+ ready_player(p)
+ p.stamina = p.max_stamina
+ var hammer_stats: Dictionary = sheet.weapon_stats("martelo")
+ check(p.attack(),"Golpe de martelo")
+ game.resolve_player_attack()
+ check(is_equal_approx(DungeonPlayer.weight_delay(hammer_stats),0.65) and is_equal_approx(p.cooldown,float(hammer_stats["cooldown"])+0.65),"Martelo (6,5 kg): 0,65 s a mais até o próximo golpe")
+ # Right after the swing ends: free to move and dodge, not yet to strike.
+ p.attack_wait = 0.0
+ p.attack_timer = 0.0
+ p.dodge_lock = 0.0
+ p.cooldown = 0.5
+ check(not p.attack() and p.dodge(),"Durante o delay do peso: sem golpe, mas a esquiva funciona")
+ p.dodge_timer = 0.0
+ inv.restore({"stacks":{"sword":1},"equipped":"sword"})
+ p.refresh_weapon()
  # Stamina: costs halved, regeneration ×1,3.
  check(is_equal_approx(float(Items.info("sword")["cost"]),8.5) and is_equal_approx(float(Items.info("martelo")["cost"]),16.0) and is_equal_approx(float(ProficiencyTree.section("punhos")["cost"]),4.0),"Fôlego das armas pela metade (espada 8,5, martelo 16, soco 4)")
  check(is_equal_approx(sheet.dodge_cost(),12.5) and is_equal_approx(sheet.block_cost(20.0),10.0) and is_equal_approx(sheet.block_cost(1.0),2.0) and is_equal_approx(sheet.stamina_rule("corrida",0),8.0),"Esquiva 12,5, guarda metade do dano segurado (mínimo 2), corrida 8 por segundo")
@@ -1752,7 +1774,7 @@ func test_balance() -> void:
     swings += 1
  foe.set_physics_process(false)
  p.set_physics_process(false)
- check(swings >= 4 and p.health < p.max_health,"Golpear sem parar não impede mais o monstro de revidar (%d golpes, vida %d)" % [swings,roundi(p.health)])
+ check(swings >= 3 and p.health < p.max_health,"Golpear sem parar não impede mais o monstro de revidar (%d golpes, vida %d)" % [swings,roundi(p.health)])
  p.health = p.max_health
  # Twice the bonus per level.
  sheet.reset()
@@ -1773,3 +1795,139 @@ func test_balance() -> void:
  ready_player(p)
  p.set_physics_process(was_processing)
  game.ui.level_banner.queue.clear()
+
+func press_key(code: int) -> void:
+ var key := InputEventKey.new()
+ key.physical_keycode = code
+ key.pressed = true
+ game.ui._input(key)
+
+## Quick bar on 1 to 9 with any item; habilidade keys chosen by the player.
+func test_quick_bar() -> void:
+ get_tree().paused = false
+ var p = game.player
+ var inv = game.inventory
+ var bar: QuickBar = game.quick_bar
+ var hud: UiHotbar = game.ui.hotbar
+ var saved_inventory: Dictionary = inv.snapshot()
+ var was_processing: bool = p.is_physics_processing()
+ p.set_physics_process(false)
+ game.ui.close_all()
+ bar.defaults("sword")
+ inv.restore({"stacks":{"sword":1,"ration":3,"bandage":3,"katana":1,"couro":1,"flecha":6},"equipped":"sword"})
+ p.refresh_weapon()
+ game.ui.update_hud()
+ check(QuickBar.SIZE == 9 and hud.slots.size() == 9 and bar.snapshot() == ["sword","ration","bandage","","","","","",""],"Barra rápida com 9 espaços; começa com arma, rações e bandagens")
+ var right_edge: float = hud.position.x+hud.bar_width()
+ check(hud.position.x >= game.ui.hands.position.x+game.ui.hands.custom_minimum_size.x and right_edge <= 1440.0,"Barra cabe na tela sem cobrir o cartão da arma")
+ # Keys 1-9 use the slot.
+ p.food = 50.0
+ press_key(KEY_2)
+ check(inv.count("ration") == 2 and p.food > 50.0,"Tecla 2: come a ração do espaço 2")
+ bar.assign(3,"katana")
+ bar.assign(4,"couro")
+ press_key(KEY_4)
+ check(inv.equipped == "katana","Arma em qualquer espaço: tecla 4 equipa a katana")
+ game.ui.update_hud()
+ check(hud.slots[3]["active"].visible and not hud.slots[0]["active"].visible,"Espaço da arma em mãos fica marcado")
+ press_key(KEY_4)
+ check(inv.equipped == "","Apertar de novo guarda a arma (punhos)")
+ press_key(KEY_1)
+ check(inv.equipped == "sword","Tecla 1 volta para a espada")
+ press_key(KEY_5)
+ check(inv.armor == "couro","Armadura na barra: tecla 5 veste")
+ press_key(KEY_5)
+ check(inv.armor == "","Apertar de novo tira a armadura")
+ bar.assign(5,"flecha")
+ game.ui.update_hud()
+ check(hud.slots[5]["count"].text == "6" and not bar.use(game,5),"Munição na barra mostra quantas restam e não se usa")
+ game.message_text = ""
+ press_key(KEY_9)
+ check(game.message_text.contains("vazio"),"Espaço vazio explica como pôr um item")
+ inv.remove("ration",inv.count("ration"))
+ game.ui.update_hud()
+ check(bar.at(1) == "ration" and hud.slots[1]["count"].text == "0","Pilha acabou: o espaço fica, mostrando 0")
+ # Putting items in: drag, menu, number with the backpack open; right click empties.
+ var drop_ok: bool = hud.slots[6]["button"]._can_drop_data(Vector2.ZERO,{"type":"item","source":"bag","id":"bandage","count":3})
+ hud.slots[6]["button"]._drop_data(Vector2.ZERO,{"type":"item","source":"bag","id":"bandage","count":3})
+ check(drop_ok and bar.at(6) == "bandage" and bar.at(2) == "","Arrastar da mochila põe o item no espaço (e tira do espaço antigo)")
+ game.ui.toggle_inventory()
+ game.ui.select_item("katana")
+ press_key(KEY_8)
+ check(bar.at(7) == "katana" and bar.at(3) == "" and inv.equipped == "sword","Mochila aberta: item selecionado e tecla 8 põe na barra sem usar")
+ game.ui.inventory._open_menu("bag","couro",Vector2(200,200))
+ var menu_texts: Array = []
+ for i in game.ui.inventory.menu.item_count:
+  menu_texts.append(game.ui.inventory.menu.get_item_text(i))
+ game.ui.inventory.menu.hide()
+ check(menu_texts.any(func(t): return t.contains("Tirar da barra rápida (5)")),"Menu do item mostra a posição dele na barra")
+ game.ui.inventory.quick_add("unguento")
+ check(bar.slot_of("unguento") == 2,"Menu põe o item no primeiro espaço livre (3)")
+ game.ui.toggle_inventory()
+ var right := InputEventMouseButton.new()
+ right.button_index = MOUSE_BUTTON_RIGHT
+ right.pressed = true
+ hud.slots[7]["button"]._gui_input(right)
+ check(bar.at(7) == "","Botão direito tira o item da barra")
+ # Save and odd data.
+ var snap: Array = bar.snapshot()
+ check(game.save_game(false),"Save com a barra rápida é gravado")
+ bar.clear()
+ check(game.load_game() and bar.snapshot() == snap,"Barra rápida volta do save")
+ bar.restore(["sword",3,"nada","sword",null])
+ check(bar.snapshot() == ["sword","","","","","","","",""],"Barra estranha no save é limpa")
+ # Habilidade keys: Q R F G by default, any free key, never the number row.
+ check(InputSetup.TECHNIQUE_KEYS == [KEY_Q,KEY_R,KEY_F,KEY_G] and game.technique_keys == InputSetup.TECHNIQUE_KEYS,"Teclas das habilidades começam em Q, R, F e G")
+ check(game.set_technique_key(0,KEY_3).contains("barra rápida") and game.set_technique_key(0,KEY_E).contains("interagir") and game.set_technique_key(0,KEY_T).contains("habilidades"),"Números de cima e teclas do jogo são recusados, com o motivo")
+ check(game.set_technique_key(0,KEY_KP_1) == "" and game.technique_key_name(0) == "Num 1","Teclado numérico pode (Num 1)")
+ check(game.set_technique_key(1,KEY_KP_1) == "" and game.technique_keys[1] == KEY_KP_1 and game.technique_keys[0] == KEY_R,"Tecla já usada em outro espaço troca de lugar com ele")
+ var saved_keys = game.load_setting("teclas","habilidades",[])
+ check(saved_keys is Array and int(saved_keys[1]) == KEY_KP_1,"Teclas ficam salvas nas configurações")
+ game.ui.update_hud()
+ check(hud.tech_slots[1]["key"].text == "Num 1","Barra mostra a tecla escolhida")
+ # Using a habilidade by its new key.
+ var book: TechniqueBook = game.techniques
+ book.clear()
+ book.assign(1,"corte")
+ ready_player(p)
+ p.stamina = p.max_stamina
+ press_key(KEY_KP_1)
+ check(book.remaining("corte") > 0.0,"Num 1 usa a habilidade do espaço escolhido")
+ game.resolve_player_attack()
+ ready_player(p)
+ book.recharge.clear()
+ press_key(KEY_4)
+ check(book.remaining("corte") == 0.0,"Tecla 4 não usa mais habilidade (é da barra rápida)")
+ # Choosing in the T window.
+ game.ui.toggle_techniques()
+ var win: UiTechniqueWindow = game.ui.tech_window
+ win.start_capture(2)
+ check(win.key_buttons[2].text == "aperte…","Clicar na tecla espera a nova")
+ press_key(KEY_V)
+ check(game.technique_keys[2] == KEY_V and win.capturing == -1 and win.key_buttons[2].text.contains("V"),"A tecla apertada vira a do espaço")
+ win.start_capture(3)
+ press_key(KEY_ESCAPE)
+ check(game.technique_keys[3] == KEY_G and win.capturing == -1,"Esc cancela a troca")
+ win.start_capture(3)
+ press_key(KEY_7)
+ check(game.technique_keys[3] == KEY_G and win.key_hint.text.contains("barra rápida"),"Número de cima na janela é recusado com o motivo")
+ check(win.assign_box.get_child(2).text == "V","Botões de pôr na barra mostram as teclas")
+ game.ui.toggle_techniques()
+ game.ui.toggle_pause()
+ var help: Array = []
+ for cap in game.ui.technique_help_keys.get_children():
+  help.append(label_text(cap) if cap is Control else "")
+ game.ui.toggle_pause()
+ check(" ".join(help).contains("Num 1") and " ".join(help).contains("V"),"Lista de controles mostra as teclas atuais das habilidades")
+ # Back to defaults.
+ for i in 4:
+  game.technique_keys[i] = InputSetup.TECHNIQUE_KEYS[i]
+ DirAccess.remove_absolute(game.settings_path)
+ game.ui.refresh_technique_keys()
+ book.clear()
+ bar.defaults("sword")
+ inv.restore(saved_inventory)
+ p.refresh_weapon()
+ ready_player(p)
+ p.set_physics_process(was_processing)
+ game.ui.close_all()
