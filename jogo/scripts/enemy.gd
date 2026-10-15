@@ -44,6 +44,8 @@ var alive: bool = true
 var armored: bool = false
 var bleed_time: float = 0.0
 var bleed_dps: float = 0.0
+## Seconds to the next drop of blood shown while bleeding.
+var bleed_fx: float = 0.0
 ## Proficiency path of the weapon that opened the wound (bleeding damage teaches it).
 var bleed_path: Array = []
 ## Ammunition stuck in this monster; it drops with its belongings.
@@ -261,6 +263,11 @@ func tick_bleed(delta: float) -> void:
 	var dealt: float = minf(bleed_dps * step, maxf(0.0, health))
 	health -= bleed_dps * step
 	game.sheet.award_damage(self, dealt, bleed_path)
+	bleed_fx -= step
+	if bleed_fx <= 0.0:
+		bleed_fx = 0.5
+		if visible:
+			Vfx.burst(game, "gota", Vfx.body_point(self, 0.9) + Vfx.jitter(0.15))
 	if bleed_time <= 0:
 		bleed_dps = 0
 	if health <= 0:
@@ -278,4 +285,5 @@ func _die() -> void:
 	if slam_ring:
 		slam_ring.visible = false
 	Visuals.play(animator, "die", false)
+	Vfx.burst(game, "fumaca_morte", global_position + Vector3(0, 0.7, 0), float(stats.get("scale", 1.0)))
 	game.enemy_defeated(self)
