@@ -1,110 +1,463 @@
 {
- "versao": 1,
- "_sobre": "Técnicas montadas pelo jogador. Uma técnica = uma forma + componentes nos espaços. A forma parte dos números da arma em mãos (CharacterSheet.weapon_stats); cada componente age, na ordem dos espaços, sobre o que já está montado à esquerda: 'multiplica' escala os valores atuais (inclusive o que outros componentes acrescentaram antes), 'soma' acrescenta um valor fixo. Formas e componentes destravam por nível de ramo ('requer': {ramo: nível}). Espaços liberados pelo domínio da arma: 1 + (domínio - 1) / espaco_a_cada_dominio, até o máximo da forma.",
+ "versao": 2,
+ "_sobre": "Habilidades montadas pelo jogador. Cada habilidade existe uma vez, com características fixas (a forma), e tem slots onde vão objetos. Os números partem da arma em mãos (CharacterSheet.weapon_stats); depois vêm os efeitos da habilidade e, na ordem dos slots, os de cada objeto, que age sobre o que já está montado à esquerda: 'multiplica' escala os valores atuais (inclusive o que objetos anteriores somaram), 'soma' acrescenta um valor fixo. Habilidades e objetos destravam por nível de ramo ('requer'). Slots: 1 + (nível do ramo da habilidade - nível em que destravou) / 'slot_a_cada', até 'slots'; nas habilidades básicas o nível é o domínio da arma em mãos. Objetos: cada nível em 'copias' (no ramo de 'requer') dá mais uma cópia; cada cópia fica em uma habilidade por vez. 'estilos' limita só onde o objeto não faz sentido.",
  "regras": {
-  "espaco_a_cada_dominio": 5,
-  "recarga_por_componente": 0.75,
-  "xp_por_componente": 1.5,
-  "limite_receitas": 12,
+  "slot_a_cada_basica": 5,
+  "recarga_por_objeto": 0.75,
+  "xp_por_objeto": 1.5,
   "barra": 4
  },
  "formas": {
   "corte": {
-   "name": "Corte", "icone": "golpe", "estilos": ["slash"], "espacos": 3, "recarga": 1.5,
-   "texto": "O golpe da arma em arco, como o ataque normal."
+   "name": "Corte",
+   "icone": "golpe",
+   "estilos": [
+    "slash"
+   ],
+   "recarga": 1.5,
+   "texto": "O golpe da arma em arco, como o ataque normal.",
+   "slots": 3,
+   "slot_a_cada": 5
   },
   "estocada": {
-   "name": "Estocada", "icone": "investida", "estilos": ["thrust"], "espacos": 3, "recarga": 1.5,
-   "texto": "Golpe reto da arma de haste, como o ataque normal."
+   "name": "Estocada",
+   "icone": "investida",
+   "estilos": [
+    "thrust"
+   ],
+   "recarga": 1.5,
+   "texto": "Golpe reto da arma de haste, como o ataque normal.",
+   "slots": 3,
+   "slot_a_cada": 5
   },
   "pancada": {
-   "name": "Pancada", "icone": "pancada", "estilos": ["smash"], "espacos": 3, "recarga": 1.5,
-   "texto": "Pancada no chão à frente, como o ataque normal."
+   "name": "Pancada",
+   "icone": "pancada",
+   "estilos": [
+    "smash"
+   ],
+   "recarga": 1.5,
+   "texto": "Pancada no chão à frente, como o ataque normal.",
+   "slots": 3,
+   "slot_a_cada": 5
   },
   "disparo": {
-   "name": "Disparo", "icone": "disparo", "estilos": ["shoot"], "espacos": 3, "recarga": 1.5,
-   "texto": "Um tiro da arma de disparo, como o ataque normal."
+   "name": "Disparo",
+   "icone": "disparo",
+   "estilos": [
+    "shoot"
+   ],
+   "recarga": 1.5,
+   "texto": "Um tiro da arma de disparo, como o ataque normal.",
+   "slots": 3,
+   "slot_a_cada": 5
   },
   "soco": {
-   "name": "Soco", "icone": "soco", "estilos": ["punhos"], "espacos": 2, "recarga": 1.0,
-   "texto": "Soco de mãos vazias."
+   "name": "Soco",
+   "icone": "soco",
+   "estilos": [
+    "punhos"
+   ],
+   "recarga": 1.0,
+   "texto": "Soco de mãos vazias.",
+   "slots": 2,
+   "slot_a_cada": 5
   },
   "corte_giratorio": {
-   "name": "Corte giratório", "icone": "giro", "estilos": ["slash"], "espacos": 2, "recarga": 4.0,
-   "requer": {"laminas": 4},
+   "name": "Corte giratório",
+   "icone": "giro",
+   "estilos": [
+    "slash"
+   ],
+   "recarga": 4.0,
+   "requer": {
+    "laminas": 4
+   },
    "texto": "Gira o corpo e corta tudo em volta.",
-   "efeitos": [{"campo": "angle", "define": 180.0}, {"campo": "targets", "soma": 2}, {"campo": "damage", "multiplica": 0.85}, {"campo": "cost", "multiplica": 1.4}, {"campo": "windup", "soma": 0.08}]
+   "efeitos": [
+    {
+     "campo": "angle",
+     "define": 180.0
+    },
+    {
+     "campo": "targets",
+     "soma": 2
+    },
+    {
+     "campo": "damage",
+     "multiplica": 0.85
+    },
+    {
+     "campo": "cost",
+     "multiplica": 1.4
+    },
+    {
+     "campo": "windup",
+     "soma": 0.08
+    }
+   ],
+   "slots": 2,
+   "slot_a_cada": 4
   },
   "investida": {
-   "name": "Investida", "icone": "investida", "estilos": ["thrust"], "espacos": 2, "recarga": 5.0,
-   "requer": {"hastes": 4},
+   "name": "Investida",
+   "icone": "investida",
+   "estilos": [
+    "thrust"
+   ],
+   "recarga": 5.0,
+   "requer": {
+    "hastes": 4
+   },
    "texto": "Avança 2,5 m durante o preparo e golpe com o peso do corpo.",
-   "efeitos": [{"campo": "dash", "soma": 2.5}, {"campo": "damage", "multiplica": 1.2}, {"campo": "cost", "multiplica": 1.5}]
+   "efeitos": [
+    {
+     "campo": "dash",
+     "soma": 2.5
+    },
+    {
+     "campo": "damage",
+     "multiplica": 1.2
+    },
+    {
+     "campo": "cost",
+     "multiplica": 1.5
+    }
+   ],
+   "slots": 2,
+   "slot_a_cada": 4
   },
   "golpe_esmagador": {
-   "name": "Golpe esmagador", "icone": "pancada", "estilos": ["slash", "smash"], "ramo_arma": "contundentes", "espacos": 2, "recarga": 5.0,
-   "requer": {"contundentes": 4},
+   "name": "Golpe esmagador",
+   "icone": "pancada",
+   "estilos": [
+    "slash",
+    "smash"
+   ],
+   "ramo_arma": "contundentes",
+   "recarga": 5.0,
+   "requer": {
+    "contundentes": 4
+   },
    "texto": "Ergue a arma contundente e desce com tudo: lento, mas atordoa e empurra longe.",
-   "efeitos": [{"campo": "damage", "multiplica": 1.7}, {"campo": "windup", "soma": 0.35}, {"campo": "stagger", "soma": 0.6}, {"campo": "knockback", "soma": 3.0}, {"campo": "cost", "multiplica": 1.6}]
+   "efeitos": [
+    {
+     "campo": "damage",
+     "multiplica": 1.7
+    },
+    {
+     "campo": "windup",
+     "soma": 0.35
+    },
+    {
+     "campo": "stagger",
+     "soma": 0.6
+    },
+    {
+     "campo": "knockback",
+     "soma": 3.0
+    },
+    {
+     "campo": "cost",
+     "multiplica": 1.6
+    }
+   ],
+   "slots": 2,
+   "slot_a_cada": 4
   },
   "tiro_mirado": {
-   "name": "Tiro mirado", "icone": "disparo", "estilos": ["shoot"], "espacos": 2, "recarga": 3.0,
-   "requer": {"pontaria": 4},
+   "name": "Tiro mirado",
+   "icone": "disparo",
+   "estilos": [
+    "shoot"
+   ],
+   "recarga": 3.0,
+   "requer": {
+    "pontaria": 4
+   },
    "texto": "Segura a mira um instante: mais dano e o projétil atravessa mais um.",
-   "efeitos": [{"campo": "windup", "soma": 0.45}, {"campo": "damage", "multiplica": 1.6}, {"campo": "pierce", "soma": 1}]
+   "efeitos": [
+    {
+     "campo": "windup",
+     "soma": 0.45
+    },
+    {
+     "campo": "damage",
+     "multiplica": 1.6
+    },
+    {
+     "campo": "pierce",
+     "soma": 1
+    }
+   ],
+   "slots": 2,
+   "slot_a_cada": 4
   },
   "sequencia": {
-   "name": "Sequência de socos", "icone": "soco", "estilos": ["punhos"], "espacos": 1, "recarga": 3.0,
-   "requer": {"desarmado": 4},
+   "name": "Sequência de socos",
+   "icone": "soco",
+   "estilos": [
+    "punhos"
+   ],
+   "recarga": 3.0,
+   "requer": {
+    "desarmado": 4
+   },
    "texto": "Três socos rápidos seguidos.",
-   "efeitos": [{"campo": "hits", "soma": 2}, {"campo": "damage", "multiplica": 0.6}, {"campo": "cost", "multiplica": 1.5}]
+   "efeitos": [
+    {
+     "campo": "hits",
+     "soma": 2
+    },
+    {
+     "campo": "damage",
+     "multiplica": 0.6
+    },
+    {
+     "campo": "cost",
+     "multiplica": 1.5
+    }
+   ],
+   "slots": 1,
+   "slot_a_cada": 4
   }
  },
- "componentes": {
+ "objetos": {
   "afiada": {
-   "name": "Lâmina afiada", "requer": {"laminas": 3}, "estilos": ["slash", "thrust"],
-   "texto": "Abre um corte que sangra 3 por segundo durante 4 s.",
-   "efeitos": [{"campo": "bleed.dps", "soma": 3.0}, {"campo": "bleed.time", "minimo": 4.0}, {"campo": "cost", "soma": 3}]
+   "name": "Lâmina afiada",
+   "requer": {
+    "laminas": 3
+   },
+   "texto": "Abre um corte que sangra 3 por segundo durante 4 s (em flechas, ponta larga). Não serve em pancadas nem socos.",
+   "efeitos": [
+    {
+     "campo": "bleed.dps",
+     "soma": 3.0
+    },
+    {
+     "campo": "bleed.time",
+     "minimo": 4.0
+    },
+    {
+     "campo": "cost",
+     "soma": 3
+    }
+   ],
+   "estilos": [
+    "slash",
+    "thrust",
+    "shoot"
+   ],
+   "copias": [
+    3,
+    9,
+    15
+   ]
   },
   "forca": {
-   "name": "Força", "requer": {"contundentes": 3},
+   "name": "Força",
+   "requer": {
+    "contundentes": 3
+   },
    "texto": "+30% de dano, inclusive no sangramento posto antes. Gasta mais fôlego e prepara mais devagar.",
-   "efeitos": [{"campo": "damage", "multiplica": 1.3}, {"campo": "bleed.dps", "multiplica": 1.3}, {"campo": "cost", "soma": 4}, {"campo": "windup", "soma": 0.06}]
+   "efeitos": [
+    {
+     "campo": "damage",
+     "multiplica": 1.3
+    },
+    {
+     "campo": "bleed.dps",
+     "multiplica": 1.3
+    },
+    {
+     "campo": "cost",
+     "soma": 4
+    },
+    {
+     "campo": "windup",
+     "soma": 0.06
+    }
+   ],
+   "copias": [
+    3,
+    9,
+    15
+   ]
   },
   "alcance": {
-   "name": "Alcance", "requer": {"hastes": 3},
+   "name": "Alcance",
+   "requer": {
+    "hastes": 3
+   },
    "texto": "+0,5 m de alcance (+3 m em disparos). Prepara um pouco mais devagar.",
-   "efeitos": [{"campo": "range", "soma": 0.5, "disparo": 3.0}, {"campo": "windup", "soma": 0.05}, {"campo": "cost", "soma": 2}]
+   "efeitos": [
+    {
+     "campo": "range",
+     "soma": 0.5,
+     "disparo": 3.0
+    },
+    {
+     "campo": "windup",
+     "soma": 0.05
+    },
+    {
+     "campo": "cost",
+     "soma": 2
+    }
+   ],
+   "copias": [
+    3,
+    9
+   ]
   },
   "rapidez": {
-   "name": "Rapidez", "requer": {"acrobacia": 3},
+   "name": "Rapidez",
+   "requer": {
+    "acrobacia": 3
+   },
    "texto": "Preparo 40% mais curto, inclusive o que foi somado antes, e golpe mais leve (−15% de dano).",
-   "efeitos": [{"campo": "windup", "multiplica": 0.6}, {"campo": "cooldown", "multiplica": 0.8}, {"campo": "damage", "multiplica": 0.85}]
+   "efeitos": [
+    {
+     "campo": "windup",
+     "multiplica": 0.6
+    },
+    {
+     "campo": "cooldown",
+     "multiplica": 0.8
+    },
+    {
+     "campo": "damage",
+     "multiplica": 0.85
+    }
+   ],
+   "copias": [
+    3,
+    9
+   ]
   },
   "impacto": {
-   "name": "Impacto", "requer": {"bloqueio": 3},
+   "name": "Impacto",
+   "requer": {
+    "bloqueio": 3
+   },
    "texto": "Atordoa 0,5 s a mais e empurra mais longe.",
-   "efeitos": [{"campo": "stagger", "soma": 0.5}, {"campo": "knockback", "soma": 3.0}, {"campo": "cost", "soma": 3}]
+   "efeitos": [
+    {
+     "campo": "stagger",
+     "soma": 0.5
+    },
+    {
+     "campo": "knockback",
+     "soma": 3.0
+    },
+    {
+     "campo": "cost",
+     "soma": 3
+    }
+   ],
+   "copias": [
+    3,
+    9
+   ]
   },
   "avanco": {
-   "name": "Avanço", "requer": {"atletismo": 3}, "estilos": ["slash", "thrust", "smash", "punhos"],
-   "texto": "Avança 1,5 m durante o preparo.",
-   "efeitos": [{"campo": "dash", "soma": 1.5}, {"campo": "cost", "soma": 5}]
+   "name": "Avanço",
+   "requer": {
+    "atletismo": 3
+   },
+   "texto": "Avança 1,5 m durante o preparo. Não serve em disparos.",
+   "efeitos": [
+    {
+     "campo": "dash",
+     "soma": 1.5
+    },
+    {
+     "campo": "cost",
+     "soma": 5
+    }
+   ],
+   "estilos": [
+    "slash",
+    "thrust",
+    "smash",
+    "punhos"
+   ],
+   "copias": [
+    3,
+    10
+   ]
   },
   "emboscada": {
-   "name": "Emboscada", "requer": {"furtividade": 3},
+   "name": "Emboscada",
+   "requer": {
+    "furtividade": 3
+   },
    "texto": "Dano ×1,5 em monstro que ainda não te viu.",
-   "efeitos": [{"campo": "sneak_mult", "multiplica": 1.5, "base": 1.0}, {"campo": "cost", "soma": 2}]
+   "efeitos": [
+    {
+     "campo": "sneak_mult",
+     "multiplica": 1.5,
+     "base": 1.0
+    },
+    {
+     "campo": "cost",
+     "soma": 2
+    }
+   ],
+   "copias": [
+    3,
+    10
+   ]
   },
   "duplo": {
-   "name": "Golpe duplo", "requer": {"espadas": 4}, "estilos": ["slash", "thrust", "punhos"],
+   "name": "Golpe duplo",
+   "requer": {
+    "espadas": 4
+   },
    "texto": "Acerta duas vezes, cada uma com 65% do dano montado até aqui.",
-   "efeitos": [{"campo": "hits", "soma": 1}, {"campo": "damage", "multiplica": 0.65}, {"campo": "cost", "multiplica": 1.4}]
+   "efeitos": [
+    {
+     "campo": "hits",
+     "soma": 1
+    },
+    {
+     "campo": "damage",
+     "multiplica": 0.65
+    },
+    {
+     "campo": "cost",
+     "multiplica": 1.4
+    }
+   ],
+   "copias": [
+    4,
+    12
+   ]
   },
   "perfurante": {
-   "name": "Perfurante", "requer": {"pontaria": 3}, "estilos": ["thrust", "shoot"],
+   "name": "Perfurante",
+   "requer": {
+    "pontaria": 3
+   },
    "texto": "Atravessa mais um inimigo.",
-   "efeitos": [{"campo": "targets", "soma": 1}, {"campo": "pierce", "soma": 1}, {"campo": "cost", "soma": 2}]
+   "efeitos": [
+    {
+     "campo": "targets",
+     "soma": 1
+    },
+    {
+     "campo": "pierce",
+     "soma": 1
+    },
+    {
+     "campo": "cost",
+     "soma": 2
+    }
+   ],
+   "copias": [
+    3,
+    10
+   ]
   }
  }
 }
