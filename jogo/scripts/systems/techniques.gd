@@ -212,6 +212,8 @@ static func summary(s: Dictionary) -> Array:
 		rows.append(["Arco", "volta inteira" if float(s.get("angle", 55)) >= 179.0 else "%d°" % roundi(float(s.get("angle", 55)) * 2.0)])
 	if int(s.get("targets", 1)) > 1 or style == "smash":
 		rows.append(["Alvos", "até %d" % int(s.get("targets", 1))])
+	if style == "smash":
+		rows.append(["Raio", "%s m" % UiStyle.fmt(s.get("area_radius", 1.6))])
 	if int(s.get("pierce", 1)) > 1:
 		rows.append(["Atravessa", "%d inimigos" % int(s["pierce"])])
 	rows.append(["Fôlego", UiStyle.fmt(s["cost"], 0)])
@@ -228,6 +230,8 @@ static func summary(s: Dictionary) -> Array:
 		extra.append("atordoa %s s" % UiStyle.fmt(s["stagger"]))
 	if s.has("crush"):
 		extra.append("×%s em blindado" % UiStyle.fmt(s["crush"]))
+	if float(s.get("cura", 0.0)) > 0.0:
+		extra.append("cura %s por acerto" % UiStyle.fmt(s["cura"]))
 	if not extra.is_empty():
 		rows.append(["Efeitos", ", ".join(extra)])
 	return rows
