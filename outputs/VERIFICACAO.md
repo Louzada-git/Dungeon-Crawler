@@ -144,3 +144,9 @@ Caminhos de um, dois ou três ramos andam no mesmo ritmo. Trocar de espada no 3�
 - Capturas conferidas: editor com prévia, Corte giratório acertando com a recarga na barra, editor travado em combate.
 - Falta: teste humano dos números (dano, fôlego, recarga) e de quais componentes valem a pena.
 
+## Habilidades e objetos (modelo do dono do projeto) — 15/10/2026
+
+- Suíte do mundo fixo: **520 verificações, zero falhas**; suíte do labirinto: **48, zero falhas**; as duas também no executável Linux.
+- Verificações do modelo novo: cópias de Força nos níveis 3 e 9 de Contundentes; Corte com 1 slot que vira 3 no domínio 11; Corte giratório destravado e com slots pelo nível de Lâminas; Alcance (das hastes) numa habilidade de espada; Lâmina afiada recusada em pancada e soco e aceita em flecha; segunda cópia de Força em outra habilidade; uso acima das cópias recusado com o motivo; cada habilidade num lugar só da barra; ordem, recarga, treino, giro, golpe duplo, investida e lança recusando corte como antes; janela listando todas as habilidades, trocando ordem, tirando e pondo objetos, travada em combate e sem pôr habilidade trancada na barra; barra e dica; aviso de habilidade nova ao subir de nível; tecla 4; save; save do formato anterior e save estranho lidos sem quebrar; montagem sobrevivendo à morte com a barra vazia.
+- Captura conferida: janela com Corte (Lâmina afiada, Força e Alcance), cópias livres de cada objeto e habilidades trancadas com o requisito.
+
