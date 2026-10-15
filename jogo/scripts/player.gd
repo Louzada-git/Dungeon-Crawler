@@ -4,6 +4,9 @@ class_name DungeonPlayer
 const INPUT_BUFFER: float = 0.16
 ## The dodge comes back after this share of the delay that follows the blow.
 const DODGE_AFTER: float = 0.5
+## Extra wait before the next blow, per kg of the weapon (martelo 6,5 kg: +0,65 s).
+## Only the next blow waits: no slowdown, the dodge is not held.
+const DELAY_PER_KG: float = 0.1
 var game
 var visual: Node3D
 var animator: AnimationPlayer
@@ -338,6 +341,8 @@ func attack(stats: Dictionary = {}) -> bool:
  attack_wait = windup
  # The dodge comes back halfway through the delay after the blow.
  dodge_lock = windup+(cooldown-windup)*DODGE_AFTER
+ # The weapon's weight holds the next blow a little longer (and only that).
+ cooldown += weight_delay(weapon)
  var dash: float = float(weapon.get("dash",0.0))
  if dash > 0.0:
   dash_time = maxf(0.12,float(attack_wait))
@@ -348,13 +353,17 @@ func attack(stats: Dictionary = {}) -> bool:
  game.sound.play_at("swing",global_position,0.65)
  return true
 
-## Uses the habilidade on bar slot `slot` (keys 4-7) toward the cursor
+## Extra seconds before the next blow from the weapon's weight.
+static func weight_delay(weapon: Dictionary) -> float:
+ return maxf(0.0,float(weapon.get("weight",0.0)))*DELAY_PER_KG
+
+## Uses the habilidade on bar slot `slot` (keys chosen by the player) toward the cursor
 ## (aim = false keeps the current facing; used by tests).
 func use_technique(slot: int, aim: bool = true) -> bool:
  var book: TechniqueBook = game.techniques
  var form_id: String = book.at_slot(slot)
  if form_id == "":
-  game.message("Espaço %d da barra vazio. T abre as habilidades." % (slot+4),2)
+  game.message("Espaço [%s] da barra vazio. T abre as habilidades." % game.technique_key_name(slot),2)
   return false
  if health <= 0 or hurt_timer > 0 or dodge_timer > 0 or cooldown > 0:
   return false
