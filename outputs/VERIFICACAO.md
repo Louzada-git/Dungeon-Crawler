@@ -137,3 +137,10 @@ Caminhos de um, dois ou três ramos andam no mesmo ritmo. Trocar de espada no 3�
 - Capturas conferidas: as 12 armas na mão, as quatro armaduras e a sala com e sem filtro.
 - As armaduras de blocos ficam um pouco largas no corpo mais magro; são provisórias.
 
+## Técnicas — 15/10/2026
+
+- Suíte do mundo fixo: **517 verificações, zero falhas**; suíte do labirinto: **48, zero falhas**; as duas também no executável Linux.
+- Verificações novas: fichas carregadas; formas conforme a arma; Corte sem componentes igual ao golpe normal; forma, componente e arma errados dizem o motivo; proficiência destrava; espaços pelo domínio (3 no domínio 11); ordem dos componentes mudando o sangramento (3,9 contra 3,0) e o preparo; recarga somada por componente; componente repetido e que não combina recusados; salvar e pôr na barra; usar contra monstro com o dano montado e o sangramento; recarga impedindo e liberando; componente treinando seu ramo; Corte giratório acertando atrás; Golpe duplo acertando duas vezes; Investida avançando 2,5 m; técnica de corte recusada na lança; editor listando, prevendo e mudando a ordem; editor travado com monstro caçando e liberado fora de combate; pôr na barra salvando a nova; esquecer tirando da barra; barra mostrando a recarga; dica da barra; tecla 4 do teclado; save com técnicas e barra; save estranho limpo; receitas sobrevivendo à morte com a barra vazia.
+- Capturas conferidas: editor com prévia, Corte giratório acertando com a recarga na barra, editor travado em combate.
+- Falta: teste humano dos números (dano, fôlego, recarga) e de quais componentes valem a pena.
+
