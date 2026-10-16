@@ -77,3 +77,11 @@ ITEM_PLACAS_NOME,Armadura de placas
 ITEM_PLACAS_DESC,"Aço da cabeça aos pés. Ninguém te corta, mas todo mundo te ouve chegando."
 ITEM_GAZUA_NOME,Gazua
 ITEM_GAZUA_DESC,Arame torto para abrir fechadura. Quebra fácil na mão de quem não sabe.
+ITEM_FLECHA_LARGA_NOME,Flecha de ponta larga
+ITEM_FLECHA_LARGA_DESC,A ponta larga deixa o corte aberto. O bicho sangra depois.
+ITEM_FLECHA_OSSO_NOME,Flecha de osso
+ITEM_FLECHA_OSSO_DESC,"Feita com o que sobrou do jantar. Bate menos, mas sobra mais."
+ITEM_VIROTE_PESADO_NOME,Virote pesado
+ITEM_VIROTE_PESADO_DESC,Ponta de ferro maciça. Empurra o alvo e atravessa mais um.
+ITEM_PEDRA_NOME,Pedra
+ITEM_PEDRA_DESC,Uma pedra. Serve na funda.
