@@ -22,7 +22,7 @@ var low: int = 2
 var high: int = 9
 
 func _init() -> void:
-	super._init("Novo aventureiro", UiIcon.new("star", UiStyle.ACCENT), 700, 560, false)
+	super._init("Novo aventureiro", UiIcon.new("star", UiStyle.ACCENT), 700, 600, false)
 	draggable = false
 	var rules: Dictionary = ProficiencyTree.section("criacao")
 	total = int(rules.get("pontos", 20))
@@ -113,7 +113,7 @@ static func weapon_ids() -> Array:
 func _build_weapons() -> void:
 	body.add_child(UiStyle.caps("Arma inicial  ·  qualquer uma", 11, UiStyle.MUTED))
 	var grid := GridContainer.new()
-	grid.columns = 7
+	grid.columns = 11
 	grid.add_theme_constant_override("h_separation", 4)
 	grid.add_theme_constant_override("v_separation", 4)
 	body.add_child(grid)
@@ -122,7 +122,7 @@ func _build_weapons() -> void:
 		var b := UiStyle.button("" if id != "" else "Punhos", pick_weapon.bind(id))
 		b.toggle_mode = true
 		b.button_group = group
-		b.custom_minimum_size = Vector2(92, 46)
+		b.custom_minimum_size = Vector2(56, 42)
 		if id != "":
 			b.icon = UiStyle.item_icon(id)
 			b.expand_icon = true
