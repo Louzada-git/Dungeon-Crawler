@@ -344,11 +344,18 @@ func _use_label(id: String) -> String:
 		return "Guardar arma" if game.inventory.equipped == id else "Equipar"
 	if Items.info(id).has("protection"):
 		return "Tirar" if game.inventory.armor == id else "Vestir"
-	return {"ration": "Comer", "bandage": "Aplicar bandagem"}.get(id, "Usar")
+	var data: Dictionary = Items.info(id)
+	if data.has("food"):
+		return "Beber" if data.get("bebida", false) else "Comer"
+	if data.has("heal"):
+		return "Aplicar"
+	if data.get("revela_mapa", false):
+		return "Ler"
+	return "Usar"
 
 func _usable(id: String) -> bool:
 	var data: Dictionary = Items.info(id)
-	return data.has("damage") or data.has("protection") or data.has("heal") or data.has("food")
+	return data.has("damage") or data.has("protection") or data.has("heal") or data.has("food") or data.get("revela_mapa", false)
 
 # --- actions -----------------------------------------------------------------
 
