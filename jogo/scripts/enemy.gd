@@ -144,9 +144,14 @@ func _physics_process(delta: float) -> void:
 		else:
 			telegraph.visible = true
 			telegraph.scale = Vector3.ONE * (1.0 + sin(windup * 24) * 0.035)
+			_lean(1.0 - clampf((windup - 0.15) / 0.2, 0.0, 1.0))
 		if windup <= 0:
 			_strike(player)
 		return
+	if attack_recovery > 0:
+		_lean(attack_recovery / 0.30)
+	elif visual.position.x != 0.0 or visual.position.z != 0.0:
+		_lean(0.0)
 	var can_see: bool = game.clear_line(global_position, player.global_position)
 	var sight: float = float(stats.get("sight", 7.5))
 	if not game.is_safe() and distance < sight * player.detection_mult(self) and can_see:
@@ -224,10 +229,17 @@ func _strike(player) -> void:
 		game.camera_impact(0.16)
 		if not game.is_safe() and offset.length() < float(stats.get("slam_radius", 3.0)) and sees:
 			player.receive_damage(float(stats.get("slam_damage", 30.0)) * damage_scale, offset.normalized(), false)
-	elif not game.is_safe() and offset.length() < reach + 0.2 and committed.dot(offset.normalized()) >= cos(0.95) and sees:
+	elif not game.is_safe() and sees and Hitbox.monster_hits(game, self):
+		# The claw has to touch the adventurer over the swing (see Hitbox).
 		player.receive_damage(float(stats.get("damage", 17.0)) * damage_scale, committed)
 	slamming = false
 	cooldown = 1.2 if not enraged else 0.85
+
+## The body throws itself forward into the claw ("lunge" metres at the blow,
+## amount 0..1), the same reach the hitbox gives it. Only the model moves.
+func _lean(amount: float) -> void:
+	var lunge: float = float(stats.get("lunge", 0.0)) * smoothstep(0.0, 1.0, amount)
+	visual.position = Vector3(committed.x, 0, committed.z).normalized() * lunge + Vector3(0, visual.position.y, 0)
 
 ## hit: optional "stagger" (seconds) and "knockback" (weapon force; 3 is the base).
 func receive_damage(amount: float, direction: Vector3 = Vector3.ZERO, hit: Dictionary = {}) -> void:
@@ -291,6 +303,7 @@ func _die() -> void:
 		return
 	alive = false
 	bleed_time = 0
+	_lean(0.0)
 	collision_layer = 0
 	collision_mask = 0
 	health_label.visible = false
