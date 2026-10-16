@@ -1,4 +1,30 @@
-# Personagem PSX
+# Personagens PSX
+
+## Desde 16/10/2026: `personagens.gd`
+
+Todos os personagens do jogo saem de `personagens.gd`: o aventureiro, o mercador e os cinco monstros. Eles usam modelos do pacote [Characters PSX](https://elbolilloduro.itch.io/characters-psx), de Elbolilloduro (CC0), todos no rig do Mixamo, e as mesmas animações:
+
+- **Universal Animation Library** (Quaternius, CC0; ver `../ual/`): parado, andar, correr, agachar, esquiva, dano, morte, soco, golpe de espada e arremesso.
+- **`../mixamo/`**: o corte do sabre (`sword and shield slash (3)`).
+- **Poses escritas no próprio script**: machado, maça, montante, marreta, lança, alabarda, arco, besta, bloqueio, a garra dos monstros e a pancada do capataz. Cada pose diz para onde apontam os braços, as pernas e a arma, quanto o tronco gira e inclina, e onde a mão esquerda segura armas de duas mãos (por IK). O script faz a transição entre as poses.
+
+A transferência entre esqueletos funciona em dois passos. Primeiro o alvo é posto na mesma pose de referência da origem: os ossos dos membros giram até apontar como no T-pose da origem, porque os personagens do pacote vêm de braços para baixo. Depois cada osso recebe a rotação que o osso de origem faz a partir dessa referência.
+
+| Personagem | Modelo | Textura |
+| --- | --- | --- |
+| aventureiro_psx | `Character_16.fbx` | `aventureiro_psx.png` (repintada) |
+| mercador | `Character_16.fbx` | `mercador.png` (a do aventureiro com a túnica vinho) |
+| afogado | `monstros/Character_Monster_06.fbx` | `monstros/Character_Monster_06.png` |
+| carnical | `monstros/Character_Monster_07.fbx` | `monstros/Character_Monster_07.png` |
+| inchado | `monstros/Character_Monster_08.fbx` | `monstros/Character_Monster_08.png` |
+| carcereiro | `monstros/Character_Killer_08.fbx` | `monstros/Character_Killer_08.png` |
+| capataz | `monstros/Character_Killer_05.fbx` | `monstros/Character_Killer_05.png` |
+
+O script também grava `animacoes.json`, com o momento do impacto de cada golpe, que vai para `jogo/data/animacoes.json`. O jogo usa esse valor para o golpe acertar no fim do preparo.
+
+Para refazer: num projeto Godot à parte, monte `p/` com `Character_16.fbx`, `aventureiro_psx.png`, `mercador.png`, `p/psx/` (os arquivos de `monstros/`), `p/mixamo/` (os `.fbx` de `../mixamo/`) e `p/ual/UAL1_Standard.glb`. Depois rode `godot --headless --path . -s res://personagens.gd -- <saída> [ids...]`. Com `catalogo` no lugar dos ids, ele monta todo modelo de `p/psx/` só com a animação de parado, para escolher.
+
+## Antes (14/10/2026): repintura e transferência do rig próprio
 
 O aventureiro do jogo (`jogo/assets/originais/aventureiro_psx.glb`) é o `Character_16` do pacote
 [Characters PSX](https://elbolilloduro.itch.io/characters-psx), de Elbolilloduro (CC0), com rig
