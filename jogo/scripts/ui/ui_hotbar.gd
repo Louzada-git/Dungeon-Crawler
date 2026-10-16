@@ -90,7 +90,7 @@ func refresh() -> void:
 ## anything else that stacks, nothing for a weapon or armor (-1).
 func amount_for(id: String) -> int:
 	var data: Dictionary = Items.info(id)
-	var ammo: String = str(data.get("ammo", ""))
+	var ammo: String = game.ammo_for(data)
 	if ammo != "":
 		return game.inventory.count(ammo)
 	if data.has("damage") or data.has("protection"):
