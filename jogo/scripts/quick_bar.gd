@@ -62,9 +62,11 @@ static func action_name(game, id: String) -> String:
 	if data.has("protection"):
 		return "Tirar" if game.inventory.armor == id else "Vestir"
 	if data.has("food"):
-		return "Comer"
+		return "Beber" if data.get("bebida", false) else "Comer"
 	if data.has("heal"):
 		return "Aplicar"
+	if data.get("revela_mapa", false):
+		return "Ler"
 	if data.get("tag", "") == "MUNICAO":
 		return "Escolher"
 	return ""
