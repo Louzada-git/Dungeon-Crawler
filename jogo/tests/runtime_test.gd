@@ -577,7 +577,8 @@ func test_data() -> void:
  check(Items.DATA.size() >= 7,"Catálogo de itens carrega de data/itens.json")
  for id in Items.DATA:
   var d: Dictionary = Items.info(id)
-  var complete: bool = d.has("tag") and d.has("weight") and d.has("model") and float(d["weight"]) > 0
+  # Coins are the only thing without weight (shop money).
+  var complete: bool = d.has("tag") and d.has("weight") and d.has("model") and (float(d["weight"]) > 0 or (id == "coin" and float(d["weight"]) == 0.0))
   check(complete and UiStyle.CATEGORIES.has(d["tag"]),"Item completo e com categoria conhecida: "+id)
   check(not str(d["name"]).begins_with("ITEM_") and not str(d["description"]).begins_with("ITEM_"),"Nome e descrição traduzidos: "+id)
   if d.has("damage"):
