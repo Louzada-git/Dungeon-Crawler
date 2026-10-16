@@ -320,15 +320,15 @@ func run(target, capture: bool) -> void:
  await test_quick_bar()
  await test_third_person()
  var guardian = game.fixed_guardian()
- check(guardian != null and guardian.uid == "camara_guardiao","Mundo fixo: o objetivo é o guardião da câmara")
+ check(guardian != null and guardian.uid == "camara_guardiao","Mundo fixo: o objetivo é o carcereiro da câmara")
  if guardian.alive:
-  check(game.objective_text() == "Derrote o guardião da câmara" and not game.fixed_goal_done(),"Com o guardião vivo, o objetivo é derrotá-lo")
+  check(game.objective_text() == "Derrote o carcereiro" and not game.fixed_goal_done(),"Com o carcereiro vivo, o objetivo é derrotá-lo")
   guardian.receive_damage(guardian.maximum_health * 3, Vector3.RIGHT)
- check(not guardian.alive and game.objective_text() == "Volte ao abrigo","Guardião derrotado: o objetivo vira voltar ao abrigo")
+ check(not guardian.alive and game.objective_text() == "Volte ao abrigo","Carcereiro derrotado: o objetivo vira voltar ao abrigo")
  p.position = game.camp_position
  check(game.interaction_text().contains("VOLTAR"),"No abrigo, E encerra a expedição")
  game.interact()
- check(game.won and game.ended and game.ui.ending_panel.visible,"Voltar ao abrigo depois do guardião conclui a incursão")
+ check(game.won and game.ended and game.ui.ending_panel.visible,"Voltar ao abrigo depois do carcereiro conclui a incursão")
  get_tree().paused = false
  DirAccess.remove_absolute(game.save_path)
  print("RESULT: %d checks, %d failures" % [checks,failures.size()])
@@ -697,7 +697,7 @@ func test_weapons() -> void:
   p.refresh_weapon()
   check(is_instance_valid(p.held_weapon),"Personagem segura a arma: "+id)
   inv.remove(id)
- check(ProficiencyTree.path_text(Items.info("katana")["proficiencias"]) == "Lâminas › Espadas › Katana","Arma indica o ramo de proficiência que treina")
+ check(ProficiencyTree.path_text(Items.info("katana")["proficiencias"]) == "Lâminas › Espadas › Sabre","Arma indica o ramo de proficiência que treina")
  # Real models from the asset packs: right length, grip at the origin.
  var lengths := {"adaga":0.42,"katana":1.0,"montante":1.6,"machado":0.78,"maca":0.79,"martelo":1.27,"spear":2.6,"lanca_longa":3.1,"alabarda":2.62,"arco":1.16,"besta":0.79,"flecha":0.73,"virote":0.45}
  for id in lengths:
@@ -840,7 +840,7 @@ func test_weapons() -> void:
  for node in tip.find_children("*","Label",true,false):
   texts.append(node.text)
  var joined: String = " | ".join(texts)
- check(joined.contains("Contundentes › Martelo") and joined.contains("Pancada") and joined.contains("Duas mãos"),"Dica do martelo mostra família, golpe e empunhadura")
+ check(joined.contains("Contundentes › Marreta") and joined.contains("Pancada") and joined.contains("Duas mãos"),"Dica da marreta mostra família, golpe e empunhadura")
  check(joined.contains("Pesado") and joined.contains("Delay depois do golpe") and joined.contains("1,33 s") and joined.contains("esquiva em 0,34 s") and joined.contains("inclui 0,65 s do peso") and joined.contains("16"),"Dica do martelo mostra o peso, o delay (com 0,65 s do peso), quando a esquiva volta e o fôlego")
  tip.free()
  # Test arsenal
@@ -991,7 +991,7 @@ func test_proficiencies() -> void:
  # Starting weapon: any weapon, or the fists.
  check(UiCreationPanel.weapon_ids().size() == 14 and panel.weapon == "sword" and panel.weapon_buttons["sword"].button_pressed,"Criação oferece todas as 13 armas e os punhos, com a espada marcada")
  panel.pick_weapon("katana")
- check(panel.choice()["arma"] == "katana" and panel.weapon_buttons["katana"].button_pressed and not panel.weapon_buttons["sword"].button_pressed and panel.weapon_label.text.contains("Katana"),"Escolher a katana marca só ela e mostra o que ela treina")
+ check(panel.choice()["arma"] == "katana" and panel.weapon_buttons["katana"].button_pressed and not panel.weapon_buttons["sword"].button_pressed and panel.weapon_label.text.contains("Sabre"),"Escolher a katana marca só ela e mostra o que ela treina")
  panel.pick_weapon("arco")
  check(panel.weapon_label.text.contains("20 flechas"),"Arco avisa que vem com flechas")
  panel.reset()
