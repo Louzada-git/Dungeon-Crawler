@@ -1,0 +1,43 @@
+{
+ "versao": 1,
+ "_sobre": "Momento do impacto de cada ataque, em fração da duração da animação, por modelo. Gerado por arte/fontes/personagem_psx/personagens.gd. O jogo usa para casar a animação com o preparo do golpe.",
+ "modelos": {
+  "afogado": {
+   "attack": 0.5,
+   "pancada": 0.48
+  },
+  "aventureiro_psx": {
+   "arremesso": 0.4,
+   "attack": 0.42,
+   "disparo_arco": 0.61,
+   "disparo_besta": 0.29,
+   "estocada_alabarda": 0.47,
+   "estocada_lanca": 0.47,
+   "golpe_adaga": 0.37,
+   "golpe_espada": 0.42,
+   "golpe_katana": 0.47,
+   "golpe_maca": 0.47,
+   "golpe_machado": 0.46,
+   "golpe_montante": 0.49,
+   "pancada_martelo": 0.5,
+   "soco": 0.37,
+   "stab": 0.47
+  },
+  "capataz": {
+   "attack": 0.5,
+   "pancada": 0.48
+  },
+  "carcereiro": {
+   "attack": 0.5,
+   "pancada": 0.48
+  },
+  "carnical": {
+   "attack": 0.5,
+   "pancada": 0.48
+  },
+  "inchado": {
+   "attack": 0.5,
+   "pancada": 0.48
+  }
+ }
+}
