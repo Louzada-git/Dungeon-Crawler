@@ -85,3 +85,39 @@ ITEM_VIROTE_PESADO_NOME,Virote pesado
 ITEM_VIROTE_PESADO_DESC,Ponta de ferro maciça. Empurra o alvo e atravessa mais um.
 ITEM_PEDRA_NOME,Pedra
 ITEM_PEDRA_DESC,Uma pedra. Serve na funda.
+ITEM_ESPADA_CURTA_NOME,Espada curta
+ITEM_ESPADA_CURTA_DESC,Leve e curta. Boa para quem prefere bater rápido a bater forte.
+ITEM_ESPADA_LARGA_NOME,Espada larga
+ITEM_ESPADA_LARGA_DESC,Lâmina pesada de cavaleiro. Corta fundo e ainda pega quem estiver do lado.
+ITEM_FLORETE_NOME,Florete
+ITEM_FLORETE_DESC,"Fino como agulha. Só fura, mas fura rápido, e entra fácil em quem está distraído."
+ITEM_ALFANJE_NOME,Alfanje
+ITEM_ALFANJE_DESC,Curvo e pesado na ponta. O corte é largo e o sangue demora a parar.
+ITEM_ESPADAO_NOME,Espadão
+ITEM_ESPADAO_DESC,Mais comprido que o seu braço esticado. Abre espaço em qualquer sala.
+ITEM_FACA_NOME,Faca
+ITEM_FACA_DESC,Faca de cozinha que alguém trouxe aqui para baixo. Melhor que nada.
+ITEM_PUNHAL_NOME,Punhal
+ITEM_PUNHAL_DESC,Lâmina estreita para enfiar entre as costelas. Funciona melhor pelas costas.
+ITEM_MACA_CRAVOS_NOME,Maça de cravos
+ITEM_MACA_CRAVOS_DESC,Os cravos rasgam o que a maça não amassa.
+ITEM_ESTRELA_NOME,Estrela-da-manhã
+ITEM_ESTRELA_DESC,"Uma bola cheia de pontas num cabo curto. Pesa, mas derruba qualquer um."
+ITEM_MALHO_NOME,Malho
+ITEM_MALHO_DESC,"Uma pedra presa num pau. Lento de doer, mas abre buraco no chão."
+ITEM_MARTELO_GUERRA_NOME,Martelo de guerra
+ITEM_MARTELO_GUERRA_DESC,Mais leve que a marreta. Ainda faz tremer o chão em volta.
+ITEM_MACHADO_DUPLO_NOME,Machado de duas lâminas
+ITEM_MACHADO_DUPLO_DESC,Uma lâmina para cada lado. Quem sobrevive ao corte sangra por um bom tempo.
+ITEM_PICARETA_NOME,Picareta de guerra
+ITEM_PICARETA_DESC,"O bico atravessa armadura como se fosse couro. Contra quem não usa nada, é só uma picareta."
+ITEM_TRIDENTE_NOME,Tridente
+ITEM_TRIDENTE_DESC,"Três pontas, achado no fundo de um tanque. Fura dois de uma vez se estiverem em fila."
+ITEM_FOICE_NOME,Foice
+ITEM_FOICE_DESC,"Lâmina enorme e curva. Varre tudo na frente, mas demora para voltar."
+ITEM_ARCO_LONGO_NOME,Arco longo
+ITEM_ARCO_LONGO_DESC,Mais alto que você. A flecha vai longe e chega com força.
+ITEM_BESTA_PESADA_NOME,Besta pesada
+ITEM_BESTA_PESADA_DESC,Precisa de tempo e de braço para armar. O virote atravessa três.
+ITEM_FUNDA_NOME,Funda
+ITEM_FUNDA_DESC,"Uma tira de couro e uma pedra. Quase não pesa, e munição tem em todo canto."
