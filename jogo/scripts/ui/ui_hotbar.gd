@@ -218,7 +218,7 @@ func technique_tooltip(index: int) -> Control:
 	if problem != "":
 		tip.add_child(UiStyle.label(problem, 12, UiStyle.BAD, "medium"))
 	else:
-		for row in Techniques.summary(Techniques.stats(game.sheet, form_id, objs, weapon)):
+		for row in Techniques.summary(Techniques.stats(game.sheet, form_id, objs, weapon), game.sheet.weapon_stats(weapon)):
 			tip.add_child(UiStyle.label("%s: %s" % [row[0], row[1]], 12, UiStyle.MUTED))
 	tip.add_child(UiStyle.label("Tecla [%s] ou clique: usar na direção do cursor" % key, 12, UiStyle.ACCENT, "medium"))
 	return tip

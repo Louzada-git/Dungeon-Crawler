@@ -339,7 +339,7 @@ func refresh(force: bool = false) -> void:
 	var problem: String = Techniques.problem(game.sheet, book, selected, weapon)
 	var base: Dictionary = game.sheet.weapon_stats(weapon)
 	if Techniques.form_fits(selected, weapon):
-		for row in Techniques.summary(Techniques.stats(game.sheet, selected, objs, weapon)):
+		for row in Techniques.summary(Techniques.stats(game.sheet, selected, objs, weapon), game.sheet.weapon_stats(weapon)):
 			preview.add_child(UiStyle.label(row[0], 13, UiStyle.MUTED))
 			preview.add_child(UiStyle.label(row[1], 13, UiStyle.TEXT, "medium"))
 		if base.has("damage"):

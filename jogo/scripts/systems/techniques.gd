@@ -199,8 +199,9 @@ static func apply(s: Dictionary, effect: Dictionary, style: String) -> void:
 		current = maxf(current, float(effect["minimo"]))
 	target[key] = int(roundi(current)) if key in ["targets", "pierce", "hits"] else current
 
-## Short lines describing the result for the editor and tooltips.
-static func summary(s: Dictionary) -> Array:
+## Short lines describing the result for the editor and tooltips. `held` is
+## the weapon as it is without the habilidade (to show what changes in the blow).
+static func summary(s: Dictionary, held: Dictionary = {}) -> Array:
 	var rows: Array = []
 	if not s.has("damage"):
 		return rows
@@ -208,12 +209,14 @@ static func summary(s: Dictionary) -> Array:
 	rows.append(["Dano", ("%d × %s" % [hits, UiStyle.fmt(s["damage"])]) if hits > 1 else UiStyle.fmt(s["damage"])])
 	rows.append(["Alcance", "%s m" % UiStyle.fmt(s.get("range", 1.5))])
 	var style: String = str(s.get("style", "slash"))
-	if style == "slash":
-		rows.append(["Arco", "volta inteira" if float(s.get("angle", 55)) >= 179.0 else "%d°" % roundi(float(s.get("angle", 55)) * 2.0)])
+	if style == "slash" and float(s.get("angle", 55)) >= 150.0:
+		rows.append(["Golpe", "volta inteira"])
+	elif style == "slash" and float(s.get("angle", 0.0)) > float(held.get("angle", s.get("angle", 0.0))):
+		rows.append(["Golpe", "a lâmina varre mais"])
 	if int(s.get("targets", 1)) > 1 or style == "smash":
 		rows.append(["Alvos", "até %d" % int(s.get("targets", 1))])
-	if style == "smash":
-		rows.append(["Raio", "%s m" % UiStyle.fmt(s.get("area_radius", 1.6))])
+	if style == "smash" and float(s.get("area_radius", 0.0)) > float(held.get("area_radius", s.get("area_radius", 0.0))):
+		rows.append(["Cabeça", "acerta +%s m em volta" % UiStyle.fmt(float(s["area_radius"]) - float(held.get("area_radius", 0.0)))])
 	if int(s.get("pierce", 1)) > 1:
 		rows.append(["Atravessa", "%d inimigos" % int(s["pierce"])])
 	rows.append(["Fôlego", UiStyle.num(s["cost"])])
