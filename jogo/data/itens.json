@@ -2633,6 +2633,90 @@
    "valor": 10,
    "name": "ITEM_CHA_NOME",
    "description": "ITEM_CHA_DESC"
+  },
+  "gazua_aco": {
+   "tag": "FERRAMENTA",
+   "weight": 0.06,
+   "arrombar": {
+    "ordem": 1,
+    "bonus": 0.1,
+    "quebra": 0.4
+   },
+   "valor": 25,
+   "icon_view": {
+    "rot": [
+     0,
+     0,
+     -40
+    ],
+    "margin": 1.1,
+    "pitch": 35.0
+   },
+   "blocks": [
+    {
+     "size": [
+      0.02,
+      0.08,
+      0.02
+     ],
+     "pos": [
+      0,
+      0,
+      0
+     ],
+     "color": "3c4248"
+    },
+    {
+     "size": [
+      0.006,
+      0.15,
+      0.006
+     ],
+     "pos": [
+      0,
+      0.115,
+      0
+     ],
+     "color": "d6dde3"
+    },
+    {
+     "size": [
+      0.022,
+      0.006,
+      0.006
+     ],
+     "pos": [
+      0.009,
+      0.19,
+      0
+     ],
+     "color": "d6dde3"
+    }
+   ],
+   "model": "gazua_aco",
+   "name": "ITEM_GAZUA_ACO_NOME",
+   "description": "ITEM_GAZUA_ACO_DESC"
+  },
+  "chave_mestra": {
+   "tag": "FERRAMENTA",
+   "weight": 0.1,
+   "arrombar": {
+    "ordem": 3,
+    "sempre": true
+   },
+   "model": "chave_mestra",
+   "valor": 60,
+   "name": "ITEM_CHAVE_MESTRA_NOME",
+   "description": "ITEM_CHAVE_MESTRA_DESC"
+  },
+  "mapa": {
+   "tag": "FERRAMENTA",
+   "weight": 0.05,
+   "revela_mapa": true,
+   "model": "mapa",
+   "valor": 20,
+   "name": "ITEM_MAPA_NOME",
+   "description": "ITEM_MAPA_DESC"
   }
  }
 }
