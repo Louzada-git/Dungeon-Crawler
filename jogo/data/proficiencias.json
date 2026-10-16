@@ -136,7 +136,7 @@
    ]
   },
   "katana": {
-   "name": "Katana",
+   "name": "Sabre",
    "parent": "espadas",
    "atributo": "agilidade",
    "perks": [
@@ -184,7 +184,7 @@
    "name": "Contundentes",
    "grupo": "combate",
    "atributo": "forca",
-   "text": "Maças, martelos, machados e socos.",
+   "text": "Maças, marretas, machados e socos.",
    "perks": [
     {
      "nivel": 5,
@@ -212,7 +212,7 @@
    ]
   },
   "martelo": {
-   "name": "Martelo",
+   "name": "Marreta",
    "parent": "contundentes",
    "atributo": "forca",
    "perks": [
