@@ -19,7 +19,7 @@ static func write(game, notify_user: bool = true) -> bool:
 	for cell in game.discovered:
 		explored.append([cell.x, cell.y])
 	var p = game.player
-	var data := {"sheet": game.sheet.snapshot(), "version": VERSION, "mode": "labirinto" if game.generated else "fixo", "seed": game.seed, "floor": game.floor, "deepest": game.deepest, "floors": _pack_floors(game), "knowledge": pack_knowledge(game.knowledge), "world": game.layout.world.get("id", ""), "inventory": game.inventory.snapshot(), "tecnicas": game.techniques.snapshot(), "barra_rapida": game.quick_bar.snapshot(), "player": {"pos": [p.position.x, p.position.z], "health": p.health, "stamina": p.stamina, "food": p.food, "bleeding": p.bleeding}, "containers": loot_data, "enemies": enemy_data, "explored": explored, "kills": game.kills, "hits": game.hits_received, "won": game.won}
+	var data := {"sheet": game.sheet.snapshot(), "version": VERSION, "mode": "labirinto" if game.generated else "fixo", "seed": game.seed, "floor": game.floor, "deepest": game.deepest, "floors": _pack_floors(game), "knowledge": pack_knowledge(game.knowledge), "world": game.layout.world.get("id", ""), "inventory": game.inventory.snapshot(), "tecnicas": game.techniques.snapshot(), "barra_rapida": game.quick_bar.snapshot(), "municao": game.chosen_ammo, "player": {"pos": [p.position.x, p.position.z], "health": p.health, "stamina": p.stamina, "food": p.food, "bleeding": p.bleeding}, "containers": loot_data, "enemies": enemy_data, "explored": explored, "kills": game.kills, "hits": game.hits_received, "won": game.won}
 	var file := FileAccess.open(game.save_path + ".tmp", FileAccess.WRITE)
 	if file == null:
 		game.message("Não foi possível salvar a expedição.")
@@ -49,6 +49,8 @@ static func read(game) -> bool:
 		game.techniques.restore(raw["tecnicas"])
 	if raw.has("barra_rapida"):
 		game.quick_bar.restore(raw["barra_rapida"])
+	var ammo = raw.get("municao", "")
+	game.chosen_ammo = ammo if ammo is String and Items.DATA.has(ammo) else ""
 	var p = game.player
 	var pd: Dictionary = raw["player"]
 	p.position = Vector3(pd["pos"][0], 0, pd["pos"][1])
