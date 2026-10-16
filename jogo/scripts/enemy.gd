@@ -202,8 +202,13 @@ func _begin_attack(player) -> void:
 	committed = (player.global_position - global_position).normalized()
 	visual.rotation.y = atan2(committed.x, committed.z)
 	telegraph.rotation.y = visual.rotation.y
-	if animator.has_animation("attack"):
-		animator.play("attack", 0.08, animator.get_animation("attack").length / (windup + 0.30))
+	# The slam has its own animation; both are timed so the blow lands when the windup ends.
+	var anim: String = "pancada" if slamming and animator.has_animation("pancada") else "attack"
+	if animator.has_animation(anim):
+		var length: float = animator.get_animation(anim).length
+		var hit_at: float = Animacoes.impact(str(stats.get("model", "")), anim, 0.0) * length
+		var speed: float = hit_at / windup if hit_at > 0.0 else length / (windup + 0.30)
+		animator.play(anim, 0.08, speed)
 
 func _strike(player) -> void:
 	telegraph.visible = false
