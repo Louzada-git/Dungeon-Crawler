@@ -496,7 +496,7 @@ func update_hud() -> void:
 
 func _update_hands() -> void:
 	var id: String = game.inventory.equipped
-	var ammo_key: String = str(Items.info(id).get("ammo", ""))
+	var ammo_key: String = game.ammo_for(Items.info(id))
 	var path: Array = CharacterSheet.path_of(id)
 	var mastery: int = game.sheet.mastery(path) if game.sheet.enabled and not path.is_empty() else 0
 	hands_caption.text = ("EM MÃOS  ·  DOMÍNIO %d" % mastery) if mastery > 0 else "EM MÃOS"
@@ -516,7 +516,7 @@ func _update_hands() -> void:
 	hands_icon.texture = UiStyle.item_icon(id)
 	hands_name.text = str(data.get("name", id))
 	hands_stats.text = "Dano %d  ·  Alcance %s m  ·  Fôlego %s" % [roundi(float(data.get("damage", 0))), UiStyle.fmt(float(data.get("range", 1.5))), UiStyle.num(float(data.get("cost", 10)))]
-	var ammo: String = str(data.get("ammo", ""))
+	var ammo: String = game.ammo_for(data)
 	if ammo != "":
 		hands_stats.text = "Dano %d  ·  Alcance %s m  ·  %ss: %d" % [roundi(float(data.get("damage", 0))), UiStyle.fmt(float(data.get("range", 1.5)), 0), str(Items.info(ammo).get("name", ammo)), game.inventory.count(ammo)]
 
