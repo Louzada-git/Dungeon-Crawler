@@ -188,6 +188,9 @@ static func dust_ring(game, center: Vector3, radius: float) -> void:
 		burst(game, "poeira", center + Vector3(sin(a), 0, cos(a)) * radius * 0.75 + Vector3(0, 0.25, 0), _rng.randf_range(0.8, 1.2))
 
 
+## Seconds the blade trail takes to fade (captures hold it longer).
+static var trail_time: float = 0.18
+
 ## Pale trail of the blade over the swept part of the swing (the same capsules
 ## the hitbox used), fading quickly.
 static func swing_trail(game, samples: Array) -> void:
@@ -199,7 +202,7 @@ static func swing_trail(game, samples: Array) -> void:
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	mat.vertex_color_use_as_albedo = true
-	mat.albedo_color = Color(1, 1, 1, 0.55)
+	mat.albedo_color = Color(1, 1, 1, 0.7)
 	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, mat)
 	var quads: int = 0
 	for i in samples.size() - 1:
@@ -209,8 +212,8 @@ static func swing_trail(game, samples: Array) -> void:
 			continue
 		var fade0: float = float(i) / (samples.size() - 1)
 		var fade1: float = float(i + 1) / (samples.size() - 1)
-		var c0 := Color(0.92, 0.90, 0.84, 0.15 + 0.6 * fade0)
-		var c1 := Color(0.92, 0.90, 0.84, 0.15 + 0.6 * fade1)
+		var c0 := Color(0.95, 0.93, 0.86, 0.25 + 0.65 * fade0)
+		var c1 := Color(0.95, 0.93, 0.86, 0.25 + 0.65 * fade1)
 		var in0: Vector3 = (a[0] as Vector3).lerp(a[1], 0.45)
 		var in1: Vector3 = (b[0] as Vector3).lerp(b[1], 0.45)
 		for v in [[in0, c0], [a[1], c0], [b[1], c1], [in0, c0], [b[1], c1], [in1, c1]]:
@@ -228,7 +231,7 @@ static func swing_trail(game, samples: Array) -> void:
 	node.material_override = mat
 	game.add_child(node)
 	var fade := node.create_tween()
-	fade.tween_property(mat, "albedo_color:a", 0.0, 0.18)
+	fade.tween_property(mat, "albedo_color:a", 0.0, trail_time)
 	fade.tween_callback(node.queue_free)
 
 
