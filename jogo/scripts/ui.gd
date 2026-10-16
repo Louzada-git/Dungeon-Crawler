@@ -454,7 +454,9 @@ func _process(delta: float) -> void:
 	if game.player.health > 0 and low > 0:
 		target = low * (0.55 + 0.25 * sin(_time * (2.2 + low * 2.5)))
 	vignette.modulate.a = lerpf(vignette.modulate.a, target, minf(1.0, delta * 6.0))
-	# The game node stops while paused; keep the HUD current from here.
+	# The game node stops while paused (inventory, map, pause menu), so the cursor
+	# and the HUD are kept current from here, which always runs.
+	game.update_cursor()
 	if get_tree().paused:
 		update_hud()
 
