@@ -163,3 +163,9 @@ ITEM_VINHO_NOME,Vinho de garrafão
 ITEM_VINHO_DESC,"Vinho ruim, mas aquece. Tira o cansaço e alivia a dor."
 ITEM_CHA_NOME,Chá de casca
 ITEM_CHA_DESC,Amargo de fazer careta. Deixa você acordado e com fôlego.
+ITEM_GAZUA_ACO_NOME,Gazua de aço
+ITEM_GAZUA_ACO_DESC,Feita por quem entende do assunto. Quebra bem menos que a de arame.
+ITEM_CHAVE_MESTRA_NOME,Chave-mestra
+ITEM_CHAVE_MESTRA_DESC,"Abre qualquer fechadura, uma vez só. Depois fica presa nela."
+ITEM_MAPA_NOME,Mapa rabiscado
+ITEM_MAPA_DESC,Alguém desenhou este andar antes de você. Ler mostra tudo no mapa.
