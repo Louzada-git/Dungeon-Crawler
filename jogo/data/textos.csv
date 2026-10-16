@@ -11,8 +11,8 @@ ITEM_ORE_NOME,Minério de ferro
 ITEM_ORE_DESC,Pesado e sem uso para você. O mercador compra.
 ITEM_COIN_NOME,Vintém
 ITEM_COIN_DESC,O dinheiro daqui de baixo. Só o mercador aceita.
-INIMIGO_CORROMPIDO_NOME,Corrompido
-INIMIGO_GUARDIAO_NOME,Guardião
+INIMIGO_CORROMPIDO_NOME,Afogado
+INIMIGO_GUARDIAO_NOME,Carcereiro
 MUNDO_CISTERNAS_NOME,As Cisternas
 SALA_ABRIGO,Abrigo da entrada
 SALA_GALERIA,Galeria da guarda
@@ -37,9 +37,9 @@ ITEM_TONICO_NOME,Aguardente
 ITEM_TONICO_DESC,Desce queimando. O cansaço some na hora.
 ITEM_GEMA_NOME,Ametista
 ITEM_GEMA_DESC,Pedra bonita e leve. Só serve para vender.
-INIMIGO_ESPREITADOR_NOME,Espreitador
-INIMIGO_BRUTAMONTES_NOME,Brutamontes
-INIMIGO_CHEFE_NOME,Guardião do andar
+INIMIGO_ESPREITADOR_NOME,Carniçal
+INIMIGO_BRUTAMONTES_NOME,Inchado
+INIMIGO_CHEFE_NOME,Capataz
 MUNDO_LABIRINTO_NOME,O Labirinto
 RECIPIENTE_BAU,Baú
 RECIPIENTE_BAU_CHEFE,Relicário do guardião
