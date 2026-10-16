@@ -18,6 +18,8 @@ var scroll: ScrollContainer
 var rows: VBoxContainer
 var empty_label: Label
 var _items: Dictionary = {}
+## Shop lists: price of one unit, shown (and sorted) in the last column instead of the weight.
+var price_of: Callable = Callable()
 
 const SORT_COLUMNS := [["name", "Item"], ["category", "Categoria"], ["count", "Qtd."], ["weight", "Peso"]]
 
@@ -87,8 +89,12 @@ func _compare(a: String, b: String) -> bool:
 			va = int(_items[a])
 			vb = int(_items[b])
 		"weight":
-			va = float(da.get("weight", 0.0)) * int(_items[a])
-			vb = float(db.get("weight", 0.0)) * int(_items[b])
+			if price_of.is_valid():
+				va = int(price_of.call(a))
+				vb = int(price_of.call(b))
+			else:
+				va = float(da.get("weight", 0.0)) * int(_items[a])
+				vb = float(db.get("weight", 0.0)) * int(_items[b])
 		_:
 			va = UiStyle.category(str(da.get("tag", "")))[2] * 1000 + (0 if a == equipped_id else 1)
 			vb = UiStyle.category(str(db.get("tag", "")))[2] * 1000 + (0 if b == equipped_id else 1)
@@ -154,7 +160,7 @@ func _draw_header() -> void:
 	var f: Font = UiStyle.caps_font()
 	var cols: Array = columns(w)
 	var y: float = header.size.y * 0.5 + 4
-	var spots := [[38.0, "Item", "name", HORIZONTAL_ALIGNMENT_LEFT, cols[0] - 38.0], [cols[0], "Categoria", "category", HORIZONTAL_ALIGNMENT_LEFT, cols[1] - cols[0]], [cols[1], "Qtd.", "count", HORIZONTAL_ALIGNMENT_RIGHT, cols[2] - cols[1] - 8], [cols[2], "Peso", "weight", HORIZONTAL_ALIGNMENT_RIGHT, w - cols[2] - 8]]
+	var spots := [[38.0, "Item", "name", HORIZONTAL_ALIGNMENT_LEFT, cols[0] - 38.0], [cols[0], "Categoria", "category", HORIZONTAL_ALIGNMENT_LEFT, cols[1] - cols[0]], [cols[1], "Qtd.", "count", HORIZONTAL_ALIGNMENT_RIGHT, cols[2] - cols[1] - 8], [cols[2], "Preço" if price_of.is_valid() else "Peso", "weight", HORIZONTAL_ALIGNMENT_RIGHT, w - cols[2] - 8]]
 	for spot in spots:
 		var active: bool = spot[2] == sort_key
 		var text: String = spot[1].to_upper()
