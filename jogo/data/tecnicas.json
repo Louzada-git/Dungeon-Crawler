@@ -15,7 +15,7 @@
     "slash"
    ],
    "recarga": 1.5,
-   "texto": "O golpe normal da arma, em arco.",
+   "texto": "O golpe normal da arma.",
    "slots": 3,
    "slot_a_cada": 5
   },
@@ -503,7 +503,7 @@
    "requer": {
     "montante": 4
    },
-   "texto": "Arco 50° mais largo e +1 alvo. Gasta mais fôlego. Não serve em disparos.",
+   "texto": "A lâmina varre um trecho maior do golpe e +1 alvo. Gasta mais fôlego. Não serve em disparos.",
    "efeitos": [
     {
      "campo": "angle",
@@ -586,7 +586,7 @@
    "requer": {
     "martelo": 4
    },
-   "texto": "Raio da pancada no chão +0,5 m. Só em pancadas.",
+   "texto": "A cabeça acerta +0,5 m em volta de onde bate. Só em pancadas.",
    "efeitos": [
     {
      "campo": "area_radius",
