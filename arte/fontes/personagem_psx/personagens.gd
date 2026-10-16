@@ -147,7 +147,7 @@ var SETS := {
 		{"name": "golpe_adaga", "src": "ual", "anim": "Punch_Cross", "impacto": "auto"},
 		{"name": "golpe_espada", "src": "ual", "anim": "Sword_Attack", "to": 1.05, "impacto": 0.44},
 		{"name": "attack", "src": "ual", "anim": "Sword_Attack", "to": 1.05, "impacto": 0.44},
-		{"name": "golpe_katana", "src": "mixamo", "anim": "sword and shield slash (3)", "from": 0.25, "to": 0.95, "impacto": 0.33},
+		{"name": "golpe_katana", "src": "mixamo", "anim": "sword and shield slash (3)", "from": 0.25, "to": 0.95, "impacto": 0.55},
 		{"name": "arremesso", "src": "ual", "anim": "Spell_Simple_Shoot", "impacto": "auto"},
 		{"name": "golpe_machado", "src": "pose", "base": "Sword_Idle", "keys": CHOP, "impacto": 0.44},
 		{"name": "golpe_maca", "src": "pose", "base": "Sword_Idle", "keys": SWING, "impacto": 0.42},
