@@ -291,6 +291,39 @@ static func campfire(world: Node3D, pos: Vector3) -> Node3D:
 	_tremble(world, light)
 	return fire
 
+## The merchant of the floor, with a crate, a barrel and a sack beside him.
+## His model is MERCHANT_MODEL ("mercador" once it exists, else the adventurer, tinted).
+static func merchant(game, pos: Vector3, facing_point: Vector3) -> Node3D:
+	var holder := Node3D.new()
+	holder.name = "Mercador"
+	game.world_root.add_child(holder)
+	holder.position = pos
+	var dir: Vector3 = facing_point - pos
+	dir.y = 0
+	if dir.length() > 0.05:
+		holder.rotation.y = atan2(dir.x, dir.z)
+	var own: bool = ResourceLoader.exists("res://assets/originais/mercador.glb")
+	var body: Node3D = Visuals.model("mercador" if own else DungeonPlayer.MODEL)
+	body.name = "Corpo"
+	holder.add_child(body)
+	if not own:
+		Visuals.tint(body, Color("c9b49a"))
+	Visuals.play(Visuals.animation(body), "idle")
+	var solid := StaticBody3D.new()
+	var shape := CollisionShape3D.new()
+	var capsule := CapsuleShape3D.new()
+	capsule.radius = 0.38
+	capsule.height = 1.7
+	shape.shape = capsule
+	shape.position.y = 0.85
+	solid.add_child(shape)
+	holder.add_child(solid)
+	prop(holder, "caixote", Vector3(0.78, 0, -0.4), 0.3, 0.8)
+	prop(holder, "barril", Vector3(-0.78, 0, -0.4), 0.0, 0.8)
+	prop(holder, "saco", Vector3(0.78, 0.53, -0.4), 0.0, 0.6)
+	_sign(holder, "MERCADOR", Vector3(0, 2.1, 0), Color("e2c98f"))
+	return holder
+
 static func add_container(game, data: Dictionary) -> Node3D:
 	var holder := Node3D.new()
 	game.add_child(holder)
