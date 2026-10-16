@@ -118,11 +118,16 @@ static func attack_arc(radius: float, color: Color, half_angle: float = 1.2, wid
 ## named in "model" (tinted by "tint"). Grip at the origin, tip toward +Y.
 static func item_model(id: String) -> Node3D:
  var data: Dictionary = Items.DATA.get(id,{})
- var custom := "res://assets/armas/%s.glb" % id
- if ResourceLoader.exists(custom):
+ var custom := custom_model_path(id)
+ if custom != "":
   if not cache.has(custom):
    cache[custom] = load(custom)
-  return cache[custom].instantiate()
+  var made: Node3D = cache[custom].instantiate()
+  # "base" + "escala_modelo": another item's model, bigger or smaller (longbow from the bow).
+  made.scale = Vector3.ONE * float(data.get("escala_modelo",1.0))
+  if str(data.get("tint","")) != "":
+   tint(made,Color(data["tint"]))
+  return made
  if data.has("blocks"):
   return blocks(data["blocks"])
  var node := model(str(data.get("model","coin")))
@@ -130,8 +135,19 @@ static func item_model(id: String) -> Node3D:
   tint(node,Color(data["tint"]))
  return node
 
+## Model made for the item: assets/armas/<id>.glb (weapons, ammo),
+## assets/itens/<id>.glb (other items), or the model of its "base" item.
+static func custom_model_path(id: String) -> String:
+ for path in ["res://assets/armas/%s.glb" % id,"res://assets/itens/%s.glb" % id]:
+  if ResourceLoader.exists(path):
+   return path
+ var base: String = str(Items.DATA.get(id,{}).get("base",""))
+ if base != "" and base != id:
+  return custom_model_path(base)
+ return ""
+
 static func has_custom_model(id: String) -> bool:
- return ResourceLoader.exists("res://assets/armas/%s.glb" % id)
+ return custom_model_path(id) != ""
 
 ## Provisional model made of boxes: [{size:[x,y,z], pos:[x,y,z], color, rot (degrees around Z)}].
 static func blocks(list: Array) -> Node3D:
