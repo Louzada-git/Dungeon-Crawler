@@ -2,7 +2,7 @@
 
 Dungeon crawler de sobrevivência com cara de PlayStation 1, feito na Godot 4.7.
 
-Você desce pelas cisternas com uma mochila, um pouco de comida e uma arma. Cada expedição gera um labirinto novo. Explore as salas, cuide da fome, do fôlego e dos ferimentos, derrote o guardião de cada andar para abrir a descida e volte ao abrigo com os selos. Se o aventureiro morrer, ele não volta: o próximo começa do zero, mas lembra o mapa que você já explorou.
+Você desce pelas cisternas com uma mochila, um pouco de comida e uma arma. Cada expedição gera um labirinto novo. Explore as salas, cuide da fome, do fôlego e dos ferimentos, troque o que achar com o mercador e derrote o capataz de cada andar para abrir a descida. Se o aventureiro morrer, ele não volta: o próximo começa do zero, mas lembra o mapa que você já explorou.
 
 ![Uma sala do 1º andar, na câmera isométrica](revisao/terceira/04-mesmo-lugar-isometrica.png)
 
@@ -21,18 +21,21 @@ Precisa de placa de vídeo com OpenGL 3.3. O jogo é em português. Os créditos
 
 **Labirinto**
 - Gerado por semente a cada expedição. O 1º andar tem 10 salas, e cada andar seguinte é maior (20, 40, 60…).
-- Salas de combate, de suprimentos, de tesouro, covis com guardião de elite e a câmara do chefe, que guarda o selo e a descida.
+- Salas de combate, de suprimentos, de tesouro, covis com o carcereiro (elite) e a câmara do capataz, que guarda a descida.
+- Um mercador na entrada de cada andar compra e vende com vinténs. O estoque muda de andar para andar.
 - Baús abertos e monstros mortos continuam assim quando você volta a um andar. Alguns baús são trancados e precisam de gazua.
 
 **Sobrevivência**
 - Fome, fôlego, carga da mochila e ferimentos que sangram até você tratar com bandagens ou unguento.
-- O abrigo do 1º andar é o único lugar seguro: lá você descansa, salva e entrega os selos.
+- O abrigo do 1º andar é o único lugar seguro: lá você descansa e salva.
+- 77 itens: comida, bebida que devolve fôlego, curativos, armaduras leves e pesadas, gazuas, chave-mestra, mapa do andar e tesouros para vender.
 
 **Combate**
-- 13 armas, cada uma com seu jeito: espadas e katana cortam em arco, lanças e alabarda estocam em linha, maça e martelo esmagam (e furam armadura), o machado faz sangrar, a adaga mata quem não te viu, e arco e besta atiram flechas e virotes que dá para recolher.
+- 31 armas, cada uma com seu jeito: espadas, sabre e alfanje cortam, lanças, pique, alabarda e tridente estocam em linha, maças, marretas e martelos esmagam (e furam armadura), machados e lâminas serrilhadas fazem sangrar, adagas matam quem não te viu, e arcos, bestas e funda atiram munição que dá para recolher (flechas de osso, de ponta larga, virotes pesados…).
+- O golpe acerta quem a arma encosta: cada arma tem uma hitbox do tamanho do modelo que segue a animação, e o alcance mostrado é o da lâmina. Os monstros acertam com a garra e se jogam no golpe; recuar no preparo escapa.
 - Arma pesada bate forte e demora para golpear de novo: cada kg da arma soma 0,1 s de espera.
 - Guarda com o botão direito, esquiva, corrida, andar agachado e ataque furtivo.
-- Cinco tipos de monstro: corrompido, espreitador (rápido), brutamontes (resistente), guardião de elite e o guardião do andar, com golpe em área e fúria na metade da vida.
+- Cinco tipos de monstro: afogado, carniçal (rápido), inchado (resistente), carcereiro de elite e o capataz do andar, com pancada em área e fúria na metade da vida.
 
 **Personagem**
 - No começo você distribui 25 pontos entre Força, Vigor, Agilidade e Destreza e escolhe a arma inicial (ou começa de punhos).
@@ -47,8 +50,10 @@ Precisa de placa de vídeo com OpenGL 3.3. O jogo é em português. Os créditos
 
 | | |
 |---|---|
-| ![Terceira pessoa, com um monstro à frente](revisao/terceira/02-sala-com-monstro.png) | ![O guardião do andar e o anel do golpe em área](revisao/labirinto/03-chefe-golpe-em-area.png) |
-| Câmera em terceira pessoa | O guardião do andar avisa o golpe em área com um anel vermelho |
+| ![Terceira pessoa, com um monstro à frente](revisao/terceira/02-sala-com-monstro.png) | ![O capataz e o anel da pancada em área](revisao/labirinto/03-chefe-golpe-em-area.png) |
+| Câmera em terceira pessoa | O capataz avisa a pancada em área com um anel vermelho |
+| ![A hitbox da espada ao longo do golpe](revisao/hitbox/01-sword-lado.png) | ![A janela da loja do mercador](revisao/loja/02-loja.png) |
+| A hitbox da espada ao longo do golpe (em verde, a posição do impacto) | A loja do mercador |
 | ![Janela de habilidades, com objetos e teclas](revisao/barra/02-teclas-das-habilidades.png) | ![Barra rápida com vários itens](revisao/barra/01-barra-rapida.png) |
 | Habilidades: objetos, prévia e teclas | Barra rápida de 1 a 9 |
 
@@ -62,7 +67,7 @@ Precisa de placa de vídeo com OpenGL 3.3. O jogo é em português. Os créditos
 | Correr | Shift |
 | Esquivar | Espaço |
 | Andar agachado | C |
-| Interagir / abrir baú / arrombar | E |
+| Interagir / abrir baú / arrombar / loja | E |
 | Inventário | I ou Tab |
 | Mapa explorado | M |
 | Condição física | H |
@@ -79,11 +84,11 @@ Precisa de placa de vídeo com OpenGL 3.3. O jogo é em português. Os créditos
 ## Primeiros passos
 
 1. Monte o aventureiro: distribua os pontos e escolha a arma.
-2. No abrigo, pegue o que precisar dos baús. Comida e bandagens ocupam a barra rápida desde o começo.
+2. No abrigo, pegue o que precisar dos baús e veja o que o mercador vende. Comida e bandagens ocupam a barra rápida desde o começo.
 3. Explore o andar. Chegue agachado (C) em monstros que ainda não te viram para um ataque furtivo.
-4. Quando o fôlego acabar, você não esquiva nem segura a guarda. Recue antes disso.
-5. O guardião do andar fica na sala mais distante. Derrote-o para pegar o selo e abrir a descida.
-6. Volte ao abrigo e use o ponto de descanso (E) para salvar e entregar os selos.
+4. Chegue perto o bastante para a arma encostar, e recue quando o monstro preparar a garra. Sem fôlego, você não esquiva nem segura a guarda.
+5. O capataz fica na sala mais distante. Derrote-o para abrir a descida.
+6. Volte ao abrigo e use o ponto de descanso (E) para salvar.
 
 ## Rodar pelo código
 
@@ -116,13 +121,16 @@ Engine: [Godot](https://godotengine.org/) (MIT). Fonte: [Inter](https://github.c
 
 | Asset | Autor | Licença |
 |---|---|---|
-| Personagem (Characters PSX) | [Elbolilloduro](https://elbolilloduro.itch.io/characters-psx) | CC0 |
-| Adaga, montante, machado, maça, martelo e lanças (RPG Weapons) | [Binbun](https://binbun3d.itch.io/rpg-weapons) | CC0 |
-| Katana, alabarda, arco, besta, flecha e virote (Low Poly Weapon Pack) | Kickin' It Studios | Uso livre em jogos |
+| Aventureiro, mercador e monstros (Characters PSX) | [Elbolilloduro](https://elbolilloduro.itch.io/characters-psx) | CC0 |
+| Animações (Universal Animation Library) | [Quaternius](https://quaternius.com) | CC0 |
+| Corte do sabre e rig dos personagens | [Mixamo](https://www.mixamo.com/) (Adobe) | Termos do Mixamo |
+| Adaga, faca, espada curta, montante, machado, maça, marreta e lanças (RPG Weapons) | [Binbun](https://binbun3d.itch.io/rpg-weapons) | CC0 |
+| Sabre, alabarda, arco, besta, flecha e virote (Low Poly Weapon Pack) | Kickin' It Studios | Uso livre em jogos |
+| Treze armas novas, de espada larga a foice (3D Fantasy Weapons Pack) | Polyy, **modelos gerados por IA** | CC0 |
+| Comida, bebida, tesouros e ferramentas (Fantasy Props MegaKit) | [Quaternius](https://quaternius.com) | CC0 |
 | Efeitos visuais (Brackeys VFX Bundle) | Brackeys, com texturas de CodeManu e Thomas Iché | CC0 |
-| Rig e parte das animações do aventureiro | [Mixamo](https://www.mixamo.com/) (Adobe) | Termos do Mixamo |
 
-Monstros, cenário, móveis e o resto dos objetos são arte própria do projeto. A lista completa está em `jogo/ASSETS.md`.
+Cenário, móveis e parte dos objetos são arte própria do projeto. A lista completa, com o modelo de origem de cada item, está em `jogo/ASSETS.md`.
 
 ## Licença
 
