@@ -500,7 +500,7 @@ func _update_hands() -> void:
 	var path: Array = CharacterSheet.path_of(id)
 	var mastery: int = game.sheet.mastery(path) if game.sheet.enabled and not path.is_empty() else 0
 	hands_caption.text = ("EM MÃOS  ·  DOMÍNIO %d" % mastery) if mastery > 0 else "EM MÃOS"
-	var key: String = id + ("|%d" % game.inventory.count(ammo_key) if ammo_key != "" else "") + "|m%d" % mastery
+	var key: String = id + ("|%s%d" % [ammo_key, game.inventory.count(ammo_key)] if ammo_key != "" else "") + "|m%d" % mastery
 	if key == _last_hands:
 		return
 	_last_hands = key
