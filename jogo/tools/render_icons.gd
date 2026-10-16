@@ -1,7 +1,8 @@
 extends SceneTree
 # Renders inventory icons from the game's own 3D models.
 # Needs a display (real or virtual) and the Compatibility renderer:
-#   godot --path . --rendering-driver opengl3 -s res://tools/render_icons.gd
+#   godot --path . --rendering-driver opengl3 -s res://tools/render_icons.gd [-- ids...]
+# With ids, only those icons are rendered.
 # Output: res://assets/ui/icones/<id>.png (transparent, 128 px, dark outline).
 
 const SIZE: int = 128
@@ -39,16 +40,28 @@ func _initialize() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUT))
 	render_all()
 
+## Tight bounds from the vertices: a mesh's own box can be much bigger once
+## turned (Polyy models come posed at an angle and are turned upright).
 func mesh_bounds(node: Node, acc: Array) -> void:
 	if node is MeshInstance3D and node.mesh != null:
-		var box: AABB = node.global_transform * node.mesh.get_aabb()
-		acc.append(box)
+		var t: Transform3D = node.global_transform
+		for s in node.mesh.get_surface_count():
+			var verts = node.mesh.surface_get_arrays(s)[Mesh.ARRAY_VERTEX]
+			if verts == null or verts.is_empty():
+				continue
+			var box := AABB(t * verts[0], Vector3.ZERO)
+			for v in verts:
+				box = box.expand(t * v)
+			acc.append(box)
 	for child in node.get_children():
 		mesh_bounds(child, acc)
 
 func render_all() -> void:
+	var only: PackedStringArray = OS.get_cmdline_user_args()
 	for item in entries():
 		var id: String = item[0]
+		if not only.is_empty() and not id in only:
+			continue
 		var framing: Array = item[2]
 		var entry: Array = [item[1], framing[0], framing[1], framing[2]]
 		var viewport := SubViewport.new()
