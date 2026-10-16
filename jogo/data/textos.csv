@@ -147,3 +147,13 @@ ITEM_CENOURA_NOME,Cenoura
 ITEM_CENOURA_DESC,Alguém plantou isso aqui embaixo? Dá um pouco de ânimo.
 ITEM_COGUMELO_NOME,Cogumelo do poço
 ITEM_COGUMELO_DESC,Cresce nas paredes úmidas. Alimenta pouco e fecha um arranhão.
+ITEM_ARNICA_NOME,Pomada de arnica
+ITEM_ARNICA_DESC,Passa no roxo e a dor alivia. Não segura sangramento.
+ITEM_SUTURA_NOME,Agulha e linha
+ITEM_SUTURA_DESC,"Para fechar o corte na marra. Dói, mas para de sangrar."
+ITEM_ERVA_NOME,Erva-de-bicho
+ITEM_ERVA_DESC,Mastiga e põe em cima do machucado. Cura pouco.
+ITEM_MEL_NOME,Pote de mel
+ITEM_MEL_DESC,Doce. Alimenta e ajuda a fechar ferida.
+ITEM_GARRAFADA_NOME,Garrafada
+ITEM_GARRAFADA_DESC,"Receita de curandeiro, e ninguém sabe bem o que tem dentro. Funciona."
