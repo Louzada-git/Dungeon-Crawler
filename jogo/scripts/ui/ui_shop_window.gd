@@ -38,7 +38,8 @@ func _init(owner_game) -> void:
 	left.add_child(_row([buy_button, buy_more_button]))
 	bag_list = UiItemList.new("loja_mochila")
 	bag_list.empty_text = "Nada na mochila para vender."
-	bag_list.price_of = func(id): return ShopSystem.sell_price(id)
+	# "—" for what he does not buy and for the piece in use.
+	bag_list.price_of = func(id): return ShopSystem.sell_price(id) if ShopSystem.sellable(game, id) > 0 else 0
 	var right := _column(columns, "Sua mochila  ·  o que ele paga", bag_list)
 	sell_button = UiStyle.button("Vender 1", func(): sell(bag_list.selected_id, 1), 130)
 	sell_all_button = UiStyle.button("Vender todos", func(): sell(bag_list.selected_id, 9999), 130)
@@ -105,13 +106,17 @@ func _refresh_detail() -> void:
 	var id: String = parts[1]
 	var data: Dictionary = Items.info(id)
 	if parts[0] == "loja":
-		detail.text = "%s  ·  %d vinténs cada  ·  %s" % [data.get("name", id), ShopSystem.buy_price(game.floor, id), data.get("description", "")]
+		detail.text = "%s  ·  %s cada  ·  %s" % [data.get("name", id), coins(ShopSystem.buy_price(game.floor, id)), data.get("description", "")]
 	else:
 		var pay: int = ShopSystem.sell_price(id)
-		var note: String = "ele paga %d cada" % pay if pay > 0 else "ele não compra isso"
+		var note: String = "ele paga %s cada" % coins(pay) if pay > 0 else "ele não compra isso"
 		if pay > 0 and ShopSystem.sellable(game, id) < game.inventory.count(id):
 			note += " (a peça em uso fica com você)"
 		detail.text = "%s  ·  %s  ·  %s" % [data.get("name", id), note, data.get("description", "")]
+
+## "1 vintém", "12 vinténs".
+static func coins(n: int) -> String:
+	return "%d %s" % [n, "vintém" if n == 1 else "vinténs"]
 
 func buy(id: String, amount: int) -> void:
 	if id == "":
@@ -136,7 +141,7 @@ func sell(id: String, amount: int) -> void:
 	var price: int = ShopSystem.sell_price(id)
 	var gone: int = ShopSystem.sell(game, id, amount)
 	if gone > 0:
-		game.message("Vendeu %d × %s por %d vinténs." % [gone, name, gone * price], 2)
+		game.message("Vendeu %d × %s por %s." % [gone, name, coins(gone * price)], 2)
 		game.sound.play_at("loot", game.player.global_position, 0.5)
 	elif price <= 0:
 		game.message("O mercador não compra isso.", 2)
