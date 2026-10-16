@@ -249,7 +249,10 @@ func run(target, capture: bool) -> void:
  game.resolve_player_attack()
  check(enemy.health==65,"Estocada não atinge alvo fora da faixa estreita")
  second.position = game.layout.to_world(Vector2i(9,10))
- for sample in [Vector3(3.05,0,0),Vector3(3.05,0,0.7),Vector3(3.5,0,0),Vector3(-1.0,0,0)]:
+ # The spear reaches as far as its model goes over the thrust ("range" is measured from it).
+ var spear_reach: float = float(Items.info("spear")["range"])
+ var spear_far := Vector3(spear_reach+0.25,0,0)
+ for sample in [spear_far,spear_far+Vector3(0,0,0.7),Vector3(spear_reach+0.7,0,0),Vector3(-1.0,0,0)]:
   p.cooldown = 0
   p.attack_timer = 0
   p.attack_wait = 0
@@ -258,8 +261,8 @@ func run(target, capture: bool) -> void:
   enemy.position = p.position+sample
   p.attack()
   game.resolve_player_attack()
-  var expected: float = spear_hit if sample == Vector3(3.05,0,0) else 65.0
-  check(enemy.health == expected,"Alcance linear da lança: "+str(sample))
+  var expected: float = spear_hit if sample == spear_far else 65.0
+  check(enemy.health == expected,"Alcance linear da lança (ponta do modelo): "+str(sample))
  check(p.animator.current_animation == "estocada_lanca","Estocada usa o movimento da lança com as duas mãos")
  # Real windup, committed aim, and inventory swap while the strike is pending.
  inv.equip("sword")
@@ -775,14 +778,18 @@ func test_weapons() -> void:
  swing("maca",Vector3.RIGHT)
  check(is_equal_approx(e0.health,e0.maximum_health-mace),"Maça: dano normal em monstro sem armadura")
  inv.remove("maca")
- # War hammer: area in front, nothing behind.
- fresh(e0,at+Vector3(1.3,0,1.0))
- fresh(e1,at+Vector3(2.2,0,-0.6))
+ # War hammer: hits everyone the head touches where it comes down, nobody around it.
+ fresh(e0,at+Vector3(1.2,0,0.45))
+ fresh(e1,at+Vector3(1.2,0,-0.45))
  fresh(e2,at+Vector3(-1.5,0,0))
  swing("martelo",Vector3.RIGHT)
  var hammer_left: float = e0.maximum_health-float(Items.info("martelo")["damage"])
- check(is_equal_approx(e0.health,hammer_left) and is_equal_approx(e1.health,hammer_left),"Martelo acerta todos na área à frente")
- check(is_equal_approx(e2.health,e2.maximum_health),"Martelo não acerta quem está atrás")
+ check(is_equal_approx(e0.health,hammer_left) and is_equal_approx(e1.health,hammer_left),"Marreta acerta todos que a cabeça toca ao descer")
+ check(is_equal_approx(e2.health,e2.maximum_health),"Marreta não acerta quem está atrás")
+ fresh(e0,at+Vector3(1.2,0,1.7))
+ fresh(e1,at+Vector3(2.9,0,0))
+ swing("martelo",Vector3.RIGHT)
+ check(is_equal_approx(e0.health,e0.maximum_health) and is_equal_approx(e1.health,e1.maximum_health),"Marreta não acerta longe da cabeça (sem área em volta)")
  inv.remove("martelo")
  # Halberd: pierces two in a line.
  fresh(e0,at+Vector3(1.3,0,0))
@@ -864,12 +871,134 @@ func test_weapons() -> void:
  check(all_there and int(chest["items"].get("flecha",0)) == 40,"Arsenal de teste traz todas as armas e munição")
  game.containers.erase(chest)
  chest["node"].queue_free()
+ await test_hitbox(at,e0,e1,e2)
  for e in [e0,e1,e2,guard]:
   fresh(e,game.layout.to_world(Vector2i(28,7)))
  inv.restore(saved_inventory)
  game.quick_bar.defaults("sword")
  p.refresh_weapon()
  game.ui.close_all()
+
+## Hits by touch: the weapon's capsule follows the model in the hand over the
+## swing, bodies are capsules; monsters hit with the claw of their attack.
+func test_hitbox(at: Vector3, e0, e1, e2) -> void:
+ var p = game.player
+ var inv = game.inventory
+ check(is_equal_approx(Hitbox.segment_distance(Vector3.ZERO,Vector3(2,0,0),Vector3(1,1,0),Vector3(1,3,0)),1.0) and is_equal_approx(Hitbox.segment_distance(Vector3.ZERO,Vector3(1,0,0),Vector3(3,0,0),Vector3(4,0,0)),2.0),"Distância entre segmentos (base das cápsulas)")
+ check(Hitbox.touches([Vector3.ZERO,Vector3(1,0,0),0.1],[Vector3(1.4,0,0),Vector3(1.4,1,0),0.35]) and not Hitbox.touches([Vector3.ZERO,Vector3(1,0,0),0.1],[Vector3(1.5,0,0),Vector3(1.5,1,0),0.35]),"Cápsulas se tocam só quando as superfícies encostam")
+ # The capsule is the weapon in the hand: from the grip to the tip of the model.
+ inv.add("sword")
+ inv.equip("sword")
+ p.refresh_weapon()
+ p.attack_item = "sword"
+ var cap: Array = Hitbox.player_weapon(p,"sword",game.sheet.weapon_stats("sword"),Vector3.ZERO)
+ var grip: Vector3 = p.held_weapon.global_position
+ var length: float = Hitbox.extent("sword").y
+ check(cap[0].distance_to(grip) < 0.02 and absf(cap[0].distance_to(cap[1])-length) < 0.02,"Hitbox da espada vai da empunhadura à ponta do modelo (%s m)" % UiStyle.fmt(length,2))
+ # What the item shows as "Alcance" is what the hitbox reaches.
+ var off: Array = []
+ for id in Items.DATA:
+  if str(Items.DATA[id].get("style","")) in ["slash","thrust","smash"] and absf(Hitbox.reach(game,id)-float(Items.DATA[id]["range"])) > 0.06:
+   off.append(id)
+ check(off.is_empty() and absf(Hitbox.reach(game,"")-float(game.sheet.base_stats("")["range"])) <= 0.06,"Alcance mostrado nas armas e nos punhos é o da hitbox (tools/medir_alcance.gd) "+str(off))
+ # The swing is the animation's: the wind-up behind the back does not hit.
+ fresh(e0,at+Vector3(-0.9,0,0.3))
+ fresh(e1,game.layout.to_world(Vector2i(28,7)))
+ fresh(e2,game.layout.to_world(Vector2i(28,7)))
+ swing("sword",Vector3.RIGHT)
+ check(is_equal_approx(e0.health,e0.maximum_health),"Espada: preparo atrás das costas não acerta")
+ # Where the blade does not pass, nothing is hit, even close and in front.
+ fresh(e0,at+Vector3(0.3,0,1.25))
+ swing("spear",Vector3.RIGHT)
+ check(is_equal_approx(e0.health,e0.maximum_health),"Estocada não acerta ao lado, onde a haste não passa")
+ # Katana: the slash crosses the front at the impact (timing fixed for the hitbox).
+ inv.add("katana")
+ inv.equip("katana")
+ p.attack_item = "katana"
+ p.attack_facing = Vector3.RIGHT
+ var front: int = 0
+ for c in Hitbox.player_samples(game,game.sheet.weapon_stats("katana")):
+  if (c[1]-p.global_position).x > 1.0:
+   front += 1
+ check(front >= 3,"Sabre: a lâmina passa pela frente no momento do impacto")
+ # Fists reach a short way.
+ inv.unequip()
+ fresh(e0,at+Vector3(1.1,0,0))
+ p.cooldown = 0
+ p.attack_timer = 0
+ p.attack_wait = 0
+ p.stamina = 100
+ p.facing = Vector3.RIGHT
+ p.attack()
+ game.resolve_player_attack()
+ check(e0.health < e0.maximum_health,"Soco acerta quem está ao alcance do punho")
+ fresh(e0,at+Vector3(1.8,0,0))
+ p.cooldown = 0
+ p.attack_timer = 0
+ p.attack_wait = 0
+ p.attack()
+ game.resolve_player_attack()
+ check(is_equal_approx(e0.health,e0.maximum_health),"Soco não acerta além do braço")
+ # A wider stroke (Varredura, Corte giratório) and Braço longo widen the capsule's path.
+ var spin: Dictionary = game.sheet.weapon_stats("sword").duplicate()
+ spin["angle"] = 180.0
+ p.attack_item = "sword"
+ p.attack_facing = Vector3.RIGHT
+ var behind: bool = false
+ for c in Hitbox.player_samples(game,spin):
+  behind = behind or (c[1]-p.global_position).x < -0.8
+ check(behind,"Corte giratório leva a lâmina à volta inteira")
+ var longer: Dictionary = game.sheet.weapon_stats("sword").duplicate()
+ longer["range"] = float(longer["range"])+0.5
+ check(Hitbox.reach(game,"sword") < 1.7 and Hitbox.extras(game.sheet.base_stats("sword"),longer).x == 0.5,"Braço longo estica a lâmina da hitbox")
+ # Trail of the blade drawn from the same capsules.
+ var trails: int = game.get_children().filter(func(n): return n is MeshInstance3D and n.mesh is ImmediateMesh).size()
+ swing("sword",Vector3.RIGHT)
+ check(game.get_children().filter(func(n): return n is MeshInstance3D and n.mesh is ImmediateMesh).size() > trails,"Golpe deixa o rastro da lâmina por onde a hitbox passou")
+ # Monsters: the claw of the attack has to touch the adventurer.
+ var foe = e0
+ fresh(foe,at+Vector3(1.6,0,0))
+ foe.committed = Vector3.LEFT
+ var claw: Array = Hitbox.monster_samples(foe)
+ check(not claw.is_empty() and claw.all(func(c): return (c[1]-foe.global_position).dot(Vector3.LEFT) > 0.0),"Garra do monstro varre à frente dele")
+ check(Hitbox.monster_hits(game,foe),"Garra acerta o aventureiro na distância em que o monstro ataca")
+ foe.committed = Vector3.RIGHT
+ check(not Hitbox.monster_hits(game,foe),"Garra não acerta quem está atrás do monstro")
+ foe.committed = Vector3.LEFT
+ foe.position = at+Vector3(foe.reach+0.7,0,0)
+ check(not Hitbox.monster_hits(game,foe),"Garra não acerta além do alcance do golpe")
+ foe.position = at+Vector3(1.6,0,0)
+ var base_lunge: float = float(foe.stats.get("lunge",0.0))
+ foe.stats["lunge"] = 0.0
+ foe.position = at+Vector3(foe.reach,0,0)
+ var without: bool = Hitbox.monster_hits(game,foe)
+ foe.stats["lunge"] = base_lunge
+ check(not without and Hitbox.monster_hits(game,foe),"O bote do monstro (lunge) leva a garra até o alcance de ataque")
+ foe._lean(1.0)
+ check(absf(foe.visual.position.x+base_lunge) < 0.01,"Modelo do monstro avança com o bote")
+ foe._lean(0.0)
+ # The real state machine: the claw lands when the player stays, misses when the player steps back.
+ p.position = at
+ p.invulnerable = 0
+ p.health = 100
+ p.hurt_timer = 0
+ p.dodge_timer = 0
+ fresh(foe,at+Vector3(1.6,0,0))
+ foe.aggro = true
+ foe.cooldown = 0
+ foe.attack_recovery = 0
+ foe.memory = 3.0
+ foe.set_physics_process(true)
+ await wait_frames(4)
+ check(foe.windup > 0,"Monstro começa o golpe ao alcance")
+ p.position = at+Vector3(-1.6,0,0)
+ await wait_frames(60)
+ check(p.health == 100,"Recuar durante o preparo escapa da garra")
+ foe.set_physics_process(false)
+ foe._lean(0.0)
+ p.position = at
+ inv.remove("sword")
+ inv.remove("katana")
 
 func test_proficiencies() -> void:
  get_tree().paused = false
