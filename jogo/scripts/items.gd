@@ -64,6 +64,17 @@ static func with_ammo(weapon: Dictionary, ammo: String) -> Dictionary:
 		w["pierce"] = int(w.get("pierce", 1)) + int(a["pierce"])
 	return w
 
+## Lockpicking tools ("arrombar" in the data), in the order they get used:
+## "ordem" lowest first. "bonus" adds to the chance, "quebra" multiplies the
+## chance of breaking on a miss, "sempre" opens any lock and is used up.
+static func lockpicks() -> Array:
+	var out: Array = []
+	for id in DATA:
+		if DATA[id].has("arrombar"):
+			out.append(id)
+	out.sort_custom(func(a, b): return int(DATA[a]["arrombar"].get("ordem", 9)) < int(DATA[b]["arrombar"].get("ordem", 9)))
+	return out
+
 ## Drops translated copies, e.g. after a language change.
 static func clear_cache() -> void:
 	_resolved.clear()
