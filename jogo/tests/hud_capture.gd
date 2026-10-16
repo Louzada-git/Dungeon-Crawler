@@ -58,7 +58,7 @@ func run() -> void:
 	# 2. Next to the shelter reserve: prompt + collapsed bars show the container.
 	p.position = Vector3(game.containers[0]["pos"][0] + 1.2, 0, game.containers[0]["pos"][1])
 	game.camera_rig.position = p.position
-	game.message("Prepare sua mochila. Explore e recupere o selo das cisternas.", 6)
+	game.message("Prepare a mochila. O guardião da câmara está no fundo das cisternas.", 6)
 	await frames(10)
 	await shot("02-perto-do-bau")
 	# 3. Inventory open on the reserve, item selected, tooltip on a row.
