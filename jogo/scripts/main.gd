@@ -29,6 +29,8 @@ var layout: DungeonLayout
 var player: DungeonPlayer
 var camera: Camera3D
 var camera_rig: GameCamera
+## Third person: whether the cursor should be captured right now (see update_cursor).
+var cursor_captured: bool = false
 var ui
 var world_root: Node3D
 var stairs_sign: Label3D
@@ -172,10 +174,11 @@ func third_person() -> bool:
 	return camera_rig != null and camera_rig.third_person()
 
 ## Third person: the mouse turns the camera (cursor captured) unless a window,
-## a menu or Alt needs the cursor.
+## a menu or Alt needs the cursor. Called every frame by the HUD, which keeps
+## running while the game is paused (inventory, map, pause menu).
 func update_cursor() -> void:
-	var captured: bool = third_person() and not ended and not choosing_character and ui != null and not ui.cursor_needed()
-	var wanted: int = Input.MOUSE_MODE_CAPTURED if captured else Input.MOUSE_MODE_VISIBLE
+	cursor_captured = third_person() and not ended and not choosing_character and ui != null and not ui.cursor_needed()
+	var wanted: int = Input.MOUSE_MODE_CAPTURED if cursor_captured else Input.MOUSE_MODE_VISIBLE
 	if Input.mouse_mode != wanted:
 		Input.mouse_mode = wanted
 
@@ -407,7 +410,6 @@ func _process(delta: float) -> void:
 	for loot in containers:
 		loot["ring"].visible = not loot["items"].is_empty()
 	aim_marker.refresh(self)
-	update_cursor()
 	ui.update_hud()
 
 func _unhandled_input(event: InputEvent) -> void:
