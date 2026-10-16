@@ -83,12 +83,22 @@ func use(game, slot: int) -> bool:
 		game.inventory.unequip()
 		game.message("Guardou: %s. Punhos." % name, 2)
 		return true
+	if data.get("tag", "") == "MUNICAO":
+		# Ammunition on the bar picks what the weapon fires.
+		game.chosen_ammo = id
+		var held: String = game.inventory.equipped
+		if held != "" and Items.fires(held, id):
+			game.message("Atirando: %s." % name.to_lower(), 2)
+		else:
+			var users: PackedStringArray = []
+			for weapon in Items.DATA:
+				if Items.fires(weapon, id):
+					users.append(str(Items.info(weapon).get("name", weapon)).to_lower())
+			game.message("Escolhida: %s. Serve em: %s." % [name.to_lower(), ", ".join(users)], 2.5)
+		changed.emit()
+		return true
 	if action_name(game, id) == "":
-		var ammo_for: String = ""
-		for weapon in Items.DATA:
-			if str(Items.DATA[weapon].get("ammo", "")) == id:
-				ammo_for = str(Items.info(weapon).get("name", weapon)).to_lower()
-		game.message(("Munição: equipe %s para usar." % ammo_for) if ammo_for != "" else ("%s não se usa da barra." % name), 2)
+		game.message("%s não se usa da barra." % name, 2)
 		return false
 	return game.use_item(id)
 
