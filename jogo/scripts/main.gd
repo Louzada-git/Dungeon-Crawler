@@ -55,6 +55,8 @@ var floor_states: Dictionary = {}
 var knowledge: Dictionary = {}
 ## Fractions of missed ammunition still owed to the floor (see Projectile._fall).
 var ammo_recovery: Dictionary = {}
+## Ammunition picked on the quick bar; used whenever the weapon fires it.
+var chosen_ammo: String = ""
 var _skip_load: bool = false
 ## PlayStation-style filter (pause menu); preference kept in settings_path.
 var psx: PsxFilter
@@ -583,6 +585,20 @@ func drop_item(id: String, amount: int = 1) -> bool:
 
 func use_item(id: String) -> bool:
 	return ItemUse.use(self, id)
+
+## What the weapon fires now: the chosen ammunition if it fits and is in the
+## backpack, else the first it takes that is in the backpack, else its main one
+## ("" for weapons without ammunition).
+func ammo_for(weapon: Dictionary) -> String:
+	var list: Array = Items.ammo_list(weapon)
+	if list.is_empty():
+		return ""
+	if chosen_ammo in list and inventory.count(chosen_ammo) > 0:
+		return chosen_ammo
+	for id in list:
+		if inventory.count(id) > 0:
+			return id
+	return list[0]
 
 func interaction_text() -> String:
 	if has_shelter() and player.position.distance_to(camp_position) < 1.6:
