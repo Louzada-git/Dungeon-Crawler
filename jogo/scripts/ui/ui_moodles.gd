@@ -64,7 +64,7 @@ func compute() -> Array:
 		var sight: float = 7.5 * p.detection_mult()
 		out.append({"id": "sneak", "icon": "eye_off", "level": 0, "title": "Furtivo", "text": "Um monstro comum te nota a %s m de frente e %s m por trás\n(de pé: 7,5 m). Ataque em desprevenido: dano ×%s.  [C] levanta." % [UiStyle.fmt(sight), UiStyle.fmt(sight * 0.6), UiStyle.fmt(game.sheet.sneak_attack_mult(), 1)]})
 	if p.can_block():
-		out.append({"id": "guard", "icon": "shield", "level": 0, "title": "Em guarda", "text": "Golpes de frente perdem %d%% do dano; cada bloqueio gasta fôlego.\nNão segura a pancada em área do chefe." % roundi(game.sheet.block_reduction(game.inventory.equipped) * 100)})
+		out.append({"id": "guard", "icon": "shield", "level": 0, "title": "Em guarda", "text": "Golpes de frente perdem %d%% do dano; cada bloqueio gasta fôlego.\nNão segura a pancada em área do capataz." % roundi(game.sheet.block_reduction(game.inventory.equipped) * 100)})
 	if game.is_safe():
 		out.append({"id": "safe", "icon": "tent", "level": 0, "title": "No abrigo", "text": "Monstros não atacam aqui.\nNo ponto de descanso, E salva a expedição."})
 	return out

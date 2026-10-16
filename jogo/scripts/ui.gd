@@ -855,7 +855,7 @@ func show_ending(success: bool) -> void:
 		_end_button("Sair", func(): get_tree().quit(), 110)
 	else:
 		end_title.text = "Você voltou vivo" if success else "A expedição terminou"
-		end_note.text = "O guardião caiu e você saiu das cisternas com o que conseguiu carregar." if success else "Os corredores cobram cada descuido."
+		end_note.text = "O carcereiro caiu e você saiu das cisternas com o que conseguiu carregar." if success else "Os corredores cobram cada descuido."
 		rows = [["Monstros derrotados", str(game.kills)], ["Golpes recebidos", str(game.hits_received)], ["Carga trazida", "%s kg" % UiStyle.fmt(game.inventory.weight())], ["Moedas na mochila", str(game.inventory.count("coin"))]]
 		_end_button("Nova expedição — reiniciar progresso", func(): game.restart())
 		_end_button("Sair", func(): get_tree().quit(), 110)
