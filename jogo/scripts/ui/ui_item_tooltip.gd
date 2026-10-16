@@ -79,11 +79,11 @@ static func _weapon_rows(grid: GridContainer, data: Dictionary) -> void:
 	var targets: int = int(data.get("targets", 1))
 	match style:
 		"thrust":
-			_row(grid, "Golpe", "Estocada em linha reta")
+			_row(grid, "Golpe", "Estocada: acerta o que a ponta e a haste tocam")
 			_row(grid, "Alvos", "atravessa até %d" % targets if targets > 1 else "primeiro da linha")
 		"smash":
-			_row(grid, "Golpe", "Pancada no chão, raio de %s m" % UiStyle.fmt(float(data.get("area_radius", 1.6)), 1))
-			_row(grid, "Alvos", "todos na área")
+			_row(grid, "Golpe", "Pancada de cima: acerta onde a cabeça bate")
+			_row(grid, "Alvos", "todos que ela tocar (até %d)" % targets)
 		"shoot":
 			var pierce: int = int(data.get("pierce", 1))
 			_row(grid, "Golpe", "Disparo à distância")
@@ -92,7 +92,7 @@ static func _weapon_rows(grid: GridContainer, data: Dictionary) -> void:
 				var have: String = ("  ·  %d na mochila" % inventory.count(ammo)) if inventory != null else ""
 				_row(grid, "Munição", str(Items.info(ammo).get("name", ammo)) + have)
 		_:
-			_row(grid, "Golpe", "Corte em arco de %d°" % int(float(data.get("angle", 55.0)) * 2))
+			_row(grid, "Golpe", "Corte: acerta o que a lâmina toca no movimento")
 			_row(grid, "Alvos", "até %d" % targets if targets > 1 else "um")
 	var specials: Array = []
 	if data.has("sneak_mult"):
