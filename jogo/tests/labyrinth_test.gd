@@ -253,7 +253,8 @@ func run(target) -> void:
 	var locked_by_floor: Dictionary = {1: [], 3: []}
 	var relic_locked: bool = false
 	var chests: int = 0
-	for s in 6:
+	# 16 seeds: the 1st floor has few chests, and a small sample made the average swing.
+	for s in 16:
 		for fl in [1, 3]:
 			var d: Dictionary = LabyrinthGenerator.generate(3000 + s * 11, fl)
 			for entry in d["containers"]:
