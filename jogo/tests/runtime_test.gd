@@ -56,8 +56,17 @@ func run(target, capture: bool) -> void:
  check(skeleton.find_bone("mixamorig_RightHand") >= 0 and game.player.weapon_mount.get_parent() is BoneAttachment3D,"Personagem PSX: arma presa à mão do rig Mixamo com a correção de posição")
  for animation_name in ["idle","guard","walk","run","attack","stab","dodge","hit","die"]:
   check(game.player.animator.has_animation(animation_name),"Animação original disponível: "+animation_name)
- for animation_name in ["mixamo_attack","mixamo_stab","mixamo_hit","mixamo_die"]:
-  check(game.player.animator.has_animation(animation_name),"Animação Mixamo adaptada disponível: "+animation_name)
+ # New set (16/10/2026): Universal Animation Library retargeted to the rig, plus written attacks.
+ var weapon_anims: Array = []
+ for id in Items.DATA:
+  var wanted: String = str(Items.DATA[id].get("animacao",""))
+  if wanted != "" and not wanted in weapon_anims:
+   weapon_anims.append(wanted)
+ for animation_name in ["furtivo","furtivo_andar","bloqueio","soco"] + weapon_anims:
+  check(game.player.animator.has_animation(animation_name),"Animação nova disponível: "+animation_name)
+ for animation_name in weapon_anims + ["soco"]:
+  var at: float = Animacoes.impact(DungeonPlayer.MODEL,animation_name,-1.0)
+  check(at > 0.1 and at < 0.9,"Momento do impacto conhecido para %s (%s)" % [animation_name,UiStyle.fmt(at,2)])
  check(game.enemies[0].animator.has_animation("attack"),"Monstro original tem animação de ataque")
  check(game.layout.pathfinder.is_point_solid(Vector2i(2,22)),"Móvel bloqueia a rota de navegação dos monstros")
  for container_data in game.containers:
@@ -133,7 +142,7 @@ func run(target, capture: bool) -> void:
  p.cooldown = 0
  var hp: float = enemy.health
  check(p.attack(),"Ataque inicia com fôlego disponível")
- check(p.animator.current_animation == "mixamo_attack","Corte de espada usa animação Mixamo")
+ check(p.animator.current_animation == "golpe_espada","Corte de espada usa a animação da espada")
  check(not p.attack(),"Recuperação bloqueia spam de ataque")
  # Running player physics would update mouse aim; damage uses the committed direction below.
  game.resolve_player_attack()
@@ -164,7 +173,7 @@ func run(target, capture: bool) -> void:
  p.invulnerable = 0
  p.receive_damage(17)
  check(p.health == player_hp-17,"Receber ataque reduz vida")
- check(p.animator.current_animation == "mixamo_hit","Ferimento reproduz reação Mixamo no jogo")
+ check(p.animator.current_animation == "hit","Ferimento toca a reação de dano no jogo")
  p.health = 83
  p.food = 62
  p.bleeding = false
@@ -251,7 +260,7 @@ func run(target, capture: bool) -> void:
   game.resolve_player_attack()
   var expected: float = spear_hit if sample == Vector3(3.05,0,0) else 65.0
   check(enemy.health == expected,"Alcance linear da lança: "+str(sample))
- check(p.animator.current_animation == "mixamo_stab","Estocada usa o movimento adaptado do Mixamo")
+ check(p.animator.current_animation == "estocada_lanca","Estocada usa o movimento da lança com as duas mãos")
  # Real windup, committed aim, and inventory swap while the strike is pending.
  inv.equip("sword")
  enemy.health = 65
@@ -320,6 +329,7 @@ func run(target, capture: bool) -> void:
  await test_quick_bar()
  await test_new_items()
  await test_shop()
+ test_characters()
  await test_third_person()
  var guardian = game.fixed_guardian()
  check(guardian != null and guardian.uid == "camara_guardiao","Mundo fixo: o objetivo é o carcereiro da câmara")
@@ -1719,7 +1729,8 @@ func test_balance() -> void:
  check(not p.dodge(),"Sem esquiva antes da metade do delay")
  if p.animator and p.animator.is_playing() and p.animator.speed_scale > 0.0:
   var anim: Animation = p.animator.get_animation(p.animator.current_animation)
-  check(is_equal_approx(p.animator.get_playing_speed()/p.animator.speed_scale,anim.length/(float(w["windup"])/float(w["impacto"]))),"Animação do golpe acerta no fim do preparo (dura preparo / impacto)")
+  var at: float = Animacoes.impact(DungeonPlayer.MODEL,p.animator.current_animation,float(w["impacto"]))
+  check(is_equal_approx(p.animator.get_playing_speed()/p.animator.speed_scale,anim.length/(float(w["windup"])/at)),"Animação do golpe acerta no fim do preparo (dura preparo / impacto da animação)")
  p.set_physics_process(true)
  await get_tree().create_timer(p.dodge_lock+0.03).timeout
  var still_slow: bool = p.attack_timer > 0.0
@@ -2151,6 +2162,36 @@ func test_shop() -> void:
  p.set_physics_process(was_processing)
  game.ui.close_all()
  DirAccess.remove_absolute(game.save_path)
+
+## Characters of 16/10/2026: a model of the Characters PSX pack per monster
+## type, all on the Mixamo rig with the same animations, and the merchant.
+func test_characters() -> void:
+ var models: Dictionary = {}
+ for kind in EnemyTypes.DATA:
+  var info: Dictionary = EnemyTypes.info(kind)
+  var model: String = str(info.get("model",""))
+  models[model] = true
+  var node: Node3D = Visuals.model(model)
+  var anim: AnimationPlayer = Visuals.animation(node)
+  var needed: Array = ["idle","walk","guard","attack","hit","die"] + (["pancada"] if info.get("boss",false) else [])
+  var missing: Array = needed.filter(func(n): return anim == null or not anim.has_animation(n))
+  check(ResourceLoader.exists("res://assets/originais/%s.glb" % model) and missing.is_empty() and str(info.get("tint","")) == "","Monstro %s usa o modelo %s com todas as animações" % [kind,model] + ("" if missing.is_empty() else " (faltam %s)" % ", ".join(missing)))
+  check(Animacoes.impact(model,"attack",0.0) > 0.2,"Golpe do %s tem momento de impacto conhecido" % kind)
+  node.free()
+ check(models.size() == EnemyTypes.DATA.size(),"Cada tipo de monstro tem um modelo diferente")
+ var m: Node3D = game.merchant
+ var body: Node3D = m.get_node_or_null("Corpo") if m else null
+ var anim: AnimationPlayer = Visuals.animation(body) if body else null
+ check(body != null and ResourceLoader.exists("res://assets/originais/mercador.glb") and anim != null and anim.current_animation == "idle","Mercador tem modelo próprio e fica parado em pé")
+ # A monster's swing lands when its windup ends.
+ var e = game.enemies[0]
+ e._begin_attack(game.player)
+ var playing: String = e.animator.current_animation
+ var length: float = e.animator.get_animation(playing).length
+ var hit_at: float = Animacoes.impact(str(e.stats.get("model","")),playing,0.0) * length
+ check(playing == "attack" and is_equal_approx(e.animator.get_playing_speed() / e.animator.speed_scale,hit_at / e.windup),"Golpe do monstro chega no fim do preparo")
+ e.windup = 0
+ e.animator.play("idle")
 
 ## Third-person camera option: camera behind the character, mouse look, walls whole.
 func test_third_person() -> void:
