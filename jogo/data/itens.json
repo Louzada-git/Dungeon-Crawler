@@ -83,7 +83,7 @@
   },
   "coin": {
    "tag": "TESOURO",
-   "weight": 0.02,
+   "weight": 0.0,
    "model": "coin",
    "name": "ITEM_COIN_NOME",
    "description": "ITEM_COIN_DESC",
