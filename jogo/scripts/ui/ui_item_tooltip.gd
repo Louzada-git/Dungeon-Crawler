@@ -136,8 +136,14 @@ static func _item_rows(grid: GridContainer, id: String, data: Dictionary) -> voi
 		var noise: float = sheet.armor_noise(id) if sheet != null else float(data.get("noise", 0))
 		_row(grid, "Barulho", "monstros te notam %d%% mais longe" % roundi(noise * 50) if noise > 0 else "silenciosa")
 		_row(grid, "Treina", ProficiencyTree.path_text(data.get("proficiencias", [])))
-	if id == "gazua":
+	if data.has("arrombar"):
+		var spec: Dictionary = data["arrombar"]
 		_row(grid, "Uso", "abre baús trancados  [E]")
+		if spec.get("sempre", false):
+			_row(grid, "Chance", "abre qualquer fechadura e fica nela")
+		elif float(spec.get("quebra", 1.0)) < 1.0 or float(spec.get("bonus", 0.0)) > 0.0:
+			_row(grid, "Melhor que a gazua", "+%d%% de chance  ·  quebra %d%% menos" % [roundi(float(spec.get("bonus", 0.0)) * 100), roundi((1.0 - float(spec.get("quebra", 1.0))) * 100)])
+	if id == "gazua":
 		if sheet != null:
 			_row(grid, "Chance", "simples %d%%, média %d%%, difícil %d%%, mestre %d%%" % [roundi(sheet.pick_chance(1) * 100), roundi(sheet.pick_chance(2) * 100), roundi(sheet.pick_chance(3) * 100), roundi(sheet.pick_chance(4) * 100)])
 	if data.get("tag", "") == "MUNICAO":
