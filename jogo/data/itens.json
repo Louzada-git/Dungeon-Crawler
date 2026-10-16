@@ -878,6 +878,9 @@
   },
   "gazua": {
    "tag": "FERRAMENTA",
+   "arrombar": {
+    "ordem": 2
+   },
    "weight": 0.05,
    "model": "gazua",
    "name": "ITEM_GAZUA_NOME",
