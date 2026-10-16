@@ -3,7 +3,8 @@
 Uso (da pasta jogo/):
     python3 tools/tabela_balanco.py [itens.json] [inimigos.json] [proficiencias.json]
 
-Para cada arma, no domínio 1 e sem talentos nem habilidades: tempo do golpe
+Para cada arma, no domínio 1 e sem talentos nem habilidades: alcance (nas armas
+corpo a corpo é o da hitbox, medido por tools/medir_alcance.gd), tempo do golpe
 (preparo e ciclo até o próximo golpe, com o delay do peso), quando a esquiva libera, dano por segundo num alvo (com
 sangramento), contra blindado, fôlego por golpe, quantos golpes seguidos um
 fôlego cheio aguenta, e quantos golpes e quanto tempo para derrubar cada
@@ -59,16 +60,16 @@ def linha(nome, a):
         golpes = math.ceil(vida / por_golpe)
         mortes.append("%d (%.1f s)" % (golpes, w + (golpes - 1) * c))
     alvos = a.get("targets", 1)
-    return "| %s | %.0f | %.2f | %.2f | %.2f | %.0f | %.0f | %.1f | %s | %s | %s |" % (
-        nome, dano, w, c, esquiva, dps, blind, custo, seguidos, alvos, " | ".join(mortes))
+    return "| %s | %.0f | %.1f | %.2f | %.2f | %.2f | %.0f | %.0f | %.1f | %s | %s | %s |" % (
+        nome, dano, float(a.get("range", 1.5)), w, c, esquiva, dps, blind, custo, seguidos, alvos, " | ".join(mortes))
 
 
-print("| Arma | Dano | Preparo | Ciclo | Esquiva | DPS | DPS blind. | Fôlego | Seguidos | Alvos | " + " | ".join(NOMES.values()) + " |")
-print("|" + " --- |" * (10 + len(NOMES)))
+print("| Arma | Dano | Alcance | Preparo | Ciclo | Esquiva | DPS | DPS blind. | Fôlego | Seguidos | Alvos | " + " | ".join(NOMES.values()) + " |")
+print("|" + " --- |" * (11 + len(NOMES)))
 for nome, a in armas.items():
     print(linha(nome, a))
 print()
-print("| Monstro | Vida | Dano | Preparo | Firmeza |")
-print("| --- | --- | --- | --- | --- |")
+print("| Monstro | Vida | Dano | Preparo | Firmeza | Ataca a | Bote |")
+print("| --- | --- | --- | --- | --- | --- | --- |")
 for m, info in monstros.items():
-    print("| %s | %.0f | %.0f | %.2f | %s |" % (m, info["health"], info["damage"], info.get("windup", 0.65), info.get("firmeza", "—")))
+    print("| %s | %.0f | %.0f | %.2f | %s | %.1f m | %.2f m |" % (m, info["health"], info["damage"], info.get("windup", 0.65), info.get("firmeza", "—"), info.get("reach", 1.8), info.get("lunge", 0.0)))
