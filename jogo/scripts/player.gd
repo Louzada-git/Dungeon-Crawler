@@ -172,6 +172,8 @@ func rest_rotation(data: Dictionary) -> Vector3:
 
 ## "escala_mao" stretches the old short spear model; models made for the item use 1.
 func hand_scale(id: String, data: Dictionary) -> Vector3:
+ if data.has("escala_modelo") and Visuals.has_custom_model(id):
+  return Vector3.ONE * float(data["escala_modelo"])
  if data.has("escala_mao") and not Visuals.has_custom_model(id) and not data.has("blocks"):
   var s: Array = data["escala_mao"]
   return Vector3(s[0],s[1],s[2])
