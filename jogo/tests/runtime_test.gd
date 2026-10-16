@@ -318,6 +318,7 @@ func run(target, capture: bool) -> void:
  await test_vfx()
  await test_balance()
  await test_quick_bar()
+ await test_new_items()
  await test_third_person()
  var guardian = game.fixed_guardian()
  check(guardian != null and guardian.uid == "camara_guardiao","Mundo fixo: o objetivo é o carcereiro da câmara")
@@ -989,7 +990,11 @@ func test_proficiencies() -> void:
  panel._change("agilidade",-1)
  check(panel.start_button.disabled,"Criação exige gastar todos os pontos")
  # Starting weapon: any weapon, or the fists.
- check(UiCreationPanel.weapon_ids().size() == 14 and panel.weapon == "sword" and panel.weapon_buttons["sword"].button_pressed,"Criação oferece todas as 13 armas e os punhos, com a espada marcada")
+ var weapon_count: int = 0
+ for id in Items.DATA:
+  if Items.DATA[id].has("style"):
+   weapon_count += 1
+ check(weapon_count >= 31 and UiCreationPanel.weapon_ids().size() == weapon_count + 1 and panel.weapon == "sword" and panel.weapon_buttons["sword"].button_pressed,"Criação oferece todas as %d armas e os punhos, com a espada marcada" % weapon_count)
  panel.pick_weapon("katana")
  check(panel.choice()["arma"] == "katana" and panel.weapon_buttons["katana"].button_pressed and not panel.weapon_buttons["sword"].button_pressed and panel.weapon_label.text.contains("Sabre"),"Escolher a katana marca só ela e mostra o que ela treina")
  panel.pick_weapon("arco")
@@ -1940,6 +1945,122 @@ func test_quick_bar() -> void:
  game.ui.refresh_technique_keys()
  book.clear()
  bar.defaults("sword")
+ inv.restore(saved_inventory)
+ p.refresh_weapon()
+ ready_player(p)
+ p.set_physics_process(was_processing)
+ game.ui.close_all()
+
+## The 50 items of 16/10/2026: catalog, models, prices, ammunition you choose,
+## ammunition effects, lockpicks, the sketched map, food that heals, drinks.
+func test_new_items() -> void:
+ get_tree().paused = false
+ game.ui.close_all()
+ var p = game.player
+ var inv = game.inventory
+ var saved_inventory: Dictionary = inv.snapshot()
+ var saved_map: Dictionary = game.discovered.duplicate()
+ var was_processing: bool = p.is_physics_processing()
+ p.set_physics_process(false)
+ inv.restore({"stacks":{},"equipped":""})
+ var new_ids := ["flecha_larga","flecha_osso","virote_pesado","pedra","espada_curta","espada_larga","florete","alfanje","espadao","faca","punhal","maca_cravos","estrela","malho","martelo_guerra","machado_duplo","picareta","tridente","foice","arco_longo","besta_pesada","funda","manto","couro_fervido","brigantina","camisa_malha","peitoral","escamas","pao","queijo","peixe","toucinho","bolacha","cenoura","cogumelo","arnica","sutura","erva","mel","garrafada","cerveja","vinho","cha","gazua_aco","chave_mestra","mapa","anel_prata","calice","castical","dente_ouro"]
+ var problems: PackedStringArray = []
+ for id in new_ids:
+  var info: Dictionary = Items.info(id)
+  var model: Node3D = Visuals.item_model(id) if Items.DATA.has(id) else null
+  var ok: bool = Items.DATA.has(id) and not str(info.get("name","ITEM_")).begins_with("ITEM_") and not str(info.get("description","ITEM_")).begins_with("ITEM_") and int(info.get("valor",0)) > 0 and ResourceLoader.exists("res://assets/ui/icones/%s.png" % id) and model != null and model.find_children("*","MeshInstance3D",true,false).size() > 0
+  if model:
+   model.free()
+  if not ok:
+   problems.append(id)
+ check(new_ids.size() == 50 and problems.is_empty(),"Os 50 itens novos têm nome, descrição, preço, ícone e modelo" + ("" if problems.is_empty() else ": faltam " + ", ".join(problems)))
+ var carrot: Node3D = Visuals.item_model("cenoura")
+ var coloured: bool = false
+ for m in carrot.find_children("*","MeshInstance3D",true,false):
+  var mat = m.get_active_material(0)
+  coloured = coloured or (mat is BaseMaterial3D and mat.vertex_color_use_as_albedo)
+ carrot.free()
+ check(coloured,"Modelos do MegaKit usam a cor dos vértices (cenoura laranja, não branca)")
+ var longbow: Node3D = Visuals.item_model("arco_longo")
+ check(Visuals.has_custom_model("arco_longo") and is_equal_approx(longbow.scale.x,1.3),"Arco longo usa o modelo do arco, 30% maior")
+ longbow.free()
+ # Ammunition: the bow takes three kinds; the one on the quick bar is fired first.
+ var at: Vector3 = game.layout.to_world(Vector2i(5,12))
+ p.position = at
+ for e in game.enemies:
+  e.set_physics_process(false)
+ var e0 = game.enemies[0]
+ fresh(game.enemies[1],game.layout.to_world(Vector2i(28,7)))
+ fresh(game.enemies[2],game.layout.to_world(Vector2i(28,7)))
+ inv.add("arco")
+ inv.equip("arco")
+ inv.add("flecha",3)
+ inv.add("flecha_larga",2)
+ check(Items.ammo_list(Items.info("arco")) == ["flecha","flecha_larga","flecha_osso"] and game.ammo_for(Items.info("arco")) == "flecha","Arco aceita três flechas; sem escolha, usa a comum")
+ game.quick_bar.assign(4,"flecha_larga")
+ check(game.quick_bar.use(game,4) and game.chosen_ammo == "flecha_larga" and game.ammo_for(Items.info("arco")) == "flecha_larga","Flecha de ponta larga na barra vira a munição do arco")
+ var bow: Dictionary = game.sheet.weapon_stats("arco")
+ var broad: Dictionary = Items.with_ammo(bow,"flecha_larga")
+ check(is_equal_approx(float(broad["damage"]),float(bow["damage"])*1.1) and is_equal_approx(float(broad["bleed"]["dps"]),3.0) and not bow.has("bleed"),"Ponta larga: +10% de dano e sangramento, sem mexer no arco")
+ fresh(e0,at+Vector3(6.0,0,0))
+ swing("arco",Vector3.RIGHT)
+ await wait_frames(30)
+ check(inv.count("flecha_larga") == 1 and inv.count("flecha") == 3 and e0.bleed_time > 0,"O disparo gasta a flecha escolhida, e o monstro sangra")
+ fresh(e0,at+Vector3(6.0,0,0))
+ swing("arco",Vector3.RIGHT)
+ await wait_frames(30)
+ fresh(e0,at+Vector3(6.0,0,0))
+ swing("arco",Vector3.RIGHT)
+ await wait_frames(30)
+ check(inv.count("flecha_larga") == 0 and inv.count("flecha") == 2,"Acabou a escolhida, o arco volta para a flecha comum")
+ var heavy: Dictionary = Items.with_ammo(game.sheet.weapon_stats("besta"),"virote_pesado")
+ check(int(heavy["pierce"]) == int(Items.info("besta")["pierce"])+1 and is_equal_approx(float(heavy["damage"]),float(Items.info("besta")["damage"])*1.25),"Virote pesado: +25% de dano e atravessa mais um")
+ inv.add("pedra",2)
+ fresh(e0,at+Vector3(5.0,0,0))
+ check(swing("funda",Vector3.RIGHT) and inv.count("pedra") == 1,"Funda atira pedra")
+ await wait_frames(30)
+ game.chosen_ammo = ""
+ game.quick_bar.remove(4)
+ # Lockpicks: the steel one first and it breaks less; the master key always opens.
+ var chest: Dictionary = game.add_loot("Baú de teste",game.layout.to_cell(at+Vector3(0,0,1.6)),{"gema":1},true,"teste_itens_novos",4)
+ inv.add("gazua")
+ inv.add("gazua_aco")
+ check(game.lockpick_tool() == "gazua_aco" and is_equal_approx(game.pick_chance_with("gazua_aco",4),minf(0.98,game.sheet.pick_chance(4)+0.1)),"Gazua de aço vem primeiro e dá +10% de chance")
+ game.attempt_lockpick(chest,0.99,game.sheet.pick_break_chance()*0.6)
+ check(inv.count("gazua_aco") == 1 and chest.has("lock"),"Gazua de aço aguenta uma falha que quebraria a de arame")
+ inv.remove("gazua_aco")
+ inv.remove("gazua")
+ inv.add("chave_mestra")
+ check(game.lockpick_tool() == "chave_mestra" and game.pick_chance_with("chave_mestra",4) == 1.0,"Chave-mestra abre qualquer fechadura")
+ check(game.attempt_lockpick(chest,0.99) and not chest.has("lock") and inv.count("chave_mestra") == 0,"A chave-mestra abre a fechadura de mestre e fica presa nela")
+ game.ui.close_all()
+ game.containers.erase(chest)
+ chest["node"].queue_free()
+ # The sketched map shows the whole floor.
+ inv.add("mapa")
+ check(game.use_item("mapa") and game.discovered.size() == game.layout.floors.size() and inv.count("mapa") == 0,"Mapa rabiscado mostra o andar inteiro e é gasto")
+ inv.add("mapa")
+ check(not game.use_item("mapa") and inv.count("mapa") == 1,"Com o andar todo no mapa, o mapa rabiscado fica guardado")
+ game.discovered.clear()
+ for cell in saved_map:
+  game.discovered[cell] = true
+ # Food that heals, drinks when full, and the labels on the bar.
+ p.health = 50.0
+ p.food = 100.0
+ inv.add("mel")
+ check(game.use_item("mel") and p.health > 50.0,"Pote de mel cura mesmo de barriga cheia")
+ p.stamina = 10.0
+ p.food = 100.0
+ inv.add("cerveja")
+ check(game.use_item("cerveja") and p.stamina >= 54.0,"Cerveja choca devolve fôlego mesmo de barriga cheia")
+ p.health = p.max_health
+ p.stamina = p.max_stamina
+ p.food = 100.0
+ inv.add("pao")
+ check(not game.use_item("pao") and inv.count("pao") == 1,"De barriga cheia, o pão fica na mochila")
+ check(QuickBar.action_name(game,"cerveja") == "Beber" and QuickBar.action_name(game,"mapa") == "Ler" and QuickBar.action_name(game,"pao") == "Comer","Barra mostra Comer, Beber e Ler")
+ inv.add("brigantina")
+ check(game.use_item("brigantina") and inv.armor == "brigantina" and is_equal_approx(game.sheet.armor_protection("brigantina"),0.2),"Brigantina veste e protege 20%")
  inv.restore(saved_inventory)
  p.refresh_weapon()
  ready_player(p)
