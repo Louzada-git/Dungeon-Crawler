@@ -2717,6 +2717,120 @@
    "valor": 20,
    "name": "ITEM_MAPA_NOME",
    "description": "ITEM_MAPA_DESC"
+  },
+  "anel_prata": {
+   "tag": "TESOURO",
+   "weight": 0.02,
+   "valor": 40,
+   "blocks": [
+    {
+     "size": [
+      0.03,
+      0.008,
+      0.006
+     ],
+     "pos": [
+      0,
+      0.035,
+      0
+     ],
+     "color": "c9ced3"
+    },
+    {
+     "size": [
+      0.03,
+      0.008,
+      0.006
+     ],
+     "pos": [
+      0,
+      0.005,
+      0
+     ],
+     "color": "c9ced3"
+    },
+    {
+     "size": [
+      0.008,
+      0.03,
+      0.006
+     ],
+     "pos": [
+      -0.015,
+      0.02,
+      0
+     ],
+     "color": "b8bdc2"
+    },
+    {
+     "size": [
+      0.008,
+      0.03,
+      0.006
+     ],
+     "pos": [
+      0.015,
+      0.02,
+      0
+     ],
+     "color": "b8bdc2"
+    }
+   ],
+   "model": "anel_prata",
+   "name": "ITEM_ANEL_PRATA_NOME",
+   "description": "ITEM_ANEL_PRATA_DESC"
+  },
+  "calice": {
+   "tag": "TESOURO",
+   "weight": 0.4,
+   "model": "calice",
+   "valor": 35,
+   "name": "ITEM_CALICE_NOME",
+   "description": "ITEM_CALICE_DESC"
+  },
+  "castical": {
+   "tag": "TESOURO",
+   "weight": 0.9,
+   "model": "castical",
+   "valor": 25,
+   "name": "ITEM_CASTICAL_NOME",
+   "description": "ITEM_CASTICAL_DESC"
+  },
+  "dente_ouro": {
+   "tag": "TESOURO",
+   "weight": 0.01,
+   "valor": 50,
+   "blocks": [
+    {
+     "size": [
+      0.012,
+      0.018,
+      0.012
+     ],
+     "pos": [
+      0,
+      0.009,
+      0
+     ],
+     "color": "e2b33c"
+    },
+    {
+     "size": [
+      0.006,
+      0.01,
+      0.006
+     ],
+     "pos": [
+      0,
+      0.022,
+      0
+     ],
+     "color": "d9a62f"
+    }
+   ],
+   "model": "dente_ouro",
+   "name": "ITEM_DENTE_OURO_NOME",
+   "description": "ITEM_DENTE_OURO_DESC"
   }
  }
 }
