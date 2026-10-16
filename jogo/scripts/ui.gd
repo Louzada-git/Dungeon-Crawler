@@ -850,12 +850,12 @@ func show_ending(success: bool) -> void:
 	if game.generated and not success:
 		end_title.text = "Você morreu no %dº andar" % game.floor
 		end_note.text = "O labirinto continua o mesmo. Você recomeça do zero, mas o mapa que explorou fica com você."
-		rows = [["Andar mais fundo", "%dº" % game.deepest], ["Monstros derrotados", str(game.kills)], ["Selos entregues", str(game.seals_delivered)], ["Golpes recebidos", str(game.hits_received)]]
+		rows = [["Andar mais fundo", "%dº" % game.deepest], ["Monstros derrotados", str(game.kills)], ["Moedas na mochila", str(game.inventory.count("coin"))], ["Golpes recebidos", str(game.hits_received)]]
 		_end_button("Recomeçar no mesmo labirinto", func(): game.restart_same())
 		_end_button("Sair", func(): get_tree().quit(), 110)
 	else:
-		end_title.text = "Você voltou com o selo" if success else "A expedição terminou"
-		end_note.text = "Você recuperou o selo e atravessou as cisternas." if success else "Os corredores cobram cada descuido."
+		end_title.text = "Você voltou vivo" if success else "A expedição terminou"
+		end_note.text = "O guardião caiu e você saiu das cisternas com o que conseguiu carregar." if success else "Os corredores cobram cada descuido."
 		rows = [["Monstros derrotados", str(game.kills)], ["Golpes recebidos", str(game.hits_received)], ["Carga trazida", "%s kg" % UiStyle.fmt(game.inventory.weight())], ["Moedas na mochila", str(game.inventory.count("coin"))]]
 		_end_button("Nova expedição — reiniciar progresso", func(): game.restart())
 		_end_button("Sair", func(): get_tree().quit(), 110)
