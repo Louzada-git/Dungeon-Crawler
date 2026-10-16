@@ -25,7 +25,8 @@ func add(id: String, amount: int = 1) -> int:
  if not Items.DATA.has(id) or amount <= 0:
   return 0
  var unit: float = Items.info(id)["weight"]
- var fit: int = maxi(0, int(floor((capacity - weight() + 0.0001) / unit)))
+ # Weightless items (coins) always fit.
+ var fit: int = amount if unit <= 0.0 else maxi(0, int(floor((capacity - weight() + 0.0001) / unit)))
  var accepted: int = mini(amount, fit)
  if accepted > 0:
   stacks[id] = count(id) + accepted
