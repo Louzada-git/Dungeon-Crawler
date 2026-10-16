@@ -67,8 +67,6 @@ func compute() -> Array:
 		out.append({"id": "guard", "icon": "shield", "level": 0, "title": "Em guarda", "text": "Golpes de frente perdem %d%% do dano; cada bloqueio gasta fôlego.\nNão segura a pancada em área do chefe." % roundi(game.sheet.block_reduction(game.inventory.equipped) * 100)})
 	if game.is_safe():
 		out.append({"id": "safe", "icon": "tent", "level": 0, "title": "No abrigo", "text": "Monstros não atacam aqui.\nNo ponto de descanso, E salva a expedição."})
-	if game.inventory.count("seal") > 0:
-		out.append({"id": "seal", "icon": "flag", "level": 0, "title": "Selo recuperado", "text": "Leve o selo de volta ao abrigo." if not game.generated else "Entregue o selo no abrigo do 1º andar,\nou arrisque descer com ele."})
 	return out
 
 func refresh() -> void:
