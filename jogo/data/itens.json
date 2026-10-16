@@ -24,7 +24,8 @@
     "espada_reta"
    ],
    "maos": 1,
-   "animacao": "golpe_espada"
+   "animacao": "golpe_espada",
+   "valor": 25
   },
   "spear": {
    "tag": "ARMA",
@@ -49,7 +50,8 @@
    ],
    "maos": 2,
    "animacao": "estocada_lanca",
-   "alinhar_ao_golpe": true
+   "alinhar_ao_golpe": true,
+   "valor": 30
   },
   "ration": {
    "tag": "ALIMENTO",
@@ -58,7 +60,8 @@
    "stamina_gain": 12.0,
    "model": "pot",
    "name": "ITEM_RATION_NOME",
-   "description": "ITEM_RATION_DESC"
+   "description": "ITEM_RATION_DESC",
+   "valor": 4
   },
   "bandage": {
    "tag": "TRATAMENTO",
@@ -67,21 +70,24 @@
    "stops_bleeding": true,
    "model": "potion",
    "name": "ITEM_BANDAGE_NOME",
-   "description": "ITEM_BANDAGE_DESC"
+   "description": "ITEM_BANDAGE_DESC",
+   "valor": 6
   },
   "ore": {
    "tag": "MATERIAL",
    "weight": 1.6,
    "model": "rocks",
    "name": "ITEM_ORE_NOME",
-   "description": "ITEM_ORE_DESC"
+   "description": "ITEM_ORE_DESC",
+   "valor": 6
   },
   "coin": {
    "tag": "TESOURO",
    "weight": 0.02,
    "model": "coin",
    "name": "ITEM_COIN_NOME",
-   "description": "ITEM_COIN_DESC"
+   "description": "ITEM_COIN_DESC",
+   "valor": 1
   },
   "espada_guarda": {
    "tag": "ARMA",
@@ -106,7 +112,8 @@
     "espada_reta"
    ],
    "maos": 1,
-   "animacao": "golpe_espada"
+   "animacao": "golpe_espada",
+   "valor": 45
   },
   "lanca_longa": {
    "tag": "ARMA",
@@ -132,7 +139,8 @@
    ],
    "maos": 2,
    "animacao": "estocada_lanca",
-   "alinhar_ao_golpe": true
+   "alinhar_ao_golpe": true,
+   "valor": 45
   },
   "unguento": {
    "tag": "TRATAMENTO",
@@ -142,7 +150,8 @@
    "model": "pot",
    "tint": "8fcf8a",
    "name": "ITEM_UNGUENTO_NOME",
-   "description": "ITEM_UNGUENTO_DESC"
+   "description": "ITEM_UNGUENTO_DESC",
+   "valor": 18
   },
   "tonico": {
    "tag": "ALIMENTO",
@@ -152,7 +161,8 @@
    "model": "pot",
    "tint": "8ab4e8",
    "name": "ITEM_TONICO_NOME",
-   "description": "ITEM_TONICO_DESC"
+   "description": "ITEM_TONICO_DESC",
+   "valor": 15
   },
   "gema": {
    "tag": "TESOURO",
@@ -160,7 +170,8 @@
    "model": "coin",
    "tint": "d26fd0",
    "name": "ITEM_GEMA_NOME",
-   "description": "ITEM_GEMA_DESC"
+   "description": "ITEM_GEMA_DESC",
+   "valor": 30
   },
   "adaga": {
    "tag": "ARMA",
@@ -184,7 +195,8 @@
    "animacao": "golpe_adaga",
    "model": "adaga",
    "name": "ITEM_ADAGA_NOME",
-   "description": "ITEM_ADAGA_DESC"
+   "description": "ITEM_ADAGA_DESC",
+   "valor": 12
   },
   "katana": {
    "tag": "ARMA",
@@ -208,7 +220,8 @@
    "animacao": "golpe_katana",
    "model": "katana",
    "name": "ITEM_KATANA_NOME",
-   "description": "ITEM_KATANA_DESC"
+   "description": "ITEM_KATANA_DESC",
+   "valor": 40
   },
   "montante": {
    "tag": "ARMA",
@@ -233,7 +246,8 @@
    "animacao": "golpe_montante",
    "model": "montante",
    "name": "ITEM_MONTANTE_NOME",
-   "description": "ITEM_MONTANTE_DESC"
+   "description": "ITEM_MONTANTE_DESC",
+   "valor": 80
   },
   "machado": {
    "tag": "ARMA",
@@ -260,7 +274,8 @@
    "animacao": "golpe_machado",
    "model": "machado",
    "name": "ITEM_MACHADO_NOME",
-   "description": "ITEM_MACHADO_DESC"
+   "description": "ITEM_MACHADO_DESC",
+   "valor": 35
   },
   "maca": {
    "tag": "ARMA",
@@ -286,7 +301,8 @@
    "animacao": "golpe_maca",
    "model": "maca",
    "name": "ITEM_MACA_NOME",
-   "description": "ITEM_MACA_DESC"
+   "description": "ITEM_MACA_DESC",
+   "valor": 40
   },
   "martelo": {
    "tag": "ARMA",
@@ -313,7 +329,8 @@
    "animacao": "pancada_martelo",
    "model": "martelo",
    "name": "ITEM_MARTELO_NOME",
-   "description": "ITEM_MARTELO_DESC"
+   "description": "ITEM_MARTELO_DESC",
+   "valor": 95
   },
   "alabarda": {
    "tag": "ARMA",
@@ -339,7 +356,8 @@
    "alinhar_ao_golpe": true,
    "model": "alabarda",
    "name": "ITEM_ALABARDA_NOME",
-   "description": "ITEM_ALABARDA_DESC"
+   "description": "ITEM_ALABARDA_DESC",
+   "valor": 70
   },
   "arco": {
    "tag": "ARMA",
@@ -383,7 +401,8 @@
    "model": "arco",
    "name": "ITEM_ARCO_NOME",
    "description": "ITEM_ARCO_DESC",
-   "mao": "esquerda"
+   "mao": "esquerda",
+   "valor": 35
   },
   "besta": {
    "tag": "ARMA",
@@ -418,7 +437,8 @@
    ],
    "model": "besta",
    "name": "ITEM_BESTA_NOME",
-   "description": "ITEM_BESTA_DESC"
+   "description": "ITEM_BESTA_DESC",
+   "valor": 90
   },
   "flecha": {
    "tag": "MUNICAO",
@@ -426,7 +446,8 @@
    "recover": 0.5,
    "model": "flecha",
    "name": "ITEM_FLECHA_NOME",
-   "description": "ITEM_FLECHA_DESC"
+   "description": "ITEM_FLECHA_DESC",
+   "valor": 1
   },
   "virote": {
    "tag": "MUNICAO",
@@ -434,7 +455,8 @@
    "recover": 0.5,
    "model": "virote",
    "name": "ITEM_VIROTE_NOME",
-   "description": "ITEM_VIROTE_DESC"
+   "description": "ITEM_VIROTE_DESC",
+   "valor": 2
   },
   "gibao": {
    "tag": "ARMADURA",
@@ -535,7 +557,8 @@
      1.0,
      1.25
     ]
-   }
+   },
+   "valor": 12
   },
   "couro": {
    "tag": "ARMADURA",
@@ -649,7 +672,8 @@
      1.0,
      1.25
     ]
-   }
+   },
+   "valor": 35
   },
   "cota": {
    "tag": "ARMADURA",
@@ -752,7 +776,8 @@
      1.0,
      1.25
     ]
-   }
+   },
+   "valor": 70
   },
   "placas": {
    "tag": "ARMADURA",
@@ -881,7 +906,8 @@
      1.0,
      1.25
     ]
-   }
+   },
+   "valor": 150
   },
   "gazua": {
    "tag": "FERRAMENTA",
@@ -941,7 +967,8 @@
     ],
     "margin": 1.1,
     "pitch": 35.0
-   }
+   },
+   "valor": 5
   },
   "flecha_larga": {
    "tag": "MUNICAO",
