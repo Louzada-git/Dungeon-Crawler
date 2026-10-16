@@ -4,7 +4,7 @@
  "inimigos": {
   "corrompido": {
    "name": "INIMIGO_CORROMPIDO_NOME",
-   "model": "character-orc",
+   "model": "afogado",
    "scale": 1.0,
    "health": 80.0,
    "damage": 18.0,
@@ -21,8 +21,8 @@
   },
   "guardiao": {
    "name": "INIMIGO_GUARDIAO_NOME",
-   "model": "character-orc",
-   "scale": 1.18,
+   "model": "carcereiro",
+   "scale": 1.17,
    "health": 120.0,
    "damage": 26.0,
    "windup": 0.85,
@@ -33,16 +33,16 @@
     "coin": 3,
     "bandage": 1
    },
-   "tint": "b9a07a",
+   "tint": "",
    "radius": 0.45,
    "armored": true,
    "xp": 60
   },
   "espreitador": {
    "name": "INIMIGO_ESPREITADOR_NOME",
-   "model": "character-orc",
-   "scale": 0.86,
-   "tint": "6f7f8f",
+   "model": "carnical",
+   "scale": 0.85,
+   "tint": "",
    "radius": 0.36,
    "health": 50.0,
    "damage": 12.0,
@@ -58,9 +58,9 @@
   },
   "brutamontes": {
    "name": "INIMIGO_BRUTAMONTES_NOME",
-   "model": "character-orc",
-   "scale": 1.3,
-   "tint": "8a6a52",
+   "model": "inchado",
+   "scale": 0.92,
+   "tint": "",
    "radius": 0.5,
    "health": 175.0,
    "damage": 32.0,
@@ -77,9 +77,9 @@
   },
   "chefe": {
    "name": "INIMIGO_CHEFE_NOME",
-   "model": "character-orc",
+   "model": "capataz",
    "scale": 1.75,
-   "tint": "a8402e",
+   "tint": "",
    "radius": 0.7,
    "health": 500.0,
    "damage": 30.0,
