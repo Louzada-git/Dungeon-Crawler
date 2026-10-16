@@ -24,6 +24,8 @@ var game
 var root: Control
 var hud: Control
 var modal: Control
+## The merchant's window (E next to him).
+var shop_window: UiShopWindow
 var dim: ColorRect
 var flash: ColorRect
 var vignette: TextureRect
@@ -293,6 +295,9 @@ func _build_modals() -> void:
 	_build_map()
 	_build_pause()
 	_build_ending()
+	shop_window = UiShopWindow.new(game)
+	_centered(shop_window)
+	shop_window.close_requested.connect(close_all)
 	creation_panel = UiCreationPanel.new()
 	_centered(creation_panel)
 	creation_panel.confirmed.connect(_on_creation_confirmed)
@@ -594,6 +599,10 @@ func _input(event: InputEvent) -> void:
 				press_quick(quick)
 				get_viewport().set_input_as_handled()
 				return
+	if shop_window.visible and event.is_action_pressed("interact"):
+		close_all()
+		get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed("inventory"):
 		toggle_inventory()
 		get_viewport().set_input_as_handled()
@@ -608,7 +617,7 @@ func any_panel() -> bool:
 	return modal.visible or (inventory != null and inventory.is_open)
 
 func hide_panels() -> void:
-	for p in [map_panel, pause_panel, ending_panel]:
+	for p in [map_panel, pause_panel, ending_panel, shop_window]:
 		p.hide()
 	if inventory.is_open:
 		inventory.set_open(false)
@@ -741,6 +750,17 @@ func on_level_up(branch: String, level: int) -> void:
 
 func on_perk_unlocked(branch: String, perk: Dictionary) -> void:
 	level_banner.push("Talento: %s" % perk.get("name", ""), "%s  ·  %s" % [ProficiencyTree.display_name(branch), perk.get("text", "")])
+
+## Opens the merchant's window; the game pauses meanwhile.
+func open_shop() -> void:
+	if game.ended:
+		return
+	hide_panels()
+	modal.show()
+	dim.show()
+	shop_window.open()
+	get_tree().paused = true
+	update_hud()
 
 func toggle_map() -> void:
 	if game.ended:
