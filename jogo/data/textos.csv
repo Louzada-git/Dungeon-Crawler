@@ -16,17 +16,17 @@ INIMIGO_GUARDIAO_NOME,Carcereiro
 MUNDO_CISTERNAS_NOME,As Cisternas
 SALA_ABRIGO,Abrigo da entrada
 SALA_GALERIA,Galeria da guarda
-SALA_DEPOSITO,Depósito esquecido
-SALA_SALAO,Salão das cisternas
-SALA_CAMARA,Câmara do guardião
-SALA_PASSAGEM,Passagem subterrânea
-RECIPIENTE_RESERVA,Reserva da entrada
+SALA_DEPOSITO,Depósito velho
+SALA_SALAO,Reservatório
+SALA_CAMARA,Câmara do carcereiro
+SALA_PASSAGEM,Túnel de serviço
+RECIPIENTE_RESERVA,Estoque do abrigo
 RECIPIENTE_BAU_GUARDA,Baú da guarda
-RECIPIENTE_DEPOSITO_FERRO,Depósito de ferro
-RECIPIENTE_MANTIMENTOS,Mantimentos esquecidos
-RECIPIENTE_RELICARIO,Relicário das cisternas
-RECIPIENTE_PERTENCES,Pertences do corrompido
-RECIPIENTE_DEIXADOS,Itens deixados
+RECIPIENTE_DEPOSITO_FERRO,Pilha de minério
+RECIPIENTE_MANTIMENTOS,Caixa de mantimentos
+RECIPIENTE_RELICARIO,Cofre da câmara
+RECIPIENTE_PERTENCES,Pertences do afogado
+RECIPIENTE_DEIXADOS,Coisas no chão
 ITEM_ESPADA_GUARDA_NOME,Espada de oficial
 ITEM_ESPADA_GUARDA_DESC,"Aço melhor que o da espada de soldado, e um pouco mais pesada. Era dos oficiais da guarnição."
 ITEM_LANCA_LONGA_NOME,Pique
@@ -42,7 +42,7 @@ INIMIGO_BRUTAMONTES_NOME,Inchado
 INIMIGO_CHEFE_NOME,Capataz
 MUNDO_LABIRINTO_NOME,O Labirinto
 RECIPIENTE_BAU,Baú
-RECIPIENTE_BAU_CHEFE,Relicário do guardião
+RECIPIENTE_BAU_CHEFE,Cofre do capataz
 RECIPIENTE_DESPOJOS,Despojos
 ITEM_ADAGA_NOME,Adaga
 ITEM_ADAGA_DESC,"Curta e rápida. Pegando o bicho distraído, um golpe resolve."
