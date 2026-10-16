@@ -15,7 +15,7 @@
     "slash"
    ],
    "recarga": 1.5,
-   "texto": "O golpe da arma em arco, como o ataque normal.",
+   "texto": "O golpe normal da arma, em arco.",
    "slots": 3,
    "slot_a_cada": 5
   },
@@ -26,7 +26,7 @@
     "thrust"
    ],
    "recarga": 1.5,
-   "texto": "Golpe reto da arma de haste, como o ataque normal.",
+   "texto": "O golpe normal de lança e alabarda, em linha reta.",
    "slots": 3,
    "slot_a_cada": 5
   },
@@ -37,7 +37,7 @@
     "smash"
    ],
    "recarga": 1.5,
-   "texto": "Pancada no chão à frente, como o ataque normal.",
+   "texto": "O golpe normal das armas de pancada, no chão à frente.",
    "slots": 3,
    "slot_a_cada": 5
   },
@@ -48,7 +48,7 @@
     "shoot"
    ],
    "recarga": 1.5,
-   "texto": "Um tiro da arma de disparo, como o ataque normal.",
+   "texto": "Um tiro normal de arco ou besta.",
    "slots": 3,
    "slot_a_cada": 5
   },
@@ -59,7 +59,7 @@
     "punhos"
    ],
    "recarga": 1.0,
-   "texto": "Soco de mãos vazias.",
+   "texto": "Soco de mão vazia.",
    "slots": 2,
    "slot_a_cada": 5
   },
@@ -109,7 +109,7 @@
    "requer": {
     "hastes": 4
    },
-   "texto": "Avança 2,5 m durante o preparo e golpe com o peso do corpo.",
+   "texto": "Corre 2,5 m enquanto prepara e bate com o peso do corpo.",
    "efeitos": [
     {
      "campo": "dash",
@@ -140,7 +140,7 @@
    "requer": {
     "contundentes": 4
    },
-   "texto": "Ergue a arma contundente (ou o punho) e desce com tudo: lento, mas atordoa e empurra longe.",
+   "texto": "Levanta a arma (ou o punho) e desce com tudo. É lento, mas deixa o bicho tonto e longe.",
    "efeitos": [
     {
      "campo": "damage",
@@ -176,7 +176,7 @@
    "requer": {
     "pontaria": 4
    },
-   "texto": "Segura a mira um instante: mais dano e o projétil atravessa mais um.",
+   "texto": "Segura a mira um instante. Bate mais forte e atravessa mais um.",
    "efeitos": [
     {
      "campo": "windup",
@@ -204,7 +204,7 @@
    "requer": {
     "desarmado": 4
    },
-   "texto": "Três socos rápidos seguidos.",
+   "texto": "Três socos rápidos, um atrás do outro.",
    "efeitos": [
     {
      "campo": "hits",
@@ -229,7 +229,7 @@
    "requer": {
     "laminas": 3
    },
-   "texto": "Abre um corte que sangra 3 por segundo durante 4 s (em flechas, ponta larga). Não serve em pancadas nem socos.",
+   "texto": "Abre um corte que sangra 3 por segundo durante 4 s (na flecha, vira ponta larga). Não serve em pancada nem soco.",
    "efeitos": [
     {
      "campo": "bleed.dps",
@@ -260,7 +260,7 @@
    "requer": {
     "contundentes": 3
    },
-   "texto": "+30% de dano, inclusive no sangramento posto antes. Gasta mais fôlego e prepara mais devagar.",
+   "texto": "+30% de dano, inclusive no sangramento que vier antes. Gasta mais fôlego e demora mais para preparar.",
    "efeitos": [
     {
      "campo": "damage",
@@ -286,7 +286,7 @@
    ]
   },
   "alcance": {
-   "name": "Alcance",
+   "name": "Braço longo",
    "requer": {
     "hastes": 3
    },
@@ -316,7 +316,7 @@
    "requer": {
     "acrobacia": 3
    },
-   "texto": "Preparo 40% mais curto, inclusive o que foi somado antes, e golpe mais leve (−15% de dano).",
+   "texto": "Preparo 40% mais curto (inclusive o que veio antes), mas o golpe bate 15% menos.",
    "efeitos": [
     {
      "campo": "windup",
@@ -482,11 +482,11 @@
    ]
   },
   "saque": {
-   "name": "Saque rápido",
+   "name": "Bote",
    "requer": {
     "katana": 4
    },
-   "texto": "Preparo 0,06 s mais curto. É uma soma: vale o mesmo em qualquer arma, e a Rapidez depois dele ainda encurta o resto.",
+   "texto": "Preparo 0,06 s mais curto, igual em qualquer arma. A Rapidez depois dele ainda corta o resto.",
    "efeitos": [
     {
      "campo": "windup",
@@ -499,7 +499,7 @@
    ]
   },
   "varredura": {
-   "name": "Varredura",
+   "name": "Meia-lua",
    "requer": {
     "montante": 4
    },
@@ -534,7 +534,7 @@
    "requer": {
     "adagas": 4
    },
-   "texto": "+4 de dano fixo. Vale mais antes da Força, que multiplica o que já está montado.",
+   "texto": "+4 de dano fixo. Rende mais antes da Força, que multiplica o que já está montado.",
    "efeitos": [
     {
      "campo": "damage",
@@ -551,7 +551,7 @@
    "requer": {
     "maca": 4
    },
-   "texto": "Rasga a carne: sangra 2 por segundo durante 3 s e atordoa 0,2 s a mais. Não serve em disparos.",
+   "texto": "Sangra 2 por segundo durante 3 s e deixa tonto 0,2 s a mais. Não serve em disparo.",
    "efeitos": [
     {
      "campo": "bleed.dps",
@@ -582,7 +582,7 @@
    ]
   },
   "tremor": {
-   "name": "Tremor",
+   "name": "Estrondo",
    "requer": {
     "martelo": 4
    },
@@ -611,7 +611,7 @@
    "requer": {
     "machados": 4
    },
-   "texto": "Sangramento já montado ×1,6. Precisa vir depois do que faz sangrar (Lâmina afiada, Cravos ou a própria arma, como o machado).",
+   "texto": "Sangramento já montado ×1,6. Tem que vir depois do que faz sangrar (Lâmina afiada, Cravos ou a própria arma, como o machado).",
    "efeitos": [
     {
      "campo": "bleed.dps",
@@ -695,7 +695,7 @@
    "requer": {
     "armadura_pesada": 3
    },
-   "texto": "O peso do corpo no golpe: +10% de dano e empurra bem mais longe. Gasta mais fôlego.",
+   "texto": "Põe o peso do corpo no golpe: +10% de dano e empurra bem mais longe. Gasta mais fôlego.",
    "efeitos": [
     {
      "campo": "damage",
@@ -789,7 +789,7 @@
    "requer": {
     "arrombamento": 3
    },
-   "texto": "Acha a fresta da armadura: ×1,4 em monstros blindados (soma ao esmagar da arma).",
+   "texto": "Procura a junta da armadura: ×1,4 em monstro blindado (soma com o esmagar da arma).",
    "efeitos": [
     {
      "campo": "crush",
@@ -811,7 +811,7 @@
    "requer": {
     "tratamento": 3
    },
-   "texto": "Cada acerto recupera 2 de vida.",
+   "texto": "Cada acerto devolve 2 de vida.",
    "efeitos": [
     {
      "campo": "cura",
