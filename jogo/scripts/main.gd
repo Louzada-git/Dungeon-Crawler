@@ -359,24 +359,31 @@ func attempt_lockpick(container: Dictionary, roll: float = -1.0, break_roll: flo
 	var difficulty: int = int(container.get("lock", 0))
 	if difficulty <= 0:
 		return true
-	if inventory.count("gazua") <= 0:
+	var tool: String = lockpick_tool()
+	if tool == "":
 		message("Fechadura %s. Você precisa de uma gazua." % LOCK_NAMES[difficulty], 3)
 		return false
+	var spec: Dictionary = Items.DATA[tool]["arrombar"]
+	var tool_name: String = str(Items.info(tool).get("name", tool))
 	var value: float = randf() if roll < 0 else roll
 	var scale: float = 1.0 + 0.25 * (floor - 1)
-	if value < sheet.pick_chance(difficulty):
+	if value < pick_chance_with(tool, difficulty):
 		container.erase("lock")
 		sheet.award("arrombamento", 12.0 * difficulty * scale, floor)
 		sound.play_at("loot", player.global_position, 0.7)
-		message("A fechadura cedeu.", 2)
+		if spec.get("sempre", false):
+			inventory.remove(tool)
+			message("%s abriu e ficou presa na fechadura." % tool_name, 2.5)
+		else:
+			message("A fechadura cedeu.", 2)
 		if ui:
 			ui.open_inventory(container)
 		return true
 	sheet.award("arrombamento", 3.0 * difficulty * scale, floor)
 	var snap: float = randf() if break_roll < 0 else break_roll
-	if snap < sheet.pick_break_chance():
-		inventory.remove("gazua")
-		message("A gazua quebrou. Restam %d." % inventory.count("gazua"), 2.5)
+	if snap < sheet.pick_break_chance() * float(spec.get("quebra", 1.0)):
+		inventory.remove(tool)
+		message("%s quebrou. Restam %d." % [tool_name, inventory.count(tool)], 2.5)
 	else:
 		message("Não abriu. Tente de novo.", 2)
 	if ui:
@@ -600,6 +607,20 @@ func ammo_for(weapon: Dictionary) -> String:
 			return id
 	return list[0]
 
+## The lockpicking tool used next (Items.lockpicks order), "" when there is none.
+func lockpick_tool() -> String:
+	for id in Items.lockpicks():
+		if inventory.count(id) > 0:
+			return id
+	return ""
+
+## Chance of opening a lock of this difficulty with this tool.
+func pick_chance_with(tool: String, difficulty: int) -> float:
+	var spec: Dictionary = Items.DATA.get(tool, {}).get("arrombar", {})
+	if spec.get("sempre", false):
+		return 1.0
+	return minf(0.98, sheet.pick_chance(difficulty) + float(spec.get("bonus", 0.0)))
+
 func interaction_text() -> String:
 	if has_shelter() and player.position.distance_to(camp_position) < 1.6:
 		if fixed_goal_done():
@@ -614,9 +635,10 @@ func interaction_text() -> String:
 	if not loot.is_empty():
 		var difficulty: int = int(loot.get("lock", 0))
 		if difficulty > 0:
-			if inventory.count("gazua") <= 0:
+			var tool: String = lockpick_tool()
+			if tool == "":
 				return "E   TRANCADO  ·  %s  ·  fechadura %s, precisa de gazua" % [loot["name"], LOCK_NAMES[difficulty]]
-			return "E   ARROMBAR  ·  %s  ·  fechadura %s, %d%% de chance" % [loot["name"], LOCK_NAMES[difficulty], roundi(sheet.pick_chance(difficulty) * 100)]
+			return "E   ARROMBAR  ·  %s  ·  fechadura %s, %d%% de chance" % [loot["name"], LOCK_NAMES[difficulty], roundi(pick_chance_with(tool, difficulty) * 100)]
 		var empty: bool = loot["items"].is_empty()
 		return ("E   ABRIR  ·  " if empty else "E   VASCULHAR  ·  ") + loot["name"] + ("  (vazio)" if empty else "")
 	return ""
