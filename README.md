@@ -85,11 +85,28 @@ Precisa de placa de vídeo com OpenGL 3.3. O jogo é em português. Os créditos
 5. O guardião do andar fica na sala mais distante. Derrote-o para pegar o selo e abrir a descida.
 6. Volte ao abrigo e use o ponto de descanso (E) para salvar e entregar os selos.
 
-## O projeto
+## Rodar pelo código
 
-- `jogo/`: projeto da Godot 4.7.2 (renderizador Compatibility). A arquitetura está em `jogo/ARQUITETURA.md`, e os números de armas e monstros em `jogo/BALANCO.md`.
-- `outputs/LEIA-ME.md`: o que mudou em cada versão e como cada sistema funciona.
-- `arte/`: fontes da arte e scripts que preparam os assets.
-- `revisao/`: capturas de tela de cada etapa.
+1. Instale a [Godot 4.7.2](https://godotengine.org/download/).
+2. Abra `jogo/project.godot` e aperte F5.
 
-Créditos dos assets de terceiros em `outputs/linux/CREDITOS.txt` e `jogo/ASSETS.md`.
+Testes automáticos (da pasta `jogo/`):
+
+```
+godot --headless --path . -- --test
+godot --headless --path . -- --test-labirinto --seed=777
+```
+
+O primeiro testa o mundo fixo (combate, inventário, save, HUD, habilidades, câmera…), e o segundo testa o labirinto gerado. Para gerar os executáveis, use os presets **Linux** e **Windows** de `jogo/export_presets.cfg`, e depois `./empacotar.sh` para montar os pacotes.
+
+## Estrutura
+
+| Pasta | O que tem |
+|---|---|
+| `jogo/` | Projeto da Godot: cenas, scripts, dados em JSON e assets. O mapa do código está em `jogo/ARQUITETURA.md`, e os números de armas e monstros em `jogo/BALANCO.md`. |
+| `jogo/data/` | Itens, monstros, proficiências, habilidades, saque, efeitos e textos. Dá para balancear o jogo sem mexer no código. |
+| `outputs/` | Guia do jogador com as novidades de cada versão (`LEIA-ME.md`) e o registro dos testes (`VERIFICACAO.md`). |
+| `downloads/` | Os pacotes para Windows e Linux. |
+| `arte/` | Fontes da arte e os scripts que preparam modelos, texturas e efeitos. |
+| `revisao/` | Capturas de tela de cada etapa. |
+
