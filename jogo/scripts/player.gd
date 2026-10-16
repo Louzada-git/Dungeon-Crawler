@@ -356,7 +356,9 @@ func attack(stats: Dictionary = {}) -> bool:
   dash_velocity = facing.normalized()*dash/dash_time
   dash_fx = 0
  # The swing animation lands on the wind-up: it lasts windup / "impacto" (its share before the hit).
- animate_action(attack_animation(weapon),windup/clampf(float(weapon.get("impacto",0.39)),0.1,0.9))
+ # The animation is timed so its blow lands when the preparation ends.
+ var anim: String = attack_animation(weapon)
+ animate_action(anim,windup/clampf(Animacoes.impact(MODEL,anim,float(weapon.get("impacto",0.39))),0.1,0.9))
  game.sound.play_at("swing",global_position,0.65)
  return true
 
