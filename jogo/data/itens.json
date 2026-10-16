@@ -2495,6 +2495,110 @@
    "model": "cogumelo",
    "name": "ITEM_COGUMELO_NOME",
    "description": "ITEM_COGUMELO_DESC"
+  },
+  "arnica": {
+   "tag": "TRATAMENTO",
+   "weight": 0.15,
+   "heal": 28.0,
+   "model": "arnica",
+   "valor": 12,
+   "name": "ITEM_ARNICA_NOME",
+   "description": "ITEM_ARNICA_DESC"
+  },
+  "sutura": {
+   "tag": "TRATAMENTO",
+   "weight": 0.08,
+   "heal": 12.0,
+   "stops_bleeding": true,
+   "valor": 10,
+   "blocks": [
+    {
+     "size": [
+      0.005,
+      0.08,
+      0.005
+     ],
+     "pos": [
+      0,
+      0.04,
+      0
+     ],
+     "color": "c8ccd0"
+    },
+    {
+     "size": [
+      0.04,
+      0.02,
+      0.04
+     ],
+     "pos": [
+      0.03,
+      0.01,
+      0
+     ],
+     "color": "e6dccb"
+    }
+   ],
+   "model": "sutura",
+   "name": "ITEM_SUTURA_NOME",
+   "description": "ITEM_SUTURA_DESC"
+  },
+  "erva": {
+   "tag": "TRATAMENTO",
+   "weight": 0.05,
+   "heal": 10.0,
+   "valor": 4,
+   "blocks": [
+    {
+     "size": [
+      0.06,
+      0.12,
+      0.015
+     ],
+     "pos": [
+      0,
+      0.06,
+      0
+     ],
+     "color": "5e7d3a"
+    },
+    {
+     "size": [
+      0.05,
+      0.09,
+      0.015
+     ],
+     "pos": [
+      0.03,
+      0.045,
+      0.01
+     ],
+     "color": "6f8f45"
+    }
+   ],
+   "model": "erva",
+   "name": "ITEM_ERVA_NOME",
+   "description": "ITEM_ERVA_DESC"
+  },
+  "mel": {
+   "tag": "ALIMENTO",
+   "weight": 0.3,
+   "food": 12.0,
+   "heal": 15.0,
+   "model": "mel",
+   "valor": 9,
+   "name": "ITEM_MEL_NOME",
+   "description": "ITEM_MEL_DESC"
+  },
+  "garrafada": {
+   "tag": "TRATAMENTO",
+   "weight": 0.4,
+   "heal": 60.0,
+   "stops_bleeding": true,
+   "model": "garrafada",
+   "valor": 30,
+   "name": "ITEM_GARRAFADA_NOME",
+   "description": "ITEM_GARRAFADA_DESC"
   }
  }
 }
