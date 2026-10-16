@@ -65,6 +65,8 @@ static func action_name(game, id: String) -> String:
 		return "Comer"
 	if data.has("heal"):
 		return "Aplicar"
+	if data.get("tag", "") == "MUNICAO":
+		return "Escolher"
 	return ""
 
 ## Presses a slot: equips or puts away a weapon, wears or takes off armor, eats,
