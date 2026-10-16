@@ -41,7 +41,7 @@ func compute() -> Array:
 	elif p.food <= 30:
 		out.append({"id": "food", "icon": "bread", "level": 1, "title": "Com fome", "text": "Saciedade %d. Ainda sem efeito; abaixo de 10\no fôlego passa a recuperar devagar." % ceili(p.food)})
 	var held: Dictionary = game.sheet.weapon_stats(game.inventory.equipped)
-	var ammo: String = str(held.get("ammo", ""))
+	var ammo: String = game.ammo_for(held)
 	if ammo != "" and game.inventory.count(ammo) <= 0:
 		out.append({"id": "ammo", "icon": "arrow", "level": 2, "title": "Sem munição", "text": "%s sem %ss. Procure nos baús, no chão\nonde os disparos erraram e nos corpos dos monstros." % [str(held.get("name", "")), str(Items.info(ammo).get("name", ammo)).to_lower()]})
 	var cost: float = float(held.get("cost", 10.0))
