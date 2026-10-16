@@ -33,6 +33,37 @@ static func drop_removed(stacks) -> void:
 		for id in REMOVED:
 			stacks.erase(id)
 
+## Ammunition a weapon fires: its "ammo" first, then the ones in "ammo_extra".
+static func ammo_list(weapon: Dictionary) -> Array:
+	var out: Array = []
+	if str(weapon.get("ammo", "")) != "":
+		out.append(str(weapon["ammo"]))
+	for extra in weapon.get("ammo_extra", []):
+		out.append(str(extra))
+	return out
+
+## True when the weapon fires this ammunition.
+static func fires(weapon_id: String, ammo: String) -> bool:
+	return ammo in ammo_list(DATA.get(weapon_id, {}))
+
+## The weapon's numbers with the ammunition's own effect: "damage_mult"
+## (multiplies), "bleed" (the stronger one wins), "knockback" and "pierce" (add).
+static func with_ammo(weapon: Dictionary, ammo: String) -> Dictionary:
+	var a: Dictionary = DATA.get(ammo, {})
+	if not (a.has("damage_mult") or a.has("bleed") or a.has("knockback") or a.has("pierce")):
+		return weapon
+	var w: Dictionary = weapon.duplicate(true)
+	w["damage"] = float(w.get("damage", 0.0)) * float(a.get("damage_mult", 1.0))
+	if a.has("bleed"):
+		var mine: Dictionary = w.get("bleed", {})
+		if float(a["bleed"].get("dps", 0.0)) * float(a["bleed"].get("time", 0.0)) > float(mine.get("dps", 0.0)) * float(mine.get("time", 0.0)):
+			w["bleed"] = a["bleed"].duplicate()
+	if a.has("knockback"):
+		w["knockback"] = float(w.get("knockback", 3.0)) + float(a["knockback"])
+	if a.has("pierce"):
+		w["pierce"] = int(w.get("pierce", 1)) + int(a["pierce"])
+	return w
+
 ## Drops translated copies, e.g. after a language change.
 static func clear_cache() -> void:
 	_resolved.clear()
