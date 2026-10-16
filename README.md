@@ -110,3 +110,20 @@ O primeiro testa o mundo fixo (combate, inventário, save, HUD, habilidades, câ
 | `arte/` | Fontes da arte e os scripts que preparam modelos, texturas e efeitos. |
 | `revisao/` | Capturas de tela de cada etapa. |
 
+## Créditos
+
+Engine: [Godot](https://godotengine.org/) (MIT). Fonte: [Inter](https://github.com/rsms/inter) (SIL OFL 1.1).
+
+| Asset | Autor | Licença |
+|---|---|---|
+| Personagem (Characters PSX) | [Elbolilloduro](https://elbolilloduro.itch.io/characters-psx) | CC0 |
+| Adaga, montante, machado, maça, martelo e lanças (RPG Weapons) | [Binbun](https://binbun3d.itch.io/rpg-weapons) | CC0 |
+| Katana, alabarda, arco, besta, flecha e virote (Low Poly Weapon Pack) | Kickin' It Studios | Uso livre em jogos |
+| Efeitos visuais (Brackeys VFX Bundle) | Brackeys, com texturas de CodeManu e Thomas Iché | CC0 |
+| Rig e parte das animações do aventureiro | [Mixamo](https://www.mixamo.com/) (Adobe) | Termos do Mixamo |
+
+Monstros, cenário, móveis e o resto dos objetos são arte própria do projeto. A lista completa está em `jogo/ASSETS.md`.
+
+## Licença
+
+O código e a arte própria ainda não têm licença pública: dá para ver e jogar, mas não reaproveitar sem autorização. Os assets de terceiros seguem a licença de cada autor (tabela acima).
