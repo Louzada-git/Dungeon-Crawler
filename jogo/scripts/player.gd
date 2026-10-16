@@ -329,7 +329,7 @@ func attack(stats: Dictionary = {}) -> bool:
   return false
  var weapon = stats if not stats.is_empty() else game.sheet.weapon_stats(game.inventory.equipped)
  var cost: float = weapon.get("cost",10.0)
- var ammo: String = str(weapon.get("ammo",""))
+ var ammo: String = game.ammo_for(weapon)
  if ammo != "" and game.inventory.count(ammo) <= 0:
   game.message("Sem %ss. Procure mais nos baús e nos corpos dos monstros." % str(Items.info(ammo).get("name",ammo)).to_lower())
   return false
