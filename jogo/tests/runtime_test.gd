@@ -16,6 +16,12 @@ func wait_frames(amount: int) -> void:
  for i in amount:
   await get_tree().physics_frame
 
+## Waits for drawn frames (where _process runs, the HUD included). Several physics
+## steps can happen before one of these when a frame is slow.
+func wait_process(amount: int) -> void:
+ for i in amount:
+  await get_tree().process_frame
+
 func run(target, capture: bool) -> void:
  game = target
  process_mode = Node.PROCESS_MODE_ALWAYS
@@ -1957,17 +1963,17 @@ func test_third_person() -> void:
  game.ui.toggle_inventory()
  check(game.ui.cursor_needed() and not game.ui.crosshair.visible,"Mochila aberta solta o cursor")
  # Inventory, map and pause pause the game; the cursor must still come back.
- await wait_frames(2)
+ await wait_process(2)
  check(get_tree().paused and not game.cursor_captured,"Mochila aberta (jogo pausado): o cursor solta de verdade")
  game.ui.toggle_inventory()
- await wait_frames(2)
+ await wait_process(2)
  check(not get_tree().paused and game.cursor_captured,"Fechando a mochila, o cursor volta a ficar preso")
  for menu in [["Mapa aberto", game.ui.toggle_map], ["Menu de pausa aberto", game.ui.toggle_pause]]:
   menu[1].call()
-  await wait_frames(2)
+  await wait_process(2)
   var freed: bool = get_tree().paused and not game.cursor_captured
   menu[1].call()
-  await wait_frames(2)
+  await wait_process(2)
   check(freed and not get_tree().paused and game.cursor_captured,"%s solta o cursor; fechando, ele volta a ficar preso" % menu[0])
  game.ui.toggle_techniques()
  game.ui.update_hud()
