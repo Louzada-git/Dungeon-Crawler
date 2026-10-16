@@ -458,6 +458,16 @@ func discover() -> void:
 			if layout.is_floor(p) and p.distance_to(cell) <= 5.5 and clear_line(player.position, layout.to_world(p)):
 				discovered[p] = true
 
+## Marks every floor cell of this floor as explored (the sketched map item).
+## Returns how many cells were new.
+func reveal_floor() -> int:
+	var added: int = 0
+	for cell in layout.floors:
+		if not discovered.has(cell):
+			discovered[cell] = true
+			added += 1
+	return added
+
 func clear_line(a: Vector3, b: Vector3) -> bool:
 	if a.distance_squared_to(b) < 0.001:
 		return true
