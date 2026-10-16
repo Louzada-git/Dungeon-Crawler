@@ -1,30 +1,33 @@
 # Arquitetura do projeto Godot
 
-Mapa rápido de onde cada coisa vive. Atualizado na etapa 8 (13/10/2026).
+Mapa rápido de onde cada coisa vive. Atualizado em 16/10/2026 (acerto por toque, loja, itens novos, personagens e animações).
 
 ## Dados (`data/`)
 
 | Arquivo | Conteúdo |
 | --- | --- |
-| `itens.json` | Catálogo de itens: categoria, peso, modelo, números de combate e efeitos de consumo. `name`/`description` são chaves de texto. |
-| `inimigos.json` | Tipos de monstro: vida, dano, preparo do golpe, velocidade, recuo, escala, espólio e `firmeza` (tempo sem poder ser atordoado de novo depois de um atordoamento). |
+| `itens.json` | Catálogo de itens (77): categoria, peso, `valor` em vinténs, modelo, números de combate e efeitos de consumo. `name`/`description` são chaves de texto. |
+| `inimigos.json` | Tipos de monstro: vida, dano, preparo do golpe, velocidade, recuo, escala, modelo, espólio, `firmeza` (tempo sem poder ser atordoado de novo depois de um atordoamento), `reach` (a que distância decide atacar) e `lunge` (quanto se joga para a frente com a garra). |
 | `mundos/cisternas.json` | Descrição do mundo atual: salas, corredores, bloqueios, mobília, recipientes, monstros, início e abrigo. Cada recipiente e monstro tem `id` fixo. |
 | `textos.csv` | Textos de conteúdo por chave (coluna `pt_BR`). Outro idioma = nova coluna. |
 | `saque.json` | Tabelas de saque por tipo de sala: `[item, peso, mínimo, máximo, andar mínimo]`. |
 | `salas.json` | Nomes de sala por tipo, com gênero, e complementos. |
 | `tecnicas.json` | Habilidades e objetos: efeitos, requisitos por proficiência, cópias, slots, recarga e barra. |
 | `efeitos.json` | Efeitos visuais: folha, tamanho, velocidade, cor, brilho, mistura aditiva, se fica em pé, se repete, se sobe e se desvanece. |
+| `loja.json` | Mercador: itens que ele sempre traz, sorteios por andar, alta do preço por andar (`compra`) e quanto paga do valor (`venda`). |
+| `animacoes.json` | Momento do impacto de cada golpe, em fração da animação, por modelo. Gerado por `../arte/fontes/personagem_psx/personagens.gd`. |
 | `proficiencias.json` | Grupos, ramos de proficiência (raízes e especializações), curva, efeitos por nível, perfil dos punhos e migração de nomes; as armas e armaduras indicam o caminho que treinam. |
 
 A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrinth_generator.gd` produz esse formato a partir de (semente, andar). O mundo fixo `cisternas.json` continua existindo só para a suíte de testes.
 
 ## Labirinto
 
-- **Andares:** 10, 20, 40, 60, 100, 200, 400 salas e depois dobra. Sala 0 é a entrada (abrigo no 1º andar, subida nos outros); a sala mais distante é a do chefe, com o relicário (selo + saque) e a descida.
+- **Andares:** 10, 20, 40, 60, 100, 200, 400 salas e depois dobra. Sala 0 é a entrada (abrigo no 1º andar, subida nos outros), com o mercador; a sala mais distante é a do chefe (o capataz), com o relicário (saque) e a descida.
 - **Tipos de sala:** combate, suprimentos, tesouro (pontas sem saída), covil (guardião de elite) e chefe.
-- **Monstros:** corrompido, espreitador (rápido), brutamontes (resistente), guardião (elite) e chefe. Vida +30% e dano +15% por andar. Monstros longe do jogador dormem.
+- **Monstros** (id → nome no jogo): corrompido → Afogado, espreitador → Carniçal (rápido), brutamontes → Inchado (resistente), guardiao → Carcereiro (elite) e chefe → Capataz. Vida +30% e dano +15% por andar. Monstros longe do jogador dormem.
 - **Estado por andar:** baús e monstros de cada andar visitado ficam guardados; o mapa explorado é conhecimento e sobrevive à morte (`user://conhecimento.json`).
-- **Save versão 2:** semente, andar atual, andares visitados, conhecimento, selos entregues.
+- **Save versão 2:** semente, andar atual, andares visitados, conhecimento, munição escolhida (`municao`) e o estoque do mercador de cada andar (`loja`). Os selos saíram em 16/10/2026: `Items.REMOVED` e `SaveSystem._drop_removed_items` tiram de saves antigos o que não existe mais.
+- **Objetivo do mundo fixo:** o relicário da `camara_guardiao` (`layout.world["guardian"]`, `main.fixed_goal_done`).
 
 ## Código (`scripts/`)
 
@@ -36,9 +39,12 @@ A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrint
 | `items.gd`, `enemy_types.gd` | Leitura dos catálogos; textos traduzidos em `Items.info()`. |
 | `inventory.gd` | Mochila: pilhas, peso, equipar, transferir. |
 | `player.gd`, `enemy.gd` | Personagem e monstros (movimento, golpes, IA). O modelo do personagem é `DungeonPlayer.MODEL`; `MOUNTS` diz em que osso ficam as mãos e o tronco em rigs com outros nomes (Mixamo) e a correção que mantém armas e armaduras no lugar. |
-| `systems/combat.gd` | Resolução do golpe do jogador. |
+| `systems/combat.gd` | Resolução do golpe do jogador: corpo a corpo pela hitbox, disparo por projétil, e os efeitos de cada acerto (`apply_hit`). |
+| `systems/hitbox.gd` | Acerto por toque (`Hitbox`): cápsula da arma, do punho ou da garra seguindo a animação, cápsulas dos corpos, varredura em volta do impacto e alcance medido de cada arma. |
+| `systems/animacoes.gd` | `Animacoes.impact`: momento do impacto de cada golpe, lido de `animacoes.json`. |
+| `systems/shop.gd`, `ui/ui_shop_window.gd` | Mercador (`ShopSystem`): estoque por andar, preços, comprar, vender e o lugar dele na sala de entrada; janela da loja. |
 | `systems/containers.gd` | Baús e pilhas no chão: ids, proximidade, guardar, deixar. |
-| `systems/item_use.gd` | Comer, tratar, equipar a partir dos dados do item. |
+| `systems/item_use.gd` | Comer, beber, tratar, ler o mapa e equipar a partir dos dados do item. |
 | `systems/save_system.gd` | Save JSON (versão 2), validação, estado por andar e conhecimento. |
 | `systems/labyrinth_generator.gd` | Gera um andar por semente e o valida (alcance, chefe, selo, ids). |
 | `systems/projectile.gd` | Flechas e virotes em voo: paredes, monstros atravessados, munição presa e recuperável. |
@@ -54,12 +60,45 @@ A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrint
 
 ## Armas
 
-- **Estilos** (`style` em `itens.json`): `slash` (arco com `angle` e `targets`), `thrust` (linha reta com `width`; `targets` > 1 atravessa), `smash` (círculo à frente com `area_offset` e `area_radius`) e `shoot` (projétil com `ammo`, `projectile_speed`, `pierce`).
+- **Estilos** (`style` em `itens.json`): `slash` (corte), `thrust` (estocada; `targets` > 1 atravessa), `smash` (pancada) e `shoot` (projétil com `ammo`, `ammo_extra`, `projectile_speed`, `pierce`). Nos três primeiros o golpe acerta o que a arma toca (ver "Acerto por toque"), até `targets` monstros.
+- **Munição:** `ammo` é a principal e `ammo_extra` as outras que a arma aceita (flecha de osso, larga…). A munição escolhida na barra rápida (`main.chosen_ammo`) vale para a arma que a aceita (`main.ammo_for`); `Items.with_ammo` aplica o que ela muda (`damage_mult`, `bleed`, `knockback`, `pierce`).
 - **Efeitos:** `sneak_mult` (monstro desprevenido), `bleed` (`dps`, `time`), `crush` (monstros `armored`), `stagger` (segundos), `knockback` (3 é o normal).
 - **Tempo do golpe:** `windup` é o preparo até o golpe acertar; `cooldown` é o golpe inteiro. O delay depois do acerto (`cooldown` − `windup`) depende do peso da arma (`classe`: leve, media, pesada); armas pesadas têm muito dano por golpe e delay alto. Lentidão e trava de virar duram 90% do `cooldown`; a esquiva volta na metade do delay (`DungeonPlayer.DODGE_AFTER`) e corta a lentidão. Depois disso, o peso da arma segura só o próximo golpe por mais 0,1 s por kg (`DELAY_PER_KG`). A animação dura `windup` / `impacto` para acertar no fim do preparo. Números e tabela em `BALANCO.md`.
-- **Modelo:** `Visuals.item_model(id)` usa `assets/armas/<id>.glb` se existir; senão os `blocks` provisórios; senão o modelo compartilhado de `model`. Na mão: `rotacao_mao`, `escala_mao`, `alinhar_ao_golpe` e `mao` (`esquerda` para o arco).
-- **Animação:** `animacao` é o nome desejado; enquanto o personagem não a tiver, `DungeonPlayer.attack_animation` usa a mais próxima.
+- **Modelo:** `Visuals.item_model(id)` usa `assets/armas/<id>.glb` ou `assets/itens/<id>.glb` se existir; senão o modelo do item `base` (com `escala_modelo`, como o arco longo feito do arco); senão os `blocks` provisórios; senão o modelo compartilhado de `model`. Os objetos do MegaKit pegam a cor dos vértices (`Visuals.use_vertex_colors`). Na mão: `rotacao_mao`, `escala_mao`, `alinhar_ao_golpe` e `mao` (`esquerda` para o arco).
+- **Animação:** `animacao` é o nome desejado; enquanto o personagem não a tiver, `DungeonPlayer.attack_animation` usa a mais próxima. A duração sai de `Animacoes.impact` (o momento do impacto medido na animação); `impacto` no item é só a reserva.
 - Especificação para modelos e animações: `../arte/ARMAS_ESPEC.md`.
+
+## Acerto por toque
+
+Desde 16/10/2026 (`systems/hitbox.gd`):
+
+- **Corpos:** cápsulas em pé. Monstro: a mesma do colisor (`radius` e altura pela `scale`). Aventureiro: 0,35 m de raio, 1,75 m de altura.
+- **Arma:** cápsula da mão até a ponta do modelo. A ponta sai dos vértices do modelo (`Hitbox.extent`, uma vez por arma), com a mesma pega da mão (`DungeonPlayer.MOUNTS`, `rest_rotation`, `hand_scale`). Hastes com `alinhar_ao_golpe` apontam na linha do golpe. Espessura por estilo (`Hitbox.RADIUS`). Punhos: antebraço até um pouco além da mão.
+- **Varredura:** quando o golpe acerta (`Combat.resolve_player_attack`), o esqueleto é posto na animação do golpe direto das trilhas (`Hitbox.pose_at`, sem depender do que o `AnimationPlayer` está tocando ou misturando), de `BEFORE` antes do impacto até `AFTER` depois, em `STEPS` passos, e depois volta. O corpo é considerado virado para a linha do golpe (`attack_facing`). Posições com a ponta atrás do corpo não contam (preparo nas costas). Quem a cápsula tocou é atingido, na ordem do toque, até `targets`; parede entre o aventureiro e o monstro segura o golpe.
+- **Habilidades e talentos** (`Hitbox.extras`, diferença para a arma pura): `range` a mais estica a ponta; `angle` a mais estica o trecho do movimento que conta e engrossa um pouco; `area_radius` e `width` a mais engrossam. `angle` ≥ 150 (Corte giratório) gira a lâmina, na posição mais longe, à volta inteira.
+- **Rastro:** `Vfx.swing_trail` desenha por onde a lâmina passou, com as mesmas cápsulas.
+- **Alcance mostrado:** `range` das armas corpo a corpo (e dos punhos) é o alcance da hitbox, medido por `tools/medir_alcance.gd`; um teste confere que continuam iguais. Rodar de novo depois de trocar modelo, pega ou animação de golpe.
+- **Monstros:** garra = antebraço direito até 0,32 × escala além da mão, na animação `attack`, adiantada pelo `lunge` (`Hitbox.monster_samples`, `monster_hits`). O modelo avança o mesmo no fim do preparo e volta na recuperação (`DungeonEnemy._lean`). A pancada do capataz continua em área (`slam_radius`), avisada pelo anel.
+- Captura: `tests/hitbox_capture.gd` (cápsulas de cada arma e monstro, rastro e bote).
+
+## Loja
+
+- **Mercador** na sala de entrada de cada andar, encostado numa parede, fora do caminho (`ShopSystem.merchant_cell`); a célula dele é sólida para os monstros. Modelo `assets/originais/mercador.glb`, com placa "MERCADOR".
+- **Estoque** sorteado por (semente, andar) a partir de `loja.json` (`ShopSystem.roll_stock`); guardado por andar (`floor_states["shop"]`) e no save (`loja`).
+- **Preços:** compra = `valor` × (1 + `compra` × (andar − 1)), arredondado para cima, mínimo 1; venda = `valor` × `venda`, arredondado para baixo (0 = ele não compra). A arma em mãos e a armadura vestida não aparecem para vender. O dinheiro é o vintém (`coin`, peso 0). Ferro e ametista só servem para vender.
+- **Janela** (E perto do mercador): estoque e mochila lado a lado, com preço, botões e arrastar entre as listas. O jogo pausa enquanto ela está aberta.
+
+## Itens
+
+- **Comida e bebida:** `food` sacia; `heal` também cura; `bebida` dá para beber mesmo de barriga cheia. O menu diz Comer, Beber, Aplicar ou Ler.
+- **Gazuas:** `arrombar` (`ordem`, `bonus` na chance, `quebra` multiplica a chance de quebrar, `sempre` = nunca falha). `Items.lockpicks`, `main.lockpick_tool` (a melhor que você tem) e `main.pick_chance_with`.
+- **Mapa rabiscado:** `revela_mapa` mostra o andar inteiro (`main.reveal_floor`).
+
+## Personagens e animações
+
+- **Modelos:** aventureiro, mercador e os cinco monstros saem do pacote Characters PSX (rig do Mixamo) por `../arte/fontes/personagem_psx/personagens.gd`, que também grava `data/animacoes.json`.
+- **Animações:** Universal Animation Library (Quaternius) e um golpe do Mixamo, transferidos para o rig; os outros golpes, a garra e a pancada do capataz são poses escritas no script (direção dos membros e da arma, giro, inclinação, mão esquerda no cabo por IK).
+- **Tempo:** o golpe do aventureiro dura `windup` / `Animacoes.impact`, e o do monstro toca na velocidade em que o impacto cai no fim do preparo.
 
 ## Atributos e proficiências
 
@@ -70,7 +109,7 @@ A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrint
   - *Combate:* Lâminas › (Espadas › Espada reta, Katana, Montante; Adagas), Contundentes › (Maça, Martelo, Machados, Desarmado), Hastes › (Lança, Alabarda), Bloqueio, Armadura pesada, Atletismo.
   - *Furtividade:* Furtividade, Pontaria › (Arcos, Bestas), Armadura leve, Acrobacia, Arrombamento.
   - *Sobrevivência:* Tratamento.
-  - Fora por enquanto: magia, Alquimia, Reparo (precisa de durabilidade por item), Comércio e Oratória (precisam de mercadores).
+  - Fora por enquanto: magia, Alquimia, Reparo (precisa de durabilidade por item), Comércio e Oratória (o mercador chegou em 16/10/2026, mas o preço ainda não depende de perícia).
 - **Experiência** vem do que o personagem faz:
 
 | Ramo | Treina com |
@@ -95,7 +134,7 @@ A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrint
 
 ## Guarda, armaduras, furtividade e fechaduras
 
-- **Guarda** (`DungeonPlayer.can_block`, `receive_damage`): segurando o botão direito com arma corpo a corpo ou punhos, golpes num cone de 140° à frente perdem 40% (punhos: 25%) e gastam fôlego igual ao dano segurado (mínimo 4). Sem fôlego a guarda quebra. A pancada em área do chefe não é bloqueável (`blockable = false`). Arco e besta não bloqueiam.
+- **Guarda** (`DungeonPlayer.can_block`, `receive_damage`): segurando o botão direito com arma corpo a corpo ou punhos, golpes num cone de 140° à frente perdem 40% (punhos: 25%) e gastam fôlego igual ao dano segurado (mínimo 4). Sem fôlego a guarda quebra. A pancada em área do capataz não é bloqueável (`blockable = false`). Arco e besta não bloqueiam.
 - **Armaduras** (tag `ARMADURA` em `itens.json`): `armor_type` leve ou pesada, `protection` (parte de cada golpe absorvida, depois da guarda), `speed_penalty`, `regen_penalty` (recuperação de fôlego) e `noise` (aumenta a distância em que os monstros te notam). Vestir/tirar pelo inventário; `InventoryData.armor` vai no save. Aparece no tronco do personagem (osso `spine`); o campo `corpo` (`pos`, `escala`) ajusta os blocos provisórios.
 - **Furtividade** (C): passo a 55%, quase sem som de passos. Um monstro nota a `sight × detection_mult`: de pé 1,0; agachado 0,5 de frente e 0,3 fora do cone de visão dele (120°); correndo 1,47; armadura barulhenta multiplica tudo. Golpe agachado em monstro desprevenido: ×1,5 com qualquer arma (×2 com a habilidade), somando ao bônus próprio da adaga.
 - **Fechaduras:** baús podem ter `lock` 1–4 (simples, média, difícil, de mestre). Trancado, o conteúdo fica escondido e nada entra ou sai. Gazua (`FERRAMENTA`): chance = 60% − 20% por dificuldade acima de simples + 4% por nível de Arrombamento (+15% com a habilidade), entre 5% e 95%; falhar quebra a gazua em 50% das vezes (25% com a habilidade). `main.attempt_lockpick(container, roll, break_roll)` aceita dados fixos nos testes.
@@ -143,6 +182,7 @@ Decisões de 15/10/2026: só físicas por enquanto (a magia vem depois); montar 
 - **Desenho:** cada efeito é um `MeshInstance3D` com `QuadMesh` e o `ShaderMaterial` de `Vfx.SHADER`, que vira o quadro para a câmera (ou só em volta do eixo Y, nas chamas), escolhe o quadro da folha e lê sem suavizar. O filtro PSX não troca esse material; a imagem final passa pelo pós-processamento como o resto.
 - **Efeitos de uma vez** (`Vfx.burst`): cópia do material com o quadro avançado por um `Tween`; o nó entra no grupo `efeitos` e se apaga quando a folha acaba. Ficam um pouco à frente do corpo, na direção da câmera, para não sumirem dentro dele.
 - **Chamas** (`Vfx.flame`): grupo `chamas`, um material só para todas; o quadro sai do tempo e da posição, sem script por tocha. As luzes de tocha e da fogueira tremem por `Vfx.Flicker` (um nó por andar, `LuzesTremulas`), 15 vezes por segundo e só perto da câmera.
+- **Rastro da lâmina** (`Vfx.swing_trail`): faixa clara por onde a hitbox passou, que some em 0,18 s.
 - **Onde aparecem:** acerto em monstro (`Combat.apply_hit` → `Vfx.enemy_hit`: sangue e clarão; faíscas em blindado sem arma que esmaga; estouro grande em ataque furtivo, armadura esmagada ou atordoamento forte); sangramento (gota a cada 0,5 s); morte (fumaça); aventureiro ferido (sangue) e guarda (faíscas do lado do golpe); esquiva e avanço (poeira); pancada no chão (anel de poeira); flecha na parede (clarão e poeira).
 - Captura: `tests/vfx_capture.gd`.
 
@@ -163,7 +203,12 @@ O jogo exportado não leva `tests/`, `tools/` nem documentos (`export_presets.cf
 - `tests/balanco_capture.gd`: dicas das armas com peso, delay e esquiva (precisa de tela).
 - `tests/vfx_capture.gd`: tochas, fogueira, sangue, golpe forte, faíscas, poeira, fumaça e o mesmo acerto sem o filtro (precisa de tela).
 - `tests/hud_capture.gd`: capturas do HUD para revisão (precisa de tela).
-- `tools/render_icons.gd`: gera os ícones dos itens a partir dos modelos.
+- `tests/loja_capture.gd`: o mercador e a janela da loja (precisa de tela).
+- `tests/animacoes_capture.gd`: golpes do aventureiro e dos monstros no jogo (precisa de tela).
+- `tests/hitbox_capture.gd`: cápsulas da hitbox, rastro da lâmina e bote do monstro (precisa de tela).
+- `tools/render_icons.gd`: gera os ícones dos itens a partir dos modelos (`-- ids` para só alguns).
+- `tools/medir_alcance.gd`: mede o alcance da hitbox de cada arma e grava em `range`.
+- `tools/tabela_balanco.py`: tabela de `BALANCO.md`.
 
 ## Ainda por fazer na etapa 8
 
