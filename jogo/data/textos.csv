@@ -133,3 +133,17 @@ ITEM_PEITORAL_NOME,Peitoral de ferro
 ITEM_PEITORAL_DESC,"Uma chapa grossa na frente e outra atrás. Pesa e faz barulho, mas segura muita pancada."
 ITEM_ESCAMAS_NOME,Loriga de escamas
 ITEM_ESCAMAS_DESC,"Centenas de escamas de ferro. Só perde para a armadura de placas, e pesa quase o mesmo."
+ITEM_PAO_NOME,Pão preto
+ITEM_PAO_DESC,"Duro de ontem, ou da semana passada. Enche a barriga."
+ITEM_QUEIJO_NOME,Queijo duro
+ITEM_QUEIJO_DESC,Dura meses e alimenta bem.
+ITEM_PEIXE_NOME,Peixe seco
+ITEM_PEIXE_DESC,"Salgado demais, mas mata a fome."
+ITEM_TOUCINHO_NOME,Toucinho
+ITEM_TOUCINHO_DESC,Gordura pura. Segura a fome por muito tempo.
+ITEM_BOLACHA_NOME,Bolacha de navio
+ITEM_BOLACHA_DESC,Quase não pesa e nunca estraga. Também quase não tem gosto.
+ITEM_CENOURA_NOME,Cenoura
+ITEM_CENOURA_DESC,Alguém plantou isso aqui embaixo? Dá um pouco de ânimo.
+ITEM_COGUMELO_NOME,Cogumelo do poço
+ITEM_COGUMELO_DESC,Cresce nas paredes úmidas. Alimenta pouco e fecha um arranhão.
