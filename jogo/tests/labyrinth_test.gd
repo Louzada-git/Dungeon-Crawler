@@ -1,6 +1,6 @@
 extends Node
 # Labyrinth mode suite: generated floors, stairs, per-floor state, boss,
-# seals, save version 2 and the death rule.
+# relic chest, save version 2 and the death rule.
 #   godot --headless --path . -- --test-labirinto --seed=777
 
 var checks: int = 0
@@ -74,15 +74,19 @@ func run(target) -> void:
 	boss.receive_damage(boss.maximum_health, Vector3.RIGHT)
 	check(not boss.alive and not game.boss_alive(), "Chefe pode ser derrotado")
 	check(game.objective_text().contains("2º andar"), "Objetivo passa a apontar a descida")
+	var relic_id: String = ""
+	for entry in game.layout.world["containers"]:
+		if entry.get("objective", false):
+			relic_id = entry["id"]
 	var relic: Dictionary = {}
 	for c in game.containers:
-		if c["id"].ends_with("_bau_0") and c["items"].has("seal"):
+		if c["id"] == relic_id:
 			relic = c
-	check(not relic.is_empty(), "Relicário do chefe guarda o selo do andar")
+	check(not relic.is_empty() and int(relic["items"].get("coin", 0)) >= 12 and not Items.DATA.has("seal"), "Relicário do chefe guarda moedas e saque (o selo saiu do jogo)")
 	# Floor 1 changes that must survive the trip.
 	var chest: Dictionary = {}
 	for c in game.containers:
-		if c.get("chest", true) and not c["items"].is_empty() and not c["items"].has("seal") and c["id"] != "s0_bau_0":
+		if c.get("chest", true) and not c["items"].is_empty() and c["id"] != relic_id and c["id"] != "s0_bau_0":
 			chest = c
 			break
 	var chest_id: String = chest.get("id", "")
@@ -100,7 +104,7 @@ func run(target) -> void:
 	var picked: Dictionary = {}
 	var kept: Dictionary = {}
 	for c in game.containers:
-		if c["id"] == chest_id or c["items"].has("seal") or not c.get("chest", true):
+		if c["id"] == chest_id or c["id"] == relic_id or not c.get("chest", true):
 			continue
 		if picked.is_empty():
 			picked = c
@@ -195,15 +199,30 @@ func run(target) -> void:
 	game.inventory.remove("gema", 2)
 	game.floor_states.clear()
 	check(game.load_game() and game.inventory.count("gema") == 2 and game.floor_states.has(1), "Carregar restaura mochila e andares visitados")
-	# Deliver a seal at the shelter
+	# A save from before the seal left the game still loads, without the seal.
+	var old = JSON.parse_string(FileAccess.get_file_as_string(game.save_path))
+	old["inventory"]["stacks"]["seal"] = 1
+	old["containers"][0]["items"]["seal"] = 1
+	old["floors"]["1"]["containers"][0]["items"]["seal"] = 1
+	old["seals"] = 2
+	var file := FileAccess.open(game.save_path, FileAccess.WRITE)
+	file.store_string(JSON.stringify(old))
+	file.close()
+	var no_seal: bool = game.load_game() and game.inventory.count("seal") == 0 and game.inventory.count("gema") == 2
+	for c in game.containers:
+		no_seal = no_seal and not c["items"].has("seal")
+	for c in game.floor_states[1]["containers"]:
+		no_seal = no_seal and not c["items"].has("seal")
+	check(no_seal, "Save antigo com selos carrega sem o selo")
+	# The shelter only rests and saves now.
 	near(game.stairs_up_cell())
 	game.interact()
 	await frames(3)
-	game.inventory.add("seal")
 	game.player.position = game.camp_position
-	check(game.interaction_text().contains("ENTREGAR"), "Abrigo oferece entregar o selo")
+	check(game.interaction_text().contains("SALVAR"), "Abrigo oferece descansar e salvar")
+	DirAccess.remove_absolute(game.save_path)
 	game.interact()
-	check(game.seals_delivered == 1 and game.inventory.count("seal") == 0 and not game.ended, "Selo entregue conta e a expedição continua")
+	check(not game.ended and FileAccess.file_exists(game.save_path), "Descansar no abrigo salva e a expedição continua")
 	# Knowledge survives death
 	var known_cells: int = game.knowledge[1].size()
 	check(known_cells > 20, "Mapa do 1º andar foi explorado (%d células)" % known_cells)
