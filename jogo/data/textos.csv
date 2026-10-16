@@ -11,7 +11,6 @@ ITEM_ORE_NOME,Ferro bruto
 ITEM_ORE_DESC,Material pesado. Leve só o que consegue carregar.
 ITEM_COIN_NOME,Moeda antiga
 ITEM_COIN_DESC,Encontrada entre os pertences da antiga guarnição.
-ITEM_SEAL_NOME,Selo das cisternas
 INIMIGO_CORROMPIDO_NOME,Corrompido
 INIMIGO_GUARDIAO_NOME,Guardião
 MUNDO_CISTERNAS_NOME,As Cisternas
@@ -19,7 +18,7 @@ SALA_ABRIGO,Abrigo da entrada
 SALA_GALERIA,Galeria da guarda
 SALA_DEPOSITO,Depósito esquecido
 SALA_SALAO,Salão das cisternas
-SALA_CAMARA,Câmara do selo
+SALA_CAMARA,Câmara do guardião
 SALA_PASSAGEM,Passagem subterrânea
 RECIPIENTE_RESERVA,Reserva da entrada
 RECIPIENTE_BAU_GUARDA,Baú da guarda
@@ -28,7 +27,6 @@ RECIPIENTE_MANTIMENTOS,Mantimentos esquecidos
 RECIPIENTE_RELICARIO,Relicário das cisternas
 RECIPIENTE_PERTENCES,Pertences do corrompido
 RECIPIENTE_DEIXADOS,Itens deixados
-ITEM_SEAL_DESC,Selo arrancado de um guardião do labirinto. Entregue-o no abrigo.
 ITEM_ESPADA_GUARDA_NOME,Espada da guarda
 ITEM_ESPADA_GUARDA_DESC,"Aço temperado da antiga guarnição. Um pouco mais de dano e de peso que a espada de viajante."
 ITEM_LANCA_LONGA_NOME,Lança longa
