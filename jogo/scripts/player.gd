@@ -43,6 +43,8 @@ var dash_velocity: Vector3 = Vector3.ZERO
 ## Seconds to the next puff of dust during a dash.
 var dash_fx: float = 0.0
 var attack_weapon: Dictionary = {}
+## Item held when the blow started ("" = fists): the hitbox follows its model.
+var attack_item: String = ""
 var attack_facing: Vector3 = Vector3.FORWARD
 var attack_serial: int = 0
 var resolved_serial: int = -1
@@ -338,6 +340,7 @@ func attack(stats: Dictionary = {}) -> bool:
   return false
  stamina -= cost
  attack_weapon = weapon.duplicate()
+ attack_item = game.inventory.equipped
  attack_facing = facing
  attack_serial += 1
  # "cooldown" is the whole blow; heavy weapons carry a long delay after it lands.
