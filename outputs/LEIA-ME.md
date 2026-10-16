@@ -1,5 +1,49 @@
 # Dungepm — As Cisternas
 
+## Novo: golpes que acertam pela arma, loja, 50 itens e personagens novos (16/10/2026)
+
+**O golpe acerta quem a arma encosta**
+- Antes, o golpe acertava uma área na frente do personagem. Agora a arma tem uma hitbox do tamanho do modelo e segue a animação: o golpe acerta o que a lâmina cruza, o que a ponta e a haste da lança alcançam, quem estiver onde a cabeça da marreta desce. O soco acerta só até onde o braço chega.
+- O preparo atrás das costas não acerta ninguém. Um rastro claro mostra por onde a lâmina passou.
+- O **alcance** na dica de cada arma agora é o alcance de verdade da lâmina, medido do modelo. Ficou menor que os números antigos, que eram de uma área: espada de soldado 1,6 m, lança de guarda 2,4 m, pique 2,7 m, adaga 0,9 m, soco 0,8 m. Some uns 0,4 m do corpo do monstro.
+- A marreta não acerta mais um círculo em volta: acerta todos onde a cabeça bate.
+- Habilidades: **Braço longo** estica a lâmina, **Meia-lua** e **Varredura** fazem o golpe contar por um trecho maior do movimento, **Estrondo** e **Tremor** aumentam a cabeça da marreta e o **Corte giratório** leva a lâmina à volta inteira.
+- **Monstros** acertam com a garra: eles se jogam para a frente no golpe. Recuar enquanto o arco vermelho pisca escapa. A pancada do capataz continua em área, avisada pelo anel vermelho no chão.
+- O corte do sabre acertava quando a lâmina ainda estava atrás do ombro. Agora acerta quando ela passa na frente.
+
+**Mercador**
+- Fica na sala de entrada de cada andar (no 1º, dentro do abrigo). Chegue perto e aperte **E**.
+- Compra com **vinténs** e paga 40% do valor do que você vende. Cada andar abaixo do 1º deixa as compras 10% mais caras. A arma em mãos e a armadura vestida não aparecem para vender.
+- Sempre tem comida, bandagens, ervas, flechas, virotes, pedras e gazuas. O resto muda de andar para andar, e cada andar guarda o estoque dele (vai no save).
+- O jogo pausa enquanto a loja está aberta. Dá para arrastar itens entre o estoque e a mochila.
+
+**Dinheiro e selos**
+- A moeda virou o **vintém**, o dinheiro do jogo. Não pesa nada.
+- **Os selos saíram.** O objetivo de cada andar é derrotar o capataz, que abre a descida. Num save antigo, os selos somem sozinhos.
+- Minério de ferro e ametista só servem para vender.
+
+**50 itens novos**
+- **18 armas:** espada curta, faca, espada larga, florete, alfanje, espadão, punhal, maça de cravos, estrela-da-manhã, malho, martelo de guerra, machado de duas lâminas, picareta de guerra, tridente, foice, arco longo, besta pesada e funda. Algumas fazem sangrar (alfanje, punhal, maça de cravos, machado de duas lâminas, foice).
+- **Munição:** flecha de osso (mais barata, menos dano), flecha de ponta larga (faz sangrar), virote pesado (atravessa mais um) e pedra (para a funda). Ponha a munição na barra rápida e aperte o número para escolher qual a arma usa.
+- **6 armaduras:** manto encerado, couro fervido e brigantina (leves); camisa de malha, peitoral de ferro e loriga de escamas (pesadas).
+- **Comida:** pão preto, queijo duro, peixe seco, toucinho, bolacha de navio, cenoura, cogumelo do poço e pote de mel (os dois últimos também curam um pouco).
+- **Bebida:** cerveja choca, vinho de garrafão e chá de casca devolvem fôlego e dá para beber de barriga cheia.
+- **Tratamento:** agulha e linha (estanca sangramento), erva-de-bicho, pomada de arnica e garrafada (cura muito).
+- **Ferramentas:** gazua de aço (abre mais e quebra menos), chave-mestra (abre qualquer fechadura, mas fica presa nela) e mapa rabiscado (mostra o andar inteiro).
+- **Tesouros para vender:** anel de prata, cálice de estanho, castiçal de latão e dente de ouro.
+
+**Nomes novos**
+- Monstros: Afogado (antigo corrompido), Carniçal (espreitador), Inchado (brutamontes), Carcereiro (guardião) e Capataz (o chefe do andar).
+- Armas: espada de soldado, sabre (a katana), marreta (o martelo antigo), lança de guarda, pique (a lança longa). Também mudaram aguardente (tônico), ametista (gema) e minério de ferro.
+- Objetos de habilidade: Bote, Meia-lua, Estrondo e Braço longo. As descrições foram reescritas.
+
+**Personagens e animações**
+- Os monstros e o mercador agora são personagens do pacote Characters PSX, como o aventureiro.
+- Golpes, andar, corrida e esquiva foram refeitos com a Universal Animation Library (Quaternius) e poses novas para machado, maça, montante, marreta, lança, alabarda, arco e besta. A pegada das armas foi acertada, e as armas de duas mãos ficam com a mão esquerda no cabo.
+
+**Correção**
+- Na terceira pessoa, o cursor não voltava ao abrir um menu. Agora volta.
+
 ## Novo: câmera em terceira pessoa (15/10/2026)
 
 - **Esc → Câmera** troca entre **isométrica** (a de sempre) e **terceira pessoa**. A escolha fica salva.
@@ -142,9 +186,9 @@ Cada expedição gera um labirinto a partir de uma semente. O 1º andar tem 10 s
 - **Windows:** abra `Dungepm.exe`. Na primeira vez o Windows pode avisar que o programa não é conhecido: clique em **Mais informações → Executar assim mesmo**.
 - **Linux:** abra `linux/Dungepm.x86_64` (se não abrir com dois cliques, rode `chmod +x Dungepm.x86_64` e depois `./Dungepm.x86_64`).
 
-Os dois são executáveis independentes, com o jogo dentro; não precisa instalar nada, abrir a Godot nem programar. Os downloads ficam em **Releases**, no GitHub.
+Os dois são executáveis independentes, com o jogo dentro; não precisa instalar nada, abrir a Godot nem programar. Os downloads ficam na pasta **downloads** do repositório, no GitHub.
 
-Explore as cinco salas, gerencie comida e bandagens, encontre o selo e retorne ao abrigo. Os modelos próprios já estão no mapa jogável.
+Explore o andar, gerencie comida e bandagens, compre e venda com o mercador e derrote o capataz para abrir a descida. O abrigo do 1º andar é o lugar de descansar e salvar.
 
 | Ação | Controle |
 |---|---|
@@ -154,7 +198,7 @@ Explore as cinco salas, gerencie comida e bandagens, encontre o selo e retorne a
 | Correr | Shift |
 | Esquivar | Espaço |
 | Andar agachado | C |
-| Interagir / abrir baú / arrombar | E, perto do alvo |
+| Interagir / abrir baú / arrombar / loja | E, perto do alvo |
 | Inventário | I ou Tab |
 | Mapa explorado | M |
 | Condição física | H |
