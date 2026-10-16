@@ -169,3 +169,11 @@ ITEM_CHAVE_MESTRA_NOME,Chave-mestra
 ITEM_CHAVE_MESTRA_DESC,"Abre qualquer fechadura, uma vez só. Depois fica presa nela."
 ITEM_MAPA_NOME,Mapa rabiscado
 ITEM_MAPA_DESC,Alguém desenhou este andar antes de você. Ler mostra tudo no mapa.
+ITEM_ANEL_PRATA_NOME,Anel de prata
+ITEM_ANEL_PRATA_DESC,Ainda com a marca do dedo de quem usava. Vale bem.
+ITEM_CALICE_NOME,Cálice de estanho
+ITEM_CALICE_DESC,Veio da capela que tinha aqui em cima. O mercador gosta.
+ITEM_CASTICAL_NOME,Castiçal de latão
+ITEM_CASTICAL_DESC,"Pesado para o que vale, mas vale."
+ITEM_DENTE_OURO_NOME,Dente de ouro
+ITEM_DENTE_OURO_DESC,Melhor não perguntar de onde veio.
