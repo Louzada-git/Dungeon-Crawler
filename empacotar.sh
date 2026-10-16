@@ -10,6 +10,14 @@ OUT="$(cd "$OUT" && pwd)"
 rm -f "$OUT"/Dungepm-*.zip "$OUT"/Dungepm-*.tar.xz
 # 1. Executável Linux, com licenças e créditos.
 tar -C outputs -cJf "$OUT/Dungepm-linux.tar.xz" linux
+# 1b. Executável Windows (o jogo vai dentro do .exe), com as mesmas licenças e créditos.
+if [ -f outputs/windows/Dungepm.exe ]; then
+    TMPW="$(mktemp -d)"
+    mkdir "$TMPW/Dungepm"
+    cp outputs/windows/Dungepm.exe outputs/linux/*.txt "$TMPW/Dungepm/"
+    (cd "$TMPW" && zip -qr "$OUT/Dungepm-windows.zip" Dungepm)
+    rm -rf "$TMPW"
+fi
 # 2. Projeto do jogo (pasta jogo/ da Godot) e o guia de como jogar.
 zip -qr "$OUT/Dungepm-jogo.zip" jogo outputs/LEIA-ME.md -x "jogo/.godot/*" "*__pycache__*" "*.blend1"
 # 3. Capturas de revisão, em JPG para caber no limite de envio (originais ficam em revisao/).
