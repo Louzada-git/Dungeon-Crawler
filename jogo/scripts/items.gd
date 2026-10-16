@@ -4,6 +4,8 @@ class_name Items
 ## in data/textos.csv and come back translated from info().
 
 const PATH := "res://data/itens.json"
+## Items taken out of the game. Old saves may still have them; SaveSystem drops them.
+const REMOVED := ["seal"]
 static var DATA: Dictionary = _load()
 static var _resolved: Dictionary = {}
 
@@ -24,6 +26,12 @@ static func info(id: String) -> Dictionary:
 		data["description"] = str(TranslationServer.translate(str(data.get("description", ""))))
 		_resolved[id] = data
 	return _resolved[id]
+
+## Removes the items in REMOVED from an {id: amount} dictionary, in place.
+static func drop_removed(stacks) -> void:
+	if stacks is Dictionary:
+		for id in REMOVED:
+			stacks.erase(id)
 
 ## Drops translated copies, e.g. after a language change.
 static func clear_cache() -> void:
