@@ -88,8 +88,7 @@ static func _weapon_rows(grid: GridContainer, data: Dictionary) -> void:
 			var pierce: int = int(data.get("pierce", 1))
 			_row(grid, "Golpe", "Disparo à distância")
 			_row(grid, "Alvos", "atravessa até %d" % pierce if pierce > 1 else "primeiro atingido")
-			var ammo: String = str(data.get("ammo", ""))
-			if ammo != "":
+			for ammo in Items.ammo_list(data):
 				var have: String = ("  ·  %d na mochila" % inventory.count(ammo)) if inventory != null else ""
 				_row(grid, "Munição", str(Items.info(ammo).get("name", ammo)) + have)
 		_:
@@ -144,7 +143,7 @@ static func _item_rows(grid: GridContainer, id: String, data: Dictionary) -> voi
 	if data.get("tag", "") == "MUNICAO":
 		var users: PackedStringArray = []
 		for other in Items.DATA:
-			if str(Items.DATA[other].get("ammo", "")) == id:
+			if Items.fires(other, id):
 				users.append(str(Items.info(other).get("name", other)))
 		_row(grid, "Usada por", ", ".join(users))
 		if float(data.get("recover", 0.0)) > 0:
