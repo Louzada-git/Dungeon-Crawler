@@ -6,7 +6,7 @@ class_name LabyrinthGenerator
 ## Floors grow roughly exponentially (decision of 13/10/2026): 10, 20, 40, 60,
 ## 100, 200, 400 rooms, then doubling. Each floor has an entrance (the shelter on
 ## floor 1, stairs up below it), combat, supply, treasure and lair rooms, and a
-## boss chamber at the far end that holds the floor seal and the stairs down.
+## boss chamber at the far end that holds the relic chest and the stairs down.
 
 const ROOMS_PER_FLOOR := [10, 20, 40, 60, 100, 200, 400]
 const GAP := 3
@@ -166,7 +166,7 @@ static func validate(desc: Dictionary) -> Array:
 	if bosses != 1:
 		problems.append("chefes: %d" % bosses)
 	if objectives != 1:
-		problems.append("selos: %d" % objectives)
+		problems.append("relicários: %d" % objectives)
 	if desc["rooms"].size() != room_target(int(desc["floor"])):
 		problems.append("salas: %d" % desc["rooms"].size())
 	return problems
@@ -497,7 +497,7 @@ static func _fill_room(rng: RandomNumberGenerator, desc: Dictionary, index: int,
 		if lock > 0:
 			entry["lock"] = lock
 		if kind == "chefe":
-			entry["objective"] = true
+			entry["objective"] = true  # the relic chest, guarded by the boss
 		desc["containers"].append(entry)
 		n += 1
 	# Monsters
