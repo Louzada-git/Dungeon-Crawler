@@ -319,6 +319,7 @@ func run(target, capture: bool) -> void:
  await test_balance()
  await test_quick_bar()
  await test_new_items()
+ await test_shop()
  await test_third_person()
  var guardian = game.fixed_guardian()
  check(guardian != null and guardian.uid == "camara_guardiao","Mundo fixo: o objetivo é o carcereiro da câmara")
@@ -2067,6 +2068,89 @@ func test_new_items() -> void:
  ready_player(p)
  p.set_physics_process(was_processing)
  game.ui.close_all()
+
+## The merchant in the entrance room: where he stands, the window, prices,
+## buying, selling, what stays with the player, and the stock in the save.
+func test_shop() -> void:
+ get_tree().paused = false
+ game.ui.close_all()
+ var p = game.player
+ var inv = game.inventory
+ var saved_inventory: Dictionary = inv.snapshot()
+ var was_processing: bool = p.is_physics_processing()
+ p.set_physics_process(false)
+ var layout = game.layout
+ var m: Node3D = game.merchant
+ check(m != null and is_instance_valid(m),"Mercador presente no andar")
+ var cell: Vector2i = layout.to_cell(m.position)
+ var entry_room: Rect2i = Rect2i()
+ for r in layout.rooms:
+  if r["rect"].has_point(layout.spawn):
+   entry_room = r["rect"]
+ var walls: int = 0
+ for d in [Vector2i.LEFT,Vector2i.RIGHT,Vector2i.UP,Vector2i.DOWN]:
+  if not layout.is_floor(cell+d):
+   walls += 1
+ check(entry_room.has_point(cell) and walls > 0 and layout.pathfinder.is_point_solid(cell),"Mercador fica na sala de entrada, encostado na parede, e bloqueia a passagem só da casa dele")
+ check(m.position.distance_to(game.camp_position) > 2.5 and cell != layout.spawn,"Mercador longe da fogueira e do ponto de chegada")
+ var stock: Dictionary = ShopSystem.roll_stock(game.seed,game.floor)
+ check(stock.has("ration") and stock.has("bandage") and stock.has("flecha") and ShopSystem.roll_stock(game.seed,game.floor) == stock,"Estoque traz o básico e é o mesmo para a mesma semente e andar")
+ var deep: Dictionary = ShopSystem.roll_stock(game.seed,6)
+ var only_deep: bool = false
+ for id in deep:
+  for e in ShopSystem.DATA["sorteio"]["entries"]:
+   if e[0] == id and int(e[4]) > 1:
+    only_deep = true
+ check(only_deep,"No 6º andar aparecem coisas que o 1º não tem")
+ # Talking to him.
+ p.position = m.position + (ShopSystem.room_center(game) - m.position).normalized() * 1.4
+ check(game.near_merchant() and game.interaction_text().contains("LOJA"),"Perto do mercador, E abre a loja")
+ game.interact()
+ check(game.ui.shop_window.visible and get_tree().paused and game.ui.any_panel(),"Loja abre e o jogo pausa")
+ press_key(KEY_E)
+ check(not game.ui.shop_window.visible and not get_tree().paused,"E de novo fecha a loja")
+ game.ui.open_shop()
+ # Prices.
+ check(ShopSystem.buy_price(1,"sword") == 25 and ShopSystem.buy_price(3,"sword") == 30 and ShopSystem.sell_price("sword") == 10,"Preço: valor no 1º andar, +10% por andar; ele paga 40%")
+ check(ShopSystem.sell_price("coin") == 0 and ShopSystem.sell_price("flecha") == 0 and ShopSystem.buy_price(1,"coin") == 0,"Moeda não se compra nem se vende; flecha comum ele não compra")
+ # Buying.
+ inv.restore({"stacks":{},"equipped":""})
+ game.shop_stock = {"ration":3,"sword":1}
+ check(ShopSystem.buy(game,"ration",1) == 0,"Sem vinténs, não compra")
+ inv.add("coin",10)
+ var price: int = ShopSystem.buy_price(game.floor,"ration")
+ check(ShopSystem.buy(game,"ration",5) == mini(3,10/price) and inv.count("coin") == 10-price*mini(3,10/price),"Compra o que o dinheiro e o estoque deixam")
+ check(not game.shop_stock.has("ration") or int(game.shop_stock["ration"]) == 3-mini(3,10/price),"Estoque diminui com a compra")
+ # Selling: the weapon in hand and the armor worn stay.
+ inv.add("gema",2)
+ inv.add("sword")
+ inv.equip("sword")
+ inv.add("couro")
+ inv.wear("couro")
+ var coins: int = inv.count("coin")
+ check(ShopSystem.sell(game,"gema",5) == 2 and inv.count("coin") == coins+2*ShopSystem.sell_price("gema") and int(game.shop_stock.get("gema",0)) == 2,"Vende as gemas, recebe vinténs, e elas vão para o estoque dele")
+ check(ShopSystem.sell(game,"sword",1) == 0 and ShopSystem.sell(game,"couro",1) == 0 and inv.equipped == "sword" and inv.armor == "couro","Arma em mãos e armadura vestida não se vendem")
+ inv.add("sword")
+ check(ShopSystem.sellable(game,"sword") == 1 and ShopSystem.sell(game,"sword",5) == 1 and inv.count("sword") == 1 and inv.equipped == "sword","Com duas espadas, vende só a de reserva")
+ # The window.
+ game.ui.shop_window.refresh()
+ check(game.ui.shop_window.coins_label.text == "Vinténs: %d" % inv.count("coin") and game.ui.shop_window.stock_list.row_for("gema") != null and game.ui.shop_window.bag_list.row_for("coin") == null,"Janela mostra os vinténs, o estoque e a mochila (sem as moedas)")
+ var before_coins: int = inv.count("coin")
+ game.ui.shop_window.buy("gema",1)
+ check(inv.count("gema") == 1 and inv.count("coin") == before_coins-ShopSystem.buy_price(game.floor,"gema"),"Comprar pela janela")
+ # The stock goes in the save.
+ game.shop_stock = {"queijo":2}
+ game.ui.close_all()
+ check(game.save_game(false),"Salva com o estoque do mercador")
+ game.shop_stock = {}
+ check(game.load_game() and game.shop_stock == {"queijo":2},"Carregar devolve o estoque do mercador")
+ game.shop_stock = ShopSystem.roll_stock(game.seed,game.floor)
+ inv.restore(saved_inventory)
+ p.refresh_weapon()
+ ready_player(p)
+ p.set_physics_process(was_processing)
+ game.ui.close_all()
+ DirAccess.remove_absolute(game.save_path)
 
 ## Third-person camera option: camera behind the character, mouse look, walls whole.
 func test_third_person() -> void:
