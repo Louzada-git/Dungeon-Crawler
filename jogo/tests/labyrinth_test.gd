@@ -118,6 +118,10 @@ func run(target) -> void:
 		game.ui.close_all()
 	var picked_id: String = picked.get("id", "")
 	var kept_id: String = kept.get("id", "")
+	# The merchant's stock of floor 1 must survive the trip too.
+	var shop_mark: int = int(game.shop_stock.get("ration", 0)) + 7
+	game.shop_stock["ration"] = shop_mark
+	var merchant_1: Vector3 = game.merchant.position if game.merchant else Vector3.ZERO
 	# Down to floor 2
 	near(game.stairs_down_cell())
 	check(game.interaction_text().contains("2º andar"), "Descida aberta depois do chefe")
@@ -167,6 +171,11 @@ func run(target) -> void:
 		kinds[e.kind] = true
 	check(kinds.size() >= 3, "2º andar mistura tipos de monstro: " + str(kinds.keys()))
 	# Change floor 2, go up, come back
+	var entry2: Rect2i = Rect2i()
+	for r in game.layout.rooms:
+		if r["rect"].has_point(game.layout.spawn):
+			entry2 = r["rect"]
+	check(game.merchant != null and entry2.has_point(game.layout.to_cell(game.merchant.position)) and game.shop_stock.has("ration"), "2º andar também tem mercador na sala de entrada, com estoque próprio")
 	var victim: DungeonEnemy = game.enemies[1]
 	var victim_id: String = victim.uid
 	victim.receive_damage(9999, Vector3.RIGHT)
@@ -175,6 +184,7 @@ func run(target) -> void:
 	game.interact()
 	await frames(3)
 	check(game.floor == 1 and not game.boss_alive(), "Volta ao 1º andar com o chefe ainda derrotado")
+	check(game.merchant != null and game.merchant.position.distance_to(merchant_1) < 0.01 and int(game.shop_stock.get("ration", 0)) == shop_mark, "Mercador do 1º andar no mesmo lugar, com o estoque de antes")
 	check(game.player.position.distance_to(game.layout.to_world(game.stairs_down_cell())) < 3.0, "Chega ao lado da descida ao subir")
 	if chest_id != "":
 		var same: Array = game.containers.filter(func(c): return c["id"] == chest_id)
