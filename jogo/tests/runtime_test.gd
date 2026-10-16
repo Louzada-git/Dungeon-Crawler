@@ -319,10 +319,16 @@ func run(target, capture: bool) -> void:
  await test_balance()
  await test_quick_bar()
  await test_third_person()
- inv.add("seal")
+ var guardian = game.fixed_guardian()
+ check(guardian != null and guardian.uid == "camara_guardiao","Mundo fixo: o objetivo é o guardião da câmara")
+ if guardian.alive:
+  check(game.objective_text() == "Derrote o guardião da câmara" and not game.fixed_goal_done(),"Com o guardião vivo, o objetivo é derrotá-lo")
+  guardian.receive_damage(guardian.maximum_health * 3, Vector3.RIGHT)
+ check(not guardian.alive and game.objective_text() == "Volte ao abrigo","Guardião derrotado: o objetivo vira voltar ao abrigo")
  p.position = game.camp_position
+ check(game.interaction_text().contains("VOLTAR"),"No abrigo, E encerra a expedição")
  game.interact()
- check(game.won and game.ended and game.ui.ending_panel.visible,"Retornar ao abrigo com o selo conclui a incursão")
+ check(game.won and game.ended and game.ui.ending_panel.visible,"Voltar ao abrigo depois do guardião conclui a incursão")
  get_tree().paused = false
  DirAccess.remove_absolute(game.save_path)
  print("RESULT: %d checks, %d failures" % [checks,failures.size()])
