@@ -1853,7 +1853,8 @@ func test_quick_bar() -> void:
  check(inv.armor == "","Apertar de novo tira a armadura")
  bar.assign(5,"flecha")
  game.ui.update_hud()
- check(hud.slots[5]["count"].text == "6" and not bar.use(game,5),"Munição na barra mostra quantas restam e não se usa")
+ check(hud.slots[5]["count"].text == "6" and bar.use(game,5) and game.chosen_ammo == "flecha","Munição na barra mostra quantas restam e, apertada, vira a munição escolhida")
+ game.chosen_ammo = ""
  game.message_text = ""
  press_key(KEY_9)
  check(game.message_text.contains("vazio"),"Espaço vazio explica como pôr um item")
