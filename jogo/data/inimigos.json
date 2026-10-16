@@ -1,6 +1,6 @@
 {
  "versao": 1,
- "_sobre": "Tipos de monstro. 'sight' é o alcance de visão; chefes têm golpe em área (slam_*). Vida e dano crescem com o andar (ver LabyrinthGenerator.scaling). 'armored' marca monstros blindados (armas com 'crush' causam mais dano). 'xp' é a experiência que o monstro inteiro ensina (dividida pelo dano causado; +25% por andar). 'firmeza': depois de ser atordoado (ou ter o ataque interrompido), o monstro fica esse tempo, além do atordoamento, sem poder ser atordoado de novo: os golpes ainda ferem, mas não cancelam o ataque dele. Chefes só vacilam. Balanço de 15/10/2026: mais vida e um pouco mais de dano.",
+ "_sobre": "Tipos de monstro. 'sight' é o alcance de visão; chefes têm golpe em área (slam_*). Vida e dano crescem com o andar (ver LabyrinthGenerator.scaling). 'armored' marca monstros blindados (armas com 'crush' causam mais dano). 'xp' é a experiência que o monstro inteiro ensina (dividida pelo dano causado; +25% por andar). 'firmeza': depois de ser atordoado (ou ter o ataque interrompido), o monstro fica esse tempo, além do atordoamento, sem poder ser atordoado de novo: os golpes ainda ferem, mas não cancelam o ataque dele. Chefes só vacilam. Balanço de 15/10/2026: mais vida e um pouco mais de dano. O golpe comum acerta se a garra (antebraço até além da mão, na animação 'attack') tocar o corpo do aventureiro; 'lunge' é quanto o monstro se joga para a frente com ela (m), o que leva o toque até perto de 'reach' (padrão 1,8), a distância em que ele decide atacar.",
  "inimigos": {
   "corrompido": {
    "name": "INIMIGO_CORROMPIDO_NOME",
@@ -17,7 +17,8 @@
    },
    "tint": "",
    "radius": 0.4,
-   "xp": 30
+   "xp": 30,
+   "lunge": 0.5
   },
   "guardiao": {
    "name": "INIMIGO_GUARDIAO_NOME",
@@ -36,7 +37,8 @@
    "tint": "",
    "radius": 0.45,
    "armored": true,
-   "xp": 60
+   "xp": 60,
+   "lunge": 0.45
   },
   "espreitador": {
    "name": "INIMIGO_ESPREITADOR_NOME",
@@ -54,7 +56,8 @@
    "loot": {
     "coin": 1
    },
-   "xp": 22
+   "xp": 22,
+   "lunge": 0.65
   },
   "brutamontes": {
    "name": "INIMIGO_BRUTAMONTES_NOME",
@@ -73,7 +76,8 @@
     "ration": 1
    },
    "armored": true,
-   "xp": 55
+   "xp": 55,
+   "lunge": 0.45
   },
   "chefe": {
    "name": "INIMIGO_CHEFE_NOME",
@@ -90,7 +94,8 @@
    "slam_damage": 38.0,
    "slam_radius": 3.2,
    "slam_windup": 1.15,
-   "reach": 2.4,
+   "reach": 2.2,
+   "lunge": 0.75,
    "loot": {
     "gema": 2,
     "coin": 25,
