@@ -1563,6 +1563,702 @@
    "model": "funda",
    "name": "ITEM_FUNDA_NOME",
    "description": "ITEM_FUNDA_DESC"
+  },
+  "manto": {
+   "tag": "ARMADURA",
+   "weight": 1.5,
+   "armor_type": "leve",
+   "protection": 0.06,
+   "noise": 0.0,
+   "proficiencias": [
+    "armadura_leve"
+   ],
+   "blocks": [
+    {
+     "size": [
+      0.42,
+      0.52,
+      0.24
+     ],
+     "pos": [
+      0,
+      0.26,
+      0
+     ],
+     "color": "4a5a48"
+    },
+    {
+     "size": [
+      0.16,
+      0.1,
+      0.26
+     ],
+     "pos": [
+      -0.2,
+      0.5,
+      0
+     ],
+     "color": "3a4838"
+    },
+    {
+     "size": [
+      0.16,
+      0.1,
+      0.26
+     ],
+     "pos": [
+      0.2,
+      0.5,
+      0
+     ],
+     "color": "3a4838"
+    },
+    {
+     "size": [
+      0.44,
+      0.06,
+      0.25
+     ],
+     "pos": [
+      0,
+      0.04,
+      0
+     ],
+     "color": "3a4838"
+    },
+    {
+     "size": [
+      0.03,
+      0.44,
+      0.245
+     ],
+     "pos": [
+      0,
+      0.26,
+      0
+     ],
+     "color": "3a4838"
+    }
+   ],
+   "icon_view": {
+    "rot": [
+     0,
+     25,
+     0
+    ],
+    "margin": 1.15,
+    "pitch": 20.0
+   },
+   "corpo": {
+    "pos": [
+     0,
+     -0.1,
+     0.0
+    ],
+    "escala": [
+     1.05,
+     1.0,
+     1.25
+    ]
+   },
+   "valor": 15,
+   "model": "manto",
+   "name": "ITEM_MANTO_NOME",
+   "description": "ITEM_MANTO_DESC"
+  },
+  "couro_fervido": {
+   "tag": "ARMADURA",
+   "weight": 3.2,
+   "armor_type": "leve",
+   "protection": 0.13,
+   "noise": 0.03,
+   "proficiencias": [
+    "armadura_leve"
+   ],
+   "blocks": [
+    {
+     "size": [
+      0.42,
+      0.52,
+      0.24
+     ],
+     "pos": [
+      0,
+      0.26,
+      0
+     ],
+     "color": "7a4f2c"
+    },
+    {
+     "size": [
+      0.16,
+      0.1,
+      0.26
+     ],
+     "pos": [
+      -0.2,
+      0.5,
+      0
+     ],
+     "color": "5e3c21"
+    },
+    {
+     "size": [
+      0.16,
+      0.1,
+      0.26
+     ],
+     "pos": [
+      0.2,
+      0.5,
+      0
+     ],
+     "color": "5e3c21"
+    },
+    {
+     "size": [
+      0.44,
+      0.06,
+      0.25
+     ],
+     "pos": [
+      0,
+      0.04,
+      0
+     ],
+     "color": "5e3c21"
+    },
+    {
+     "size": [
+      0.03,
+      0.44,
+      0.245
+     ],
+     "pos": [
+      0,
+      0.26,
+      0
+     ],
+     "color": "5e3c21"
+    }
+   ],
+   "icon_view": {
+    "rot": [
+     0,
+     25,
+     0
+    ],
+    "margin": 1.15,
+    "pitch": 20.0
+   },
+   "corpo": {
+    "pos": [
+     0,
+     -0.1,
+     0.0
+    ],
+    "escala": [
+     1.05,
+     1.0,
+     1.25
+    ]
+   },
+   "valor": 40,
+   "model": "couro_fervido",
+   "name": "ITEM_COURO_FERVIDO_NOME",
+   "description": "ITEM_COURO_FERVIDO_DESC"
+  },
+  "brigantina": {
+   "tag": "ARMADURA",
+   "weight": 5.5,
+   "armor_type": "leve",
+   "protection": 0.2,
+   "noise": 0.1,
+   "proficiencias": [
+    "armadura_leve"
+   ],
+   "blocks": [
+    {
+     "size": [
+      0.42,
+      0.52,
+      0.24
+     ],
+     "pos": [
+      0,
+      0.26,
+      0
+     ],
+     "color": "5b3b38"
+    },
+    {
+     "size": [
+      0.16,
+      0.1,
+      0.26
+     ],
+     "pos": [
+      -0.2,
+      0.5,
+      0
+     ],
+     "color": "8c8f93"
+    },
+    {
+     "size": [
+      0.16,
+      0.1,
+      0.26
+     ],
+     "pos": [
+      0.2,
+      0.5,
+      0
+     ],
+     "color": "8c8f93"
+    },
+    {
+     "size": [
+      0.44,
+      0.06,
+      0.25
+     ],
+     "pos": [
+      0,
+      0.04,
+      0
+     ],
+     "color": "8c8f93"
+    },
+    {
+     "size": [
+      0.03,
+      0.44,
+      0.245
+     ],
+     "pos": [
+      0,
+      0.26,
+      0
+     ],
+     "color": "8c8f93"
+    }
+   ],
+   "icon_view": {
+    "rot": [
+     0,
+     25,
+     0
+    ],
+    "margin": 1.15,
+    "pitch": 20.0
+   },
+   "corpo": {
+    "pos": [
+     0,
+     -0.1,
+     0.0
+    ],
+    "escala": [
+     1.05,
+     1.0,
+     1.25
+    ]
+   },
+   "valor": 90,
+   "model": "brigantina",
+   "name": "ITEM_BRIGANTINA_NOME",
+   "description": "ITEM_BRIGANTINA_DESC"
+  },
+  "camisa_malha": {
+   "tag": "ARMADURA",
+   "weight": 5.8,
+   "armor_type": "pesada",
+   "protection": 0.2,
+   "speed_penalty": 0.03,
+   "regen_penalty": 0.06,
+   "noise": 0.18,
+   "proficiencias": [
+    "armadura_pesada"
+   ],
+   "blocks": [
+    {
+     "size": [
+      0.42,
+      0.52,
+      0.24
+     ],
+     "pos": [
+      0,
+      0.26,
+      0
+     ],
+     "color": "8d949b"
+    },
+    {
+     "size": [
+      0.16,
+      0.1,
+      0.26
+     ],
+     "pos": [
+      -0.2,
+      0.5,
+      0
+     ],
+     "color": "6b7279"
+    },
+    {
+     "size": [
+      0.16,
+      0.1,
+      0.26
+     ],
+     "pos": [
+      0.2,
+      0.5,
+      0
+     ],
+     "color": "6b7279"
+    },
+    {
+     "size": [
+      0.44,
+      0.06,
+      0.25
+     ],
+     "pos": [
+      0,
+      0.04,
+      0
+     ],
+     "color": "6b7279"
+    },
+    {
+     "size": [
+      0.36,
+      0.2,
+      0.27
+     ],
+     "pos": [
+      0,
+      0.36,
+      0
+     ],
+     "color": "8d949b"
+    },
+    {
+     "size": [
+      0.2,
+      0.14,
+      0.29
+     ],
+     "pos": [
+      -0.22,
+      0.52,
+      0
+     ],
+     "color": "8d949b"
+    },
+    {
+     "size": [
+      0.2,
+      0.14,
+      0.29
+     ],
+     "pos": [
+      0.22,
+      0.52,
+      0
+     ],
+     "color": "8d949b"
+    }
+   ],
+   "icon_view": {
+    "rot": [
+     0,
+     25,
+     0
+    ],
+    "margin": 1.15,
+    "pitch": 20.0
+   },
+   "corpo": {
+    "pos": [
+     0,
+     -0.1,
+     0.0
+    ],
+    "escala": [
+     1.05,
+     1.0,
+     1.25
+    ]
+   },
+   "valor": 80,
+   "model": "camisa_malha",
+   "name": "ITEM_CAMISA_MALHA_NOME",
+   "description": "ITEM_CAMISA_MALHA_DESC"
+  },
+  "peitoral": {
+   "tag": "ARMADURA",
+   "weight": 8.5,
+   "armor_type": "pesada",
+   "protection": 0.28,
+   "speed_penalty": 0.07,
+   "regen_penalty": 0.14,
+   "noise": 0.3,
+   "proficiencias": [
+    "armadura_pesada"
+   ],
+   "blocks": [
+    {
+     "size": [
+      0.42,
+      0.52,
+      0.24
+     ],
+     "pos": [
+      0,
+      0.26,
+      0
+     ],
+     "color": "9aa1a8"
+    },
+    {
+     "size": [
+      0.16,
+      0.1,
+      0.26
+     ],
+     "pos": [
+      -0.2,
+      0.5,
+      0
+     ],
+     "color": "5f666d"
+    },
+    {
+     "size": [
+      0.16,
+      0.1,
+      0.26
+     ],
+     "pos": [
+      0.2,
+      0.5,
+      0
+     ],
+     "color": "5f666d"
+    },
+    {
+     "size": [
+      0.44,
+      0.06,
+      0.25
+     ],
+     "pos": [
+      0,
+      0.04,
+      0
+     ],
+     "color": "5f666d"
+    },
+    {
+     "size": [
+      0.36,
+      0.2,
+      0.27
+     ],
+     "pos": [
+      0,
+      0.36,
+      0
+     ],
+     "color": "9aa1a8"
+    },
+    {
+     "size": [
+      0.2,
+      0.14,
+      0.29
+     ],
+     "pos": [
+      -0.22,
+      0.52,
+      0
+     ],
+     "color": "9aa1a8"
+    },
+    {
+     "size": [
+      0.2,
+      0.14,
+      0.29
+     ],
+     "pos": [
+      0.22,
+      0.52,
+      0
+     ],
+     "color": "9aa1a8"
+    }
+   ],
+   "icon_view": {
+    "rot": [
+     0,
+     25,
+     0
+    ],
+    "margin": 1.15,
+    "pitch": 20.0
+   },
+   "corpo": {
+    "pos": [
+     0,
+     -0.1,
+     0.0
+    ],
+    "escala": [
+     1.05,
+     1.0,
+     1.25
+    ]
+   },
+   "valor": 120,
+   "model": "peitoral",
+   "name": "ITEM_PEITORAL_NOME",
+   "description": "ITEM_PEITORAL_DESC"
+  },
+  "escamas": {
+   "tag": "ARMADURA",
+   "weight": 9.5,
+   "armor_type": "pesada",
+   "protection": 0.3,
+   "speed_penalty": 0.08,
+   "regen_penalty": 0.16,
+   "noise": 0.35,
+   "proficiencias": [
+    "armadura_pesada"
+   ],
+   "blocks": [
+    {
+     "size": [
+      0.42,
+      0.52,
+      0.24
+     ],
+     "pos": [
+      0,
+      0.26,
+      0
+     ],
+     "color": "77808a"
+    },
+    {
+     "size": [
+      0.16,
+      0.1,
+      0.26
+     ],
+     "pos": [
+      -0.2,
+      0.5,
+      0
+     ],
+     "color": "5b636c"
+    },
+    {
+     "size": [
+      0.16,
+      0.1,
+      0.26
+     ],
+     "pos": [
+      0.2,
+      0.5,
+      0
+     ],
+     "color": "5b636c"
+    },
+    {
+     "size": [
+      0.44,
+      0.06,
+      0.25
+     ],
+     "pos": [
+      0,
+      0.04,
+      0
+     ],
+     "color": "5b636c"
+    },
+    {
+     "size": [
+      0.36,
+      0.2,
+      0.27
+     ],
+     "pos": [
+      0,
+      0.36,
+      0
+     ],
+     "color": "77808a"
+    },
+    {
+     "size": [
+      0.2,
+      0.14,
+      0.29
+     ],
+     "pos": [
+      -0.22,
+      0.52,
+      0
+     ],
+     "color": "77808a"
+    },
+    {
+     "size": [
+      0.2,
+      0.14,
+      0.29
+     ],
+     "pos": [
+      0.22,
+      0.52,
+      0
+     ],
+     "color": "77808a"
+    }
+   ],
+   "icon_view": {
+    "rot": [
+     0,
+     25,
+     0
+    ],
+    "margin": 1.15,
+    "pitch": 20.0
+   },
+   "corpo": {
+    "pos": [
+     0,
+     -0.1,
+     0.0
+    ],
+    "escala": [
+     1.05,
+     1.0,
+     1.25
+    ]
+   },
+   "valor": 160,
+   "model": "escamas",
+   "name": "ITEM_ESCAMAS_NOME",
+   "description": "ITEM_ESCAMAS_DESC"
   }
  }
 }
