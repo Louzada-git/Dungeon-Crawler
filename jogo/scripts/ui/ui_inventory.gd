@@ -315,9 +315,10 @@ func _refresh_buttons() -> void:
 	lock_button.visible = locked()
 	if locked():
 		var d: int = int(loot["lock"])
-		lock_button.text = "Arrombar  ·  %d%%" % roundi(game.sheet.pick_chance(d) * 100)
-		lock_button.disabled = game.inventory.count("gazua") <= 0
-		lock_button.tooltip_text = "Gazuas na mochila: %d. Uma tentativa que falha pode quebrar a gazua." % game.inventory.count("gazua")
+		var tool: String = game.lockpick_tool()
+		lock_button.text = "Arrombar  ·  %d%%" % roundi(game.pick_chance_with(tool, d) * 100)
+		lock_button.disabled = tool == ""
+		lock_button.tooltip_text = ("Usa: %s (%d na mochila). Uma tentativa que falha pode quebrar a ferramenta." % [str(Items.info(tool).get("name", tool)).to_lower(), game.inventory.count(tool)]) if tool != "" else "Sem gazua na mochila."
 	take_button.disabled = lid == "" or not items.has(lid)
 	take_stack_button.disabled = take_button.disabled
 	take_all_button.disabled = items.is_empty()
@@ -325,7 +326,8 @@ func _refresh_buttons() -> void:
 	if not has_target:
 		loot_detail.text = "Recipientes a até 2,4 m aparecem nas abas à direita."
 	elif locked():
-		loot_detail.text = "Fechadura %s  ·  chance de abrir: %d%%  ·  gazuas: %d" % [game.LOCK_NAMES[int(loot["lock"])], roundi(game.sheet.pick_chance(int(loot["lock"])) * 100), game.inventory.count("gazua")]
+		var pick: String = game.lockpick_tool()
+		loot_detail.text = "Fechadura %s  ·  chance de abrir: %d%%  ·  %s: %d" % [game.LOCK_NAMES[int(loot["lock"])], roundi(game.pick_chance_with(pick, int(loot["lock"])) * 100), str(Items.info(pick).get("name", "gazua")).to_lower() if pick != "" else "gazuas", game.inventory.count(pick) if pick != "" else 0]
 	elif lid != "" and items.has(lid):
 		var ld: Dictionary = Items.info(lid)
 		loot_detail.text = "%s  ·  %d × %s kg  ·  %s" % [UiStyle.category(str(ld.get("tag", "")))[0], int(items[lid]), UiStyle.fmt(float(ld.get("weight", 0.0)), 2), ld.get("description", "")]
