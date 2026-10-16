@@ -43,7 +43,7 @@ var hits_received: int = 0
 var won: bool = false
 var ended: bool = false
 var last_discover: Vector2i = Vector2i(-99, -99)
-var message_text: String = "Prepare a mochila. O guardião da câmara está no fundo das cisternas."
+var message_text: String = "Prepare a mochila. O carcereiro está no fundo das cisternas."
 var message_time: float = 8.0
 var test_mode: bool = false
 # Labyrinth state
@@ -81,7 +81,7 @@ func _ready() -> void:
 	# Progression is off in the fixed test world so its exact numbers stay put.
 	sheet.enabled = generated
 	if generated:
-		message_text = "Prepare a mochila. A descida fica na sala do guardião do andar."
+		message_text = "Prepare a mochila. A descida fica na sala do capataz."
 		_choose_seed(args)
 		layout = DungeonLayout.new(LabyrinthGenerator.generate(seed, floor))
 	else:
@@ -495,9 +495,9 @@ func fixed_goal_done() -> bool:
 
 func objective_text() -> String:
 	if not generated:
-		return "Volte ao abrigo" if fixed_goal_done() else "Derrote o guardião da câmara"
+		return "Volte ao abrigo" if fixed_goal_done() else "Derrote o carcereiro"
 	if boss_alive():
-		return "Derrote o guardião do %dº andar" % floor
+		return "Derrote o capataz do %dº andar" % floor
 	return "Desça ao %dº andar ou volte ao abrigo" % (floor + 1)
 
 # --- floors ------------------------------------------------------------------------
@@ -553,7 +553,7 @@ func change_floor(n: int, going_down: bool) -> void:
 	discover()
 	sound.play_at("step", player.global_position, 0.6)
 	if going_down:
-		message("%dº andar. %s" % [n, "A descida fica com o guardião deste andar." if boss_alive() else "Este andar já foi vencido."], 5)
+		message("%dº andar. %s" % [n, "A descida fica na sala do capataz." if boss_alive() else "Este andar já foi vencido."], 5)
 	else:
 		message("De volta ao %dº andar." % n, 3)
 
@@ -593,7 +593,7 @@ func interaction_text() -> String:
 		if _near(stairs_up_cell()):
 			return "E   SUBIR  ·  para o %dº andar" % (floor - 1)
 		if _near(stairs_down_cell()):
-			return ("E   DESCER  ·  selada pelo guardião" if boss_alive() else "E   DESCER  ·  para o %dº andar" % (floor + 1))
+			return ("E   DESCER  ·  trancada até o capataz cair" if boss_alive() else "E   DESCER  ·  para o %dº andar" % (floor + 1))
 	var loot = nearest_container()
 	if not loot.is_empty():
 		var difficulty: int = int(loot.get("lock", 0))
@@ -622,7 +622,7 @@ func interact() -> void:
 			return
 		if _near(stairs_down_cell()):
 			if boss_alive():
-				message("A descida está selada. Derrote o guardião deste andar.", 3)
+				message("A descida está trancada. Derrote o capataz deste andar.", 3)
 			else:
 				change_floor(floor + 1, true)
 			return
@@ -678,7 +678,7 @@ func enemy_defeated(enemy: DungeonEnemy) -> void:
 		if is_instance_valid(stairs_sign):
 			stairs_sign.modulate = Color("9fdc8f")
 		camera_impact(0.2)
-		message("O guardião caiu. A descida para o %dº andar está aberta." % (floor + 1), 6)
+		message("O capataz caiu. A descida para o %dº andar está aberta." % (floor + 1), 6)
 	else:
 		message("Área mais segura. E para recolher os pertences.", 3)
 
