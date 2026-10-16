@@ -48,7 +48,7 @@ func run(target) -> void:
 	var boss: DungeonEnemy = game.boss()
 	check(boss != null and boss.alive and boss.maximum_health >= 420, "Chefe presente com vida de chefe")
 	near(game.stairs_down_cell())
-	check(game.interaction_text().contains("selada"), "Descida aparece selada com o chefe vivo")
+	check(game.interaction_text().contains("trancada"), "Descida aparece trancada com o capataz vivo")
 	game.interact()
 	check(game.floor == 1, "Não desce enquanto o chefe vive")
 	# Boss slam hits around it, even behind; fury below half life.
