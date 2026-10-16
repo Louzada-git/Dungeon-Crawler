@@ -121,3 +121,15 @@ ITEM_BESTA_PESADA_NOME,Besta pesada
 ITEM_BESTA_PESADA_DESC,Precisa de tempo e de braço para armar. O virote atravessa três.
 ITEM_FUNDA_NOME,Funda
 ITEM_FUNDA_DESC,"Uma tira de couro e uma pedra. Quase não pesa, e munição tem em todo canto."
+ITEM_MANTO_NOME,Manto encerado
+ITEM_MANTO_DESC,"Mantém você seco e não faz barulho. Contra lâmina, ajuda pouco."
+ITEM_COURO_FERVIDO_NOME,Couro fervido
+ITEM_COURO_FERVIDO_DESC,Couro cozido até ficar duro. Leve e quase sem barulho.
+ITEM_BRIGANTINA_NOME,Brigantina
+ITEM_BRIGANTINA_DESC,Plaquinhas costuradas por dentro do pano. Protege quase como malha e não tilinta.
+ITEM_CAMISA_MALHA_NOME,Camisa de malha
+ITEM_CAMISA_MALHA_DESC,Malha só no tronco. Bem mais leve que a cota inteira.
+ITEM_PEITORAL_NOME,Peitoral de ferro
+ITEM_PEITORAL_DESC,"Uma chapa grossa na frente e outra atrás. Pesa e faz barulho, mas segura muita pancada."
+ITEM_ESCAMAS_NOME,Loriga de escamas
+ITEM_ESCAMAS_DESC,"Centenas de escamas de ferro. Só perde para a armadura de placas, e pesa quase o mesmo."
