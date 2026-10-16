@@ -43,6 +43,15 @@ static func roll_stock(seed: int, floor: int) -> Dictionary:
 				break
 	return stock
 
+## A stock read from a save: known items with positive amounts only.
+static func clean_stock(raw) -> Dictionary:
+	var out: Dictionary = {}
+	if raw is Dictionary:
+		for id in raw:
+			if Items.DATA.has(id) and (raw[id] is int or raw[id] is float) and int(raw[id]) > 0:
+				out[str(id)] = int(raw[id])
+	return out
+
 ## What the merchant charges: the item's value, a little more on each floor down.
 static func buy_price(floor: int, id: String) -> int:
 	var value: float = float(Items.DATA.get(id, {}).get("valor", 0))
