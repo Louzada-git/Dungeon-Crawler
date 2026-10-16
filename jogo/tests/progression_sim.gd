@@ -29,14 +29,14 @@ func play(sheet: CharacterSheet, path: Array, kinds: Array, floor: int) -> void:
 		sheet.award_damage(e, e.maximum_health, path)
 
 func _initialize() -> void:
-	var paths := {"Adaga": CharacterSheet.path_of("adaga"), "Katana": CharacterSheet.path_of("katana"), "Martelo": CharacterSheet.path_of("martelo"), "Punhos": CharacterSheet.path_of("")}
+	var paths := {"Adaga": CharacterSheet.path_of("adaga"), "Sabre": CharacterSheet.path_of("katana"), "Marreta": CharacterSheet.path_of("martelo"), "Punhos": CharacterSheet.path_of("")}
 	var sheets: Dictionary = {}
 	for name in paths:
 		sheets[name] = CharacterSheet.new()
 	var strong := CharacterSheet.new()
 	strong.reset({"forca": 9, "vigor": 4, "agilidade": 4, "destreza": 3})
 	var mixed := CharacterSheet.new()
-	print("SIM andar | " + " | ".join(paths.keys()) + " | Martelo com Força 9 | Espada reta → Katana no 3º")
+	print("SIM andar | " + " | ".join(paths.keys()) + " | Marreta com Força 9 | Espada reta → Sabre no 3º")
 	for floor in range(1, 8):
 		var kills: Array = floor_kills(777, floor)
 		for name in paths:
