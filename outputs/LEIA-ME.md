@@ -139,7 +139,10 @@ Cada expedição gera um labirinto a partir de uma semente. O 1º andar tem 10 s
 
 ## Jogar
 
-Abra `linux/Dungepm.x86_64`. É um executável Linux independente; não precisa abrir a Godot nem programar.
+- **Windows:** abra `Dungepm.exe`. Na primeira vez o Windows pode avisar que o programa não é conhecido: clique em **Mais informações → Executar assim mesmo**.
+- **Linux:** abra `linux/Dungepm.x86_64` (se não abrir com dois cliques, rode `chmod +x Dungepm.x86_64` e depois `./Dungepm.x86_64`).
+
+Os dois são executáveis independentes, com o jogo dentro; não precisa instalar nada, abrir a Godot nem programar. Os downloads ficam em **Releases**, no GitHub.
 
 Explore as cinco salas, gerencie comida e bandagens, encontre o selo e retorne ao abrigo. Os modelos próprios já estão no mapa jogável.
 
