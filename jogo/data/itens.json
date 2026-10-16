@@ -935,6 +935,86 @@
     "margin": 1.1,
     "pitch": 35.0
    }
+  },
+  "flecha_larga": {
+   "tag": "MUNICAO",
+   "weight": 0.06,
+   "recover": 0.4,
+   "damage_mult": 1.1,
+   "bleed": {
+    "dps": 3.0,
+    "time": 4.0
+   },
+   "base": "flecha",
+   "tint": "d89a84",
+   "valor": 2,
+   "model": "flecha_larga",
+   "name": "ITEM_FLECHA_LARGA_NOME",
+   "description": "ITEM_FLECHA_LARGA_DESC"
+  },
+  "flecha_osso": {
+   "tag": "MUNICAO",
+   "weight": 0.04,
+   "recover": 0.6,
+   "damage_mult": 0.8,
+   "base": "flecha",
+   "tint": "eee6cc",
+   "valor": 1,
+   "model": "flecha_osso",
+   "name": "ITEM_FLECHA_OSSO_NOME",
+   "description": "ITEM_FLECHA_OSSO_DESC"
+  },
+  "virote_pesado": {
+   "tag": "MUNICAO",
+   "weight": 0.09,
+   "recover": 0.5,
+   "damage_mult": 1.25,
+   "knockback": 2.0,
+   "pierce": 1,
+   "base": "virote",
+   "escala_modelo": 1.15,
+   "tint": "8f99a3",
+   "valor": 3,
+   "model": "virote_pesado",
+   "name": "ITEM_VIROTE_PESADO_NOME",
+   "description": "ITEM_VIROTE_PESADO_DESC"
+  },
+  "pedra": {
+   "tag": "MUNICAO",
+   "weight": 0.1,
+   "recover": 0.7,
+   "valor": 1,
+   "blocks": [
+    {
+     "size": [
+      0.05,
+      0.04,
+      0.045
+     ],
+     "pos": [
+      0,
+      0.02,
+      0
+     ],
+     "color": "7d7a74"
+    },
+    {
+     "size": [
+      0.035,
+      0.02,
+      0.03
+     ],
+     "pos": [
+      0.01,
+      0.045,
+      0
+     ],
+     "color": "8a877f"
+    }
+   ],
+   "model": "pedra",
+   "name": "ITEM_PEDRA_NOME",
+   "description": "ITEM_PEDRA_DESC"
   }
  }
 }
