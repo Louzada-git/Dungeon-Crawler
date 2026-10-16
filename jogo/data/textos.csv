@@ -1,16 +1,16 @@
 keys,pt_BR
 ITEM_SWORD_NOME,Espada de soldado
-ITEM_SWORD_DESC,"Equilibrada e confiável: peso médio, corta até três em arco."
+ITEM_SWORD_DESC,"A espada que todo recruta recebe. Nada de especial, e é por isso que funciona."
 ITEM_SPEAR_NOME,Lança de guarda
-ITEM_SPEAR_DESC,"Estocada longa de 3,2 m em linha reta. Atinge o primeiro alvo."
+ITEM_SPEAR_DESC,A lança comum da guarda. Fura em linha reta e deixa o bicho longe de você.
 ITEM_RATION_NOME,Pão e carne seca
-ITEM_RATION_DESC,Restaura 35 de saciedade. Comer também ajuda na recuperação do fôlego.
+ITEM_RATION_DESC,"Duro de mastigar, mas segura a fome. De barriga cheia o fôlego volta mais rápido."
 ITEM_BANDAGE_NOME,Atadura
-ITEM_BANDAGE_DESC,Estanca o sangramento e recupera 18 de vida.
+ITEM_BANDAGE_DESC,Pano limpo para amarrar o corte. Para o sangramento.
 ITEM_ORE_NOME,Minério de ferro
-ITEM_ORE_DESC,Material pesado. Leve só o que consegue carregar.
+ITEM_ORE_DESC,Pesado e sem uso para você. O mercador compra.
 ITEM_COIN_NOME,Vintém
-ITEM_COIN_DESC,Encontrada entre os pertences da antiga guarnição.
+ITEM_COIN_DESC,O dinheiro daqui de baixo. Só o mercador aceita.
 INIMIGO_CORROMPIDO_NOME,Corrompido
 INIMIGO_GUARDIAO_NOME,Guardião
 MUNDO_CISTERNAS_NOME,As Cisternas
@@ -28,15 +28,15 @@ RECIPIENTE_RELICARIO,Relicário das cisternas
 RECIPIENTE_PERTENCES,Pertences do corrompido
 RECIPIENTE_DEIXADOS,Itens deixados
 ITEM_ESPADA_GUARDA_NOME,Espada de oficial
-ITEM_ESPADA_GUARDA_DESC,Aço temperado da antiga guarnição. Um pouco mais de dano e de peso que a espada de viajante.
+ITEM_ESPADA_GUARDA_DESC,"Aço melhor que o da espada de soldado, e um pouco mais pesada. Era dos oficiais da guarnição."
 ITEM_LANCA_LONGA_NOME,Pique
-ITEM_LANCA_LONGA_DESC,"Haste de 3,7 m. Mantém inimigos à distância, mas cansa."
+ITEM_LANCA_LONGA_DESC,"Comprida demais para corredor apertado. Em sala aberta, ninguém chega perto."
 ITEM_UNGUENTO_NOME,Unguento
-ITEM_UNGUENTO_DESC,Pasta amarga que fecha ferimentos e recupera 40 de vida.
+ITEM_UNGUENTO_DESC,Cheira mal e arde. Fecha a ferida e devolve um bom tanto de vida.
 ITEM_TONICO_NOME,Aguardente
-ITEM_TONICO_DESC,Recupera todo o fôlego de uma vez.
+ITEM_TONICO_DESC,Desce queimando. O cansaço some na hora.
 ITEM_GEMA_NOME,Ametista
-ITEM_GEMA_DESC,"Pedra preciosa leve. Vale muito, não serve para mais nada ainda."
+ITEM_GEMA_DESC,Pedra bonita e leve. Só serve para vender.
 INIMIGO_ESPREITADOR_NOME,Espreitador
 INIMIGO_BRUTAMONTES_NOME,Brutamontes
 INIMIGO_CHEFE_NOME,Guardião do andar
@@ -45,35 +45,35 @@ RECIPIENTE_BAU,Baú
 RECIPIENTE_BAU_CHEFE,Relicário do guardião
 RECIPIENTE_DESPOJOS,Despojos
 ITEM_ADAGA_NOME,Adaga
-ITEM_ADAGA_DESC,"Lâmina curta e rápida. Em monstro desprevenido, o golpe causa dano muito maior."
+ITEM_ADAGA_DESC,"Curta e rápida. Pegando o bicho distraído, um golpe resolve."
 ITEM_KATANA_NOME,Sabre
-ITEM_KATANA_DESC,"Corte rápido e preciso num arco estreito. Leve, mas exige proximidade."
+ITEM_KATANA_DESC,"Lâmina curva e leve. Corta rápido, mas tem que chegar perto."
 ITEM_MONTANTE_NOME,Montante
-ITEM_MONTANTE_DESC,Espada de duas mãos. Arco largo que acerta vários inimigos e os empurra; lenta e cansativa.
+ITEM_MONTANTE_DESC,Espada de duas mãos. Varre quem estiver na frente e empurra. Cansa só de levantar.
 ITEM_MACHADO_NOME,Machado
-ITEM_MACHADO_DESC,Golpe curto que abre feridas: o monstro sangra por alguns segundos.
+ITEM_MACHADO_DESC,"Não é bonito, mas o corte demora a parar de sangrar."
 ITEM_MACA_NOME,Maça
-ITEM_MACA_DESC,Atordoa e empurra. Causa mais dano em monstros blindados.
+ITEM_MACA_DESC,Feita para amassar armadura. Quem leva fica tonto.
 ITEM_MARTELO_NOME,Marreta
-ITEM_MARTELO_DESC,"Pancada lenta no chão à frente, que atinge todos na área. Pesado."
+ITEM_MARTELO_DESC,"Lenta demais para golpe rápido. Quando bate no chão, ninguém em volta fica de pé."
 ITEM_ALABARDA_NOME,Alabarda
-ITEM_ALABARDA_DESC,Estocada longa que atravessa o primeiro inimigo e acerta o de trás.
+ITEM_ALABARDA_DESC,Ponta e lâmina no mesmo cabo. Atravessa o primeiro e pega o de trás.
 ITEM_ARCO_NOME,Arco curto
-ITEM_ARCO_DESC,Ataque à distância. Gasta flechas; flechas presas num monstro voltam com os pertences dele.
+ITEM_ARCO_DESC,Para começar a briga de longe. A flecha que fica no bicho volta com o que ele carregava.
 ITEM_BESTA_NOME,Besta
-ITEM_BESTA_DESC,Tiro forte que atravessa dois inimigos. Recarga lenta; gasta virotes.
+ITEM_BESTA_DESC,"Demora para recarregar, mas o virote atravessa dois."
 ITEM_FLECHA_NOME,Flecha
-ITEM_FLECHA_DESC,Munição do arco. Parte das flechas que erram pode ser recolhida do chão.
+ITEM_FLECHA_DESC,Algumas das que erram dá para recolher do chão.
 ITEM_VIROTE_NOME,Virote
-ITEM_VIROTE_DESC,Munição da besta. Parte dos virotes que erram pode ser recolhida do chão.
+ITEM_VIROTE_DESC,Munição da besta. Alguns dos que erram dá para pegar de volta.
 RECIPIENTE_ARSENAL,Arsenal de teste
 ITEM_GIBAO_NOME,Gibão acolchoado
-ITEM_GIBAO_DESC,"Camadas de tecido grosso. Leve e silencioso, protege pouco."
+ITEM_GIBAO_DESC,"Pano grosso costurado em camadas. Protege pouco, mas não faz barulho."
 ITEM_COURO_NOME,Couro batido
-ITEM_COURO_DESC,Couro endurecido com rebites. Boa proteção sem pesar demais.
+ITEM_COURO_DESC,Couro duro com rebite. Protege bem e não pesa tanto.
 ITEM_COTA_NOME,Cota de malha
-ITEM_COTA_DESC,"Anéis de ferro entrelaçados. Protege bem, mas pesa, cansa e faz barulho."
+ITEM_COTA_DESC,"Protege bem. Pesa, cansa e tilinta a cada passo."
 ITEM_PLACAS_NOME,Armadura de placas
-ITEM_PLACAS_DESC,"Aço sobre o corpo inteiro. A melhor proteção, a mais pesada e a mais barulhenta."
+ITEM_PLACAS_DESC,"Aço da cabeça aos pés. Ninguém te corta, mas todo mundo te ouve chegando."
 ITEM_GAZUA_NOME,Gazua
-ITEM_GAZUA_DESC,Ferramenta para abrir fechaduras. Pode quebrar quando a tentativa falha.
+ITEM_GAZUA_DESC,Arame torto para abrir fechadura. Quebra fácil na mão de quem não sabe.
