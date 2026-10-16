@@ -136,11 +136,12 @@ static func _shoot(game, weapon: Dictionary) -> void:
 
 static func _shoot_one(game, weapon: Dictionary, spread: float) -> void:
 	var player = game.player
-	var ammo: String = str(weapon.get("ammo", ""))
+	var ammo: String = game.ammo_for(weapon)
 	if ammo != "":
 		if not game.inventory.remove(ammo, 1):
 			game.message("Sem munição.", 1.5)
 			return
+		weapon = Items.with_ammo(weapon, ammo)
 	var shot := Projectile.new()
 	shot.game = game
 	shot.weapon = weapon
