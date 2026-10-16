@@ -1609,7 +1609,7 @@
     "pontaria"
    ],
    "maos": 1,
-   "animacao": "disparo_arco",
+   "animacao": "arremesso",
    "model": "funda",
    "name": "ITEM_FUNDA_NOME",
    "description": "ITEM_FUNDA_DESC"
