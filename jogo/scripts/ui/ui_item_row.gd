@@ -100,6 +100,10 @@ func _draw() -> void:
 	var cat: Array = UiStyle.category(str(data.get("tag", "")))
 	draw_string(regular, Vector2(cols[0], baseline), fit(regular, cat[0], 13, cols[1] - cols[0] - 4), HORIZONTAL_ALIGNMENT_LEFT, -1, 13, cat[1])
 	draw_string(medium, Vector2(cols[1], baseline), str(count), HORIZONTAL_ALIGNMENT_RIGHT, cols[2] - cols[1] - 8, 13, UiStyle.TEXT)
+	if list.price_of.is_valid():
+		var price: int = int(list.price_of.call(item_id))
+		draw_string(medium, Vector2(cols[2], baseline), str(price) if price > 0 else "—", HORIZONTAL_ALIGNMENT_RIGHT, w - cols[2] - 8, 13, UiStyle.ACCENT if price > 0 else UiStyle.DIM)
+		return
 	var weight: float = float(data.get("weight", 0.0)) * count
 	draw_string(regular, Vector2(cols[2], baseline), UiStyle.fmt(weight, 2), HORIZONTAL_ALIGNMENT_RIGHT, w - cols[2] - 8, 13, UiStyle.MUTED)
 
