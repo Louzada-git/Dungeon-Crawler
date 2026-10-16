@@ -2,6 +2,7 @@
  "versao": 1,
  "id": "cisternas",
  "name": "MUNDO_CISTERNAS_NOME",
+ "guardian": "camara_guardiao",
  "_sobre": "Descrição do mundo fixo atual. Um gerador procedural futuro deve produzir este mesmo formato.",
  "cell_size": 2.0,
  "size": [
@@ -416,8 +417,8 @@
     5
    ],
    "items": {
-    "seal": 1,
-    "coin": 20
+    "coin": 20,
+    "gema": 1
    },
    "chest": true,
    "objective": true
