@@ -57,6 +57,9 @@ var knowledge: Dictionary = {}
 var ammo_recovery: Dictionary = {}
 ## Ammunition picked on the quick bar; used whenever the weapon fires it.
 var chosen_ammo: String = ""
+## The merchant of this floor (ShopSystem) and what he has to sell.
+var merchant: Node3D
+var shop_stock: Dictionary = {}
 var _skip_load: bool = false
 ## PlayStation-style filter (pause menu); preference kept in settings_path.
 var psx: PsxFilter
@@ -406,6 +409,21 @@ func setup_content() -> void:
 		add_child(enemy)
 		enemies.append(enemy)
 		index += 1
+	place_merchant()
+
+## The merchant goes in the entrance room with a fresh stock for this floor
+## (a saved stock replaces it afterwards, in apply_floor_state or the save).
+func place_merchant() -> void:
+	merchant = null
+	shop_stock = ShopSystem.roll_stock(seed, floor)
+	var cell: Vector2i = ShopSystem.merchant_cell(self)
+	if cell.x < 0:
+		return
+	layout.pathfinder.set_point_solid(cell, true)
+	merchant = WorldBuilder.merchant(self, layout.to_world(cell), ShopSystem.room_center(self))
+
+func near_merchant() -> bool:
+	return merchant != null and is_instance_valid(merchant) and player.position.distance_to(merchant.position) < ShopSystem.REACH
 
 func add_loot(title: String, cell: Vector2i, items: Dictionary, chest: bool = true, id: String = "", lock: int = 0) -> Dictionary:
 	return ContainerSystem.add(self, title, cell, items, chest, id, lock)
@@ -528,7 +546,7 @@ func snapshot_floor() -> Dictionary:
 	var es: Dictionary = {}
 	for e in enemies:
 		es[e.uid] = {"health": e.health, "alive": e.alive, "pos": [e.position.x, e.position.z], "stuck": e.stuck.duplicate()}
-	return {"containers": cs, "enemies": es}
+	return {"containers": cs, "enemies": es, "shop": shop_stock.duplicate()}
 
 func apply_floor_state(state: Dictionary) -> void:
 	for c in containers:
@@ -538,6 +556,8 @@ func apply_floor_state(state: Dictionary) -> void:
 		var copy: Dictionary = data.duplicate(true)
 		containers.append(copy)
 		WorldBuilder.add_container(self, copy)
+	if state.get("shop") is Dictionary:
+		shop_stock = ShopSystem.clean_stock(state["shop"])
 	var saved: Dictionary = state.get("enemies", {})
 	for e in enemies:
 		if saved.has(e.uid):
@@ -636,6 +656,8 @@ func interaction_text() -> String:
 		if fixed_goal_done():
 			return "E   VOLTAR PARA CASA"
 		return "E   DESCANSAR E SALVAR NO ABRIGO"
+	if near_merchant():
+		return "E   LOJA  ·  comprar e vender com o mercador"
 	if generated:
 		if _near(stairs_up_cell()):
 			return "E   SUBIR  ·  para o %dº andar" % (floor - 1)
@@ -663,6 +685,10 @@ func interact() -> void:
 		player.stamina = player.max_stamina
 		save_game(false)
 		message("Expedição salva. Coma e cuide dos ferimentos antes de sair.")
+		return
+	if near_merchant():
+		if ui:
+			ui.open_shop()
 		return
 	if generated:
 		if _near(stairs_up_cell()):
