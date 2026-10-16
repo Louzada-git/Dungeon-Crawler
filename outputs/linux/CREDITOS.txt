@@ -1,20 +1,32 @@
 Dungepm — créditos de assets de terceiros
 
-Personagem
+Personagens
 - Characters PSX, por Elbolilloduro (https://elbolilloduro.itch.io/characters-psx) — CC0.
-  O aventureiro é o Character_16, com textura repintada para o jogo.
+  O aventureiro e o mercador são o Character_16, com textura repintada para o jogo.
+  Monstros: Character_Monster_06, 07 e 08, Character_Killer_08 e Character_Killer_05.
+
+Animações
+- Universal Animation Library, por Quaternius (https://quaternius.com) — CC0.
+- Corte do sabre: Mixamo (Adobe).
+- Os outros golpes são poses feitas para o jogo.
 
 Armas
 - RPG Weapons, por Binbun (https://binbun3d.itch.io/rpg-weapons) — CC0.
-  Adaga, montante, machado de guerra, maça de flanges, martelo de guerra, lança e lança longa.
+  Adaga, faca, espada curta, montante, machado, maça, marreta, lança de guarda e pique.
 - Low Poly Weapon Pack, por Kickin' It Studios (itch.io) — uso livre em jogos.
-  Katana, alabarda, arco curto, besta, flecha e virote.
+  Sabre, alabarda, arco curto, besta, flecha e virote.
+- 3D Fantasy Weapons Pack, por Polyy (polyy.ai) — CC0. Modelos gerados por IA.
+  Espada larga, florete, alfanje, espadão, punhal, maça de cravos, estrela-da-manhã,
+  malho, martelo de guerra, machado de duas lâminas, picareta de guerra, tridente e foice.
+
+Objetos
+- Fantasy Props MegaKit, por Quaternius (https://quaternius.com) — CC0.
+  Cenoura, chave-mestra, mapa, cálice, castiçal, caneca, garrafas, frascos e pote de mel.
 
 Efeitos visuais
 - Brackeys VFX Bundle, por Brackeys — CC0.
   Sangue, clarão de acerto e golpe forte: VFX Free Pack, por CodeManu (https://codemanu.itch.io/vfx-free-pack).
   Chamas e fumaça: flipbooks gratuitos de Thomas Iché (Unity).
 
-Rig e parte das animações do aventureiro: Mixamo (Adobe).
 Fonte: Inter, por The Inter Project Authors — SIL Open Font License 1.1 (ver LICENCA-FONTE-INTER.txt).
 Engine: Godot Engine — licença MIT (ver LICENCA-GODOT.txt e AVISOS-TERCEIROS-GODOT.txt).
