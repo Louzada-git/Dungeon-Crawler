@@ -1015,6 +1015,554 @@
    "model": "pedra",
    "name": "ITEM_PEDRA_NOME",
    "description": "ITEM_PEDRA_DESC"
+  },
+  "espada_curta": {
+   "tag": "ARMA",
+   "weight": 1.8,
+   "damage": 20.0,
+   "range": 1.9,
+   "cost": 7.0,
+   "cooldown": 0.44,
+   "windup": 0.19,
+   "impacto": 0.38,
+   "style": "slash",
+   "angle": 50.0,
+   "targets": 2,
+   "valor": 30,
+   "classe": "media",
+   "proficiencias": [
+    "laminas",
+    "espadas",
+    "espada_reta"
+   ],
+   "maos": 1,
+   "animacao": "golpe_espada",
+   "model": "espada_curta",
+   "name": "ITEM_ESPADA_CURTA_NOME",
+   "description": "ITEM_ESPADA_CURTA_DESC"
+  },
+  "espada_larga": {
+   "tag": "ARMA",
+   "weight": 3.4,
+   "damage": 30.0,
+   "range": 2.3,
+   "cost": 10.5,
+   "cooldown": 0.58,
+   "windup": 0.25,
+   "impacto": 0.39,
+   "style": "slash",
+   "angle": 58.0,
+   "targets": 3,
+   "valor": 70,
+   "classe": "media",
+   "proficiencias": [
+    "laminas",
+    "espadas",
+    "espada_reta"
+   ],
+   "maos": 1,
+   "animacao": "golpe_espada",
+   "model": "espada_larga",
+   "name": "ITEM_ESPADA_LARGA_NOME",
+   "description": "ITEM_ESPADA_LARGA_DESC"
+  },
+  "florete": {
+   "tag": "ARMA",
+   "weight": 1.1,
+   "damage": 18.0,
+   "range": 2.4,
+   "cost": 7.0,
+   "cooldown": 0.4,
+   "windup": 0.17,
+   "impacto": 0.37,
+   "style": "thrust",
+   "angle": 6.0,
+   "width": 0.25,
+   "targets": 1,
+   "sneak_mult": 1.6,
+   "valor": 55,
+   "classe": "leve",
+   "proficiencias": [
+    "laminas",
+    "espadas",
+    "espada_reta"
+   ],
+   "maos": 1,
+   "animacao": "golpe_adaga",
+   "model": "florete",
+   "name": "ITEM_FLORETE_NOME",
+   "description": "ITEM_FLORETE_DESC"
+  },
+  "alfanje": {
+   "tag": "ARMA",
+   "weight": 1.6,
+   "damage": 18.0,
+   "range": 2.0,
+   "cost": 8.0,
+   "cooldown": 0.4,
+   "windup": 0.17,
+   "impacto": 0.37,
+   "style": "slash",
+   "angle": 48.0,
+   "targets": 2,
+   "bleed": {
+    "dps": 2.0,
+    "time": 3.0
+   },
+   "valor": 45,
+   "classe": "leve",
+   "proficiencias": [
+    "laminas",
+    "espadas",
+    "katana"
+   ],
+   "maos": 1,
+   "animacao": "golpe_espada",
+   "model": "alfanje",
+   "name": "ITEM_ALFANJE_NOME",
+   "description": "ITEM_ALFANJE_DESC"
+  },
+  "espadao": {
+   "tag": "ARMA",
+   "weight": 6.2,
+   "damage": 52.0,
+   "range": 2.7,
+   "cost": 16.0,
+   "cooldown": 1.1,
+   "windup": 0.48,
+   "impacto": 0.45,
+   "style": "slash",
+   "angle": 82.0,
+   "targets": 4,
+   "knockback": 5.0,
+   "valor": 110,
+   "classe": "pesada",
+   "proficiencias": [
+    "laminas",
+    "espadas",
+    "montante"
+   ],
+   "maos": 2,
+   "animacao": "golpe_montante",
+   "model": "espadao",
+   "name": "ITEM_ESPADAO_NOME",
+   "description": "ITEM_ESPADAO_DESC"
+  },
+  "faca": {
+   "tag": "ARMA",
+   "weight": 0.4,
+   "damage": 8.0,
+   "range": 1.4,
+   "cost": 3.5,
+   "cooldown": 0.26,
+   "windup": 0.1,
+   "impacto": 0.37,
+   "style": "slash",
+   "angle": 35.0,
+   "targets": 1,
+   "sneak_mult": 2.5,
+   "valor": 10,
+   "classe": "leve",
+   "proficiencias": [
+    "laminas",
+    "adagas"
+   ],
+   "maos": 1,
+   "animacao": "golpe_adaga",
+   "model": "faca",
+   "name": "ITEM_FACA_NOME",
+   "description": "ITEM_FACA_DESC"
+  },
+  "punhal": {
+   "tag": "ARMA",
+   "weight": 0.7,
+   "damage": 12.0,
+   "range": 1.5,
+   "cost": 5.0,
+   "cooldown": 0.32,
+   "windup": 0.13,
+   "impacto": 0.37,
+   "style": "slash",
+   "angle": 30.0,
+   "targets": 1,
+   "sneak_mult": 3.0,
+   "bleed": {
+    "dps": 2.0,
+    "time": 3.0
+   },
+   "valor": 35,
+   "classe": "leve",
+   "proficiencias": [
+    "laminas",
+    "adagas"
+   ],
+   "maos": 1,
+   "animacao": "golpe_adaga",
+   "model": "punhal",
+   "name": "ITEM_PUNHAL_NOME",
+   "description": "ITEM_PUNHAL_DESC"
+  },
+  "maca_cravos": {
+   "tag": "ARMA",
+   "weight": 3.4,
+   "damage": 25.0,
+   "range": 1.8,
+   "cost": 9.5,
+   "cooldown": 0.6,
+   "windup": 0.26,
+   "impacto": 0.4,
+   "style": "slash",
+   "angle": 40.0,
+   "targets": 1,
+   "crush": 1.4,
+   "stagger": 0.7,
+   "knockback": 4.0,
+   "bleed": {
+    "dps": 3.0,
+    "time": 3.0
+   },
+   "valor": 50,
+   "classe": "media",
+   "proficiencias": [
+    "contundentes",
+    "maca"
+   ],
+   "maos": 1,
+   "animacao": "golpe_maca",
+   "model": "maca_cravos",
+   "name": "ITEM_MACA_CRAVOS_NOME",
+   "description": "ITEM_MACA_CRAVOS_DESC"
+  },
+  "estrela": {
+   "tag": "ARMA",
+   "weight": 4.3,
+   "damage": 35.0,
+   "range": 2.0,
+   "cost": 12.0,
+   "cooldown": 0.78,
+   "windup": 0.32,
+   "impacto": 0.41,
+   "style": "slash",
+   "angle": 45.0,
+   "targets": 2,
+   "crush": 1.5,
+   "stagger": 1.0,
+   "knockback": 5.5,
+   "valor": 85,
+   "classe": "pesada",
+   "proficiencias": [
+    "contundentes",
+    "maca"
+   ],
+   "maos": 1,
+   "animacao": "golpe_maca",
+   "model": "estrela",
+   "name": "ITEM_ESTRELA_NOME",
+   "description": "ITEM_ESTRELA_DESC"
+  },
+  "malho": {
+   "tag": "ARMA",
+   "weight": 9.5,
+   "damage": 70.0,
+   "range": 3.0,
+   "cost": 19.0,
+   "cooldown": 1.55,
+   "windup": 0.72,
+   "impacto": 0.5,
+   "style": "smash",
+   "area_offset": 1.4,
+   "area_radius": 1.9,
+   "targets": 7,
+   "crush": 1.4,
+   "stagger": 1.3,
+   "knockback": 7.0,
+   "valor": 130,
+   "classe": "pesada",
+   "proficiencias": [
+    "contundentes",
+    "martelo"
+   ],
+   "maos": 2,
+   "animacao": "pancada_martelo",
+   "model": "malho",
+   "name": "ITEM_MALHO_NOME",
+   "description": "ITEM_MALHO_DESC"
+  },
+  "martelo_guerra": {
+   "tag": "ARMA",
+   "weight": 3.8,
+   "damage": 40.0,
+   "range": 2.4,
+   "cost": 12.0,
+   "cooldown": 0.95,
+   "windup": 0.42,
+   "impacto": 0.47,
+   "style": "smash",
+   "area_offset": 1.1,
+   "area_radius": 1.2,
+   "targets": 4,
+   "crush": 1.4,
+   "stagger": 0.9,
+   "knockback": 5.0,
+   "valor": 75,
+   "classe": "media",
+   "proficiencias": [
+    "contundentes",
+    "martelo"
+   ],
+   "maos": 2,
+   "animacao": "pancada_martelo",
+   "model": "martelo_guerra",
+   "name": "ITEM_MARTELO_GUERRA_NOME",
+   "description": "ITEM_MARTELO_GUERRA_DESC"
+  },
+  "machado_duplo": {
+   "tag": "ARMA",
+   "weight": 5.2,
+   "damage": 40.0,
+   "range": 2.3,
+   "cost": 14.0,
+   "cooldown": 0.98,
+   "windup": 0.4,
+   "impacto": 0.44,
+   "style": "slash",
+   "angle": 60.0,
+   "targets": 3,
+   "knockback": 4.0,
+   "bleed": {
+    "dps": 6.0,
+    "time": 5.0
+   },
+   "valor": 100,
+   "classe": "pesada",
+   "proficiencias": [
+    "contundentes",
+    "machados"
+   ],
+   "maos": 2,
+   "animacao": "golpe_montante",
+   "model": "machado_duplo",
+   "name": "ITEM_MACHADO_DUPLO_NOME",
+   "description": "ITEM_MACHADO_DUPLO_DESC"
+  },
+  "picareta": {
+   "tag": "ARMA",
+   "weight": 2.8,
+   "damage": 26.0,
+   "range": 1.9,
+   "cost": 9.5,
+   "cooldown": 0.62,
+   "windup": 0.27,
+   "impacto": 0.41,
+   "style": "slash",
+   "angle": 30.0,
+   "targets": 1,
+   "crush": 1.8,
+   "stagger": 0.4,
+   "valor": 45,
+   "classe": "media",
+   "proficiencias": [
+    "contundentes",
+    "martelo"
+   ],
+   "maos": 1,
+   "animacao": "golpe_machado",
+   "model": "picareta",
+   "name": "ITEM_PICARETA_NOME",
+   "description": "ITEM_PICARETA_DESC"
+  },
+  "tridente": {
+   "tag": "ARMA",
+   "weight": 3.4,
+   "damage": 27.0,
+   "range": 3.0,
+   "cost": 11.0,
+   "cooldown": 0.7,
+   "windup": 0.3,
+   "impacto": 0.39,
+   "style": "thrust",
+   "angle": 7.0,
+   "width": 0.5,
+   "targets": 2,
+   "alinhar_ao_golpe": true,
+   "valor": 65,
+   "classe": "media",
+   "proficiencias": [
+    "hastes",
+    "lanca"
+   ],
+   "maos": 2,
+   "animacao": "estocada_lanca",
+   "model": "tridente",
+   "name": "ITEM_TRIDENTE_NOME",
+   "description": "ITEM_TRIDENTE_DESC"
+  },
+  "foice": {
+   "tag": "ARMA",
+   "weight": 4.0,
+   "damage": 38.0,
+   "range": 2.7,
+   "cost": 13.0,
+   "cooldown": 1.0,
+   "windup": 0.42,
+   "impacto": 0.44,
+   "style": "slash",
+   "angle": 85.0,
+   "targets": 4,
+   "bleed": {
+    "dps": 4.0,
+    "time": 3.0
+   },
+   "valor": 80,
+   "classe": "pesada",
+   "proficiencias": [
+    "hastes",
+    "alabarda"
+   ],
+   "maos": 2,
+   "animacao": "golpe_montante",
+   "model": "foice",
+   "name": "ITEM_FOICE_NOME",
+   "description": "ITEM_FOICE_DESC"
+  },
+  "arco_longo": {
+   "tag": "ARMA",
+   "weight": 1.6,
+   "damage": 26.0,
+   "range": 18.0,
+   "cost": 6.5,
+   "cooldown": 0.85,
+   "windup": 0.45,
+   "impacto": 0.52,
+   "style": "shoot",
+   "targets": 1,
+   "ammo": "flecha",
+   "ammo_extra": [
+    "flecha_larga",
+    "flecha_osso"
+   ],
+   "projectile_speed": 26.0,
+   "pierce": 1,
+   "rotacao_mao": [
+    0,
+    0,
+    0
+   ],
+   "mao": "esquerda",
+   "base": "arco",
+   "escala_modelo": 1.3,
+   "icon_view": {
+    "rot": [
+     0,
+     0,
+     -35
+    ],
+    "margin": 1.08,
+    "pitch": 30.0
+   },
+   "valor": 70,
+   "classe": "media",
+   "proficiencias": [
+    "pontaria",
+    "arcos"
+   ],
+   "maos": 2,
+   "animacao": "disparo_arco",
+   "model": "arco_longo",
+   "name": "ITEM_ARCO_LONGO_NOME",
+   "description": "ITEM_ARCO_LONGO_DESC"
+  },
+  "besta_pesada": {
+   "tag": "ARMA",
+   "weight": 6.5,
+   "damage": 62.0,
+   "range": 18.0,
+   "cost": 5.0,
+   "cooldown": 1.95,
+   "windup": 0.3,
+   "impacto": 0.17,
+   "style": "shoot",
+   "targets": 1,
+   "ammo": "virote",
+   "ammo_extra": [
+    "virote_pesado"
+   ],
+   "projectile_speed": 32.0,
+   "pierce": 3,
+   "knockback": 4.5,
+   "alinhar_ao_golpe": true,
+   "rotacao_mao": [
+    -85,
+    0,
+    0
+   ],
+   "base": "besta",
+   "escala_modelo": 1.2,
+   "valor": 140,
+   "classe": "pesada",
+   "proficiencias": [
+    "pontaria",
+    "bestas"
+   ],
+   "maos": 2,
+   "animacao": "disparo_besta",
+   "model": "besta_pesada",
+   "name": "ITEM_BESTA_PESADA_NOME",
+   "description": "ITEM_BESTA_PESADA_DESC"
+  },
+  "funda": {
+   "tag": "ARMA",
+   "weight": 0.2,
+   "damage": 12.0,
+   "range": 11.0,
+   "cost": 4.0,
+   "cooldown": 0.5,
+   "windup": 0.3,
+   "impacto": 0.5,
+   "style": "shoot",
+   "targets": 1,
+   "ammo": "pedra",
+   "projectile_speed": 18.0,
+   "pierce": 1,
+   "stagger": 0.4,
+   "valor": 8,
+   "blocks": [
+    {
+     "size": [
+      0.02,
+      0.5,
+      0.01
+     ],
+     "pos": [
+      0,
+      0.25,
+      0
+     ],
+     "color": "7a5a3a"
+    },
+    {
+     "size": [
+      0.07,
+      0.06,
+      0.04
+     ],
+     "pos": [
+      0,
+      0.52,
+      0
+     ],
+     "color": "8a6a48"
+    }
+   ],
+   "classe": "leve",
+   "proficiencias": [
+    "pontaria"
+   ],
+   "maos": 1,
+   "animacao": "disparo_arco",
+   "model": "funda",
+   "name": "ITEM_FUNDA_NOME",
+   "description": "ITEM_FUNDA_DESC"
   }
  }
 }
