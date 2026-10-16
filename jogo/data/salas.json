@@ -10,15 +10,15 @@
   ],
   "entrada": [
    [
-    "Patamar da escada",
+    "Pé da escada",
     "m"
    ],
    [
-    "Poço de descida",
+    "Poço da escada",
     "m"
    ],
    [
-    "Átrio dos degraus",
+    "Patamar",
     "m"
    ]
   ],
@@ -28,7 +28,7 @@
     "f"
    ],
    [
-    "Corredor largo",
+    "Corredor",
     "m"
    ],
    [
@@ -56,7 +56,15 @@
     "f"
    ],
    [
-    "Claustro",
+    "Tanque",
+    "m"
+   ],
+   [
+    "Canal",
+    "m"
+   ],
+   [
+    "Poço",
     "m"
    ]
   ],
@@ -70,7 +78,7 @@
     "m"
    ],
    [
-    "Armazém",
+    "Almoxarifado",
     "m"
    ],
    [
@@ -80,19 +88,19 @@
   ],
   "tesouro": [
    [
-    "Relicário",
-    "m"
-   ],
-   [
-    "Tesouro",
-    "m"
-   ],
-   [
-    "Câmara escondida",
-    "f"
-   ],
-   [
     "Cofre",
+    "m"
+   ],
+   [
+    "Esconderijo",
+    "m"
+   ],
+   [
+    "Quartinho",
+    "m"
+   ],
+   [
+    "Nicho",
     "m"
    ]
   ],
@@ -112,12 +120,12 @@
   ],
   "chefe": [
    [
-    "Câmara do guardião",
+    "Sala do capataz",
     "f"
    ],
    [
-    "Trono afundado",
-    "m"
+    "Casa das comportas",
+    "f"
    ]
   ]
  },
@@ -127,60 +135,56 @@
    "alagada"
   ],
   [
-   "esquecido",
-   "esquecida"
+   "seco",
+   "seca"
   ],
   [
-   "dos ossos",
-   "dos ossos"
+   "velho",
+   "velha"
   ],
   [
-   "das correntes",
-   "das correntes"
+   "desabado",
+   "desabada"
   ],
   [
-   "em ruínas",
-   "em ruínas"
+   "do lado norte",
+   "do lado norte"
   ],
   [
-   "úmido",
-   "úmida"
+   "do lado sul",
+   "do lado sul"
   ],
   [
-   "dos ecos",
-   "dos ecos"
+   "dos canos",
+   "dos canos"
   ],
   [
-   "da guarda",
-   "da guarda"
+   "das grades",
+   "das grades"
   ],
   [
-   "silencioso",
-   "silenciosa"
+   "da bomba",
+   "da bomba"
   ],
   [
-   "rachado",
-   "rachada"
+   "escuro",
+   "escura"
   ],
   [
-   "das raízes",
-   "das raízes"
+   "entupido",
+   "entupida"
   ],
   [
-   "sem luz",
-   "sem luz"
+   "do aqueduto",
+   "do aqueduto"
   ],
   [
-   "antigo",
-   "antiga"
+   "de baixo",
+   "de baixo"
   ],
   [
-   "dos mortos",
-   "dos mortos"
-  ],
-  [
-   "de pedra negra",
-   "de pedra negra"
+   "de cima",
+   "de cima"
   ]
  ]
 }
