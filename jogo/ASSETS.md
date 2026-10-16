@@ -1,8 +1,22 @@
 # Assets e procedência
 
-## Biblioteca ativa: criação própria
+## Resumo (16/10/2026)
 
-Todos os modelos usados pelo jogo estão em `assets/originais/`. Geometria, texturas procedurais e esqueleto foram criados para este projeto usando Blender. O aventureiro agora usa também animações gratuitas do Mixamo, adaptadas ao esqueleto original. Não houve compra, assinatura, geração por serviço pago ou importação de imagens de Project Zomboid.
+| O quê | De onde | Licença |
+| --- | --- | --- |
+| Cenário, móveis, baús, tochas, moeda e os modelos antigos | Criação própria (Blender), `assets/originais/` | do projeto |
+| Aventureiro, mercador e os cinco monstros | Characters PSX (Elbolilloduro) | CC0 |
+| Animações | Universal Animation Library (Quaternius), um golpe do Mixamo e poses escritas no projeto | CC0 / termos do Mixamo |
+| Armas | RPG Weapons (Binbun), Low Poly Weapon Pack (Kickin' It Studios), 3D Fantasy Weapons Pack (Polyy, **gerado por IA**) | CC0 / uso livre em jogos / CC0 |
+| Objetos (comida, bebida, tesouros, ferramentas) | Fantasy Props MegaKit (Quaternius) | CC0 |
+| Efeitos visuais | Brackeys VFX Bundle | CC0 |
+| Fonte | Inter | SIL OFL 1.1 |
+
+**Declaração de IA para a Steam:** as 13 armas do 3D Fantasy Weapons Pack (seção "Armas") foram geradas por IA pelo autor do pacote (polyy.ai). O dono do projeto autorizou o uso em 16/10/2026, sabendo que a página da Steam precisa declarar isso. Nenhum outro asset do jogo foi gerado por IA, até onde as páginas dos autores informam.
+
+## Biblioteca própria
+
+Os modelos próprios estão em `assets/originais/`. Geometria, texturas procedurais e esqueleto foram criados para este projeto usando Blender. Não houve compra, assinatura, geração por serviço pago ou importação de imagens de Project Zomboid.
 
 - Fonte editável: `../arte/fontes/dungepm_modelos.blend`.
 - Gerador reproduzível: `../arte/fontes/gerar_modelos.py`.
@@ -11,7 +25,7 @@ Todos os modelos usados pelo jogo estão em `assets/originais/`. Geometria, text
 - Referências visuais e observações: `../arte/REFERENCIAS.md`.
 - Regeneração: `blender --background --factory-startup --python arte/fontes/gerar_modelos.py` a partir da raiz do projeto.
 
-Os modelos de `assets/originais/` são produção original do projeto. As armas vêm de dois pacotes de terceiros (seção "Armas" abaixo). Não foi atribuída uma licença pública de redistribuição ao código ou à arte; essa escolha fica com o proprietário do projeto.
+Os modelos de `assets/originais/` feitos no Blender são produção original do projeto. Os personagens (`aventureiro_psx`, `mercador`, `afogado`, `carnical`, `inchado`, `carcereiro`, `capataz`) ficam na mesma pasta, mas vêm do Characters PSX (seção "Personagens"). As armas vêm de três pacotes de terceiros (seção "Armas") e os objetos novos do MegaKit (seção "Objetos"). Não foi atribuída uma licença pública de redistribuição ao código ou à arte; essa escolha fica com o proprietário do projeto.
 
 ## Histórico do bloco inicial
 
@@ -31,13 +45,25 @@ A organização do HUD segue a leitura do Project Zomboid (barra lateral, janela
 - **Ícones de interface e silhueta corporal**: desenhos vetoriais originais em `scripts/ui/ui_icon.gd` e `scripts/ui/ui_body_figure.gd`.
 - **Fonte Inter** (`assets/fontes/Inter-*.otf`): © 2016-2023 The Inter Project Authors, [rsms/inter](https://github.com/rsms/inter), versão 4.0, licença SIL Open Font License 1.1. Texto completo em `assets/fontes/OFL.txt`; ele precisa acompanhar o jogo distribuído (já copiado para `outputs/linux/LICENCA-FONTE-INTER.txt`). A OFL permite embutir a fonte em software, inclusive comercial, desde que a fonte não seja vendida sozinha.
 
-## Personagem
+## Personagens
 
-O aventureiro é o `Character_16` do pacote [Characters PSX](https://elbolilloduro.itch.io/characters-psx), de Elbolilloduro, licença CC0 (conferida na página do autor em 14/10/2026). O rig é o esqueleto padrão do Mixamo; a [FAQ da Adobe](https://helpx.adobe.com/creative-cloud/faq/mixamo-faq.html) permite usar personagens e animações do Mixamo em jogos comerciais. A textura foi repintada para este projeto (roupa medieval; rosto, mãos e cabelo do original) e as animações são as do aventureiro anterior, transferidas para o novo esqueleto. Arquivo: `assets/originais/aventureiro_psx.glb`; fontes e ferramentas em `../arte/fontes/personagem_psx/`. O modelo anterior (`aventureiro_mixamo.glb`, criação própria) fica fora do jogo, em `../arte/fontes/personagem_psx/origem_animacoes/`, como fonte das animações.
+Todos usam modelos do pacote [Characters PSX](https://elbolilloduro.itch.io/characters-psx), de Elbolilloduro, licença CC0 (conferida na página do autor em 14/10/2026), com o rig padrão do Mixamo. São montados por `../arte/fontes/personagem_psx/personagens.gd` (detalhes em `../arte/fontes/personagem_psx/LEIA-ME.md`).
+
+| No jogo | Arquivo | Modelo do pacote |
+| --- | --- | --- |
+| Aventureiro | `assets/originais/aventureiro_psx.glb` | `Character_16`, textura repintada para o jogo (roupa medieval; rosto, mãos e cabelo do original) |
+| Mercador | `assets/originais/mercador.glb` | `Character_16`, com a túnica vinho |
+| Afogado (`corrompido`) | `assets/originais/afogado.glb` | `Character_Monster_06` |
+| Carniçal (`espreitador`) | `assets/originais/carnical.glb` | `Character_Monster_07` |
+| Inchado (`brutamontes`) | `assets/originais/inchado.glb` | `Character_Monster_08` |
+| Carcereiro (`guardiao`) | `assets/originais/carcereiro.glb` | `Character_Killer_08` |
+| Capataz (`chefe`) | `assets/originais/capataz.glb` | `Character_Killer_05` |
+
+Os modelos anteriores (o aventureiro e o corrompido próprios) continuam em `assets/originais/` e em `../arte/fontes/personagem_psx/origem_animacoes/`, fora do jogo.
 
 ## Armas
 
-As armas usam modelos de dois pacotes gratuitos, escolhidos pelo dono do projeto em 14/10/2026 e convertidos para a convenção do jogo (empunhadura na origem, ponta em +Y, metros) por `../arte/fontes/converter_armas.gd`. Os arquivos de origem escolhidos e as licenças estão em `../arte/fontes/pacotes/`. Os créditos vão junto do jogo em `outputs/linux/CREDITOS.txt`.
+As armas usam modelos de três pacotes gratuitos, escolhidos pelo dono do projeto (os dois primeiros em 14/10/2026, o terceiro em 16/10/2026) e convertidos para a convenção do jogo (empunhadura na origem, ponta em +Y, metros) por `../arte/fontes/converter_armas.gd`. Os arquivos de origem escolhidos e as licenças estão em `../arte/fontes/pacotes/`. Os créditos vão junto do jogo em `outputs/linux/CREDITOS.txt`.
 
 | Arma (id) | Pacote | Modelo de origem |
 | --- | --- | --- |
@@ -54,11 +80,49 @@ As armas usam modelos de dois pacotes gratuitos, escolhidos pelo dono do projeto
 | `besta` | Low Poly Weapon Pack | Crossbow |
 | `flecha` | Low Poly Weapon Pack | Broadhead_Arrow |
 | `virote` | Low Poly Weapon Pack | Bullet_Arrow |
+| `espada_curta` | RPG Weapons | Short_Sword_03 |
+| `faca` | RPG Weapons | Dagger_02 |
+| `espada_larga` | 3D Fantasy Weapons Pack (Polyy, IA) | knights_longsword |
+| `florete` | 3D Fantasy Weapons Pack | duelists_rapier |
+| `alfanje` | 3D Fantasy Weapons Pack | falchion |
+| `espadao` | 3D Fantasy Weapons Pack | highland_claymore |
+| `punhal` | 3D Fantasy Weapons Pack | rogues_dagger |
+| `maca_cravos` | 3D Fantasy Weapons Pack | spiked_mace |
+| `estrela` | 3D Fantasy Weapons Pack | morning_star |
+| `malho` | 3D Fantasy Weapons Pack | giants_maul |
+| `martelo_guerra` | 3D Fantasy Weapons Pack | warhammer |
+| `machado_duplo` | 3D Fantasy Weapons Pack | twin_moon_battle_axe |
+| `picareta` | 3D Fantasy Weapons Pack | war_pick |
+| `tridente` | 3D Fantasy Weapons Pack | tidal_trident |
+| `foice` | 3D Fantasy Weapons Pack | reapers_scythe |
+
+Arco longo, besta pesada, flecha de osso, flecha larga e virote pesado usam o modelo de outro item (`base`), maior (`escala_modelo`) ou com outra cor (`tint`).
 
 - **RPG Weapons**, Binbun — [binbun3d.itch.io/rpg-weapons](https://binbun3d.itch.io/rpg-weapons). CC0: uso comercial livre, sem atribuição obrigatória. O pacote baixado não traz arquivo de licença; os termos foram conferidos na página em 14/10/2026.
 - **Low Poly Weapon Pack**, Kickin' It Studios (itch.io). O leia-me do pacote permite usar e modificar em qualquer jogo ou projeto e proíbe revender os modelos como modelos 3D; crédito não é obrigatório, mas é apreciado.
-- Nenhum dos dois foi gerado por IA, até onde as páginas informam.
+- **3D Fantasy Weapons Pack**, Polyy — CC0 (texto em `../arte/fontes/pacotes/polyy_fantasy_weapons/LICENSE.txt`). **Gerado por IA** no polyy.ai: a Steam pede a declaração. Usamos a versão de baixa resolução, com texturas reduzidas a 128 px; a lista de arquivos está em `../arte/fontes/pacotes/polyy_fantasy_weapons/LEIA-ME.md`.
+- RPG Weapons e Low Poly Weapon Pack não foram gerados por IA, até onde as páginas informam.
 - `sword` e `espada_guarda` continuam com a espada original do projeto (`assets/originais/espada.glb`).
+
+## Objetos
+
+Onze itens usam objetos do **Fantasy Props MegaKit** (versão gratuita), de [Quaternius](https://quaternius.com), CC0. Convertidos por `../arte/fontes/converter_itens.gd` (origem no centro da base, tamanho em metros, textura reduzida); a cor vem dos vértices do modelo.
+
+| Item | Modelo do pacote |
+| --- | --- |
+| `cenoura` | Carrot |
+| `chave_mestra` | Key_Metal |
+| `mapa` | Scroll_1 |
+| `calice` | Chalice |
+| `castical` | CandleStick |
+| `cerveja` | Mug |
+| `vinho` | Bottle_1 |
+| `garrafada` | Potion_2 |
+| `cha` | Potion_4 |
+| `mel` | Pot_1_Lid |
+| `arnica` | SmallBottle |
+
+Os ícones desses itens e das armas novas saem dos próprios modelos, por `tools/render_icons.gd`.
 
 ## Efeitos visuais
 
@@ -74,18 +138,18 @@ Sangue, clarão de acerto, faíscas, golpe forte, poeira, fumaça e as chamas da
 
 As folhas foram recortadas, reduzidas para tamanho PSX (32 a 69 px por quadro) e remontadas por `../arte/fontes/vfx/preparar_vfx.py`, que lê os originais guardados em `../arte/fontes/vfx/originais/` (com o arquivo de licença e créditos do pacote). CC0 não exige crédito; mesmo assim os autores estão em `outputs/linux/CREDITOS.txt`.
 
-## Pacotes recebidos e ainda não usados
+## Pacotes recebidos
 
-Recebidos em 14/10/2026. Nada destes pacotes está no jogo ainda; registrado aqui para quando forem usados. Em 15/10/2026 o dono do projeto autorizou o uso de tudo o que enviou. Isso não muda a licença de quem fez cada pacote: os marcados como **sem licença** ou **origem não identificada** precisam ter o autor e os termos confirmados antes de entrar na versão vendida na Steam.
+Recebidos em 14/10/2026. Os marcados **Em uso** já estão no jogo; o resto fica registrado para quando for usado. Em 15/10/2026 o dono do projeto autorizou o uso de tudo o que enviou. Isso não muda a licença de quem fez cada pacote: os marcados como **sem licença** ou **origem não identificada** precisam ter o autor e os termos confirmados antes de entrar na versão vendida na Steam.
 
 | Pacote | Autor | Licença | Observação |
 | --- | --- | --- | --- |
 | PSX Dungeon | [Goblinatron](https://goblinatron.itch.io/psx-dungeon) | CC BY 4.0: créditos precisam citar "Goblinatron" | Kit PSX de masmorra; as texturas são três atlas (`Dungeon_Map`, `Doors_Map`, `CratesAndBarrels_Map`) |
-| Characters PSX | [Elbolilloduro](https://elbolilloduro.itch.io/characters-psx) | CC0 | Em uso: `Character_16` é o aventureiro. Os outros 112 (9 monstros) ainda não |
-| Fantasy Props MegaKit | [Quaternius](https://quaternius.com) | CC0 | Versão gratuita |
-| Universal Animation Library | Quaternius | CC0 | 43 animações num esqueleto próprio |
+| Characters PSX | [Elbolilloduro](https://elbolilloduro.itch.io/characters-psx) | CC0 | **Em uso**: aventureiro, mercador e os cinco monstros (seção "Personagens") |
+| Fantasy Props MegaKit | [Quaternius](https://quaternius.com) | CC0 | **Em uso**: 11 objetos (seção "Objetos"). Versão gratuita |
+| Universal Animation Library | Quaternius | CC0 | **Em uso**: parte das 43 animações (seção "Animações") |
 | Brackeys VFX Bundle | Brackeys (texturas de Picster, Kenney, Thomas Iché, CodeManu) | CC0 | **Em uso** (seção "Efeitos visuais"). O resto (explosões, vórtice, anéis, magia) fica para quando a magia entrar |
-| 3D Fantasy Weapons Pack | Polyy | CC0, **gerado por IA** | Exige declaração de IA na Steam |
+| 3D Fantasy Weapons Pack | Polyy | CC0, **gerado por IA** | **Em uso**: 13 armas (seção "Armas"). Exige declaração de IA na Steam |
 | Victorian Study | FoxDev | Crédito a "FoxDev" em projetos comerciais | Mobília vitoriana |
 | Models + 512 (props de masmorra) | desconhecido | **sem licença** | Não usar sem confirmar a origem |
 | LowPolyDungeon_FBX | desconhecido | **sem licença** | Veio sem texturas |
@@ -93,16 +157,22 @@ Recebidos em 14/10/2026. Nada destes pacotes está no jogo ainda; registrado aqu
 
 ## Modelos provisórios
 
-As quatro armaduras (gibão, couro, cota de malha, placas) e a gazua aparecem como **blocos** montados em tempo de execução a partir do campo `blocks` de `data/itens.json` (`Visuals.blocks`). São formas originais e provisórias. Um arquivo `assets/armas/<id>.glb` substitui os blocos automaticamente; a especificação está em `../arte/ARMAS_ESPEC.md`. Se os modelos vierem de uma ferramenta de IA, registre aqui a ferramenta e os termos de uso, porque a Steam pede essa informação no questionário de conteúdo.
+As dez armaduras, as gazuas, a funda e as pedras, parte da comida (pão, queijo, peixe, toucinho, bolacha, cogumelo), sutura, erva, anel de prata e dente de ouro aparecem como **blocos** montados em tempo de execução a partir do campo `blocks` de `data/itens.json` (`Visuals.blocks`). São formas originais e provisórias. Um arquivo `assets/armas/<id>.glb` substitui os blocos automaticamente; a especificação está em `../arte/ARMAS_ESPEC.md`. Se os modelos vierem de uma ferramenta de IA, registre aqui a ferramenta e os termos de uso, porque a Steam pede essa informação no questionário de conteúdo.
 
-## Animações e sons de gameplay
+## Animações
 
-Nove ações originais no rig próprio: `idle`, `guard`, `walk`, `run`, `attack`, `stab`, `dodge`, `hit`, `die`. Ações criadas pelo gerador Blender do projeto.
+Desde 16/10/2026 todas as animações dos personagens saem de `../arte/fontes/personagem_psx/personagens.gd`, que as transfere para o rig do Mixamo:
+
+- **Universal Animation Library** (Quaternius, CC0; arquivos e lista em `../arte/fontes/ual/`): parado, andar, correr, guarda, agachado, esquiva, dano, morte, soco, golpe de adaga e de espada, arremesso da funda e o mercador falando. Andar e parado dos monstros também.
+- **Mixamo** (Adobe): o corte do sabre, `sword and shield slash (3)` do pacote Sword And Shield, baixado em 13/10/2026 pela conta Adobe do projeto. A [FAQ oficial da Adobe](https://helpx.adobe.com/creative-cloud/faq/mixamo-faq.html) permite usar personagens e animações do Mixamo em jogos pessoais e comerciais. Os FBX estão em `../arte/fontes/mixamo/`.
+- **Poses escritas no projeto:** golpes de machado, maça, montante, marreta, lança e alabarda, arco, besta, bloqueio, a garra dos monstros e a pancada do capataz.
+
+O acerto dos golpes segue essas animações (`scripts/systems/hitbox.gd`): a arma acerta o que toca no movimento.
+
+## Sons
 
 Cinco sons provisórios originais em `assets/audio/`, gerados localmente por `../arte/fontes/gerar_audio.py`. Não há gravações, músicas ou sons baixados de terceiros.
 
-## Mixamo
+## Histórico das animações
 
-O aventureiro usa quatro animações do pacote **Sword And Shield Pack**: `slash (3)` para o golpe de espada, `attack (4)` como base da estocada, `impact` e `death`. Caminhada, corrida, repouso, guarda e esquiva usam movimentos próprios do esqueleto original. A caminhada e a corrida do pacote foram retiradas do jogo após inspeção visual, porque cruzavam os pés no nosso modelo. Fonte: [Mixamo](https://www.mixamo.com/), pacote baixado em 13/10/2026 pela conta Adobe do projeto. A [FAQ oficial da Adobe](https://helpx.adobe.com/creative-cloud/faq/mixamo-faq.html) permite incorporar personagens e animações gratuitamente em jogos pessoais e comerciais. Os FBX selecionados estão em `../arte/fontes/mixamo/`; a adaptação reproduzível está em `../arte/fontes/aplicar_mixamo.py`. O modelo, suas texturas e seu esqueleto continuam originais do projeto.
-
-A estocada usa o corpo de `sword and shield attack (4).fbx`, com adaptação própria dos braços para alcançar a haste. A orientação da lança fica alinhada à direção comprometida do golpe. O dano é limitado a uma faixa linear de 3,2 m e ao primeiro alvo.
+Até 15/10/2026 o aventureiro usava nove ações feitas no rig próprio (`idle`, `guard`, `walk`, `run`, `attack`, `stab`, `dodge`, `hit`, `die`) e quatro animações do Mixamo (`slash (3)`, `attack (4)`, `impact`, `death`), adaptadas por `../arte/fontes/aplicar_mixamo.py`. Foram substituídas pelo conjunto acima.
