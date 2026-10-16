@@ -55,7 +55,7 @@ ITEM_MACHADO_DESC,"Não é bonito, mas o corte demora a parar de sangrar."
 ITEM_MACA_NOME,Maça
 ITEM_MACA_DESC,Feita para amassar armadura. Quem leva fica tonto.
 ITEM_MARTELO_NOME,Marreta
-ITEM_MARTELO_DESC,"Lenta demais para golpe rápido. Quando bate no chão, ninguém em volta fica de pé."
+ITEM_MARTELO_DESC,"Lenta demais para golpe rápido. Quem estiver onde a cabeça desce não fica de pé."
 ITEM_ALABARDA_NOME,Alabarda
 ITEM_ALABARDA_DESC,Ponta e lâmina no mesmo cabo. Atravessa o primeiro e pega o de trás.
 ITEM_ARCO_NOME,Arco curto
@@ -106,7 +106,7 @@ ITEM_ESTRELA_DESC,"Uma bola cheia de pontas num cabo curto. Pesa, mas derruba qu
 ITEM_MALHO_NOME,Malho
 ITEM_MALHO_DESC,"Uma pedra presa num pau. Lento de doer, mas abre buraco no chão."
 ITEM_MARTELO_GUERRA_NOME,Martelo de guerra
-ITEM_MARTELO_GUERRA_DESC,Mais leve que a marreta. Ainda faz tremer o chão em volta.
+ITEM_MARTELO_GUERRA_DESC,Mais leve que a marreta. Ainda faz tremer o chão onde bate.
 ITEM_MACHADO_DUPLO_NOME,Machado de duas lâminas
 ITEM_MACHADO_DUPLO_DESC,Uma lâmina para cada lado. Quem sobrevive ao corte sangra por um bom tempo.
 ITEM_PICARETA_NOME,Picareta de guerra
