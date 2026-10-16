@@ -76,6 +76,15 @@ Precisa de placa de vídeo com OpenGL 3.3. O jogo é em português. Os créditos
 | Pausar | Esc |
 | Salvar no abrigo | F5 |
 
+## Primeiros passos
+
+1. Monte o aventureiro: distribua os pontos e escolha a arma.
+2. No abrigo, pegue o que precisar dos baús. Comida e bandagens ocupam a barra rápida desde o começo.
+3. Explore o andar. Chegue agachado (C) em monstros que ainda não te viram para um ataque furtivo.
+4. Quando o fôlego acabar, você não esquiva nem segura a guarda. Recue antes disso.
+5. O guardião do andar fica na sala mais distante. Derrote-o para pegar o selo e abrir a descida.
+6. Volte ao abrigo e use o ponto de descanso (E) para salvar e entregar os selos.
+
 ## O projeto
 
 - `jogo/`: projeto da Godot 4.7.2 (renderizador Compatibility). A arquitetura está em `jogo/ARQUITETURA.md`, e os números de armas e monstros em `jogo/BALANCO.md`.
