@@ -31,7 +31,8 @@ func refresh(game) -> void:
 		if enemy.alive and enemy.position.distance_to(pos) < 0.9 and game.clear_line(game.player.position, enemy.position):
 			position = enemy.position + Vector3.UP * 0.06
 			scale = Vector3.ONE * 2.5
-			var reach: float = Items.info(game.inventory.equipped).get("range", 1.5)
+			# "range" is how far the blade goes from the adventurer; the body adds its radius.
+			var reach: float = float(game.sheet.weapon_stats(game.inventory.equipped).get("range", 1.5)) + float(enemy.stats.get("radius", 0.4))
 			color = Color("d9bd81") if game.player.position.distance_to(enemy.position) <= reach else Color("8d7a65")
 			break
 	ring.material_override.albedo_color = color
