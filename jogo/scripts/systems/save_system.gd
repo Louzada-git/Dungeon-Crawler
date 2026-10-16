@@ -19,7 +19,7 @@ static func write(game, notify_user: bool = true) -> bool:
 	for cell in game.discovered:
 		explored.append([cell.x, cell.y])
 	var p = game.player
-	var data := {"sheet": game.sheet.snapshot(), "version": VERSION, "mode": "labirinto" if game.generated else "fixo", "seed": game.seed, "floor": game.floor, "deepest": game.deepest, "seals": game.seals_delivered, "floors": _pack_floors(game), "knowledge": pack_knowledge(game.knowledge), "world": game.layout.world.get("id", ""), "inventory": game.inventory.snapshot(), "tecnicas": game.techniques.snapshot(), "barra_rapida": game.quick_bar.snapshot(), "player": {"pos": [p.position.x, p.position.z], "health": p.health, "stamina": p.stamina, "food": p.food, "bleeding": p.bleeding}, "containers": loot_data, "enemies": enemy_data, "explored": explored, "kills": game.kills, "hits": game.hits_received, "won": game.won}
+	var data := {"sheet": game.sheet.snapshot(), "version": VERSION, "mode": "labirinto" if game.generated else "fixo", "seed": game.seed, "floor": game.floor, "deepest": game.deepest, "floors": _pack_floors(game), "knowledge": pack_knowledge(game.knowledge), "world": game.layout.world.get("id", ""), "inventory": game.inventory.snapshot(), "tecnicas": game.techniques.snapshot(), "barra_rapida": game.quick_bar.snapshot(), "player": {"pos": [p.position.x, p.position.z], "health": p.health, "stamina": p.stamina, "food": p.food, "bleeding": p.bleeding}, "containers": loot_data, "enemies": enemy_data, "explored": explored, "kills": game.kills, "hits": game.hits_received, "won": game.won}
 	var file := FileAccess.open(game.save_path + ".tmp", FileAccess.WRITE)
 	if file == null:
 		game.message("Não foi possível salvar a expedição.")
@@ -35,6 +35,7 @@ static func write(game, notify_user: bool = true) -> bool:
 
 static func read(game) -> bool:
 	var raw = JSON.parse_string(FileAccess.get_file_as_string(game.save_path))
+	_drop_removed_items(raw)
 	if not valid(game, raw):
 		game.message("O save não pôde ser lido. Iniciando uma expedição nova.")
 		return false
@@ -80,7 +81,6 @@ static func read(game) -> bool:
 		for f in known:
 			if f != game.floor:
 				game.knowledge[f] = known[f]
-		game.seals_delivered = int(raw.get("seals", 0))
 		game.deepest = maxi(int(raw.get("deepest", 1)), game.floor)
 	game.discovered.clear()
 	for cell in raw["explored"]:
@@ -160,6 +160,25 @@ static func _legacy_id(game, data: Dictionary) -> String:
 			if DungeonLayout.cell(entry["cell"]) == cell:
 				return entry["id"]
 	return ContainerSystem.unique_id(game)
+
+## Saves from older versions can hold items that left the game (Items.REMOVED,
+## like the seal): they are dropped from the backpack and from every chest.
+static func _drop_removed_items(raw) -> void:
+	if not raw is Dictionary:
+		return
+	if raw.get("inventory") is Dictionary:
+		Items.drop_removed(raw["inventory"].get("stacks"))
+	var chests: Array = []
+	if raw.get("containers") is Array:
+		chests.append_array(raw["containers"])
+	if raw.get("floors") is Dictionary:
+		for key in raw["floors"]:
+			var state = raw["floors"][key]
+			if state is Dictionary and state.get("containers") is Array:
+				chests.append_array(state["containers"])
+	for chest in chests:
+		if chest is Dictionary:
+			Items.drop_removed(chest.get("items"))
 
 static func valid(game, raw) -> bool:
 	if not raw is Dictionary or raw.get("version") != VERSION:
