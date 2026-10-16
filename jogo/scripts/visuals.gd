@@ -123,6 +123,8 @@ static func item_model(id: String) -> Node3D:
   if not cache.has(custom):
    cache[custom] = load(custom)
   var made: Node3D = cache[custom].instantiate()
+  if custom.begins_with("res://assets/itens/"):
+   use_vertex_colors(made)
   # "base" + "escala_modelo": another item's model, bigger or smaller (longbow from the bow).
   made.scale = Vector3.ONE * float(data.get("escala_modelo",1.0))
   if str(data.get("tint","")) != "":
@@ -145,6 +147,18 @@ static func custom_model_path(id: String) -> String:
  if base != "" and base != id:
   return custom_model_path(base)
  return ""
+
+## Props of the Quaternius MegaKit get their colour from the vertices (the
+## texture is a grey trim sheet). glTF import leaves that off; turn it on.
+static func use_vertex_colors(root: Node) -> void:
+ for m in root.find_children("*","MeshInstance3D",true,false):
+  if m.mesh == null:
+   continue
+  for i in m.mesh.get_surface_count():
+   var colors = m.mesh.surface_get_arrays(i)[Mesh.ARRAY_COLOR]
+   var mat = m.get_active_material(i)
+   if colors != null and colors.size() > 0 and mat is BaseMaterial3D and not mat.vertex_color_use_as_albedo:
+    mat.vertex_color_use_as_albedo = true
 
 static func has_custom_model(id: String) -> bool:
  return custom_model_path(id) != ""
