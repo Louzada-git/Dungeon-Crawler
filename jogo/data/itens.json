@@ -2599,6 +2599,40 @@
    "valor": 30,
    "name": "ITEM_GARRAFADA_NOME",
    "description": "ITEM_GARRAFADA_DESC"
+  },
+  "cerveja": {
+   "tag": "ALIMENTO",
+   "weight": 0.5,
+   "food": 6.0,
+   "stamina_gain": 45.0,
+   "bebida": true,
+   "model": "cerveja",
+   "valor": 5,
+   "name": "ITEM_CERVEJA_NOME",
+   "description": "ITEM_CERVEJA_DESC"
+  },
+  "vinho": {
+   "tag": "ALIMENTO",
+   "weight": 0.8,
+   "food": 4.0,
+   "stamina_gain": 35.0,
+   "heal": 8.0,
+   "bebida": true,
+   "model": "vinho",
+   "valor": 8,
+   "name": "ITEM_VINHO_NOME",
+   "description": "ITEM_VINHO_DESC"
+  },
+  "cha": {
+   "tag": "ALIMENTO",
+   "weight": 0.3,
+   "food": 3.0,
+   "stamina_gain": 60.0,
+   "bebida": true,
+   "model": "cha",
+   "valor": 10,
+   "name": "ITEM_CHA_NOME",
+   "description": "ITEM_CHA_DESC"
   }
  }
 }
