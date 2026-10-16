@@ -123,7 +123,7 @@ func _build_character_page() -> void:
 	info_grid.add_theme_constant_override("h_separation", 16)
 	info_grid.add_theme_constant_override("v_separation", 6)
 	page.add_child(info_grid)
-	for entry in [["weapon", "Em mãos"], ["armor", "Armadura"], ["damage", "Dano / alcance"], ["cost", "Fôlego por golpe"], ["area", "Área atual"], ["objective", "Objetivo"], ["depth", "Andar mais fundo"], ["seals", "Selos entregues"], ["kills", "Monstros derrotados"], ["hits", "Golpes recebidos"], ["load", "Carga"]]:
+	for entry in [["weapon", "Em mãos"], ["armor", "Armadura"], ["damage", "Dano / alcance"], ["cost", "Fôlego por golpe"], ["area", "Área atual"], ["objective", "Objetivo"], ["depth", "Andar mais fundo"], ["coins", "Moedas"], ["kills", "Monstros derrotados"], ["hits", "Golpes recebidos"], ["load", "Carga"]]:
 		info_grid.add_child(UiStyle.label(entry[1], 13, UiStyle.DIM))
 		var value := UiStyle.label("", 13, UiStyle.TEXT, "medium")
 		value.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -196,7 +196,7 @@ func refresh() -> void:
 		info_values["area"].text = game.layout.room_name(p.position)
 		info_values["objective"].text = game.objective_text()
 		info_values["depth"].text = "%dº  (agora no %dº)" % [game.deepest, game.floor] if game.generated else "—"
-		info_values["seals"].text = str(game.seals_delivered)
+		info_values["coins"].text = str(game.inventory.count("coin"))
 		subtitle.text = ("Labirinto %d" % game.seed) if game.generated else "Expedição às cisternas"
 		info_values["kills"].text = str(game.kills)
 		info_values["hits"].text = str(game.hits_received)
