@@ -354,6 +354,10 @@
    "style": "shoot",
    "targets": 1,
    "ammo": "flecha",
+   "ammo_extra": [
+    "flecha_larga",
+    "flecha_osso"
+   ],
    "projectile_speed": 22.0,
    "pierce": 1,
    "proficiencias": [
@@ -394,6 +398,9 @@
    "style": "shoot",
    "targets": 1,
    "ammo": "virote",
+   "ammo_extra": [
+    "virote_pesado"
+   ],
    "projectile_speed": 30.0,
    "pierce": 2,
    "knockback": 3.0,
