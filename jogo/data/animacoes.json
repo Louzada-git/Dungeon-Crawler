@@ -7,11 +7,12 @@
    "pancada": 0.48
   },
   "aventureiro_psx": {
-   "arremesso": 0.4,
+   "arremesso": 0.43,
    "attack": 0.42,
    "disparo_arco": 0.61,
    "disparo_besta": 0.29,
    "estocada_alabarda": 0.47,
+   "estocada_florete": 0.37,
    "estocada_lanca": 0.47,
    "golpe_adaga": 0.37,
    "golpe_espada": 0.42,
