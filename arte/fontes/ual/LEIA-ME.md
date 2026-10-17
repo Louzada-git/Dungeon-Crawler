@@ -8,16 +8,16 @@ Animações do pacote usadas no jogo:
 
 | No pacote | No jogo |
 | --- | --- |
-| `Idle` | parado (aventureiro, monstros, mercador) |
-| `Jog_Fwd` | andar do aventureiro, corrida dos monstros |
+| `Idle` | parado (aventureiro, com o braço da arma relaxado; monstros; mercador); base do arremesso da funda |
+| `Jog_Fwd` | andar do aventureiro (com o braço da arma parado), corrida dos monstros |
 | `Walk` | andar dos monstros |
-| `Sprint` | correr |
-| `Sword_Idle` | guarda; base das poses de golpe escritas à mão |
+| `Sprint` | correr (com o braço da arma parado) |
+| `Sword_Idle` | guarda (com a arma pronta na frente); base das poses de golpe escritas à mão |
 | `Crouch_Idle`, `Crouch_Fwd` | agachado parado e andando |
 | `Roll` | esquiva |
 | `Hit_Chest`, `Hit_Head` | dano (aventureiro, monstros) |
 | `Death01` | morte |
 | `Punch_Cross` | soco e golpe de adaga |
-| `Sword_Attack` | golpe de espada |
-| `Spell_Simple_Shoot` | arremesso da funda |
 | `Idle_Talking` | mercador falando |
+
+Até 16/10/2026 o golpe de espada usava `Sword_Attack` e a funda `Spell_Simple_Shoot`. Saíram na revisão das animações: o golpe de espada enterrava a lâmina no chão e o arremesso era feito com a mão esquerda, enquanto a funda fica na direita. Os dois agora são poses escritas em `../personagem_psx/personagens.gd`.
