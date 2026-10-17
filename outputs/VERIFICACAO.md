@@ -225,3 +225,14 @@ Caminhos de um, dois ou três ramos andam no mesmo ritmo. Trocar de espada no 3�
 - Ramos Florete (Espadas), Picareta (Contundentes) e Foice (Hastes), cada um com talento no nível 6 e um objeto (28 ramos, 28 objetos).
 - Suíte do mundo fixo: **956 verificações, zero falhas**; suíte do labirinto: **53, zero falhas**. Novas: cada uma das três armas treina o ramo próprio e ele dá um objeto; os talentos Ceifar, Fura-couraça e Fintar mudam a arma; treinar a foice não dá o talento da alabarda.
 - Captura conferida: janela de proficiências com Florete sob Espadas e Picareta sob Contundentes.
+
+## Pegada e jeito de carregar — 17/10/2026
+
+- Pedido: arrumar a pegada de cada arma e as animações (mão aberta com a arma solta do lado, braço direito esticado de mãos vazias, armas de duas mãos e arco carregados numa mão só, pose esquisita do montante) e tirar uma imagem de cada quadro de cada animação com cada arma.
+- Pegada natural calculada dos ossos da mão: o cabo atravessa o punho fechado nas duas mãos; dedos fechados por trilhas próprias em todas as animações do aventureiro. Variantes de parado, andar, correr, guarda, agachado e bloqueio para duas mãos, haste, besta, arco e mãos vazias.
+- Captura no estúdio (`jogo/tests/estudio_capture.gd`): cada quadro (30 por segundo) de cada animação com cada arma e de punhos, de lado e de frente — 32 conjuntos (punhos e 31 armas), 11 animações cada (10 nas de tiro), folhas por `jogo/tools/estudio_folhas.py`.
+- Achado e corrigido depois de olhar as folhas: armas de duas mãos entrando no chão agachado (agora inclinadas para cima); adaga, faca e punhal com a lâmina para cima no soco (agora estocada curta, ponta para a frente); maça passando perto do corpo na frente e errando o monstro a 1,2 m (ganhou uma pose com o braço esticado no meio do golpe); foice usando o golpe do montante (agora ceifada própria).
+- Conferidos sem mudança: espada, espada curta, espada larga, de oficial, alfanje, florete, sabre, machado, picareta, maça de cravos, estrela, montante, espadão, machado de duas lâminas, marreta, malho, martelo de guerra, lança, pique, alabarda, tridente, arco, arco longo, besta, besta pesada, funda e punhos.
+- Alcance medido de novo (`tools/medir_alcance.gd`), mudanças de até 0,1 m; tabela de `jogo/BALANCO.md` refeita.
+- Suíte do mundo fixo: **983 verificações, zero falhas**; suíte do labirinto: **53, zero falhas**. Na primeira rodada, três falharam: a adaga com a lâmina para cima não alcançava o monstro a 1,1 m e a maça passava a 0,53 m do eixo do monstro a 1,2 m (limite 0,52). Novas: os quatro jeitos de carregar têm todas as animações; mãos vazias têm as próprias; cada tipo de arma escolhe a variante certa parado e andando; o cabo atravessa o punho sem giro extra.
+- Executável Linux exportado abre e roda 400 quadros sem erro.
