@@ -64,6 +64,22 @@ func run(target, capture: bool) -> void:
    weapon_anims.append(wanted)
  for animation_name in ["furtivo","furtivo_andar","bloqueio","soco"] + weapon_anims:
   check(game.player.animator.has_animation(animation_name),"Animação nova disponível: "+animation_name)
+ # Each way of carrying a weapon (data "porte") has its own standing, moving,
+ # guard and crouched animations (17/10/2026); empty hands have free arms.
+ var ways: Array = []
+ for id in Items.DATA:
+  var way: String = str(Items.DATA[id].get("porte",""))
+  if way != "" and not way in ways:
+   ways.append(way)
+ check(ways.size() == 4,"Quatro jeitos de carregar além de uma mão: %s" % [ways])
+ for way in ways:
+  var missing: Array = []
+  for base in ["idle","walk","run","guard","furtivo","furtivo_andar"]:
+   if not game.player.animator.has_animation(base+"_"+way):
+    missing.append(base)
+  check(missing.is_empty(),"Animações para carregar %s: parado, andando, correndo, em guarda e agachado %s" % [way,missing])
+ for base in ["idle","walk","run","guard","bloqueio"]:
+  check(game.player.animator.has_animation(base+"_livre"),"Mãos vazias têm %s próprio" % base)
  for animation_name in weapon_anims + ["soco"]:
   var at: float = Animacoes.impact(DungeonPlayer.MODEL,animation_name,-1.0)
   check(at > 0.1 and at < 0.9,"Momento do impacto conhecido para %s (%s)" % [animation_name,UiStyle.fmt(at,2)])
@@ -714,6 +730,23 @@ func test_weapons() -> void:
   check(is_instance_valid(p.held_weapon),"Personagem segura a arma: "+id)
   inv.remove(id)
  check(ProficiencyTree.path_text(Items.info("katana")["proficiencias"]) == "Lâminas › Espadas › Sabre","Arma indica o ramo de proficiência que treina")
+ # The weapon in hand picks how it is carried standing and moving; the natural
+ # grip holds the handle straight through the fist unless the item turns it.
+ var was_sneaking: bool = p.sneaking
+ var was_aiming: bool = p.aiming
+ p.sneaking = false
+ p.aiming = false
+ inv.restore({"stacks":{},"equipped":""})
+ check(p.carry_suffix() == "_livre" and p.locomotion(0.0)[0] == "idle_livre" and p.locomotion(2.0)[0] == "walk_livre","Mãos vazias: braços livres parado e andando")
+ for pair in [["sword",""],["montante","_duas"],["martelo","_duas"],["spear","_haste"],["foice","_haste"],["besta","_besta"],["arco","_arco"]]:
+  inv.add(pair[0])
+  inv.equip(pair[0])
+  check(p.carry_suffix() == pair[1] and p.locomotion(0.0)[0] == "idle"+pair[1] and p.locomotion(2.0)[0] == "walk"+pair[1],"%s carregado do jeito certo: idle%s, walk%s" % [pair[0],pair[1],pair[1]])
+  check(p.rest_rotation(Items.info(pair[0])) == Vector3.ZERO,"%s: cabo atravessando o punho fechado" % pair[0])
+  inv.remove(pair[0])
+ p.sneaking = was_sneaking
+ p.aiming = was_aiming
+ inv.restore({"stacks":{},"equipped":""})
  # Real models from the asset packs: right length, grip at the origin.
  var lengths := {"adaga":0.42,"katana":1.0,"montante":1.6,"machado":0.78,"maca":0.79,"martelo":1.27,"spear":2.6,"lanca_longa":3.1,"alabarda":2.62,"arco":1.16,"besta":0.79,"flecha":0.73,"virote":0.45}
  for id in lengths:
