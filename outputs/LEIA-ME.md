@@ -1,11 +1,24 @@
 # Dungepm — As Cisternas
 
+## Correção das animações (16/10/2026, à noite)
+
+Revisei todas as animações quadro a quadro (aventureiro com cada arma, os cinco monstros e o mercador) e refiz as que estavam erradas. As folhas de antes e depois estão em `revisao/animacoes-correcao/`.
+
+- **Andar e correr:** a arma balançava solta com o braço e chegava a atravessar o corpo. Agora o braço da arma fica parado, carregando a arma na frente.
+- **Guarda:** a arma ficava pendurada para trás, apontando para o chão. Agora fica pronta na frente, e os golpes começam e terminam nessa pose, sem salto entre a guarda e o golpe.
+- **Parado:** a arma fica um pouco mais baixa e as armas longas não entram mais no chão.
+- **Espada (e espada larga, curta, de oficial e alfanje):** o golpe antigo terminava com a lâmina enterrada no chão. Agora é um corte na diagonal, do ombro direito para baixo à esquerda, com um passo à frente.
+- **Florete:** usava o soco da adaga e a lâmina ficava apontando para cima. Agora tem estocada própria: recua o braço e avança com a perna direita, com a ponta reta para a frente.
+- **Funda:** o arremesso era feito com a mão esquerda, e a funda fica na direita. Agora o braço direito vai para trás e lança por cima do ombro.
+- **Monstros:** na garra, o braço subia reto para o alto. Agora o monstro arma o braço atrás do ombro e golpeia na diagonal, inclinando o corpo.
+- Alcance e bote foram medidos de novo depois disso: espada de soldado 1,5 m, florete 1,6 m, espada larga 1,6 m; o bote dos monstros quase não mudou.
+
 ## Novo: golpes que acertam pela arma, loja, 50 itens e personagens novos (16/10/2026)
 
 **O golpe acerta quem a arma encosta**
 - Antes, o golpe acertava uma área na frente do personagem. Agora a arma tem uma hitbox do tamanho do modelo e segue a animação: o golpe acerta o que a lâmina cruza, o que a ponta e a haste da lança alcançam, quem estiver onde a cabeça da marreta desce. O soco acerta só até onde o braço chega.
 - O preparo atrás das costas não acerta ninguém. Um rastro claro mostra por onde a lâmina passou.
-- O **alcance** na dica de cada arma agora é o alcance de verdade da lâmina, medido do modelo. Ficou menor que os números antigos, que eram de uma área: espada de soldado 1,6 m, lança de guarda 2,4 m, pique 2,7 m, adaga 0,9 m, soco 0,8 m. Some uns 0,4 m do corpo do monstro.
+- O **alcance** na dica de cada arma agora é o alcance de verdade da lâmina, medido do modelo. Ficou menor que os números antigos, que eram de uma área: espada de soldado 1,5 m, lança de guarda 2,4 m, pique 2,7 m, adaga 0,9 m, soco 0,8 m. Some uns 0,4 m do corpo do monstro.
 - A marreta não acerta mais um círculo em volta: acerta todos onde a cabeça bate.
 - Habilidades: **Braço longo** estica a lâmina, **Meia-lua** e **Varredura** fazem o golpe contar por um trecho maior do movimento, **Estrondo** e **Tremor** aumentam a cabeça da marreta e o **Corte giratório** leva a lâmina à volta inteira.
 - **Monstros** acertam com a garra: eles se jogam para a frente no golpe. Recuar enquanto o arco vermelho pisca escapa. A pancada do capataz continua em área, avisada pelo anel vermelho no chão.
