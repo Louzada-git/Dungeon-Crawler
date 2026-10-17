@@ -218,3 +218,10 @@ Caminhos de um, dois ou três ramos andam no mesmo ritmo. Trocar de espada no 3�
 - Alcance medido de novo (`tools/medir_alcance.gd`) e bote dos monstros recalibrado (`tools/calibrar_bote.gd`).
 - Suíte do mundo fixo: **951 verificações, zero falhas**; suíte do labirinto: **53, zero falhas**. Na primeira tentativa, o corte novo da espada alcançava só 1,3 m e nove verificações falharam (monstro a 1,5 m); o corte ganhou um passo à frente e voltou a 1,5 m.
 - Capturas: antes e depois em `revisao/animacoes-correcao/`; `revisao/animacoes/` e `revisao/hitbox/` refeitas com as animações novas.
+
+## Proficiências novas — 17/10/2026
+
+- Pedido: foice treinava Alabarda; armas novas com proficiências próprias. Escolha do dono do projeto: só as que estavam erradas (foice, picareta, florete).
+- Ramos Florete (Espadas), Picareta (Contundentes) e Foice (Hastes), cada um com talento no nível 6 e um objeto (28 ramos, 28 objetos).
+- Suíte do mundo fixo: **956 verificações, zero falhas**; suíte do labirinto: **53, zero falhas**. Novas: cada uma das três armas treina o ramo próprio e ele dá um objeto; os talentos Ceifar, Fura-couraça e Fintar mudam a arma; treinar a foice não dá o talento da alabarda.
+- Captura conferida: janela de proficiências com Florete sob Espadas e Picareta sob Contundentes.
