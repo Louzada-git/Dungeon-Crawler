@@ -163,9 +163,9 @@ As dez armaduras, as gazuas, a funda e as pedras, parte da comida (pão, queijo,
 
 Desde 16/10/2026 todas as animações dos personagens saem de `../arte/fontes/personagem_psx/personagens.gd`, que as transfere para o rig do Mixamo:
 
-- **Universal Animation Library** (Quaternius, CC0; arquivos e lista em `../arte/fontes/ual/`): parado, andar, correr, guarda, agachado, esquiva, dano, morte, soco, golpe de adaga e de espada, arremesso da funda e o mercador falando. Andar e parado dos monstros também.
+- **Universal Animation Library** (Quaternius, CC0; arquivos e lista em `../arte/fontes/ual/`): parado, andar, correr, guarda, agachado, esquiva, dano, morte, soco, golpe de adaga e o mercador falando. Andar e parado dos monstros também.
 - **Mixamo** (Adobe): o corte do sabre, `sword and shield slash (3)` do pacote Sword And Shield, baixado em 13/10/2026 pela conta Adobe do projeto. A [FAQ oficial da Adobe](https://helpx.adobe.com/creative-cloud/faq/mixamo-faq.html) permite usar personagens e animações do Mixamo em jogos pessoais e comerciais. Os FBX estão em `../arte/fontes/mixamo/`.
-- **Poses escritas no projeto:** golpes de machado, maça, montante, marreta, lança e alabarda, arco, besta, bloqueio, a garra dos monstros e a pancada do capataz.
+- **Poses escritas no projeto:** golpes de espada, florete, machado, maça, montante, marreta, lança e alabarda, arco, besta, funda, bloqueio, a garra dos monstros e a pancada do capataz.
 
 O acerto dos golpes segue essas animações (`scripts/systems/hitbox.gd`): a arma acerta o que toca no movimento.
 
