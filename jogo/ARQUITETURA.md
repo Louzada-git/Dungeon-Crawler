@@ -97,7 +97,7 @@ Desde 16/10/2026 (`systems/hitbox.gd`):
 ## Personagens e animações
 
 - **Modelos:** aventureiro, mercador e os cinco monstros saem do pacote Characters PSX (rig do Mixamo) por `../arte/fontes/personagem_psx/personagens.gd`, que também grava `data/animacoes.json`.
-- **Animações:** Universal Animation Library (Quaternius) e um golpe do Mixamo, transferidos para o rig; os outros golpes, a garra e a pancada do capataz são poses escritas no script (direção dos membros e da arma, giro, inclinação, mão esquerda no cabo por IK).
+- **Animações:** Universal Animation Library (Quaternius) e um golpe do Mixamo, transferidos para o rig; os outros golpes, a garra e a pancada do capataz são poses escritas no script (direção dos membros e da arma, giro, inclinação, pernas, mão esquerda no cabo por IK). No parado, no andar, na corrida e na guarda, `segura` prende o braço da arma numa pose por cima do movimento da biblioteca. Os golpes começam e terminam na pose da guarda.
 - **Tempo:** o golpe do aventureiro dura `windup` / `Animacoes.impact`, e o do monstro toca na velocidade em que o impacto cai no fim do preparo.
 
 ## Atributos e proficiências
@@ -208,6 +208,8 @@ O jogo exportado não leva `tests/`, `tools/` nem documentos (`export_presets.cf
 - `tests/hitbox_capture.gd`: cápsulas da hitbox, rastro da lâmina e bote do monstro (precisa de tela).
 - `tools/render_icons.gd`: gera os ícones dos itens a partir dos modelos (`-- ids` para só alguns).
 - `tools/medir_alcance.gd`: mede o alcance da hitbox de cada arma e grava em `range`.
+- `tools/calibrar_bote.gd`: mede até onde a garra de cada monstro alcança e o `lunge` que leva o toque até a distância de ataque.
+- `tests/auditoria_capture.gd` + `tools/auditoria_folhas.py`: todas as animações quadro a quadro, de lado e de frente, em folhas de revisão (precisa de tela).
 - `tools/tabela_balanco.py`: tabela de `BALANCO.md`.
 
 ## Ainda por fazer na etapa 8
