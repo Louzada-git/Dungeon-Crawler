@@ -38,7 +38,7 @@
    "radius": 0.45,
    "armored": true,
    "xp": 60,
-   "lunge": 0.45
+   "lunge": 0.4
   },
   "espreitador": {
    "name": "INIMIGO_ESPREITADOR_NOME",
@@ -57,7 +57,7 @@
     "coin": 1
    },
    "xp": 22,
-   "lunge": 0.65
+   "lunge": 0.7
   },
   "brutamontes": {
    "name": "INIMIGO_BRUTAMONTES_NOME",
