@@ -12,8 +12,8 @@ Não precisa instalar nada: o jogo inteiro vai dentro do executável.
 
 | Sistema | Download | Como abrir |
 |---|---|---|
-| Windows (64 bits) | [Dungepm-windows.zip](https://github.com/Louzada-git/Dungeon-Crawler/raw/main/downloads/Dungepm-windows.zip) (42 MB) | Extraia (botão direito → **Extrair tudo**) e abra `Dungepm.exe`. Se o Windows avisar que o programa não é conhecido, clique em **Mais informações → Executar assim mesmo**. |
-| Linux (64 bits) | [Dungepm-linux.tar.xz](https://github.com/Louzada-git/Dungeon-Crawler/raw/main/downloads/Dungepm-linux.tar.xz) (23 MB) | Extraia e abra `linux/Dungepm.x86_64`. Se não abrir com dois cliques: `chmod +x Dungepm.x86_64` e `./Dungepm.x86_64`. |
+| Windows (64 bits) | [Dungepm-windows.zip](https://github.com/Louzada-git/Dungeon-Crawler/raw/main/downloads/Dungepm-windows.zip) (47 MB) | Extraia (botão direito → **Extrair tudo**) e abra `Dungepm.exe`. Se o Windows avisar que o programa não é conhecido, clique em **Mais informações → Executar assim mesmo**. |
+| Linux (64 bits) | [Dungepm-linux.tar.xz](https://github.com/Louzada-git/Dungeon-Crawler/raw/main/downloads/Dungepm-linux.tar.xz) (29 MB) | Extraia e abra `linux/Dungepm.x86_64`. Se não abrir com dois cliques: `chmod +x Dungepm.x86_64` e `./Dungepm.x86_64`. |
 
 Precisa de placa de vídeo com OpenGL 3.3. O jogo é em português. Os créditos e as licenças vão junto nos dois pacotes.
 
