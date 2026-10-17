@@ -4,9 +4,9 @@
 
 Todos os personagens do jogo saem de `personagens.gd`: o aventureiro, o mercador e os cinco monstros. Eles usam modelos do pacote [Characters PSX](https://elbolilloduro.itch.io/characters-psx), de Elbolilloduro (CC0), todos no rig do Mixamo, e as mesmas animações:
 
-- **Universal Animation Library** (Quaternius, CC0; ver `../ual/`): parado, andar, correr, guarda, agachar, esquiva, dano, morte, soco e golpe de adaga. No parado, no andar, na corrida e na guarda, o braço da arma fica numa pose fixa por cima do movimento (`segura`: relaxado, carregando ou pronto na frente), para a arma não balançar solta.
+- **Universal Animation Library** (Quaternius, CC0; ver `../ual/`): parado, andar, correr, guarda, agachar, esquiva, dano, morte e soco. No parado, no andar, na corrida e na guarda, o braço da arma fica numa pose fixa por cima do movimento (`segura`: relaxado, carregando ou pronto na frente), para a arma não balançar solta.
 - **`../mixamo/`**: o corte do sabre (`sword and shield slash (3)`).
-- **Poses escritas no próprio script**: espada (com um passo à frente), estocada do florete, arremesso da funda, machado, maça, montante, marreta, lança, alabarda, arco, besta, bloqueio, a garra dos monstros e a pancada do capataz. Os golpes começam e terminam com a arma pronta na frente (`READY`), a mesma pose da guarda. Cada pose diz para onde apontam os braços, as pernas e a arma, quanto o tronco gira e inclina, e onde a mão esquerda segura armas de duas mãos (por IK). O script faz a transição entre as poses.
+- **Poses escritas no próprio script**: espada (com um passo à frente), estocada da adaga, estocada do florete, arremesso da funda, machado, maça, montante, ceifada da foice, marreta, lança, alabarda, arco, besta, bloqueio, a garra dos monstros e a pancada do capataz. Os golpes começam e terminam com a arma pronta na frente (`READY`), a mesma pose da guarda. Cada pose diz para onde apontam os braços, as pernas e a arma, quanto o tronco gira e inclina, e onde a mão esquerda segura armas de duas mãos (por IK). O script faz a transição entre as poses.
 
 A transferência entre esqueletos funciona em dois passos. Primeiro o alvo é posto na mesma pose de referência da origem: os ossos dos membros giram até apontar como no T-pose da origem, porque os personagens do pacote vêm de braços para baixo. Depois cada osso recebe a rotação que o osso de origem faz a partir dessa referência.
 
@@ -19,6 +19,8 @@ A transferência entre esqueletos funciona em dois passos. Primeiro o alvo é po
 | inchado | `monstros/Character_Monster_08.fbx` | `monstros/Character_Monster_08.png` |
 | carcereiro | `monstros/Character_Killer_08.fbx` | `monstros/Character_Killer_08.png` |
 | capataz | `monstros/Character_Killer_05.fbx` | `monstros/Character_Killer_05.png` |
+
+**Pegada e jeito de carregar (17/10/2026).** A arma fica dentro da mão fechada: `GRIP` (o mesmo que `DungeonPlayer.MOUNTS` no jogo) põe o cabo no eixo em que os dedos se fecham, a lâmina saindo do lado do polegar, a cabeça ou o gume para o lado dos nós dos dedos. Os três ossos do indicador da mão-luva ganham trilhas de punho fechado (`FIST`) em todas as animações do aventureiro; a mão esquerda fecha só onde segura o cabo ou o arco e fica meio aberta no resto (`RELAXED_HAND`). `carry_variants()` acrescenta o parado, andar, correr, guarda, agachado e bloqueio para cada jeito de carregar (`porte` no item): `_duas` (as duas mãos no cabo, baixa parado e inclinada para cima andando e agachado), `_haste` (de pé na mão direita parado, inclinada andando, com a esquerda à frente na guarda e agachado), `_besta` (na cintura com as duas mãos), `_arco` (na mão esquerda) e `_livre` (mãos vazias: braços soltos da biblioteca, guarda de punhos e antebraços erguidos no bloqueio).
 
 O script também grava `animacoes.json`, com o momento do impacto de cada golpe, que vai para `jogo/data/animacoes.json`. O jogo usa esse valor para o golpe acertar no fim do preparo.
 
