@@ -1,5 +1,16 @@
 # Dungepm — As Cisternas
 
+## Pegada das armas e jeito de carregar (17/10/2026)
+
+- **A arma fica na mão fechada.** Antes a mão ficava aberta e a arma flutuava do lado (dava para ver na marreta e no machado). Agora o cabo atravessa o punho fechado, com os dedos em volta, e a lâmina ou a cabeça sai do lado do polegar.
+- **Duas mãos de verdade:** montante, espadão, marreta, malho, martelo de guerra e machado de duas lâminas ficam com as duas mãos no cabo parado, andando, correndo, em guarda e agachado. Parado, a arma fica baixa; andando e agachado, inclinada para cima na frente (não entra mais no chão).
+- **Hastes:** lança, pique, alabarda, tridente e foice ficam de pé na mão direita quando você está parado e inclinadas para a frente andando; na guarda e agachado, as duas mãos seguram a haste, a esquerda mais à frente.
+- **Arco** na mão esquerda, com o braço direito livre. **Besta** na cintura, com as duas mãos.
+- **Mãos vazias:** o braço direito não fica mais esticado na frente como se segurasse uma arma. Parado, andando e correndo, os braços balançam soltos; a guarda é de punhos erguidos, e o bloqueio é com os antebraços.
+- **Golpes revistos com a pegada nova:** a foice ganhou uma ceifada própria (antes usava o golpe do montante); a adaga, a faca e o punhal dão uma estocada curta com a ponta para a frente (o soco deixava a lâmina virada para cima); a maça passa na frente com o braço esticado e acerta o monstro logo à frente.
+- **Todas as animações quadro a quadro:** cada quadro de cada animação com cada arma (e de punhos), de lado e de frente, foi capturado para revisão. As folhas vão à parte, num zip; um resumo está em `revisao/pegada/`.
+- Alcances medidos de novo (mudaram no máximo 0,1 m): adaga, faca e punhal 0,8 m; pique 2,8 m; sabre 2,0 m; montante 2,0 m; foice 1,8 m.
+
 ## Proficiências novas: Florete, Picareta e Foice (17/10/2026)
 
 - A foice treinava Alabarda, a picareta de guerra treinava Marreta e o florete treinava Espada reta. Agora cada uma tem o seu ramo: **Florete** (dentro de Espadas), **Picareta** (dentro de Contundentes) e **Foice** (dentro de Hastes). A raiz continua contando: o florete ainda treina Lâminas e Espadas.
