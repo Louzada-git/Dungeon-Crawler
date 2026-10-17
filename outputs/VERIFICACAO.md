@@ -208,3 +208,13 @@ Caminhos de um, dois ou três ramos andam no mesmo ritmo. Trocar de espada no 3�
 - Capturas conferidas (`revisao/hitbox/`): cápsulas de cada arma ao longo do golpe, coincidindo com o modelo na mão no momento do impacto (verde); garra dos monstros com o bote; rastro da lâmina; monstro se jogando no golpe. Ajustes depois de olhar: o sabre tinha o impacto cedo demais (lâmina atrás do ombro), passou para 0,79 da animação; a cápsula da haste começa na mão (a ponta de trás da lança acertava quem estava atrás); o preparo atrás das costas deixou de contar.
 - Capturas da loja (`revisao/loja/`) e das animações novas (`revisao/animacoes/`).
 - Falta: jogar para sentir as armas curtas (adaga, faca, maça, machado), que agora precisam chegar a menos de 1,5 m do monstro.
+
+## Revisão das animações — 16/10/2026, à noite
+
+- Pedido: conferir se as animações estavam certas e corrigir o que não estivesse.
+- Revisão quadro a quadro (`jogo/tests/auditoria_capture.gd` e `jogo/tools/auditoria_folhas.py`): 31 animações do aventureiro com a arma de cada golpe, 8 de cada monstro e 2 do mercador, de lado e de frente, 8 quadros cada.
+- Problemas achados e corrigidos: arma balançando solta ao andar e correr; guarda com a arma pendurada para trás; armas longas entrando no chão parado; golpe de espada enterrando a lâmina no chão; florete sem estocada (usava o soco); funda lançada com a mão esquerda; garra dos monstros com o braço subindo reto.
+- Sem mudança (conferidos): soco, adaga, sabre, machado, maça, montante, marreta, lança, alabarda, arco, besta, bloqueio, agachado, esquiva, dano, morte, monstros parados, andando, correndo, dano, morte e a pancada do capataz.
+- Alcance medido de novo (`tools/medir_alcance.gd`) e bote dos monstros recalibrado (`tools/calibrar_bote.gd`).
+- Suíte do mundo fixo: **951 verificações, zero falhas**; suíte do labirinto: **53, zero falhas**. Na primeira tentativa, o corte novo da espada alcançava só 1,3 m e nove verificações falharam (monstro a 1,5 m); o corte ganhou um passo à frente e voltou a 1,5 m.
+- Capturas: antes e depois em `revisao/animacoes-correcao/`; `revisao/animacoes/` e `revisao/hitbox/` refeitas com as animações novas.
