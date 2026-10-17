@@ -93,7 +93,7 @@
    "name": "Lâminas",
    "grupo": "combate",
    "atributo": "destreza",
-   "text": "Espadas e adagas.",
+   "text": "Espadas, florete e adagas.",
    "perks": [
     {
      "nivel": 5,
@@ -165,6 +165,22 @@
     }
    ]
   },
+  "florete": {
+   "name": "Florete",
+   "parent": "espadas",
+   "atributo": "agilidade",
+   "perks": [
+    {
+     "nivel": 6,
+     "name": "Fintar",
+     "text": "preparação 0,03 s mais curta e −1 de fôlego por golpe",
+     "mods": {
+      "windup": -0.03,
+      "cost": -1.0
+     }
+    }
+   ]
+  },
   "adagas": {
    "name": "Adagas",
    "parent": "laminas",
@@ -184,7 +200,7 @@
    "name": "Contundentes",
    "grupo": "combate",
    "atributo": "forca",
-   "text": "Maças, marretas, machados e socos.",
+   "text": "Maças, marretas, machados, picaretas e socos.",
    "perks": [
     {
      "nivel": 5,
@@ -241,11 +257,26 @@
     }
    ]
   },
+  "picareta": {
+   "name": "Picareta",
+   "parent": "contundentes",
+   "atributo": "forca",
+   "perks": [
+    {
+     "nivel": 6,
+     "name": "Fura-couraça",
+     "text": "esmagar ×2,1 em vez de ×1,8",
+     "mods": {
+      "crush": 0.3
+     }
+    }
+   ]
+  },
   "hastes": {
    "name": "Hastes",
    "grupo": "combate",
    "atributo": "forca",
-   "text": "Lanças e alabardas.",
+   "text": "Lanças, alabardas e foices.",
    "perks": [
     {
      "nivel": 5,
@@ -281,6 +312,21 @@
      "nivel": 6,
      "name": "Atravessar",
      "text": "+1 alvo na estocada",
+     "mods": {
+      "targets": 1
+     }
+    }
+   ]
+  },
+  "foice": {
+   "name": "Foice",
+   "parent": "hastes",
+   "atributo": "forca",
+   "perks": [
+    {
+     "nivel": 6,
+     "name": "Ceifar",
+     "text": "+1 alvo no golpe",
      "mods": {
       "targets": 1
      }
