@@ -14,7 +14,7 @@
    "estocada_alabarda": 0.47,
    "estocada_florete": 0.37,
    "estocada_lanca": 0.47,
-   "golpe_adaga": 0.37,
+   "golpe_adaga": 0.35,
    "golpe_espada": 0.42,
    "golpe_katana": 0.79,
    "golpe_maca": 0.47,
@@ -22,7 +22,8 @@
    "golpe_montante": 0.49,
    "pancada_martelo": 0.5,
    "soco": 0.37,
-   "stab": 0.47
+   "stab": 0.47,
+   "golpe_foice": 0.48
   },
   "capataz": {
    "attack": 0.5,
