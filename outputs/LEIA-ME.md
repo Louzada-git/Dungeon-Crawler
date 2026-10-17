@@ -1,5 +1,13 @@
 # Dungepm — As Cisternas
 
+## Proficiências novas: Florete, Picareta e Foice (17/10/2026)
+
+- A foice treinava Alabarda, a picareta de guerra treinava Marreta e o florete treinava Espada reta. Agora cada uma tem o seu ramo: **Florete** (dentro de Espadas), **Picareta** (dentro de Contundentes) e **Foice** (dentro de Hastes). A raiz continua contando: o florete ainda treina Lâminas e Espadas.
+- Talentos no nível 6: **Fintar** (florete: preparação 0,03 s mais curta e −1 de fôlego), **Fura-couraça** (picareta: esmagar ×2,1 em vez de ×1,8) e **Ceifar** (foice: +1 alvo).
+- Objetos nos níveis 4 e 12: **Passo à frente** (avança 0,8 m no preparo e bate 15% mais), **Bico de corvo** (deixa tonto 0,4 s a mais e sangra) e **Gume curvo** (o corte varre um trecho maior e sangra 2 por segundo a mais).
+- As outras armas novas seguem no ramo do tipo delas: espada curta e espada larga em Espada reta, alfanje em Sabre, espadão em Montante, faca e punhal em Adagas, maça de cravos e estrela-da-manhã em Maça, malho e martelo de guerra em Marreta, machado de duas lâminas em Machados, tridente em Lança, arco longo em Arcos, besta pesada em Bestas e a funda em Pontaria.
+- Num save antigo, quem treinou a foice, a picareta ou o florete pelo ramo antigo mantém essa experiência lá; o ramo novo começa do zero.
+
 ## Correção das animações (16/10/2026, à noite)
 
 Revisei todas as animações quadro a quadro (aventureiro com cada arma, os cinco monstros e o mercador) e refiz as que estavam erradas. As folhas de antes e depois estão em `revisao/animacoes-correcao/`.
