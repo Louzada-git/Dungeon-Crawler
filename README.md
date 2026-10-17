@@ -40,7 +40,7 @@ Precisa de placa de vídeo com OpenGL 3.3. O jogo é em português. Os créditos
 **Personagem**
 - No começo você distribui 25 pontos entre Força, Vigor, Agilidade e Destreza e escolhe a arma inicial (ou começa de punhos).
 - Proficiências que sobem com o uso, no estilo de Oblivion, em três grupos: Combate, Furtividade e Sobrevivência. Os ramos dão talentos a partir do nível 5.
-- Habilidades com objetos encaixados: cada objeto muda a habilidade (Lâmina afiada faz sangrar, Alcance aumenta o golpe, Golpe duplo acerta duas vezes…), e a ordem dos objetos importa. As teclas das habilidades são você quem escolhe.
+- Habilidades com objetos encaixados: cada objeto muda a habilidade (Lâmina afiada faz sangrar, Braço longo estica a lâmina, Golpe duplo acerta duas vezes…), e a ordem dos objetos importa. As teclas das habilidades são você quem escolhe.
 - Barra rápida de 1 a 9 com qualquer item.
 
 **Visual**
