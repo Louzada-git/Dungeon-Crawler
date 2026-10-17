@@ -99,6 +99,8 @@ Desde 16/10/2026 (`systems/hitbox.gd`):
 - **Modelos:** aventureiro, mercador e os cinco monstros saem do pacote Characters PSX (rig do Mixamo) por `../arte/fontes/personagem_psx/personagens.gd`, que também grava `data/animacoes.json`.
 - **Animações:** Universal Animation Library (Quaternius) e um golpe do Mixamo, transferidos para o rig; os outros golpes, a garra e a pancada do capataz são poses escritas no script (direção dos membros e da arma, giro, inclinação, pernas, mão esquerda no cabo por IK). No parado, no andar, na corrida e na guarda, `segura` prende o braço da arma numa pose por cima do movimento da biblioteca. Os golpes começam e terminam na pose da guarda.
 - **Tempo:** o golpe do aventureiro dura `windup` / `Animacoes.impact`, e o do monstro toca na velocidade em que o impacto cai no fim do preparo.
+- **Pegada (17/10/2026):** a arma fica dentro da mão fechada. `MOUNTS` (e `GRIP` no script dos personagens) põe o cabo no eixo em que os dedos se fecham, com a cabeça ou o gume (+X da arma) para o lado dos nós dos dedos e a origem no meio do punho; `rest_rotation` é zero, a não ser que o item tenha `rotacao_mao`. Os dedos se fecham por trilhas próprias em todas as animações do aventureiro (`FIST`), e a mão esquerda só fecha quando segura algo. As hastes com `alinhar_ao_golpe` apontam na linha do golpe por `DungeonPlayer.aim_held`, que calcula a partir da pose do osso no mesmo quadro.
+- **Jeito de carregar:** `porte` no item (`duas`, `haste`, `besta`, `arco`) escolhe as variantes `_duas`, `_haste`, `_besta` e `_arco` do parado, andar, correr, guarda, agachado e bloqueio; sem arma, `_livre` (braços soltos, guarda de punhos). `DungeonPlayer.locomotion` troca pela variante quando o rig a tem (`carry_suffix`).
 
 ## Atributos e proficiências
 
@@ -210,6 +212,7 @@ O jogo exportado não leva `tests/`, `tools/` nem documentos (`export_presets.cf
 - `tools/medir_alcance.gd`: mede o alcance da hitbox de cada arma e grava em `range`.
 - `tools/calibrar_bote.gd`: mede até onde a garra de cada monstro alcança e o `lunge` que leva o toque até a distância de ataque.
 - `tests/auditoria_capture.gd` + `tools/auditoria_folhas.py`: todas as animações quadro a quadro, de lado e de frente, em folhas de revisão (precisa de tela).
+- `tests/estudio_capture.gd` + `tools/estudio_folhas.py`: num estúdio vazio, cada quadro de cada animação com cada arma (e de punhos), de lado e de frente, uma folha por arma e animação, com índice em HTML (precisa de tela; `-- ids` ou `--anims=` para só algumas).
 - `tools/tabela_balanco.py`: tabela de `BALANCO.md`.
 
 ## Ainda por fazer na etapa 8
