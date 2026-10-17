@@ -46,6 +46,7 @@ Precisa de placa de vídeo com OpenGL 3.3. O jogo é em português. Os créditos
 **Visual**
 - Filtro PSX: imagem em pixels grandes, cores reduzidas, texturas sem suavizar e vértices que tremem, como no PS1. Pode desligar.
 - Câmera isométrica ou em terceira pessoa, à sua escolha.
+- A arma fica na mão fechada, e cada tipo é carregado do seu jeito: duas mãos no cabo, haste de pé, arco na mão esquerda, besta na cintura, braços soltos de mãos vazias.
 - Sangue, faíscas, poeira, fumaça e tochas com chama animada.
 
 | | |
