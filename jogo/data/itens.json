@@ -1135,7 +1135,7 @@
    "proficiencias": [
     "laminas",
     "espadas",
-    "espada_reta"
+    "florete"
    ],
    "maos": 1,
    "animacao": "estocada_florete",
@@ -1413,7 +1413,7 @@
    "classe": "media",
    "proficiencias": [
     "contundentes",
-    "martelo"
+    "picareta"
    ],
    "maos": 1,
    "animacao": "golpe_machado",
@@ -1467,7 +1467,7 @@
    "classe": "pesada",
    "proficiencias": [
     "hastes",
-    "alabarda"
+    "foice"
    ],
    "maos": 2,
    "animacao": "golpe_montante",
