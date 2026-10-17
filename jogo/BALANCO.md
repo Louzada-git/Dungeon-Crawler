@@ -21,7 +21,7 @@ Revisão de 15/10/2026, depois do teste do dono do projeto com amigos:
 
 O golpe corpo a corpo deixou de ser uma área. Agora ele acerta quem a arma toca: a arma (ou o punho) é uma cápsula da empunhadura até a ponta do modelo, que segue a animação do golpe, e cada corpo é uma cápsula em pé. No momento do impacto o jogo repassa o movimento um pouco antes e um pouco depois e acerta quem a cápsula atravessou, na ordem em que tocou. O preparo atrás das costas não conta. Código em `scripts/systems/hitbox.gd`.
 
-- **Alcance** de cada arma corpo a corpo é o que a ponta alcança no movimento, medido por `tools/medir_alcance.gd` e gravado em `range`. Ficou menor que os números antigos, que eram de uma área: a espada foi de 2,1 para 1,6 m, a lança de 3,2 para 2,4 m, o machado de 1,9 para 1,1 m. Contra um monstro, some o raio do corpo dele (0,4 m nos comuns).
+- **Alcance** de cada arma corpo a corpo é o que a ponta alcança no movimento, medido por `tools/medir_alcance.gd` e gravado em `range`. Ficou menor que os números antigos, que eram de uma área: a espada foi de 2,1 para 1,5 m, a lança de 3,2 para 2,4 m, o machado de 1,9 para 1,1 m. Contra um monstro, some o raio do corpo dele (0,4 m nos comuns).
 - **Alvos** continua sendo o máximo por golpe, mas só conta quem a arma toca. A marreta acerta quem estiver onde a cabeça desce, não um círculo de 1,6 m.
 - **Habilidades e talentos:** Braço longo e o talento Alcance esticam a ponta; Meia-lua e Varredura fazem o golpe contar por um trecho maior do movimento; Estrondo e Tremor engrossam a cabeça da marreta; o Corte giratório leva a lâmina à volta inteira.
 - **Monstros** acertam com a garra (antebraço até além da mão) na animação de ataque, e se jogam para a frente no golpe (`lunge`, coluna "Bote"). Isso leva o toque até perto da distância em que decidem atacar (`reach`, coluna "Ataca a"). Recuar durante o preparo escapa. O capataz atacava a 2,4 m e passou para 2,2 m, com bote de 0,75 m. A pancada dele continua em área, avisada pelo anel vermelho.
@@ -33,9 +33,9 @@ Gerada por `tools/tabela_balanco.py` a partir dos dados (rodar da pasta `jogo/`)
 
 | Arma | Dano | Alcance | Preparo | Ciclo | Esquiva | DPS | DPS blind. | Fôlego | Seguidos | Alvos | Corr. | Espr. | Guard. | Brut. | Chefe |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| sword | 24 | 1.6 | 0.22 | 0.74 | 0.36 | 32 | 32 | 8.5 | 41 | 3 | 4 (2.4 s) | 3 (1.7 s) | 5 (3.2 s) | 8 (5.4 s) | 21 (15.0 s) |
+| sword | 24 | 1.5 | 0.22 | 0.74 | 0.36 | 32 | 32 | 8.5 | 41 | 3 | 4 (2.4 s) | 3 (1.7 s) | 5 (3.2 s) | 8 (5.4 s) | 21 (15.0 s) |
 | spear | 29 | 2.4 | 0.30 | 1.04 | 0.49 | 28 | 28 | 11.5 | 38 | 1 | 3 (2.4 s) | 2 (1.3 s) | 5 (4.5 s) | 7 (6.5 s) | 18 (18.0 s) |
-| espada_guarda | 27 | 1.6 | 0.23 | 0.83 | 0.38 | 33 | 33 | 9.5 | 46 | 3 | 3 (1.9 s) | 2 (1.1 s) | 5 (3.6 s) | 7 (5.2 s) | 19 (15.2 s) |
+| espada_guarda | 27 | 1.5 | 0.23 | 0.83 | 0.38 | 33 | 33 | 9.5 | 46 | 3 | 3 (1.9 s) | 2 (1.1 s) | 5 (3.6 s) | 7 (5.2 s) | 19 (15.2 s) |
 | lanca_longa | 34 | 2.7 | 0.33 | 1.26 | 0.58 | 27 | 27 | 13.0 | 40 | 1 | 3 (2.9 s) | 2 (1.6 s) | 4 (4.1 s) | 6 (6.6 s) | 15 (18.0 s) |
 | adaga | 10 | 0.9 | 0.12 | 0.38 | 0.21 | 26 | 26 | 4.5 | 45 | 1 | 8 (2.8 s) | 5 (1.6 s) | 12 (4.3 s) | 18 (6.6 s) | 50 (18.7 s) |
 | katana | 17 | 2.1 | 0.16 | 0.52 | 0.27 | 33 | 33 | 8.5 | 21 | 2 | 5 (2.2 s) | 3 (1.2 s) | 8 (3.8 s) | 11 (5.4 s) | 30 (15.2 s) |
@@ -46,10 +46,10 @@ Gerada por `tools/tabela_balanco.py` a partir dos dados (rodar da pasta `jogo/`)
 | alabarda | 36 | 2.5 | 0.34 | 1.38 | 0.61 | 26 | 26 | 12.5 | 371 | 2 | 3 (3.1 s) | 2 (1.7 s) | 4 (4.5 s) | 5 (5.9 s) | 14 (18.3 s) |
 | arco | 18 | 14.0 | 0.35 | 0.75 | 0.49 | 24 | 24 | 5.0 | 84 | 1 | 5 (3.4 s) | 3 (1.9 s) | 7 (4.8 s) | 10 (7.1 s) | 28 (20.6 s) |
 | besta | 43 | 16.0 | 0.25 | 1.80 | 0.82 | 24 | 24 | 4.0 | sem fim | 1 | 2 (2.0 s) | 2 (2.0 s) | 3 (3.8 s) | 5 (7.4 s) | 12 (20.0 s) |
-| espada_curta | 20 | 1.4 | 0.19 | 0.62 | 0.32 | 32 | 32 | 7.0 | 43 | 2 | 4 (2.0 s) | 3 (1.4 s) | 6 (3.3 s) | 9 (5.2 s) | 25 (15.1 s) |
-| espada_larga | 30 | 1.7 | 0.25 | 0.92 | 0.41 | 33 | 33 | 10.5 | 45 | 3 | 3 (2.1 s) | 2 (1.2 s) | 4 (3.0 s) | 6 (4.8 s) | 17 (15.0 s) |
-| florete | 18 | 1.3 | 0.17 | 0.51 | 0.29 | 35 | 35 | 7.0 | 26 | 1 | 5 (2.2 s) | 3 (1.2 s) | 7 (3.2 s) | 10 (4.8 s) | 28 (13.9 s) |
-| alfanje | 18 | 1.5 | 0.17 | 0.56 | 0.29 | 34 | 32 | 8.0 | 26 | 2 | 5 (2.4 s) | 3 (1.3 s) | 7 (3.5 s) | 10 (5.2 s) | 28 (15.3 s) |
+| espada_curta | 20 | 1.3 | 0.19 | 0.62 | 0.32 | 32 | 32 | 7.0 | 43 | 2 | 4 (2.0 s) | 3 (1.4 s) | 6 (3.3 s) | 9 (5.2 s) | 25 (15.1 s) |
+| espada_larga | 30 | 1.6 | 0.25 | 0.92 | 0.41 | 33 | 33 | 10.5 | 45 | 3 | 3 (2.1 s) | 2 (1.2 s) | 4 (3.0 s) | 6 (4.8 s) | 17 (15.0 s) |
+| florete | 18 | 1.6 | 0.17 | 0.51 | 0.29 | 35 | 35 | 7.0 | 26 | 1 | 5 (2.2 s) | 3 (1.2 s) | 7 (3.2 s) | 10 (4.8 s) | 28 (13.9 s) |
+| alfanje | 18 | 1.4 | 0.17 | 0.56 | 0.29 | 34 | 32 | 8.0 | 26 | 2 | 5 (2.4 s) | 3 (1.3 s) | 7 (3.5 s) | 10 (5.2 s) | 28 (15.3 s) |
 | espadao | 52 | 1.9 | 0.48 | 1.72 | 0.79 | 30 | 30 | 16.0 | 123 | 4 | 2 (2.2 s) | 1 (0.5 s) | 3 (3.9 s) | 4 (5.6 s) | 10 (16.0 s) |
 | faca | 8 | 0.9 | 0.10 | 0.30 | 0.18 | 27 | 27 | 3.5 | 47 | 1 | 10 (2.8 s) | 7 (1.9 s) | 15 (4.3 s) | 22 (6.4 s) | 63 (18.7 s) |
 | punhal | 12 | 0.9 | 0.13 | 0.39 | 0.23 | 33 | 31 | 5.0 | 35 | 1 | 7 (2.5 s) | 5 (1.7 s) | 10 (3.6 s) | 15 (5.6 s) | 42 (16.1 s) |
@@ -69,8 +69,8 @@ Gerada por `tools/tabela_balanco.py` a partir dos dados (rodar da pasta `jogo/`)
 | Monstro | Vida | Dano | Preparo | Firmeza | Ataca a | Bote |
 | --- | --- | --- | --- | --- | --- | --- |
 | corrompido | 80 | 18 | 0.65 | 1.2 | 1.8 m | 0.50 m |
-| guardiao | 120 | 26 | 0.85 | 1.6 | 1.8 m | 0.45 m |
-| espreitador | 50 | 12 | 0.45 | 0.9 | 1.8 m | 0.65 m |
+| guardiao | 120 | 26 | 0.85 | 1.6 | 1.8 m | 0.40 m |
+| espreitador | 50 | 12 | 0.45 | 0.9 | 1.8 m | 0.70 m |
 | brutamontes | 175 | 32 | 1.00 | 2.0 | 1.8 m | 0.45 m |
 | chefe | 500 | 30 | 0.90 | — | 2.2 m | 0.75 m |
 
