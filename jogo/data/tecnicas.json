@@ -498,6 +498,37 @@
     12
    ]
   },
+  "passo": {
+   "name": "Passo à frente",
+   "requer": {
+    "florete": 4
+   },
+   "texto": "Avança 0,8 m no preparo e o golpe bate 15% mais. Não serve em disparos.",
+   "efeitos": [
+    {
+     "campo": "dash",
+     "soma": 0.8
+    },
+    {
+     "campo": "damage",
+     "multiplica": 1.15
+    },
+    {
+     "campo": "cost",
+     "soma": 1.0
+    }
+   ],
+   "estilos": [
+    "slash",
+    "thrust",
+    "smash",
+    "punhos"
+   ],
+   "copias": [
+    4,
+    12
+   ]
+  },
   "varredura": {
    "name": "Meia-lua",
    "requer": {
@@ -627,6 +658,41 @@
     12
    ]
   },
+  "bico": {
+   "name": "Bico de corvo",
+   "requer": {
+    "picareta": 4
+   },
+   "texto": "O bico prende na carne: deixa tonto 0,4 s a mais e sangra 2 por segundo durante 3 s. Não serve em disparo.",
+   "efeitos": [
+    {
+     "campo": "stagger",
+     "soma": 0.4
+    },
+    {
+     "campo": "bleed.dps",
+     "soma": 2.0
+    },
+    {
+     "campo": "bleed.time",
+     "minimo": 3.0
+    },
+    {
+     "campo": "cost",
+     "soma": 1.5
+    }
+   ],
+   "estilos": [
+    "slash",
+    "thrust",
+    "smash",
+    "punhos"
+   ],
+   "copias": [
+    4,
+    12
+   ]
+  },
   "ponta_rapida": {
    "name": "Ponta rápida",
    "requer": {
@@ -663,6 +729,38 @@
      "campo": "cost",
      "soma": 1.0
     }
+   ],
+   "copias": [
+    4,
+    12
+   ]
+  },
+  "gume_curvo": {
+   "name": "Gume curvo",
+   "requer": {
+    "foice": 4
+   },
+   "texto": "A lâmina curva varre um trecho maior do golpe e o corte sangra 2 por segundo a mais. Só em cortes.",
+   "efeitos": [
+    {
+     "campo": "angle",
+     "soma": 15.0
+    },
+    {
+     "campo": "bleed.dps",
+     "soma": 2.0
+    },
+    {
+     "campo": "bleed.time",
+     "minimo": 3.0
+    },
+    {
+     "campo": "cost",
+     "soma": 1.5
+    }
+   ],
+   "estilos": [
+    "slash"
    ],
    "copias": [
     4,
