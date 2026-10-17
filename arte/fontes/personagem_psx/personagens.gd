@@ -57,33 +57,72 @@ const ALIGN := {
 
 # Written attacks. Directions in the character's space (+X its left, +Y up, +Z
 # forward); see edit_pose for the keys. "impacto": when the blow lands (seconds).
+
+## Weapon ready in front (guard, and where the attacks start and end): blade
+## forward and up, cutting side down.
+const READY := {"braco_d": Vector3(-0.25, -0.8, 0.5), "antebraco_d": Vector3(-0.05, -0.05, 1.0), "arma_d": [Vector3(0.05, 0.55, 0.83), Vector3(0, -0.83, 0.55)]}
+## Two-handed ready: the right hand in front of the belly, the left on the handle.
+const READY_2H := {"braco_d": Vector3(-0.2, -0.85, 0.5), "antebraco_d": Vector3(0.35, -0.1, 0.93), "arma_d": [Vector3(0.1, 0.5, 0.86), Vector3(0, -0.86, 0.5)]}
+## Carried while walking and running: the arm stops swinging the weapon around.
+const CARRY := {"braco_d": Vector3(-0.2, -0.92, 0.3), "antebraco_d": Vector3(-0.1, -0.4, 0.91), "arma_d": [Vector3(0.05, 0.4, 0.92), Vector3(0, -0.92, 0.4)]}
+## Standing still: arm relaxed, the tip a little down (long weapons stay off the floor).
+const RELAXED := {"braco_d": Vector3(-0.15, -0.97, 0.15), "antebraco_d": Vector3(-0.1, -0.6, 0.8), "arma_d": [Vector3(0.1, -0.22, 0.97), Vector3(0, -0.97, -0.22)]}
+
+## Sword: from over the right shoulder, a step in with the right foot and the
+## blade diagonally down across the front, ending low on the left (above the floor).
+const SLASH := [
+	[0.0, READY],
+	[0.26, {"giro": -30, "inclina": -6, "braco_d": Vector3(-0.55, 0.75, -0.35), "antebraco_d": Vector3(-0.2, 0.95, 0.15), "arma_d": [Vector3(-0.15, 0.55, -0.82), Vector3(0.3, 0.8, 0.5)]}],
+	[0.40, {"giro": 22, "inclina": 18, "quadril": Vector3(0, -0.08, 0.22), "braco_d": Vector3(0.05, -0.12, 0.99), "antebraco_d": Vector3(0.3, -0.22, 0.93), "arma_d": [Vector3(0.42, -0.28, 0.86), Vector3(0.6, -0.75, -0.2)], "coxa_d": Vector3(-0.1, -0.72, 0.68), "canela_d": Vector3(-0.05, -1.0, 0.05), "coxa_e": Vector3(0.15, -0.82, -0.55), "canela_e": Vector3(0.1, -0.95, -0.3)}],
+	[0.52, {"giro": 32, "inclina": 18, "quadril": Vector3(0, -0.08, 0.22), "braco_d": Vector3(0.4, -0.45, 0.8), "antebraco_d": Vector3(0.75, -0.4, 0.52), "arma_d": [Vector3(0.88, -0.38, 0.28), Vector3(0.2, -0.2, -0.95)], "coxa_d": Vector3(-0.1, -0.72, 0.68), "canela_d": Vector3(-0.05, -1.0, 0.05), "coxa_e": Vector3(0.15, -0.82, -0.55), "canela_e": Vector3(0.1, -0.95, -0.3)}],
+	[0.95, READY],
+]
+## Rapier: arm back, then a lunge with the right leg and the point straight ahead.
+const LUNGE_READY := {"braco_d": Vector3(-0.3, -0.7, 0.65), "antebraco_d": Vector3(-0.05, 0.05, 1.0), "arma_d": [Vector3(0, 0.25, 0.97), Vector3(0, -0.97, 0.25)]}
+const LUNGE_OUT := {"giro": 28, "inclina": 12, "quadril": Vector3(0, -0.1, 0.18), "braco_d": Vector3(-0.05, 0.05, 1.0), "antebraco_d": Vector3(0, 0.03, 1.0), "arma_d": [Vector3(0, 0, 1), Vector3(0, -1, 0)], "coxa_d": Vector3(-0.1, -0.7, 0.7), "canela_d": Vector3(-0.05, -1.0, 0.05), "coxa_e": Vector3(0.15, -0.8, -0.58), "canela_e": Vector3(0.1, -0.95, -0.3)}
+const LUNGE := [
+	[0.0, LUNGE_READY],
+	[0.16, {"giro": -20, "braco_d": Vector3(-0.45, -0.8, -0.35), "antebraco_d": Vector3(-0.1, 0.1, 0.99), "arma_d": [Vector3(0, 0.1, 1), Vector3(0, -1, 0.1)]}],
+	[0.30, LUNGE_OUT],
+	[0.42, LUNGE_OUT],
+	[0.8, LUNGE_READY],
+]
+## Sling: right arm back and up, thrown forward over the shoulder.
+const THROW_READY := {"braco_d": Vector3(-0.3, -0.9, 0.2), "antebraco_d": Vector3(-0.2, -0.5, 0.85)}
+const THROW := [
+	[0.0, THROW_READY],
+	[0.22, {"giro": -35, "inclina": -8, "braco_d": Vector3(-0.7, 0.35, -0.6), "antebraco_d": Vector3(-0.3, 0.9, -0.3), "braco_e": Vector3(0.3, 0.1, 0.95), "antebraco_e": Vector3(0.1, 0.2, 0.97)}],
+	[0.32, {"giro": 25, "inclina": 12, "braco_d": Vector3(-0.2, 0.45, 0.87), "antebraco_d": Vector3(0, 0.3, 0.95), "braco_e": Vector3(0.6, -0.6, 0.5), "antebraco_e": Vector3(0.3, -0.7, 0.6)}],
+	[0.42, {"giro": 30, "inclina": 15, "braco_d": Vector3(0.1, -0.3, 0.95), "antebraco_d": Vector3(0.2, -0.5, 0.85), "braco_e": Vector3(0.6, -0.7, 0.3), "antebraco_e": Vector3(0.3, -0.8, 0.5)}],
+	[0.75, THROW_READY],
+]
 const CHOP := [
-	[0.0, {}],
+	[0.0, READY],
 	[0.30, {"giro": -25, "inclina": -8, "braco_d": Vector3(-0.25, 0.85, -0.45), "antebraco_d": Vector3(-0.1, 0.55, -0.85), "arma_d": [Vector3(0, 0.3, -0.95), Vector3(0, 0.95, 0.3)]}],
 	[0.44, {"giro": 15, "inclina": 28, "braco_d": Vector3(-0.1, -0.4, 0.9), "antebraco_d": Vector3(-0.05, -0.65, 0.75), "arma_d": [Vector3(0, -0.55, 0.85), Vector3(0, -0.85, -0.55)]}],
 	[0.56, {"giro": 18, "inclina": 30, "braco_d": Vector3(-0.12, -0.6, 0.78), "antebraco_d": Vector3(-0.05, -0.85, 0.5), "arma_d": [Vector3(0, -0.8, 0.6), Vector3(0, -0.6, -0.8)]}],
-	[0.95, {}],
+	[0.95, READY],
 ]
 const SWING := [
-	[0.0, {}],
+	[0.0, READY],
 	[0.28, {"giro": -35, "inclina": -5, "braco_d": Vector3(-0.75, 0.55, -0.35), "antebraco_d": Vector3(-0.4, 0.8, -0.45), "arma_d": [Vector3(-0.3, 0.6, -0.75), Vector3(0.6, 0.7, 0.2)]}],
 	[0.42, {"giro": 25, "inclina": 15, "braco_d": Vector3(0.2, -0.15, 0.97), "antebraco_d": Vector3(0.5, -0.3, 0.8), "arma_d": [Vector3(0.75, -0.25, 0.6), Vector3(0.2, -0.95, -0.1)]}],
 	[0.54, {"giro": 35, "inclina": 18, "braco_d": Vector3(0.45, -0.35, 0.8), "antebraco_d": Vector3(0.7, -0.45, 0.55), "arma_d": [Vector3(0.8, -0.5, 0.3), Vector3(0, -0.6, -0.8)]}],
-	[0.9, {}],
+	[0.9, READY],
 ]
 const SWEEP := [
-	[0.0, {"duas_maos": -0.14}],
+	[0.0, {"braco_d": READY_2H["braco_d"], "antebraco_d": READY_2H["antebraco_d"], "arma_d": READY_2H["arma_d"], "duas_maos": -0.14}],
 	[0.38, {"giro": -45, "inclina": -5, "braco_d": Vector3(-0.85, 0.35, -0.3), "antebraco_d": Vector3(-0.6, 0.45, -0.6), "arma_d": [Vector3(-0.55, 0.45, -0.7), Vector3(0.1, -0.75, 0.6)], "duas_maos": -0.14}],
 	[0.56, {"giro": 30, "inclina": 10, "braco_d": Vector3(0.25, 0.0, 0.97), "antebraco_d": Vector3(0.55, 0.05, 0.83), "arma_d": [Vector3(0.85, 0.05, 0.5), Vector3(0.5, -0.1, -0.85)], "duas_maos": -0.14}],
 	[0.72, {"giro": 50, "inclina": 10, "braco_d": Vector3(0.55, -0.1, 0.8), "antebraco_d": Vector3(0.85, -0.1, 0.5), "arma_d": [Vector3(0.95, -0.1, -0.25), Vector3(-0.25, 0, -0.95)], "duas_maos": -0.14}],
-	[1.15, {"duas_maos": -0.14}],
+	[1.15, {"braco_d": READY_2H["braco_d"], "antebraco_d": READY_2H["antebraco_d"], "arma_d": READY_2H["arma_d"], "duas_maos": -0.14}],
 ]
 const SLAM := [
-	[0.0, {"duas_maos": -0.25}],
+	[0.0, {"braco_d": READY_2H["braco_d"], "antebraco_d": READY_2H["antebraco_d"], "arma_d": READY_2H["arma_d"], "duas_maos": -0.25}],
 	[0.5, {"giro": -10, "inclina": -15, "braco_d": Vector3(-0.15, 0.95, -0.2), "antebraco_d": Vector3(0, 0.7, -0.7), "arma_d": [Vector3(0, 0.2, -0.98), Vector3(-1, 0, 0)], "duas_maos": -0.25}],
 	[0.68, {"inclina": 40, "quadril": Vector3(0, -0.22, 0.05), "braco_d": Vector3(-0.1, -0.5, 0.85), "antebraco_d": Vector3(0, -0.75, 0.65), "arma_d": [Vector3(0, -0.85, 0.5), Vector3(-1, 0, 0)], "duas_maos": -0.25}],
 	[0.85, {"inclina": 40, "quadril": Vector3(0, -0.22, 0.05), "braco_d": Vector3(-0.1, -0.5, 0.85), "antebraco_d": Vector3(0, -0.75, 0.65), "arma_d": [Vector3(0, -0.85, 0.5), Vector3(-1, 0, 0)], "duas_maos": -0.25}],
-	[1.35, {"duas_maos": -0.25}],
+	[1.35, {"braco_d": READY_2H["braco_d"], "antebraco_d": READY_2H["antebraco_d"], "arma_d": READY_2H["arma_d"], "duas_maos": -0.25}],
 ]
 const SPEAR_GUARD := {"braco_d": Vector3(-0.35, -0.75, 0.55), "antebraco_d": Vector3(-0.1, -0.2, 0.98), "arma_d": [Vector3(0, 0, 1), Vector3(1, 0, 0)], "duas_maos": 0.45}
 const THRUST := [
@@ -110,11 +149,13 @@ const XBOW := [
 	[0.7, XBOW_GUARD],
 ]
 const BLOCK := {"braco_d": Vector3(-0.5, -0.1, 0.85), "antebraco_d": Vector3(0.4, 0.6, 0.7), "arma_d": [Vector3(0.9, 0.2, 0.3), Vector3(0, 1, 0)]}
+## Monsters: the right arm cocked back over the shoulder (elbow out, the body
+## turned away), then a swipe down across the front, leaning into it.
 const CLAW := [
 	[0.0, {}],
-	[0.35, {"giro": -35, "inclina": -5, "braco_d": Vector3(-0.6, 0.75, -0.25), "antebraco_d": Vector3(-0.2, 0.95, 0.2), "braco_e": Vector3(0.5, 0.3, 0.4)}],
-	[0.5, {"giro": 30, "inclina": 25, "braco_d": Vector3(0.3, -0.3, 0.9), "antebraco_d": Vector3(0.6, -0.5, 0.6)}],
-	[0.62, {"giro": 35, "inclina": 25, "braco_d": Vector3(0.5, -0.5, 0.7), "antebraco_d": Vector3(0.75, -0.6, 0.3)}],
+	[0.35, {"giro": -40, "inclina": -10, "braco_d": Vector3(-0.75, 0.45, -0.5), "antebraco_d": Vector3(-0.3, 0.85, 0.4), "braco_e": Vector3(0.45, -0.3, 0.85), "antebraco_e": Vector3(0.3, 0.2, 0.93)}],
+	[0.5, {"giro": 25, "inclina": 22, "braco_d": Vector3(0.1, -0.3, 0.95), "antebraco_d": Vector3(0.4, -0.5, 0.77), "braco_e": Vector3(0.5, -0.7, -0.2), "antebraco_e": Vector3(0.3, -0.8, 0.3)}],
+	[0.62, {"giro": 38, "inclina": 25, "braco_d": Vector3(0.45, -0.6, 0.66), "antebraco_d": Vector3(0.7, -0.65, 0.3), "braco_e": Vector3(0.5, -0.8, -0.3), "antebraco_e": Vector3(0.3, -0.85, 0.3)}],
 	[1.0, {}],
 ]
 const BOSS_SLAM := [
@@ -134,10 +175,10 @@ func stretched(keys: Array, factor: float) -> Array:
 
 var SETS := {
 	"aventureiro": [
-		{"name": "idle", "src": "ual", "anim": "Idle", "loop": true},
-		{"name": "walk", "src": "ual", "anim": "Jog_Fwd", "loop": true},
-		{"name": "run", "src": "ual", "anim": "Sprint", "loop": true},
-		{"name": "guard", "src": "ual", "anim": "Sword_Idle", "loop": true},
+		{"name": "idle", "src": "ual", "anim": "Idle", "loop": true, "segura": RELAXED},
+		{"name": "walk", "src": "ual", "anim": "Jog_Fwd", "loop": true, "segura": CARRY},
+		{"name": "run", "src": "ual", "anim": "Sprint", "loop": true, "segura": CARRY},
+		{"name": "guard", "src": "ual", "anim": "Sword_Idle", "loop": true, "segura": READY},
 		{"name": "furtivo", "src": "ual", "anim": "Crouch_Idle", "loop": true},
 		{"name": "furtivo_andar", "src": "ual", "anim": "Crouch_Fwd", "loop": true},
 		{"name": "dodge", "src": "ual", "anim": "Roll", "from": 0.05, "to": 1.25},
@@ -145,10 +186,11 @@ var SETS := {
 		{"name": "die", "src": "ual", "anim": "Death01"},
 		{"name": "soco", "src": "ual", "anim": "Punch_Cross", "impacto": "auto"},
 		{"name": "golpe_adaga", "src": "ual", "anim": "Punch_Cross", "impacto": "auto"},
-		{"name": "golpe_espada", "src": "ual", "anim": "Sword_Attack", "to": 1.05, "impacto": 0.44},
-		{"name": "attack", "src": "ual", "anim": "Sword_Attack", "to": 1.05, "impacto": 0.44},
+		{"name": "golpe_espada", "src": "pose", "base": "Sword_Idle", "keys": SLASH, "impacto": 0.40},
+		{"name": "attack", "src": "pose", "base": "Sword_Idle", "keys": SLASH, "impacto": 0.40},
+		{"name": "estocada_florete", "src": "pose", "base": "Sword_Idle", "keys": LUNGE, "impacto": 0.30},
 		{"name": "golpe_katana", "src": "mixamo", "anim": "sword and shield slash (3)", "from": 0.25, "to": 0.95, "impacto": 0.55},
-		{"name": "arremesso", "src": "ual", "anim": "Spell_Simple_Shoot", "impacto": "auto"},
+		{"name": "arremesso", "src": "pose", "base": "Idle", "keys": THROW, "impacto": 0.32},
 		{"name": "golpe_machado", "src": "pose", "base": "Sword_Idle", "keys": CHOP, "impacto": 0.44},
 		{"name": "golpe_maca", "src": "pose", "base": "Sword_Idle", "keys": SWING, "impacto": 0.42},
 		{"name": "golpe_montante", "src": "pose", "base": "Sword_Idle", "keys": SWEEP, "impacto": 0.56},
@@ -513,12 +555,16 @@ func bake(a: Dictionary, dst: Node3D, sk_t: Skeleton3D) -> Animation:
 	var best_reach: float = -INF
 	var best_time: float = 0.0
 	ap_s.play(anim_name)
+	var hold: Vector3 = a.get("pega", Vector3(-55, 0, 0))
 	for f in frames + 1:
 		var time: float = minf(f / FPS, length)
 		ap_s.seek(t0 + time * speed, true)
 		sk_s.force_update_all_bone_transforms()
 		var world_t: Array = []
 		world_t.resize(sk_t.get_bone_count())
+		var locals: Array = []
+		locals.resize(sk_t.get_bone_count())
+		var hips_local: Vector3 = sk_t.get_bone_rest(hips).origin
 		for b in sk_t.get_bone_count():
 			var parent: int = sk_t.get_bone_parent(b)
 			var parent_world: Transform3D = sk_t.global_transform if parent < 0 else world_t[parent]
@@ -532,12 +578,19 @@ func bake(a: Dictionary, dst: Node3D, sk_t: Skeleton3D) -> Animation:
 				var origin: Vector3 = (parent_world * rest_local).origin
 				if b == hips:
 					origin = world(sk_t, hips, true).origin + (pose_w.origin - ref_w.origin) * k
+					hips_local = parent_world.affine_inverse() * origin
 				world_t[b] = Transform3D(target_basis, origin)
-				anim.rotation_track_insert_key(tracks[b], time, (parent_world.basis.orthonormalized().inverse() * target_basis).get_rotation_quaternion())
-				if b == hips:
-					anim.position_track_insert_key(pos_track, time, parent_world.affine_inverse() * origin)
+				locals[b] = (parent_world.basis.orthonormalized().inverse() * target_basis).get_rotation_quaternion()
 			else:
 				world_t[b] = parent_world * rest_local
+				locals[b] = rest_local.basis.get_rotation_quaternion()
+		if a.has("segura"):
+			var held: Dictionary = make_pose({"locals": locals, "hips": hips_local}, a["segura"], sk_t, hold)
+			locals = held["locals"]
+			world_t = held["world"]
+		for b in tracks:
+			anim.rotation_track_insert_key(tracks[b], time, locals[b])
+		anim.position_track_insert_key(pos_track, time, hips_local)
 		var reach: float = world_t[rhand].origin.z - world_t[hips].origin.z + 0.5 * world_t[rhand].origin.y
 		if reach > best_reach:
 			best_reach = reach
