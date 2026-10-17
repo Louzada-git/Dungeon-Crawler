@@ -7,6 +7,7 @@ Para cada arma e animação, uma folha: em cima as fileiras de lado, embaixo as
 de frente; o número sobre cada boneco é o frame (30 por segundo) e o tempo.
 Também monta um índice por arma (index.html) para abrir no navegador.
 """
+import json
 import os
 import sys
 
@@ -24,12 +25,20 @@ for weapon in sorted(os.listdir(SRC)):
     if not os.path.isdir(wdir) or weapon == "folhas":
         continue
     sheets = []
+    # Only the band where the copies stand (the rest of the row is empty floor).
+    meta = json.load(open(os.path.join(wdir, "meta.json")))
+    used = meta["count"] * meta["spacing"] * meta["height"] / meta["tall"]
+    left = max(0, int(meta["width"] / 2 - used / 2))
+    right = min(meta["width"], int(meta["width"] / 2 + used / 2))
     for anim in sorted(os.listdir(wdir)):
         adir = os.path.join(wdir, anim)
+        if not os.path.isdir(adir):
+            continue
         rows = []
         for view in ("lado", "frente"):
             for f in sorted(x for x in os.listdir(adir) if x.startswith(view + "_")):
-                rows.append((view, Image.open(os.path.join(adir, f)).convert("RGB")))
+                im = Image.open(os.path.join(adir, f)).convert("RGB")
+                rows.append((view, im.crop((left, 0, right, im.size[1]))))
         if not rows:
             continue
         w, h = rows[0][1].size
@@ -41,7 +50,7 @@ for weapon in sorted(os.listdir(SRC)):
         os.makedirs(os.path.join(OUT, weapon), exist_ok=True)
         name = "%s.%s" % (anim, "jpg" if JPG else "png")
         if JPG:
-            sheet.save(os.path.join(OUT, weapon, name), quality=82)
+            sheet.save(os.path.join(OUT, weapon, name), quality=75)
         else:
             sheet.save(os.path.join(OUT, weapon, name), optimize=True)
         sheets.append(name)
