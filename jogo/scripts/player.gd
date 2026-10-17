@@ -12,12 +12,14 @@ var visual: Node3D
 var animator: AnimationPlayer
 ## Character model (assets/originais/<id>.glb) and where its hands and torso are.
 const MODEL := "aventureiro_psx"
-## Rigs with other bone names: [bone, rotation, offset] that puts the mount where
-## the original rig's bone was, so weapons and armour keep their placement.
-## Values from arte/fontes/personagem_psx/transferir_animacoes.gd (MOUNT lines).
+## Rigs with other bone names: [bone, rotation, offset] for each mount.
+## Hands (17/10/2026): a natural grip in the closed fist; the handle runs along
+## the axis the fingers wrap around, the head or edge (+X) toward the knuckles.
+## The same values are GRIP in arte/fontes/personagem_psx/personagens.gd.
+## The spine: from arte/fontes/personagem_psx/transferir_animacoes.gd (MOUNT lines).
 const MOUNTS := {
-	"hand-right": ["mixamorig_RightHand", Quaternion(0.14137444, -0.69607383, 0.060264293, 0.7013293), Vector3(-0.033115923, -0.024450481, -0.0018466413)],
-	"hand-left": ["mixamorig_LeftHand", Quaternion(0.02726483, -0.691197, 0.1413904, 0.7081752), Vector3(-0.03531605, -0.014843881, 0.05487594)],
+	"hand-right": ["mixamorig_RightHand", Quaternion(0.63048505783081, 0.77200245857239, -0.05100067332387, 0.06244818121195), Vector3(-0.03210743889213, 0.06280439347029, 0.02609892003238)],
+	"hand-left": ["mixamorig_LeftHand", Quaternion(0.67360925674438, 0.73670476675034, -0.0400165617466, 0.04376482963562), Vector3(-0.03327637538314, 0.06309830397367, -0.02205528132617)],
 	"spine": ["mixamorig_Spine", Quaternion(0.039866824, 0.705982, -0.03986682, 0.705982), Vector3(0.0030038357, -0.06060183, -0.025849571)],
 }
 var weapon_mount: Node3D
@@ -92,9 +94,26 @@ func _ready() -> void:
  listener.make_current()
  refresh_weapon()
 
-## Animation for moving or standing still. Optional animations made for the rig
+## Suffix of the standing and moving animations for the way the weapon in hand
+## is carried (data "porte": duas, haste, besta, arco; empty hands: livre).
+func carry_suffix() -> String:
+ var id: String = game.inventory.equipped if game else ""
+ if id == "":
+  return "_livre"
+ var way: String = str(Items.info(id).get("porte",""))
+ return "_" + way if way != "" else ""
+
+## Animation for moving or standing still, in the variant for the way the weapon
+## is carried when the rig has it. Optional animations made for the rig
 ## (furtivo, furtivo_andar, bloqueio) replace the stand-ins when they exist.
 func locomotion(moving: float) -> Array:
+ var pose: Array = _locomotion(moving)
+ var carried: String = str(pose[0]) + carry_suffix()
+ if animator != null and animator.has_animation(carried):
+  pose[0] = carried
+ return pose
+
+func _locomotion(moving: float) -> Array:
  var has = func(n: String) -> bool: return animator != null and animator.has_animation(n)
  if moving > 0.3:
   if sneaking and not sprinting and has.call("furtivo_andar"):
@@ -165,12 +184,13 @@ func refresh_armor() -> void:
  worn_model.position = Vector3(pos[0],pos[1],pos[2])
  worn_model.scale = Vector3(size[0],size[1],size[2])
 
-## Resting angle in the hand: data "rotacao_mao", else by style.
+## Angle of the weapon in the fist: data "rotacao_mao", else the natural grip
+## (the handle straight through the fist).
 func rest_rotation(data: Dictionary) -> Vector3:
  if data.has("rotacao_mao"):
   var r: Array = data["rotacao_mao"]
   return Vector3(r[0],r[1],r[2])
- return Vector3(-85,0,0) if data.get("alinhar_ao_golpe",false) else Vector3(-55,0,0)
+ return Vector3.ZERO
 
 ## "escala_mao" stretches the old short spear model; models made for the item use 1.
 func hand_scale(id: String, data: Dictionary) -> Vector3:
@@ -190,12 +210,25 @@ func _process(_delta: float) -> void:
  var size: Vector3 = hand_scale(game.inventory.equipped,data)
  if attack_timer > 0 and attack_weapon.get("alinhar_ao_golpe",false):
   # Keep the pole aimed down the committed attack line while both arms reach.
-  var axis: Vector3 = attack_facing.normalized()
-  var side: Vector3 = Vector3.UP.cross(axis).normalized()
-  held_weapon.global_basis = Basis(side,axis,side.cross(axis))*Basis.from_scale(size)
+  aim_held(held_weapon,Visuals.skeleton(visual),data,attack_facing,size)
  else:
   held_weapon.rotation_degrees = rest_rotation(data)
   held_weapon.scale = size
+
+## Points a held weapon along `axis` (its +Y), the head or edge (+X) level, from
+## the hand bone's current pose (the bone attachment only follows at the end of
+## the frame, so its transform may still be the last one).
+static func aim_held(weapon: Node3D, skel: Skeleton3D, data: Dictionary, axis: Vector3, size: Vector3) -> void:
+ if weapon == null or skel == null:
+  return
+ var entry: Array = MOUNTS["hand-left" if str(data.get("mao","direita")) == "esquerda" else "hand-right"]
+ var bone: int = skel.find_bone(entry[0])
+ if bone < 0:
+  return
+ var parent: Basis = (skel.global_transform*skel.get_bone_global_pose(bone)).basis.orthonormalized()*Basis(entry[1])
+ var forward: Vector3 = axis.normalized()
+ var side: Vector3 = Vector3.UP.cross(forward).normalized()
+ weapon.basis = parent.inverse()*Basis(side,forward,side.cross(forward))*Basis.from_scale(size)
 
 func aim_mouse() -> void:
  if game.camera == null:
@@ -398,6 +431,9 @@ func use_technique(slot: int, aim: bool = true) -> bool:
 
 ## The animation made for the weapon when the rig has it; else the closest existing one.
 func attack_animation(weapon: Dictionary) -> String:
+ return attack_animation_for(weapon,animator)
+
+static func attack_animation_for(weapon: Dictionary, animator: AnimationPlayer) -> String:
  var wanted: String = str(weapon.get("animacao",""))
  if wanted != "" and animator and animator.has_animation(wanted):
   return wanted
