@@ -1039,6 +1039,18 @@ func test_proficiencies() -> void:
  veteran.award_path(["espadas","katana"],ProficiencyTree.xp_for_level(14)*2.0)
  var kat: Dictionary = veteran.weapon_stats("katana")
  check(int(kat["targets"]) == int(Items.info("katana")["targets"])+1 and is_equal_approx(kat["windup"],Items.info("katana")["windup"]-0.04),"Habilidades desbloqueadas mudam a arma (Corte amplo, Saque rápido)")
+ # Weapons of a kind of their own train their own branch (foice, picareta, florete).
+ for kind in [["foice","foice","hastes"],["picareta","picareta","contundentes"],["florete","florete","espadas"]]:
+  var path: Array = CharacterSheet.path_of(kind[0])
+  check(path[-1] == kind[1] and ProficiencyTree.DATA[kind[1]]["parent"] == kind[2] and Techniques.OBJECTS.values().any(func(o): return o["requer"].has(kind[1])),"%s treina o ramo próprio (%s), que dá um objeto" % [Items.info(kind[0])["name"],ProficiencyTree.DATA[kind[1]]["name"]])
+ var reaper := CharacterSheet.new()
+ reaper.award_path(["hastes","foice"],ProficiencyTree.xp_for_level(8)*2.0)
+ var pick := CharacterSheet.new()
+ pick.award_path(["contundentes","picareta"],ProficiencyTree.xp_for_level(8)*2.0)
+ var fencer := CharacterSheet.new()
+ fencer.award_path(["espadas","florete"],ProficiencyTree.xp_for_level(8)*2.0)
+ check(int(reaper.weapon_stats("foice")["targets"]) == int(Items.info("foice")["targets"])+1 and is_equal_approx(float(pick.weapon_stats("picareta")["crush"]),float(Items.info("picareta")["crush"])+0.3) and is_equal_approx(float(fencer.weapon_stats("florete")["windup"]),float(Items.info("florete")["windup"])-0.03),"Talentos dos ramos novos: Ceifar, Fura-couraça e Fintar")
+ check(int(reaper.weapon_stats("alabarda")["targets"]) == int(Items.info("alabarda")["targets"]),"Treinar a foice não dá o talento da alabarda")
  check(kat["damage"] > Items.info("katana")["damage"] and kat["cost"] < Items.info("katana")["cost"],"Domínio aumenta o dano e reduz o fôlego do golpe")
  # Practice in play: hits, bleeding, dodges, treatment.
  sheet.reset()
