@@ -58,7 +58,7 @@ func remove(slot: int) -> void:
 		changed.emit()
 
 ## What pressing the slot does with this item ("Equipar", "Comer"...); "" when nothing.
-static func action_name(game, id: String) -> String:
+static func action_name(game: DungeonGame, id: String) -> String:
 	if id == "":
 		return ""
 	var data: Dictionary = Items.info(id)
@@ -78,7 +78,7 @@ static func action_name(game, id: String) -> String:
 
 ## Presses a slot: equips or puts away a weapon, wears or takes off armor, eats,
 ## treats. Returns true when something happened.
-func use(game, slot: int) -> bool:
+func use(game: DungeonGame, slot: int) -> bool:
 	var id: String = at(slot)
 	if id == "":
 		game.message("Espaço %d vazio. Arraste um item da mochila para ele, ou selecione o item na mochila e aperte %d." % [slot + 1, slot + 1], 3)
