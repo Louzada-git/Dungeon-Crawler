@@ -177,21 +177,22 @@ func refresh() -> void:
 			rows[key][1].max_value = top
 			rows[key][1].value = v
 			UiStyle.set_bar_color(rows[key][1], UiStyle.value_color(v / top))
-		bleed_value.text = "Sim  ·  −0,5 vida/s" if p.bleeding else "Não"
+		bleed_value.text = ("Sim  ·  −%s vida/s" % UiStyle.fmt(DungeonPlayer.BLEED_PER_SECOND, 1)) if p.bleeding else "Não"
 		bleed_value.add_theme_color_override("font_color", UiStyle.BAD if p.bleeding else UiStyle.GOOD)
 		var w: float = game.inventory.weight()
 		load_value.text = "%s kg  ·  %s" % [UiStyle.fmt(w), "normal" if w <= game.inventory.comfort else "pesada"]
 		load_value.add_theme_color_override("font_color", UiStyle.TEXT if w <= game.inventory.comfort else UiStyle.WARN)
 		var bandages: int = game.inventory.count("bandage")
 		var rations: int = game.inventory.count("ration")
-		bandage_button.text = "Bandagem  ·  %d   [3]" % bandages
+		bandage_button.text = "Bandagem  ·  %d %s" % [bandages, game.quick_bar.key_hint("bandage")]
 		bandage_button.disabled = bandages == 0 or game.ended
-		ration_button.text = "Ração  ·  %d   [2]" % rations
+		ration_button.text = "Ração  ·  %d %s" % [rations, game.quick_bar.key_hint("ration")]
 		ration_button.disabled = rations == 0 or game.ended
 	else:
-		var weapon: Dictionary = Items.info(game.inventory.equipped)
-		info_values["weapon"].text = weapon.get("name", "Mãos vazias")
-		info_values["damage"].text = ("%d  ·  %s m" % [int(weapon["damage"]), UiStyle.fmt(float(weapon.get("range", 1.5)))]) if weapon.has("damage") else "—"
+		# The weapon as this adventurer swings it (mastery and perks), like the card "Em mãos".
+		var weapon: Dictionary = game.sheet.weapon_stats(game.inventory.equipped)
+		info_values["weapon"].text = weapon.get("name", "Mãos vazias") if game.inventory.equipped != "" else "Mãos vazias"
+		info_values["damage"].text = ("%d  ·  %s m" % [roundi(float(weapon["damage"])), UiStyle.fmt(float(weapon.get("range", 1.5)))]) if weapon.has("damage") else "—"
 		info_values["cost"].text = UiStyle.num(float(weapon.get("cost", 10)))
 		info_values["area"].text = game.layout.room_name(p.position)
 		info_values["objective"].text = game.objective_text()
