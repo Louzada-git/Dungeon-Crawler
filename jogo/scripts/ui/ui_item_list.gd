@@ -3,7 +3,10 @@ class_name UiItemList
 ## Sortable item table used by the backpack and by nearby containers.
 
 signal item_selected(id: String)
+# Emitted by the rows (UiItemRow), not by the list itself.
+@warning_ignore("unused_signal")
 signal item_activated(id: String)
+@warning_ignore("unused_signal")
 signal item_context(id: String, at: Vector2)
 signal item_dropped(data: Dictionary)
 
