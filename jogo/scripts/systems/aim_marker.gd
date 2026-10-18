@@ -9,7 +9,7 @@ func _ready() -> void:
 	add_child(ring)
 	visible = false
 
-func refresh(game) -> void:
+func refresh(game: DungeonGame) -> void:
 	# Third person aims with the crosshair in the middle of the screen instead.
 	visible = game.player.aiming and not game.ui.any_panel() and not game.ended and not game.third_person()
 	if not visible:
