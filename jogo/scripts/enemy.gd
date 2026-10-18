@@ -212,8 +212,9 @@ func _begin_attack(player) -> void:
 	if animator.has_animation(anim):
 		var length: float = animator.get_animation(anim).length
 		var hit_at: float = Animacoes.impact(str(stats.get("model", "")), anim, 0.0) * length
-		var speed: float = hit_at / windup if hit_at > 0.0 else length / (windup + 0.30)
-		animator.play(anim, 0.08, speed)
+		var anim_speed: float = hit_at / windup if hit_at > 0.0 else length / (windup + 0.30)
+		animator.speed_scale = 1.0
+		animator.play(anim, 0.08, anim_speed)
 
 func _strike(player) -> void:
 	telegraph.visible = false
