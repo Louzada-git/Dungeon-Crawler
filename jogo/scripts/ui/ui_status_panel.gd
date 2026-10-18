@@ -7,12 +7,26 @@ signal open_requested
 var game
 var cells: Dictionary = {}
 
+## [id, icon, title]; the tooltip text comes from tip_text, with this adventurer's numbers.
 const ENTRIES := [
-	["health", "heart", "Vida", "Vida atual. Não se recupera sozinha: bandagens restauram 18."],
-	["stamina", "lungs", "Fôlego", "Gasto ao correr, golpear e esquivar. Recupera parado ou caminhando."],
-	["food", "bread", "Saciedade", "Cai com o tempo, mais rápido correndo. Abaixo de 10, o fôlego recupera devagar."],
-	["load", "weight", "Carga", "Peso na mochila. Acima de 11 kg o passo fica mais lento; limite de 18 kg."],
+	["health", "heart", "Vida"],
+	["stamina", "lungs", "Fôlego"],
+	["food", "bread", "Saciedade"],
+	["load", "weight", "Carga"],
 ]
+
+## Tooltip of a cell, from the rules as they are now for this adventurer.
+func tip_text(id: String) -> String:
+	match id:
+		"health":
+			return "Vida atual. Não se recupera sozinha: uma bandagem restaura %d." % UiMoodles.bandage_heal(game)
+		"stamina":
+			return "Gasto ao correr, golpear e esquivar. Recupera %s por segundo parado ou caminhando." % UiStyle.fmt(game.player.stamina_regen(game.player.food <= DungeonPlayer.HUNGRY), 1)
+		"food":
+			return "Cai com o tempo, mais rápido correndo. Abaixo de %d, o fôlego recupera devagar." % roundi(DungeonPlayer.HUNGRY)
+		"load":
+			return "Peso na mochila. " + UiMoodles.load_rule(game)
+	return ""
 
 func _init(game_ref) -> void:
 	game = game_ref
@@ -43,7 +57,7 @@ func _init(game_ref) -> void:
 	for entry in ENTRIES:
 		var cell := Cell.new()
 		cell.title = entry[2]
-		cell.text = entry[3]
+		cell.text_of = tip_text.bind(entry[0])
 		cell.add_theme_constant_override("separation", 3)
 		cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		cell.mouse_filter = Control.MOUSE_FILTER_PASS
@@ -93,6 +107,6 @@ func _set_cell(id: String, bar_value: float, text: String, ratio: float) -> void
 
 class Cell extends VBoxContainer:
 	var title: String = ""
-	var text: String = ""
+	var text_of: Callable
 	func _make_custom_tooltip(_for_text: String) -> Object:
-		return UiStyle.tip(title, text + "\nClique para abrir a condição física  [H].")
+		return UiStyle.tip(title, str(text_of.call()) + "\nClique para abrir a condição física  [H].")
