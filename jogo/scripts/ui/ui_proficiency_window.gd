@@ -3,7 +3,7 @@ class_name UiProficiencyWindow
 ## Attributes and proficiencies (P). Does not pause: it can stay open while
 ## exploring, like the condition window.
 
-var game
+var game: DungeonGame
 var ui
 var attr_chips: Dictionary = {}
 var weapon_title: Label
