@@ -146,6 +146,20 @@ func run(target, capture: bool) -> void:
 	check(not get_tree().paused,"Fechar mochila retoma a simulação")
 	game.ui.toggle_map()
 	check(game.ui.map_panel.visible and get_tree().paused,"Mapa explorado abre e pausa")
+	var big_map: DungeonMapView = game.ui.full_map
+	await wait_process(2)
+	big_map.zoom_by(2)
+	var zoomed: float = big_map.zoom
+	big_map.drag(Vector2(40, 0))
+	var dragged: Vector2 = big_map.pan
+	var wheel := InputEventMouseButton.new()
+	wheel.button_index = MOUSE_BUTTON_WHEEL_DOWN
+	wheel.pressed = true
+	big_map._gui_input(wheel)
+	check(zoomed > 1.0 and big_map.zoom < zoomed and dragged != Vector2.ZERO,"Mapa grande: roda dá zoom e arrastar move o mapa")
+	game.ui.close_all()
+	game.ui.toggle_map()
+	check(is_equal_approx(big_map.zoom, 1.0) and big_map.pan == Vector2.ZERO,"Mapa abre de novo centralizado, sem o zoom de antes")
 	game.ui.close_all()
 	# Isolate one enemy and exercise the real delayed attack / cooldown.
 	var enemy = game.enemies[0]
