@@ -176,12 +176,12 @@ static func player_weapon(player, item: String, weapon: Dictionary, extra: Vecto
 ## x = reach (range), y = thickness (a bigger area, a wider thrust, a wider arc),
 ## z = longer stretch of the swing that counts, before and after (a wider arc).
 static func extras(base: Dictionary, weapon: Dictionary) -> Vector3:
-	var reach: float = maxf(0.0, float(weapon.get("range", 0.0)) - float(base.get("range", 0.0)))
+	var more_reach: float = maxf(0.0, float(weapon.get("range", 0.0)) - float(base.get("range", 0.0)))
 	var arc: float = maxf(0.0, float(weapon.get("angle", 0.0)) - float(base.get("angle", 0.0)))
 	var thick: float = arc / 500.0
 	thick += maxf(0.0, float(weapon.get("area_radius", 0.0)) - float(base.get("area_radius", 0.0)))
 	thick += maxf(0.0, float(weapon.get("width", 0.0)) - float(base.get("width", 0.0)))
-	return Vector3(reach, thick, minf(0.2, arc / 300.0))
+	return Vector3(more_reach, thick, minf(0.2, arc / 300.0))
 
 ## The window of an animation that counts for the blow, in seconds.
 static func window(model: String, anim: AnimationPlayer, name: String, fallback: float, wider: float = 0.0) -> Vector2:
@@ -197,10 +197,10 @@ static func ahead(cap: Array, origin: Vector3, facing: Vector3) -> bool:
 ## The capsules the player's current blow goes through, from a little before
 ## its impact to a little after. A spinning blow (arc of 150° or more, Corte
 ## giratório) also turns them all around the player.
-static func player_samples(game, weapon: Dictionary) -> Array:
+static func player_samples(game: DungeonGame, weapon: Dictionary) -> Array:
 	var player = game.player
 	var item: String = str(player.attack_item)
-	var extra: Vector3 = extras(game.sheet.base_stats(item), weapon)
+	var extra: Vector3 = extras(CharacterSheet.base_stats(item), weapon)
 	var anim: AnimationPlayer = player.animator
 	var sk: Skeleton3D = Visuals.skeleton(player.visual)
 	var name: String = player.attack_animation(weapon)
@@ -231,7 +231,7 @@ static func player_samples(game, weapon: Dictionary) -> Array:
 
 ## The monsters a set of capsules touches, in the order they were touched
 ## (walls in between stop the blow).
-static func touched(game, samples: Array) -> Array:
+static func touched(game: DungeonGame, samples: Array) -> Array:
 	var player = game.player
 	var order: Array = []
 	for enemy in game.enemies:
@@ -281,7 +281,7 @@ static func monster_samples(enemy) -> Array:
 	return samples
 
 ## A monster's attack reaches the player.
-static func monster_hits(game, enemy) -> bool:
+static func monster_hits(game: DungeonGame, enemy) -> bool:
 	var body: Array = player_body(game.player)
 	for cap in monster_samples(enemy):
 		if touches(cap, body):
@@ -290,14 +290,14 @@ static func monster_hits(game, enemy) -> bool:
 
 ## How far the bare weapon reaches from the adventurer's centre over its blow
 ## (tip plus thickness), in metres: what the item shows as "Alcance".
-static func reach(game, item: String) -> float:
+static func reach(game: DungeonGame, item: String) -> float:
 	var player = game.player
 	var keep_item: String = player.attack_item
 	var keep_facing: Vector3 = player.attack_facing
 	player.attack_item = item
 	player.attack_facing = Vector3.FORWARD
 	var far: float = 0.0
-	for cap in player_samples(game, game.sheet.base_stats(item)):
+	for cap in player_samples(game, CharacterSheet.base_stats(item)):
 		for pt in [cap[0], cap[1]]:
 			var off: Vector3 = pt - player.global_position
 			far = maxf(far, Vector2(off.x, off.z).length() + float(cap[2]))
