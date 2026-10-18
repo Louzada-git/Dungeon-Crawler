@@ -12,11 +12,11 @@ const LEVEL_COLORS := [
 ]
 const POSITIVE := Color("3f7a3b")
 
-var game
+var game: DungeonGame
 var tiles: Dictionary = {}
 var _signature: String = ""
 
-func _init(game_ref) -> void:
+func _init(game_ref: DungeonGame) -> void:
 	game = game_ref
 	add_theme_constant_override("separation", 6)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -76,11 +76,11 @@ func compute() -> Array:
 	return out
 
 ## What a bandage heals for this adventurer (Tratamento makes it more).
-static func bandage_heal(owner_game) -> int:
+static func bandage_heal(owner_game: DungeonGame) -> int:
 	return roundi(float(Items.info("bandage").get("heal", 0.0)) * owner_game.sheet.heal_mult())
 
 ## The weight rule for this adventurer (Força moves both limits).
-static func load_rule(owner_game) -> String:
+static func load_rule(owner_game: DungeonGame) -> String:
 	return "Acima de %s kg o passo pesa; o limite é %s kg." % [UiStyle.num(owner_game.inventory.comfort), UiStyle.num(owner_game.inventory.capacity)]
 
 func refresh() -> void:
