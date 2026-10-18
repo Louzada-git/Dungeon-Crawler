@@ -34,6 +34,11 @@ func at(slot: int) -> String:
 func slot_of(id: String) -> int:
 	return slots.find(id) if id != "" else -1
 
+## "[n]" for the key of the slot holding the item; "" when it is not on the bar.
+func key_hint(id: String) -> String:
+	var slot: int = slot_of(id)
+	return "  [%d]" % (slot + 1) if slot >= 0 else ""
+
 func first_free() -> int:
 	return slots.find("")
 
