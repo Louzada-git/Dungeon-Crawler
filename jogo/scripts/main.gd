@@ -440,7 +440,7 @@ func _process(delta: float) -> void:
 	for loot in containers:
 		loot["ring"].visible = not loot["items"].is_empty()
 	aim_marker.refresh(self)
-	ui.update_hud()
+	ui.update_hud(true)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if ui == null or ended or choosing_character:
@@ -502,11 +502,19 @@ func is_safe() -> bool:
 func has_shelter() -> bool:
 	return layout.world.get("has_shelter", true)
 
+## The boss of this floor (found once per floor: big floors have hundreds of
+## monsters and the HUD asks every frame).
+var _boss: DungeonEnemy
+
 func boss() -> DungeonEnemy:
+	if is_instance_valid(_boss) and not _boss.is_queued_for_deletion() and _boss.boss:
+		return _boss
+	_boss = null
 	for e in enemies:
 		if e.boss:
-			return e
-	return null
+			_boss = e
+			break
+	return _boss
 
 func boss_alive() -> bool:
 	var b := boss()
