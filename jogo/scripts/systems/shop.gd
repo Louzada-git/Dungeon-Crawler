@@ -11,24 +11,20 @@ const REACH := 2.3
 static var DATA: Dictionary = _load()
 
 static func _load() -> Dictionary:
-	var raw = JSON.parse_string(FileAccess.get_file_as_string(PATH))
-	if not raw is Dictionary:
-		push_error("Estoque da loja inválido: " + PATH)
-		return {}
-	return raw
+	return DataFile.read(PATH)
 
 ## Stock of a floor: everything in "sempre" plus the "sorteio" rolls allowed at
 ## that depth. Same labyrinth seed and floor, same stock.
-static func roll_stock(seed: int, floor: int) -> Dictionary:
+static func roll_stock(labyrinth_seed: int, floor_number: int) -> Dictionary:
 	var stock: Dictionary = {}
 	for entry in DATA.get("sempre", []):
 		stock[str(entry[0])] = int(entry[1])
 	var table: Dictionary = DATA.get("sorteio", {})
-	var entries: Array = table.get("entries", []).filter(func(e): return int(e[4]) <= floor)
+	var entries: Array = table.get("entries", []).filter(func(e): return int(e[4]) <= floor_number)
 	if entries.is_empty():
 		return stock
 	var rng := RandomNumberGenerator.new()
-	rng.seed = LabyrinthGenerator.floor_seed(seed, floor) ^ 24301
+	rng.seed = LabyrinthGenerator.floor_seed(labyrinth_seed, floor_number) ^ 24301
 	var total: float = 0.0
 	for entry in entries:
 		total += float(entry[1])
@@ -53,11 +49,11 @@ static func clean_stock(raw) -> Dictionary:
 	return out
 
 ## What the merchant charges: the item's value, a little more on each floor down.
-static func buy_price(floor: int, id: String) -> int:
+static func buy_price(floor_number: int, id: String) -> int:
 	var value: float = float(Items.DATA.get(id, {}).get("valor", 0))
 	if value <= 0.0 or id == "coin":
 		return 0
-	return maxi(1, ceili(value * (1.0 + float(DATA.get("compra", 0.1)) * (floor - 1))))
+	return maxi(1, ceili(value * (1.0 + float(DATA.get("compra", 0.1)) * (floor_number - 1))))
 
 ## What he pays: a fraction of the value (0 = he does not buy it).
 static func sell_price(id: String) -> int:
@@ -67,7 +63,7 @@ static func sell_price(id: String) -> int:
 
 ## How many of an item the player can sell now: the weapon in hand and the
 ## armor worn stay with the player.
-static func sellable(game, id: String) -> int:
+static func sellable(game: DungeonGame, id: String) -> int:
 	if sell_price(id) <= 0:
 		return 0
 	var n: int = game.inventory.count(id)
@@ -76,11 +72,12 @@ static func sellable(game, id: String) -> int:
 	return maxi(0, n)
 
 ## Buys up to "amount"; returns how many came (stock, coins and backpack room permitting).
-static func buy(game, id: String, amount: int = 1) -> int:
-	var price: int = buy_price(game.floor, id)
+static func buy(game: DungeonGame, id: String, amount: int = 1) -> int:
+	var price: int = buy_price(game.current_floor, id)
 	if price <= 0:
 		return 0
 	var n: int = mini(amount, int(game.shop_stock.get(id, 0)))
+	@warning_ignore("integer_division")
 	n = mini(n, game.inventory.count("coin") / price)
 	if n <= 0:
 		return 0
@@ -94,7 +91,7 @@ static func buy(game, id: String, amount: int = 1) -> int:
 	return got
 
 ## Sells up to "amount"; returns how many went.
-static func sell(game, id: String, amount: int = 1) -> int:
+static func sell(game: DungeonGame, id: String, amount: int = 1) -> int:
 	var n: int = mini(amount, sellable(game, id))
 	if n <= 0:
 		return 0
@@ -107,7 +104,7 @@ static func sell(game, id: String, amount: int = 1) -> int:
 ## point), against a wall, not in a doorway, away from the arrival, the shelter
 ## fire, the stairs and the chests; nearest to the arrival among those.
 ## (-1, -1) when the room has no place.
-static func merchant_cell(game) -> Vector2i:
+static func merchant_cell(game: DungeonGame) -> Vector2i:
 	var layout = game.layout
 	var room := Rect2i()
 	for r in layout.rooms:
@@ -156,7 +153,7 @@ static func merchant_cell(game) -> Vector2i:
 	return Vector2i(-1, -1)
 
 ## Centre of the entrance room, for the merchant to face.
-static func room_center(game) -> Vector3:
+static func room_center(game: DungeonGame) -> Vector3:
 	for r in game.layout.rooms:
 		if r["rect"].has_point(game.layout.spawn):
 			return game.layout.to_world(r["rect"].get_center())
