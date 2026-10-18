@@ -34,7 +34,7 @@ func hover(canvas: Vector2) -> void:
 	event.global_position = event.position
 	root.get_viewport().push_input(event)
 
-func click(canvas: Vector2, button: int = MOUSE_BUTTON_LEFT) -> void:
+func click(canvas: Vector2, button: MouseButton = MOUSE_BUTTON_LEFT) -> void:
 	var scale: Vector2 = Vector2(root.get_window().size) / Vector2(1440, 900)
 	for pressed in [true, false]:
 		var event := InputEventMouseButton.new()
