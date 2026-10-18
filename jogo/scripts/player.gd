@@ -29,6 +29,8 @@ var armor_mount: Node3D
 var worn_model: Node3D
 var _worn_id: String = ""
 var held_weapon: Node3D
+## Item whose model is in the hand now (refresh_weapon rebuilds only when it changes).
+var _held_id: String = ""
 var facing: Vector3 = Vector3(0,0,-1)
 var health: float = 100.0
 var stamina: float = 100.0
@@ -141,15 +143,21 @@ func mount(skel: Skeleton3D, bone: String) -> Node3D:
 	attach.add_child(grip)
 	return grip
 
+## Puts the equipped weapon's model in the hand. Called on every change of the
+## backpack; the model is rebuilt only when the weapon itself changes (eating or
+## shooting an arrow keeps the one in hand).
 func refresh_weapon() -> void:
 	refresh_armor()
 	if weapon_mount == null:
 		return
-	for mount in [weapon_mount,left_mount]:
-		for child in mount.get_children():
+	var id: String = game.inventory.equipped
+	if id == _held_id and (id == "" or is_instance_valid(held_weapon)):
+		return
+	_held_id = id
+	for hand in [weapon_mount,left_mount]:
+		for child in hand.get_children():
 			child.queue_free()
 	held_weapon = null
-	var id: String = game.inventory.equipped
 	if id == "":
 		return
 	var data: Dictionary = Items.info(id)
@@ -254,12 +262,16 @@ func request_attack() -> void:
 	elif cooldown <= INPUT_BUFFER:
 		attack_buffer = INPUT_BUFFER
 
-func animate_action(name: String, duration: float) -> void:
-	if name in ["hit", "attack", "stab"] and animator and animator.has_animation("mixamo_"+name):
-		name = "mixamo_"+name
-	if animator and animator.has_animation(name):
-		animator.play(name,0.0 if name in ["mixamo_attack", "mixamo_stab"] else 0.07,animator.get_animation(name).length/duration)
-		if name in ["mixamo_attack", "mixamo_stab"]:
+## Plays a one-shot action (blow, dodge, hit) so that it lasts `duration`
+## seconds. The walk leaves its own pace in speed_scale (slower while speeding
+## up or carrying weight), which would stretch the action: it goes back to 1.
+func animate_action(anim_name: String, duration: float) -> void:
+	if anim_name in ["hit", "attack", "stab"] and animator and animator.has_animation("mixamo_"+anim_name):
+		anim_name = "mixamo_"+anim_name
+	if animator and animator.has_animation(anim_name):
+		animator.speed_scale = 1.0
+		animator.play(anim_name,0.0 if anim_name in ["mixamo_attack", "mixamo_stab"] else 0.07,animator.get_animation(anim_name).length/duration)
+		if anim_name in ["mixamo_attack", "mixamo_stab"]:
 			animator.seek(0.0,true)
 
 func _physics_process(delta: float) -> void:
