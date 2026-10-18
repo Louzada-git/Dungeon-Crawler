@@ -6,7 +6,7 @@ class_name ContainerSystem
 
 const REACH := 2.4
 
-static func add(game, title: String, cell: Vector2i, items: Dictionary, chest: bool = true, id: String = "", lock: int = 0) -> Dictionary:
+static func add(game: DungeonGame, title: String, cell: Vector2i, items: Dictionary, chest: bool = true, id: String = "", lock: int = 0) -> Dictionary:
 	var pos: Vector3 = game.layout.to_world(cell)
 	var clean: Dictionary = {}
 	for key in items:
@@ -19,7 +19,7 @@ static func add(game, title: String, cell: Vector2i, items: Dictionary, chest: b
 	return data
 
 ## Ids for piles created during play ("pilha_N"); world containers keep the ids of the description.
-static func unique_id(game) -> String:
+static func unique_id(game: DungeonGame) -> String:
 	var used: Dictionary = {}
 	for c in game.containers:
 		used[str(c.get("id", ""))] = true
@@ -33,7 +33,7 @@ static func position_of(container: Dictionary) -> Vector3:
 
 ## Containers within reach for the inventory tabs: chests even when empty
 ## (items can be stored in them) and ground piles that still hold something.
-static func nearby(game, reach: float = REACH) -> Array:
+static func nearby(game: DungeonGame, reach: float = REACH) -> Array:
 	var found: Array = []
 	var origin: Vector3 = game.player.position
 	for c in game.containers:
@@ -45,19 +45,19 @@ static func nearby(game, reach: float = REACH) -> Array:
 	found.sort_custom(func(a, b): return position_of(a).distance_squared_to(origin) < position_of(b).distance_squared_to(origin))
 	return found
 
-static func nearest(game) -> Dictionary:
+static func nearest(game: DungeonGame) -> Dictionary:
 	var found: Array = nearby(game)
 	return found[0] if not found.is_empty() else {}
 
 ## Nearest container that still has items.
-static func nearest_with_items(game) -> Dictionary:
+static func nearest_with_items(game: DungeonGame) -> Dictionary:
 	for c in nearby(game):
 		if not c["items"].is_empty():
 			return c
 	return {}
 
 ## Puts items on the floor near pos, joining a ground pile within 1.5 m.
-static func add_ground(game, pos: Vector3, id: String, amount: int) -> Dictionary:
+static func add_ground(game: DungeonGame, pos: Vector3, id: String, amount: int) -> Dictionary:
 	var cell: Vector2i = game.layout.to_cell(pos)
 	if not game.layout.is_floor(cell):
 		var found: bool = false
@@ -82,7 +82,7 @@ static func add_ground(game, pos: Vector3, id: String, amount: int) -> Dictionar
 	best["items"][id] = int(best["items"].get(id, 0)) + amount
 	return best
 
-static func store(game, id: String, amount: int, container: Dictionary) -> int:
+static func store(game: DungeonGame, id: String, amount: int, container: Dictionary) -> int:
 	amount = mini(amount, game.inventory.count(id))
 	if amount <= 0 or container.is_empty() or not game.containers.has(container):
 		return 0
@@ -94,7 +94,7 @@ static func store(game, id: String, amount: int, container: Dictionary) -> int:
 	game.ui.refresh_inventory()
 	return amount
 
-static func drop(game, id: String, amount: int = 1) -> bool:
+static func drop(game: DungeonGame, id: String, amount: int = 1) -> bool:
 	amount = mini(amount, game.inventory.count(id))
 	if amount <= 0 or not game.inventory.remove(id, amount):
 		return false
