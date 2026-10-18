@@ -27,19 +27,21 @@ func compute() -> Array:
 	var out: Array = []
 	if p == null or p.health <= 0:
 		return out
+	var bandage: String = "Use uma bandagem" + game.quick_bar.key_hint("bandage") + "."
+	var ration: String = "Coma uma ração" + game.quick_bar.key_hint("ration") + "."
 	if p.bleeding:
-		out.append({"id": "bleeding", "icon": "drop", "level": 3, "title": "Sangrando", "text": "Perde 0,5 de vida por segundo até ser tratado.\nUse uma bandagem  [3]."})
+		out.append({"id": "bleeding", "icon": "drop", "level": 3, "title": "Sangrando", "text": "Perde %s de vida por segundo até ser tratado.\n%s" % [UiStyle.fmt(DungeonPlayer.BLEED_PER_SECOND, 1), bandage]})
 	var life: float = p.health / p.max_health
 	if life < 0.75:
 		var lv: int = 1 if life >= 0.5 else (2 if life >= 0.25 else (3 if life >= 0.12 else 4))
 		var names := ["Machucado", "Ferido", "Gravemente ferido", "À beira da morte"]
-		out.append({"id": "hurt", "icon": "heart_crack", "level": lv, "title": names[lv - 1], "text": "Vida %d de %d. A vida não se recupera sozinha;\numa bandagem restaura 18." % [ceili(p.health), roundi(p.max_health)]})
+		out.append({"id": "hurt", "icon": "heart_crack", "level": lv, "title": names[lv - 1], "text": "Vida %d de %d. A vida não se recupera sozinha;\numa bandagem restaura %d." % [ceili(p.health), roundi(p.max_health), bandage_heal(game)]})
 	if p.food <= 0:
-		out.append({"id": "food", "icon": "bread", "level": 4, "title": "Inanição", "text": "Perde 0,2 de vida por segundo e o fôlego recupera devagar.\nComa uma ração  [2]."})
-	elif p.food <= 10:
-		out.append({"id": "food", "icon": "bread", "level": 2, "title": "Faminto", "text": "Saciedade %d. O fôlego recupera 6 por segundo em vez de 16.\nComa uma ração  [2]." % ceili(p.food)})
+		out.append({"id": "food", "icon": "bread", "level": 4, "title": "Inanição", "text": "Perde %s de vida por segundo e o fôlego recupera devagar.\n%s" % [UiStyle.fmt(DungeonPlayer.STARVE_PER_SECOND, 1), ration]})
+	elif p.food <= DungeonPlayer.HUNGRY:
+		out.append({"id": "food", "icon": "bread", "level": 2, "title": "Faminto", "text": "Saciedade %d. O fôlego recupera %s por segundo em vez de %s.\n%s" % [ceili(p.food), UiStyle.fmt(p.stamina_regen(true), 1), UiStyle.fmt(p.stamina_regen(false), 1), ration]})
 	elif p.food <= 30:
-		out.append({"id": "food", "icon": "bread", "level": 1, "title": "Com fome", "text": "Saciedade %d. Ainda sem efeito; abaixo de 10\no fôlego passa a recuperar devagar." % ceili(p.food)})
+		out.append({"id": "food", "icon": "bread", "level": 1, "title": "Com fome", "text": "Saciedade %d. Ainda sem efeito; abaixo de %d\no fôlego passa a recuperar devagar." % [ceili(p.food), roundi(DungeonPlayer.HUNGRY)]})
 	var held: Dictionary = game.sheet.weapon_stats(game.inventory.equipped)
 	var ammo: String = game.ammo_for(held)
 	if ammo != "" and game.inventory.count(ammo) <= 0:
@@ -53,7 +55,7 @@ func compute() -> Array:
 	if w > game.inventory.comfort:
 		var factor: float = lerpf(1.0, 0.72, (w - game.inventory.comfort) / (game.inventory.capacity - game.inventory.comfort))
 		var lv2: int = 1 if w <= lerpf(game.inventory.comfort, game.inventory.capacity, 0.57) else 2
-		out.append({"id": "load", "icon": "weight", "level": lv2, "title": "Carga pesada" if lv2 == 1 else "Sobrecarregado", "text": "%s kg na mochila: %d%% mais lento.\nAcima de 11 kg o passo pesa; o limite é 18 kg." % [UiStyle.fmt(w), roundi((1.0 - factor) * 100.0)]})
+		out.append({"id": "load", "icon": "weight", "level": lv2, "title": "Carga pesada" if lv2 == 1 else "Sobrecarregado", "text": "%s kg na mochila: %d%% mais lento.\n%s" % [UiStyle.fmt(w), roundi((1.0 - factor) * 100.0), load_rule(game)]})
 	var hunters: int = 0
 	for enemy in game.enemies:
 		if enemy.alive and enemy.aggro:
@@ -61,13 +63,21 @@ func compute() -> Array:
 	if hunters > 0:
 		out.append({"id": "hunted", "icon": "eye", "level": 2 if hunters == 1 else 3, "title": "Perseguido", "text": ("Um monstro está atrás de você." if hunters == 1 else "%d monstros estão atrás de você." % hunters) + "\nNo abrigo eles desistem e não atacam."})
 	if p.sneaking:
-		var sight: float = 7.5 * p.detection_mult()
-		out.append({"id": "sneak", "icon": "eye_off", "level": 0, "title": "Furtivo", "text": "Um monstro comum te nota a %s m de frente e %s m por trás\n(de pé: 7,5 m). Ataque em desprevenido: dano ×%s.  [C] levanta." % [UiStyle.fmt(sight), UiStyle.fmt(sight * 0.6), UiStyle.fmt(game.sheet.sneak_attack_mult(), 1)]})
+		var sight: float = DungeonEnemy.SIGHT * p.detection_mult()
+		out.append({"id": "sneak", "icon": "eye_off", "level": 0, "title": "Furtivo", "text": "Um monstro comum te nota a %s m de frente e %s m por trás\n(de pé: %s m). Ataque em desprevenido: dano ×%s.  [C] levanta." % [UiStyle.fmt(sight), UiStyle.fmt(sight * 0.6), UiStyle.num(DungeonEnemy.SIGHT), UiStyle.fmt(game.sheet.sneak_attack_mult(), 1)]})
 	if p.can_block():
 		out.append({"id": "guard", "icon": "shield", "level": 0, "title": "Em guarda", "text": "Golpes de frente perdem %d%% do dano; cada bloqueio gasta fôlego.\nNão segura a pancada em área do capataz." % roundi(game.sheet.block_reduction(game.inventory.equipped) * 100)})
 	if game.is_safe():
 		out.append({"id": "safe", "icon": "tent", "level": 0, "title": "No abrigo", "text": "Monstros não atacam aqui.\nNo ponto de descanso, E salva a expedição."})
 	return out
+
+## What a bandage heals for this adventurer (Tratamento makes it more).
+static func bandage_heal(owner_game) -> int:
+	return roundi(float(Items.info("bandage").get("heal", 0.0)) * owner_game.sheet.heal_mult())
+
+## The weight rule for this adventurer (Força moves both limits).
+static func load_rule(owner_game) -> String:
+	return "Acima de %s kg o passo pesa; o limite é %s kg." % [UiStyle.num(owner_game.inventory.comfort), UiStyle.num(owner_game.inventory.capacity)]
 
 func refresh() -> void:
 	var list: Array = compute()
