@@ -186,16 +186,7 @@ static func build(game) -> void:
 	for area in front_tall:
 		_batch(world, "parede_frente_alta", front_tall[area], "parede", area).set_meta("frente", "alta")
 	apply_view(world, game.camera_rig != null and game.camera_rig.third_person())
-	var body := StaticBody3D.new()
-	body.name = "Paredes"
-	world.add_child(body)
-	var box := BoxShape3D.new()
-	box.size = Vector3(2, 3, 2)
-	for cell in walls:
-		var shape := CollisionShape3D.new()
-		shape.shape = box
-		shape.position = layout.to_world(cell) + Vector3(0, 1.5, 0)
-		body.add_child(shape)
+	_wall_colliders(world, walls)
 	# Furniture is placed against room boundaries, outside the navigation lane.
 	for entry in layout.world["furniture"]:
 		var cell: Vector2i = DungeonLayout.cell(entry["cell"])
@@ -230,6 +221,54 @@ static func build(game) -> void:
 		var stairs = prop(world, "escada", layout.to_world(down), _stairs_turn(layout, down))
 		stairs.name = "EscadaDesce"
 		game.stairs_sign = _sign(world, "DESCIDA", layout.to_world(down) + Vector3(0, 1.8, 0), Color("d98a6a"))
+
+## Colliders of the wall cells: runs of neighbouring cells along each row, and
+## runs that repeat on the rows below joined into one box, instead of one box
+## per cell (thousands on big floors). The same space is covered.
+static func _wall_colliders(world: Node3D, walls: Dictionary) -> StaticBody3D:
+	var body := StaticBody3D.new()
+	body.name = "Paredes"
+	world.add_child(body)
+	var rows: Dictionary = {}
+	for cell in walls:
+		if not rows.has(cell.y):
+			rows[cell.y] = []
+		rows[cell.y].append(cell.x)
+	# Runs along the rows: (first x, last x) -> the rows that have that run.
+	var runs: Dictionary = {}
+	for y in rows:
+		var xs: Array = rows[y]
+		xs.sort()
+		var first: int = xs[0]
+		for i in xs.size():
+			if i < xs.size() - 1 and xs[i + 1] == xs[i] + 1:
+				continue
+			var key := Vector2i(first, xs[i])
+			if not runs.has(key):
+				runs[key] = []
+			runs[key].append(y)
+			if i < xs.size() - 1:
+				first = xs[i + 1]
+	var boxes: Dictionary = {}
+	for key in runs:
+		var ys: Array = runs[key]
+		ys.sort()
+		var top: int = ys[0]
+		for i in ys.size():
+			if i < ys.size() - 1 and ys[i + 1] == ys[i] + 1:
+				continue
+			var cells := Vector2i(key.y - key.x + 1, ys[i] - top + 1)
+			if not boxes.has(cells):
+				var box := BoxShape3D.new()
+				box.size = Vector3(cells.x * DungeonLayout.CELL, 3, cells.y * DungeonLayout.CELL)
+				boxes[cells] = box
+			var shape := CollisionShape3D.new()
+			shape.shape = boxes[cells]
+			shape.position = Vector3((key.x + key.y) * 0.5 * DungeonLayout.CELL, 1.5, (top + ys[i]) * 0.5 * DungeonLayout.CELL)
+			body.add_child(shape)
+			if i < ys.size() - 1:
+				top = ys[i + 1]
+	return body
 
 ## Faces the stairs into the room from the wall they lean on.
 static func _stairs_turn(layout, cell: Vector2i) -> float:
