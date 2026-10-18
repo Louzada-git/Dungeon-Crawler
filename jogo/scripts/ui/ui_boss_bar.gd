@@ -2,14 +2,14 @@ extends VBoxContainer
 class_name UiBossBar
 ## Boss name and health across the top of the screen while it is fighting.
 
-var game
+var game: DungeonGame
 var title: Label
 var state: Label
 var bar: Control
 var _shown_health: float = 1.0
 var _target: DungeonEnemy
 
-func _init(game_ref) -> void:
+func _init(game_ref: DungeonGame) -> void:
 	game = game_ref
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_theme_constant_override("separation", 3)
@@ -32,9 +32,9 @@ func _init(game_ref) -> void:
 
 func refresh() -> void:
 	var b: DungeonEnemy = game.boss() if game.has_method("boss") else null
-	var show: bool = b != null and b.alive and b.aggro and not game.ended
-	visible = show
-	if not show:
+	var shown: bool = b != null and b.alive and b.aggro and not game.ended
+	visible = shown
+	if not shown:
 		_target = null
 		return
 	if _target != b:
