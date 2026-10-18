@@ -57,6 +57,8 @@ var bleed_path: Array = []
 var stuck: Dictionary = {}
 ## What sneaking near this monster can still teach (Furtividade).
 var sneak_budget: float = 0.0
+## Far from the adventurer and not hunting: hidden, and its animation stopped.
+var asleep: bool = false
 
 func _ready() -> void:
 	stats = EnemyTypes.info(kind)
@@ -121,9 +123,12 @@ func _physics_process(delta: float) -> void:
 	var player = game.player
 	var distance: float = global_position.distance_to(player.global_position)
 	if distance > SLEEP_DISTANCE and not aggro:
-		visible = false
+		_sleep(true)
 		return
-	visible = distance < 20 and game.clear_line(player.global_position, global_position)
+	_sleep(false)
+	# One ray a frame: it decides whether the monster is drawn and whether it sees you.
+	var can_see: bool = game.clear_line(global_position, player.global_position)
+	visible = distance < 20 and can_see
 	health_label.visible = not boss and (aggro or health < maximum_health)
 	health_label.text = "%s  %d%s" % [display_name(), ceil(health), "  · sangrando" if bleed_time > 0 else ""]
 	health_label.modulate = Color("ff8f7a") if bleed_time > 0 else Color("ecb9a7")
@@ -154,7 +159,6 @@ func _physics_process(delta: float) -> void:
 		_lean(attack_recovery / 0.30)
 	elif visual.position.x != 0.0 or visual.position.z != 0.0:
 		_lean(0.0)
-	var can_see: bool = game.clear_line(global_position, player.global_position)
 	var sight: float = float(stats.get("sight", SIGHT))
 	if not game.is_safe() and distance < sight * player.detection_mult(self) and can_see:
 		aggro = true
@@ -201,7 +205,18 @@ func _physics_process(delta: float) -> void:
 		game.sound.play_at("step", global_position, 0.22 if not boss else 0.5)
 		step_time = 0.55
 
+## Big floors hold hundreds of monsters: the far ones stop drawing and animating.
+func _sleep(on: bool) -> void:
+	if on == asleep:
+		return
+	asleep = on
+	if on:
+		visible = false
+	if animator:
+		animator.active = not on
+
 func _begin_attack(player) -> void:
+	_sleep(false)
 	slamming = boss and attacks_done % 3 == 2
 	windup = float(stats.get("slam_windup", 1.1)) if slamming else float(stats.get("windup", 0.65))
 	if enraged:
@@ -248,6 +263,7 @@ func _lean(amount: float) -> void:
 func receive_damage(amount: float, direction: Vector3 = Vector3.ZERO, hit: Dictionary = {}) -> void:
 	if not alive:
 		return
+	_sleep(false)
 	health -= amount
 	# Bosses flinch briefly instead of being stun-locked; the others are stunned
 	# and lose their attack, then stay steady for a while.
@@ -306,6 +322,9 @@ func _die() -> void:
 		return
 	alive = false
 	bleed_time = 0
+	# A body stays where it fell, drawn even when it died far away (bleeding).
+	_sleep(false)
+	visible = true
 	_lean(0.0)
 	collision_layer = 0
 	collision_mask = 0
