@@ -5,6 +5,8 @@ class_name DungeonEnemy
 ## half health. Monsters far from the player sleep to keep big floors cheap.
 
 const SLEEP_DISTANCE := 26.0
+## How far a monster sees when its type does not say ("sight" in inimigos.json).
+const SIGHT := 7.5
 
 var game
 var enemy_id: int
@@ -153,7 +155,7 @@ func _physics_process(delta: float) -> void:
 	elif visual.position.x != 0.0 or visual.position.z != 0.0:
 		_lean(0.0)
 	var can_see: bool = game.clear_line(global_position, player.global_position)
-	var sight: float = float(stats.get("sight", 7.5))
+	var sight: float = float(stats.get("sight", SIGHT))
 	if not game.is_safe() and distance < sight * player.detection_mult(self) and can_see:
 		aggro = true
 		last_seen = player.global_position
