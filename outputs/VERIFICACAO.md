@@ -236,3 +236,18 @@ Caminhos de um, dois ou três ramos andam no mesmo ritmo. Trocar de espada no 3�
 - Alcance medido de novo (`tools/medir_alcance.gd`), mudanças de até 0,1 m; tabela de `jogo/BALANCO.md` refeita.
 - Suíte do mundo fixo: **983 verificações, zero falhas**; suíte do labirinto: **53, zero falhas**. Na primeira rodada, três falharam: a adaga com a lâmina para cima não alcançava o monstro a 1,1 m e a maça passava a 0,53 m do eixo do monstro a 1,2 m (limite 0,52). Novas: os quatro jeitos de carregar têm todas as animações; mãos vazias têm as próprias; cada tipo de arma escolhe a variante certa parado e andando; o cabo atravessa o punho sem giro extra.
 - Executável Linux exportado abre e roda 400 quadros sem erro.
+
+## Revisão do código — 18/10/2026
+
+- Pedido: arrumar os itens 1 a 14 da análise do código (bugs visíveis, desempenho e organização).
+- Medições antes e depois (scripts temporários, rodando o jogo sem tela):
+  - golpe dado ao começar a andar: a animação chegava em 0,49 s para um dano em 0,22 s; agora chega em 0,22 s;
+  - gerar o 7º andar: 23 s → 0,58 s; 8º andar: cerca de 3 min (estimado) → 1,2 s; 9º: 2,9 s;
+  - mesma semente, mesmo labirinto: impressões digitais de 25 andares (4 sementes, andares 1 a 6, e o 7º de uma) iguais às de antes;
+  - luzes por lote de chão e parede no 2º andar: no máximo 4 tochas (o limite do renderizador é 8); a mesma sala renderizada fica igual à feita com o limite de luzes aumentado (diferença média de 0,1 a 0,2 em 255, antes 0,3 a 3,4);
+  - lógica por quadro (processo/física, sem desenho): 6º andar de 5,5–10 / 4,3–8 ms para 3–4 / 3 ms; 1º andar de 2,5–3,7 para 1,2 ms;
+  - colisores de parede no 2º andar: 711 células em 141 caixas.
+- Avisos do Godot (pelo servidor de linguagem do editor, em 77 scripts): 64 → 0.
+- Suíte do mundo fixo: **994 verificações, zero falhas**; suíte do labirinto: **61, zero falhas**. Novas: golpe e garra não herdam o ritmo da caminhada (o teste antigo descontava esse valor e por isso não pegava o erro); mudar a mochila sem trocar de arma não recria o modelo; a janela T não se refaz com experiência sem nível novo e se refaz com nível novo; os textos de fome, sangramento, carga e esquiva seguem os números e a barra; o mapa grande dá zoom, anda e abre centralizado; impressões digitais do labirinto e 7º andar em segundos; andar visitado não é gerado de novo; lotes por área com no máximo 7 tochas; paredes em blocos cobrindo todas as células; sala de cada célula igual à busca antiga; monstros longe dormindo; chefe guardado; aviso e tecla E vindos da mesma decisão.
+- Capturas conferidas: tochas antes e depois (`revisao/melhorias/`), labirinto (combate, chefe, mapa com a dica de zoom, 2º andar) e terceira pessoa.
+
