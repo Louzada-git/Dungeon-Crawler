@@ -4,7 +4,7 @@ class_name ItemUse
 ## Effects come from the item data (food, stamina_gain, heal, stops_bleeding,
 ## revela_mapa). Food that also has "heal" heals when eaten.
 
-static func use(game, id: String) -> bool:
+static func use(game: DungeonGame, id: String) -> bool:
 	var inventory = game.inventory
 	var player = game.player
 	if inventory.count(id) <= 0:
