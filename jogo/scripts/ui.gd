@@ -6,7 +6,7 @@ extends CanvasLayer
 const HELP_ROWS := [
 	[["W", "A", "S", "D"], "Mover (setas também)"],
 	[["Shift"], "Correr — gasta fôlego"],
-	[["Espaço"], "Esquivar — 12,5 de fôlego"],
+	[["Espaço"], "@esquiva"],
 	[["Botão dir."], "Mirar e erguer a guarda"],
 	[["Mouse"], "Terceira pessoa: virar a câmera  ·  Alt solta o cursor"],
 	[["C"], "Andar furtivo (agachado)"],
@@ -68,6 +68,8 @@ var pause_note: Label
 var controls_box: Control
 ## Key caps of the habilidade row in the controls list.
 var technique_help_keys: HBoxContainer
+## The dodge line of the controls list (its cost changes with Agilidade and Acrobacia).
+var dodge_help: Label
 var sound_button: Button
 var psx_button: Button
 var camera_button: Button
@@ -420,7 +422,11 @@ func _build_pause() -> void:
 			for key in entry[0]:
 				keys.add_child(UiStyle.keycap(key, 12))
 		grid.add_child(keys)
-		grid.add_child(UiStyle.label(entry[1], 13, UiStyle.TEXT))
+		var line := UiStyle.label(entry[1], 13, UiStyle.TEXT)
+		if entry[1] == "@esquiva":
+			dodge_help = line
+			line.text = dodge_text()
+		grid.add_child(line)
 
 func _build_ending() -> void:
 	ending_panel = UiWindow.new("Fim da incursão", UiIcon.new("flag", UiStyle.TEXT), 640, 330, false)
@@ -786,11 +792,16 @@ func toggle_pause() -> void:
 	pause_title.text = "Um momento de respiro"
 	pause_note.text = ""
 	controls_box.modulate.a = 1.0
+	dodge_help.text = dodge_text()
 	modal.show()
 	dim.show()
 	pause_panel.show()
 	get_tree().paused = true
 	update_hud()
+
+## "Esquivar — 11,5 de fôlego", with what the dodge costs this adventurer now.
+func dodge_text() -> String:
+	return "Esquivar — %s de fôlego" % UiStyle.num(game.player.dodge_cost())
 
 func confirm_restart() -> void:
 	if pause_confirm:
