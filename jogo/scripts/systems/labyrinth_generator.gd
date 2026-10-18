@@ -215,32 +215,48 @@ static func _center(r: Rect2i) -> Vector2i:
 	return r.position + r.size / 2
 
 ## Minimum spanning tree over room centers plus a few loops for shortcuts.
+## Prim's tree in O(n²): every room outside the tree keeps its nearest room in
+## the tree. Ties go the way the first version (an O(n³) search) went, to the
+## room that joined the tree first and then the lowest index, so every seed keeps
+## the labyrinth it always had (saves and the explored map depend on it).
 static func _connect(rng: RandomNumberGenerator, rects: Array, floor: int) -> Array:
 	var n: int = rects.size()
+	var centers: Array = []
+	for r in rects:
+		centers.append(Vector2(_center(r)))
 	var edges: Array = []
-	var in_tree: Array = [0]
 	var linked: Dictionary = {}
-	while in_tree.size() < n:
-		var best: Array = []
-		var best_d: float = INF
-		for a in in_tree:
-			for b in n:
-				if in_tree.has(b):
-					continue
-				var d: float = Vector2(_center(rects[a])).distance_to(Vector2(_center(rects[b])))
-				if d < best_d:
-					best_d = d
-					best = [a, b]
-		edges.append(best)
-		linked["%d-%d" % [mini(best[0], best[1]), maxi(best[0], best[1])]] = true
-		in_tree.append(best[1])
+	var joined_at := PackedInt32Array()
+	joined_at.resize(n)
+	joined_at.fill(-1)
+	var best := PackedFloat64Array()
+	best.resize(n)
+	var nearest := PackedInt32Array()
+	nearest.resize(n)
+	joined_at[0] = 0
+	for b in n:
+		best[b] = centers[0].distance_to(centers[b])
+		nearest[b] = 0
+	for joined in range(1, n):
+		var pick: int = -1
+		for b in n:
+			if joined_at[b] >= 0:
+				continue
+			if pick < 0 or best[b] < best[pick] or (best[b] == best[pick] and joined_at[nearest[b]] < joined_at[nearest[pick]]):
+				pick = b
+		var a: int = nearest[pick]
+		edges.append([a, pick])
+		linked["%d-%d" % [mini(a, pick), maxi(a, pick)]] = true
+		joined_at[pick] = joined
+		for b in n:
+			if joined_at[b] < 0:
+				var d: float = centers[pick].distance_to(centers[b])
+				if d < best[b]:
+					best[b] = d
+					nearest[b] = pick
 	var loop_chance: float = 0.14 + 0.03 * mini(floor - 1, 4)
 	for a in n:
-		var near: Array = []
-		for b in n:
-			if b != a:
-				near.append([Vector2(_center(rects[a])).distance_to(Vector2(_center(rects[b]))), b])
-		near.sort_custom(func(x, y): return x[0] < y[0])
+		var near: Array = _two_nearest(centers, a)
 		for k in mini(2, near.size()):
 			var b: int = near[k][1]
 			var key := "%d-%d" % [mini(a, b), maxi(a, b)]
@@ -248,6 +264,42 @@ static func _connect(rng: RandomNumberGenerator, rects: Array, floor: int) -> Ar
 				linked[key] = true
 				edges.append([a, b])
 	return edges
+
+## The two rooms nearest to room `a`, nearest first, as [distance, index]. A
+## linear pass; only when distances tie around the first two places does it
+## sort the whole list as the first version did, so the result never changes.
+static func _two_nearest(centers: Array, a: int) -> Array:
+	var d1: float = INF
+	var d2: float = INF
+	var d3: float = INF
+	var i1: int = -1
+	var i2: int = -1
+	for b in centers.size():
+		if b == a:
+			continue
+		var d: float = centers[a].distance_to(centers[b])
+		if d < d1:
+			d3 = d2
+			d2 = d1
+			i2 = i1
+			d1 = d
+			i1 = b
+		elif d < d2:
+			d3 = d2
+			d2 = d
+			i2 = b
+		elif d < d3:
+			d3 = d
+	if i2 < 0:
+		return [] if i1 < 0 else [[d1, i1]]
+	if d1 < d2 and d2 < d3:
+		return [[d1, i1], [d2, i2]]
+	var near: Array = []
+	for b in centers.size():
+		if b != a:
+			near.append([centers[a].distance_to(centers[b]), b])
+	near.sort_custom(func(x, y): return x[0] < y[0])
+	return near
 
 ## Two-cell wide L-shaped corridors between connected rooms.
 static func _corridors(rng: RandomNumberGenerator, rects: Array, edges: Array) -> Array:
