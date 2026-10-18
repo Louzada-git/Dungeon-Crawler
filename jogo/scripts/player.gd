@@ -12,7 +12,7 @@ const BLEED_PER_SECOND: float = 0.5
 const STARVE_PER_SECOND: float = 0.2
 ## At or below this much food the stamina recovers slowly.
 const HUNGRY: float = 10.0
-var game
+var game: DungeonGame
 var visual: Node3D
 var animator: AnimationPlayer
 ## Character model (assets/originais/<id>.glb) and where its hands and torso are.
@@ -271,13 +271,9 @@ func request_attack() -> void:
 ## seconds. The walk leaves its own pace in speed_scale (slower while speeding
 ## up or carrying weight), which would stretch the action: it goes back to 1.
 func animate_action(anim_name: String, duration: float) -> void:
-	if anim_name in ["hit", "attack", "stab"] and animator and animator.has_animation("mixamo_"+anim_name):
-		anim_name = "mixamo_"+anim_name
 	if animator and animator.has_animation(anim_name):
 		animator.speed_scale = 1.0
-		animator.play(anim_name,0.0 if anim_name in ["mixamo_attack", "mixamo_stab"] else 0.07,animator.get_animation(anim_name).length/duration)
-		if anim_name in ["mixamo_attack", "mixamo_stab"]:
-			animator.seek(0.0,true)
+		animator.play(anim_name,0.07,animator.get_animation(anim_name).length/duration)
 
 func _physics_process(delta: float) -> void:
 	if health <= 0:
@@ -360,7 +356,7 @@ func _physics_process(delta: float) -> void:
 	# One-shot actions start only on entry; they are not restarted on every frame.
 	if hurt_timer <= 0 and attack_timer <= 0 and dodge_timer <= 0:
 		var pose: Array = locomotion(horizontal.length())
-		Visuals.play(animator,pose[0],pose[1],pose[2])
+		Visuals.play(animator,pose[0],pose[2])
 	step_time -= delta
 	if horizontal.length() > 0.5 and dodge_timer <= 0 and step_time <= 0:
 		game.sound.play_at("step",global_position,0.48 if sprinting else (0.1 if sneaking else 0.28))
@@ -455,9 +451,9 @@ func use_technique(slot: int, aim: bool = true) -> bool:
 func attack_animation(weapon: Dictionary) -> String:
 	return attack_animation_for(weapon,animator)
 
-static func attack_animation_for(weapon: Dictionary, animator: AnimationPlayer) -> String:
+static func attack_animation_for(weapon: Dictionary, anim_player: AnimationPlayer) -> String:
 	var wanted: String = str(weapon.get("animacao",""))
-	if wanted != "" and animator and animator.has_animation(wanted):
+	if wanted != "" and anim_player and anim_player.has_animation(wanted):
 		return wanted
 	match str(weapon.get("style","slash")):
 		"thrust":
@@ -597,5 +593,5 @@ func die() -> void:
 	health = 0
 	attack_wait = 0
 	attack_buffer = 0
-	Visuals.play(animator,"die",false)
+	Visuals.play(animator,"die")
 	game.end_run(false)
