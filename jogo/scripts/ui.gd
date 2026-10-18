@@ -1,4 +1,5 @@
 extends CanvasLayer
+class_name DungeonUI
 ## HUD root. Layout and reading follow Project Zomboid: tool bar on the left,
 ## collapsible inventory windows at the top, condition and status indicators
 ## on the right, quick slots at the bottom. Pieces live in scripts/ui/.
@@ -20,7 +21,7 @@ const HELP_ROWS := [
 	[["F5"], "Salvar  ·  Esc: pausa"],
 ]
 
-var game
+var game: DungeonGame
 var root: Control
 var hud: Control
 var modal: Control
@@ -506,7 +507,7 @@ func update_hud(every_frame: bool = false) -> void:
 	_update_hands()
 	var area: String = game.layout.room_name(game.player.position)
 	if game.generated:
-		area = "%dº andar  ·  %s" % [game.floor, area]
+		area = "%dº andar  ·  %s" % [game.current_floor, area]
 	if area_label.text != area:
 		area_label.text = area
 	objective.text = game.objective_text()
@@ -788,7 +789,7 @@ func toggle_map() -> void:
 	modal.show()
 	dim.show()
 	map_panel.show()
-	map_panel.set_title("Mapa explorado  ·  %dº andar" % game.floor if game.generated else "Mapa explorado  ·  As Cisternas")
+	map_panel.set_title("Mapa explorado  ·  %dº andar" % game.current_floor if game.generated else "Mapa explorado  ·  As Cisternas")
 	full_map.recenter()
 	get_tree().paused = true
 	update_hud()
@@ -889,7 +890,7 @@ func show_ending(success: bool) -> void:
 		child.queue_free()
 	var rows: Array = []
 	if game.generated and not success:
-		end_title.text = "Você morreu no %dº andar" % game.floor
+		end_title.text = "Você morreu no %dº andar" % game.current_floor
 		end_note.text = "O labirinto continua o mesmo. Você recomeça do zero, mas o mapa que explorou fica com você."
 		rows = [["Andar mais fundo", "%dº" % game.deepest], ["Monstros derrotados", str(game.kills)], ["Moedas na mochila", str(game.inventory.count("coin"))], ["Golpes recebidos", str(game.hits_received)]]
 		_end_button("Recomeçar no mesmo labirinto", func(): game.restart_same())
