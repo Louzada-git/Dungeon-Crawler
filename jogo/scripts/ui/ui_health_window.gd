@@ -169,7 +169,7 @@ func refresh() -> void:
 		figure.set_state(p.health / p.max_health * 100.0, p.bleeding)
 		var cond: Array = condition_name(p.health, p.bleeding)
 		summary.text = cond[0]
-		summary.add_theme_color_override("font_color", cond[1])
+		UiStyle.set_color(summary, cond[1])
 		for key in rows:
 			var v: float = p.get(key)
 			var top: float = {"health": p.max_health, "stamina": p.max_stamina}.get(key, 100.0)
@@ -178,10 +178,10 @@ func refresh() -> void:
 			rows[key][1].value = v
 			UiStyle.set_bar_color(rows[key][1], UiStyle.value_color(v / top))
 		bleed_value.text = ("Sim  ·  −%s vida/s" % UiStyle.fmt(DungeonPlayer.BLEED_PER_SECOND, 1)) if p.bleeding else "Não"
-		bleed_value.add_theme_color_override("font_color", UiStyle.BAD if p.bleeding else UiStyle.GOOD)
+		UiStyle.set_color(bleed_value, UiStyle.BAD if p.bleeding else UiStyle.GOOD)
 		var w: float = game.inventory.weight()
 		load_value.text = "%s kg  ·  %s" % [UiStyle.fmt(w), "normal" if w <= game.inventory.comfort else "pesada"]
-		load_value.add_theme_color_override("font_color", UiStyle.TEXT if w <= game.inventory.comfort else UiStyle.WARN)
+		UiStyle.set_color(load_value, UiStyle.TEXT if w <= game.inventory.comfort else UiStyle.WARN)
 		var bandages: int = game.inventory.count("bandage")
 		var rations: int = game.inventory.count("ration")
 		bandage_button.text = "Bandagem  ·  %d %s" % [bandages, game.quick_bar.key_hint("bandage")]

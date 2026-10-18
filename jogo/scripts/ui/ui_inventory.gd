@@ -260,13 +260,13 @@ func _switch_to(entry: Dictionary) -> void:
 func update_bars() -> void:
 	var weight: float = game.inventory.weight()
 	weight_label.text = "%s / %s kg" % [UiStyle.fmt(weight), UiStyle.fmt(game.inventory.capacity, 0)]
-	weight_label.add_theme_color_override("font_color", UiStyle.TEXT if weight <= game.inventory.comfort else UiStyle.WARN)
+	UiStyle.set_color(weight_label, UiStyle.TEXT if weight <= game.inventory.comfort else UiStyle.WARN)
 	weight_meter.queue_redraw()
 	var target: Dictionary = loot if is_open else game.nearest_container()
 	if target.is_empty():
 		loot_window.set_title("Arredores")
 		loot_info.text = "nada por perto" if not is_open else ""
-		loot_info.add_theme_color_override("font_color", UiStyle.DIM)
+		UiStyle.set_color(loot_info, UiStyle.DIM)
 	else:
 		loot_window.set_title("Arredores  ·  " + str(target["name"]))
 		var count: int = 0
@@ -278,7 +278,7 @@ func update_bars() -> void:
 		loot_info.text = "" if is_open else (("%d %s  ·  %s kg" % [count, "item" if count == 1 else "itens", UiStyle.fmt(w)]) if count > 0 else "vazio")
 		if int(target.get("lock", 0)) > 0 and not is_open:
 			loot_info.text = "trancado"
-		loot_info.add_theme_color_override("font_color", UiStyle.ACCENT)
+		UiStyle.set_color(loot_info, UiStyle.ACCENT)
 	loot_window.title_bar.tooltip_text = "" if is_open else ("Vasculhar  [E]" if not target.is_empty() else "Abrir mochila  [I]")
 
 func _draw_weight() -> void:
