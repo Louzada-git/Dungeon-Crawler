@@ -1,4 +1,5 @@
 extends Node
+class_name GameAudio
 # Short original procedural sounds generated locally; bounded positional voices.
 var enabled: bool = true
 var streams: Dictionary = {}
