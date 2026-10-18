@@ -13,6 +13,10 @@ var camp_exit: Vector2i
 var relic: Vector2i
 var floors: Dictionary = {}
 var rooms: Array[Dictionary] = []
+## Index in `rooms` of each cell inside a room (the first room listed wins).
+## Finding the room of a position is asked many times per frame (every monster
+## checks the shelter), so it is a lookup instead of a walk over all rooms.
+var room_of_cell: Dictionary = {}
 var pathfinder = AStarGrid2D.new()
 
 static func load_world(id: String) -> Dictionary:
@@ -37,8 +41,13 @@ func _init(description: Dictionary = {}) -> void:
 	camp_exit = cell(world["camp_exit"])
 	for entry in world["rooms"]:
 		rooms.append({"id": entry["id"], "name": str(TranslationServer.translate(entry["name"])), "rect": rect(entry["rect"]), "safe": entry.get("safe", false)})
-	for room in rooms:
-		carve(room["rect"])
+	for i in rooms.size():
+		var r: Rect2i = rooms[i]["rect"]
+		carve(r)
+		for x in range(r.position.x, r.end.x):
+			for y in range(r.position.y, r.end.y):
+				if not room_of_cell.has(Vector2i(x, y)):
+					room_of_cell[Vector2i(x, y)] = i
 	for corridor in world["corridors"]:
 		carve(rect(corridor))
 	# Stone islands provide cover and make routes meaningful.
@@ -70,19 +79,17 @@ func to_cell(pos: Vector3) -> Vector2i:
 func is_floor(c: Vector2i) -> bool:
 	return floors.has(c)
 
+## The room a position is in, or {} in a corridor.
+func room_at(pos: Vector3) -> Dictionary:
+	var i: int = room_of_cell.get(to_cell(pos), -1)
+	return rooms[i] if i >= 0 else {}
+
 func is_safe(pos: Vector3) -> bool:
-	var c := to_cell(pos)
-	for room in rooms:
-		if room["safe"] and room["rect"].has_point(c):
-			return true
-	return false
+	return room_at(pos).get("safe", false)
 
 func room_name(pos: Vector3) -> String:
-	var c = to_cell(pos)
-	for room in rooms:
-		if room["rect"].has_point(c):
-			return room["name"]
-	return str(TranslationServer.translate("SALA_PASSAGEM"))
+	var room: Dictionary = room_at(pos)
+	return room["name"] if not room.is_empty() else str(TranslationServer.translate("SALA_PASSAGEM"))
 
 func route(from: Vector3, to: Vector3) -> Array[Vector2i]:
 	var a = to_cell(from)
