@@ -6,7 +6,7 @@ class_name DungeonMapView
 ## click. It is drawn when something changes, not every frame, and only the
 ## cells inside the window.
 
-var game
+var game: DungeonGame
 var large: bool = false
 ## Large map: zoom over the fitted scale, and how far it was dragged (in cells).
 var zoom: float = 1.0
