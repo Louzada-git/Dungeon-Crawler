@@ -8,7 +8,7 @@ class_name UiHotbar
 const ITEM_SIZE := Vector2(52, 60)
 const TECH_SIZE := Vector2(50, 60)
 
-var game
+var game: DungeonGame
 var ui
 var slots: Array = []
 var _last: Dictionary = {}
@@ -73,13 +73,13 @@ func _slot(index: int) -> void:
 	active.position = Vector2(4, ITEM_SIZE.y - 4)
 	active.size = Vector2(ITEM_SIZE.x - 8, 2)
 	active.visible = false
-	var flash := ColorRect.new()
-	flash.color = Color(1, 0.95, 0.8, 0)
-	flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	b.add_child(flash)
-	flash.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var shine := ColorRect.new()
+	shine.color = Color(1, 0.95, 0.8, 0)
+	shine.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	b.add_child(shine)
+	shine.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(b)
-	slots.append({"button": b, "texture": tex, "count": count, "active": active, "flash": flash, "item": ""})
+	slots.append({"button": b, "texture": tex, "count": count, "active": active, "flash": shine, "item": ""})
 
 func refresh() -> void:
 	for i in slots.size():
