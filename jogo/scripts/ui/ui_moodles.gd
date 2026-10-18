@@ -42,11 +42,15 @@ func compute() -> Array:
 		out.append({"id": "food", "icon": "bread", "level": 2, "title": "Faminto", "text": "Saciedade %d. O fôlego recupera %s por segundo em vez de %s.\n%s" % [ceili(p.food), UiStyle.fmt(p.stamina_regen(true), 1), UiStyle.fmt(p.stamina_regen(false), 1), ration]})
 	elif p.food <= 30:
 		out.append({"id": "food", "icon": "bread", "level": 1, "title": "Com fome", "text": "Saciedade %d. Ainda sem efeito; abaixo de %d\no fôlego passa a recuperar devagar." % [ceili(p.food), roundi(DungeonPlayer.HUNGRY)]})
-	var held: Dictionary = game.sheet.weapon_stats(game.inventory.equipped)
+	# Runs every frame: the item data (cached) is enough, the full numbers of the
+	# weapon (a deep copy with perks) only when stamina is near its cost.
+	var held: Dictionary = Items.info(game.inventory.equipped) if game.inventory.equipped != "" else CharacterSheet.base_stats("")
 	var ammo: String = game.ammo_for(held)
 	if ammo != "" and game.inventory.count(ammo) <= 0:
 		out.append({"id": "ammo", "icon": "arrow", "level": 2, "title": "Sem munição", "text": "%s sem %ss. Procure nos baús, no chão\nonde os disparos erraram e nos corpos dos monstros." % [str(held.get("name", "")), str(Items.info(ammo).get("name", ammo)).to_lower()]})
 	var cost: float = float(held.get("cost", 10.0))
+	if p.stamina < cost + 5.0:
+		cost = float(game.sheet.weapon_stats(game.inventory.equipped).get("cost", cost))
 	if p.stamina < cost:
 		out.append({"id": "stamina", "icon": "lungs", "level": 3, "title": "Exausto", "text": "Fôlego %d: abaixo dos %s que a arma exige por golpe.\nRecue e recupere o fôlego." % [floori(p.stamina), UiStyle.num(cost)]})
 	elif p.stamina < p.dodge_cost():
