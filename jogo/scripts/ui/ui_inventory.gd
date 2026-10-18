@@ -11,7 +11,7 @@ const HEIGHT := 396.0
 
 enum Action { USE, UNEQUIP, DROP_ONE, DROP_ALL, STORE_ONE, STORE_ALL, TAKE_ONE, TAKE_STACK, TAKE_EVERYTHING, USE_FROM_LOOT, QUICK_ADD, QUICK_REMOVE }
 
-var game
+var game: DungeonGame
 var ui
 var bag_window: UiWindow
 var loot_window: UiWindow
