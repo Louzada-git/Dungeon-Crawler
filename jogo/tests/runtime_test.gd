@@ -359,9 +359,9 @@ func run(target, capture: bool) -> void:
 	await test_techniques()
 	await test_vfx()
 	await test_balance()
-	await test_quick_bar()
+	test_quick_bar()
 	await test_new_items()
-	await test_shop()
+	test_shop()
 	test_characters()
 	await test_third_person()
 	var guardian = game.fixed_guardian()
@@ -976,7 +976,7 @@ func test_hitbox(at: Vector3, e0, e1, e2) -> void:
 	for id in Items.DATA:
 		if str(Items.DATA[id].get("style","")) in ["slash","thrust","smash"] and absf(Hitbox.reach(game,id)-float(Items.DATA[id]["range"])) > 0.06:
 			off.append(id)
-	check(off.is_empty() and absf(Hitbox.reach(game,"")-float(game.sheet.base_stats("")["range"])) <= 0.06,"Alcance mostrado nas armas e nos punhos é o da hitbox (tools/medir_alcance.gd) "+str(off))
+	check(off.is_empty() and absf(Hitbox.reach(game,"")-float(CharacterSheet.base_stats("")["range"])) <= 0.06,"Alcance mostrado nas armas e nos punhos é o da hitbox (tools/medir_alcance.gd) "+str(off))
 	# The swing is the animation's: the wind-up behind the back does not hit.
 	fresh(e0,at+Vector3(-0.9,0,0.3))
 	fresh(e1,game.layout.to_world(Vector2i(28,7)))
@@ -1026,7 +1026,7 @@ func test_hitbox(at: Vector3, e0, e1, e2) -> void:
 	check(behind,"Corte giratório leva a lâmina à volta inteira")
 	var longer: Dictionary = game.sheet.weapon_stats("sword").duplicate()
 	longer["range"] = float(longer["range"])+0.5
-	check(Hitbox.reach(game,"sword") < 1.7 and Hitbox.extras(game.sheet.base_stats("sword"),longer).x == 0.5,"Braço longo estica a lâmina da hitbox")
+	check(Hitbox.reach(game,"sword") < 1.7 and Hitbox.extras(CharacterSheet.base_stats("sword"),longer).x == 0.5,"Braço longo estica a lâmina da hitbox")
 	# Trail of the blade drawn from the same capsules.
 	var trails: int = game.get_children().filter(func(n): return n is MeshInstance3D and n.mesh is ImmediateMesh).size()
 	swing("sword",Vector3.RIGHT)
@@ -1586,7 +1586,7 @@ func test_techniques() -> void:
 	check(Techniques.open_slots(sheet,"corte","sword") == 3,"Domínio 11 na espada: Corte com 3 slots")
 	teach(sheet,"laminas",4)
 	var lam: int = sheet.level("laminas")
-	check(Techniques.form_unlocked(sheet,"corte_giratorio") and Techniques.open_slots(sheet,"corte_giratorio","sword") == mini(2,1 + (lam-4)/4),"Corte giratório destrava e ganha slots pelo nível de Lâminas")
+	check(Techniques.form_unlocked(sheet,"corte_giratorio") and Techniques.open_slots(sheet,"corte_giratorio","sword") == mini(2,1 + floori((lam-4)/4.0)),"Corte giratório destrava e ganha slots pelo nível de Lâminas")
 	teach(sheet,"laminas",3)
 	teach(sheet,"acrobacia",3)
 	teach(sheet,"hastes",3)
@@ -2060,7 +2060,7 @@ func test_balance() -> void:
 
 func press_key(code: int) -> void:
 	var key := InputEventKey.new()
-	key.physical_keycode = code
+	key.physical_keycode = code as Key
 	key.pressed = true
 	game.ui._input(key)
 
@@ -2335,9 +2335,9 @@ func test_shop() -> void:
 			walls += 1
 	check(entry_room.has_point(cell) and walls > 0 and layout.pathfinder.is_point_solid(cell),"Mercador fica na sala de entrada, encostado na parede, e bloqueia a passagem só da casa dele")
 	check(m.position.distance_to(game.camp_position) > 2.5 and cell != layout.spawn,"Mercador longe da fogueira e do ponto de chegada")
-	var stock: Dictionary = ShopSystem.roll_stock(game.seed,game.floor)
-	check(stock.has("ration") and stock.has("bandage") and stock.has("flecha") and ShopSystem.roll_stock(game.seed,game.floor) == stock,"Estoque traz o básico e é o mesmo para a mesma semente e andar")
-	var deep: Dictionary = ShopSystem.roll_stock(game.seed,6)
+	var stock: Dictionary = ShopSystem.roll_stock(game.labyrinth_seed,game.current_floor)
+	check(stock.has("ration") and stock.has("bandage") and stock.has("flecha") and ShopSystem.roll_stock(game.labyrinth_seed,game.current_floor) == stock,"Estoque traz o básico e é o mesmo para a mesma semente e andar")
+	var deep: Dictionary = ShopSystem.roll_stock(game.labyrinth_seed,6)
 	var only_deep: bool = false
 	for id in deep:
 		for e in ShopSystem.DATA["sorteio"]["entries"]:
@@ -2360,9 +2360,10 @@ func test_shop() -> void:
 	game.shop_stock = {"ration":3,"sword":1}
 	check(ShopSystem.buy(game,"ration",1) == 0,"Sem vinténs, não compra")
 	inv.add("coin",10)
-	var price: int = ShopSystem.buy_price(game.floor,"ration")
-	check(ShopSystem.buy(game,"ration",5) == mini(3,10/price) and inv.count("coin") == 10-price*mini(3,10/price),"Compra o que o dinheiro e o estoque deixam")
-	check(not game.shop_stock.has("ration") or int(game.shop_stock["ration"]) == 3-mini(3,10/price),"Estoque diminui com a compra")
+	var price: int = ShopSystem.buy_price(game.current_floor,"ration")
+	var affordable: int = mini(3,floori(10.0/price))
+	check(ShopSystem.buy(game,"ration",5) == affordable and inv.count("coin") == 10-price*affordable,"Compra o que o dinheiro e o estoque deixam")
+	check(not game.shop_stock.has("ration") or int(game.shop_stock["ration"]) == 3-affordable,"Estoque diminui com a compra")
 	# Selling: the weapon in hand and the armor worn stay.
 	inv.add("gema",2)
 	inv.add("sword")
@@ -2379,14 +2380,14 @@ func test_shop() -> void:
 	check(game.ui.shop_window.coins_label.text == "Vinténs: %d" % inv.count("coin") and game.ui.shop_window.stock_list.row_for("gema") != null and game.ui.shop_window.bag_list.row_for("coin") == null,"Janela mostra os vinténs, o estoque e a mochila (sem as moedas)")
 	var before_coins: int = inv.count("coin")
 	game.ui.shop_window.buy("gema",1)
-	check(inv.count("gema") == 1 and inv.count("coin") == before_coins-ShopSystem.buy_price(game.floor,"gema"),"Comprar pela janela")
+	check(inv.count("gema") == 1 and inv.count("coin") == before_coins-ShopSystem.buy_price(game.current_floor,"gema"),"Comprar pela janela")
 	# The stock goes in the save.
 	game.shop_stock = {"queijo":2}
 	game.ui.close_all()
 	check(game.save_game(false),"Salva com o estoque do mercador")
 	game.shop_stock = {}
 	check(game.load_game() and game.shop_stock == {"queijo":2},"Carregar devolve o estoque do mercador")
-	game.shop_stock = ShopSystem.roll_stock(game.seed,game.floor)
+	game.shop_stock = ShopSystem.roll_stock(game.labyrinth_seed,game.current_floor)
 	inv.restore(saved_inventory)
 	p.refresh_weapon()
 	ready_player(p)
@@ -2403,9 +2404,9 @@ func test_characters() -> void:
 		var model: String = str(info.get("model",""))
 		models[model] = true
 		var node: Node3D = Visuals.model(model)
-		var anim: AnimationPlayer = Visuals.animation(node)
+		var monster_anim: AnimationPlayer = Visuals.animation(node)
 		var needed: Array = ["idle","walk","guard","attack","hit","die"] + (["pancada"] if info.get("boss",false) else [])
-		var missing: Array = needed.filter(func(n): return anim == null or not anim.has_animation(n))
+		var missing: Array = needed.filter(func(n): return monster_anim == null or not monster_anim.has_animation(n))
 		check(ResourceLoader.exists("res://assets/originais/%s.glb" % model) and missing.is_empty() and str(info.get("tint","")) == "","Monstro %s usa o modelo %s com todas as animações" % [kind,model] + ("" if missing.is_empty() else " (faltam %s)" % ", ".join(missing)))
 		check(Animacoes.impact(model,"attack",0.0) > 0.2,"Golpe do %s tem momento de impacto conhecido" % kind)
 		node.free()
