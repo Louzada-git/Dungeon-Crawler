@@ -20,12 +20,7 @@ var room_of_cell: Dictionary = {}
 var pathfinder = AStarGrid2D.new()
 
 static func load_world(id: String) -> Dictionary:
-	var path := "res://data/mundos/%s.json" % id
-	var raw = JSON.parse_string(FileAccess.get_file_as_string(path))
-	if not raw is Dictionary:
-		push_error("Mundo inválido: " + path)
-		return {}
-	return raw
+	return DataFile.read("res://data/mundos/%s.json" % id)
 
 static func cell(value) -> Vector2i:
 	return Vector2i(int(value[0]), int(value[1]))
