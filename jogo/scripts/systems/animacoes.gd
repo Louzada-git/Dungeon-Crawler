@@ -8,11 +8,7 @@ const PATH := "res://data/animacoes.json"
 static var DATA: Dictionary = _load()
 
 static func _load() -> Dictionary:
-	var raw = JSON.parse_string(FileAccess.get_file_as_string(PATH))
-	if not raw is Dictionary:
-		push_error("Tabela de animações inválida: " + PATH)
-		return {}
-	return raw.get("modelos", {})
+	return DataFile.read(PATH, "modelos").get("modelos", {})
 
 ## Fraction of the animation where the blow lands; "fallback" when unknown.
 static func impact(model: String, anim: String, fallback: float) -> float:
