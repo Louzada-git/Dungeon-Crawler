@@ -22,7 +22,7 @@ static func prop(world: Node3D, id: String, pos: Vector3, rotation: float = 0.0,
 	node.rotation.y = rotation
 	return node
 
-static func environment(game) -> void:
+static func environment(game: DungeonGame) -> void:
 	var node := WorldEnvironment.new()
 	node.name = "Ambiente"
 	var env := Environment.new()
@@ -48,7 +48,7 @@ static func environment(game) -> void:
 	game.add_child(sun)
 
 ## Removes the current floor: scene, containers and monsters.
-static func clear(game) -> void:
+static func clear(game: DungeonGame) -> void:
 	if is_instance_valid(game.world_root):
 		game.world_root.queue_free()
 	for c in game.containers:
@@ -133,7 +133,7 @@ static func apply_view(world: Node3D, third_person: bool) -> void:
 static func front_walls(world: Node3D, which: String) -> Array:
 	return world.get_children().filter(func(n): return n.get_meta("frente", "") == which)
 
-static func build(game) -> void:
+static func build(game: DungeonGame) -> void:
 	var layout = game.layout
 	var world := Node3D.new()
 	world.name = "Dungeon"
@@ -371,7 +371,7 @@ static func campfire(world: Node3D, pos: Vector3) -> Node3D:
 
 ## The merchant of the floor, with a crate, a barrel and a sack beside him.
 ## His model is MERCHANT_MODEL ("mercador" once it exists, else the adventurer, tinted).
-static func merchant(game, pos: Vector3, facing_point: Vector3) -> Node3D:
+static func merchant(game: DungeonGame, pos: Vector3, facing_point: Vector3) -> Node3D:
 	var holder := Node3D.new()
 	holder.name = "Mercador"
 	game.world_root.add_child(holder)
@@ -402,7 +402,7 @@ static func merchant(game, pos: Vector3, facing_point: Vector3) -> Node3D:
 	_sign(holder, "MERCADOR", Vector3(0, 2.1, 0), Color("e2c98f"))
 	return holder
 
-static func add_container(game, data: Dictionary) -> Node3D:
+static func add_container(game: DungeonGame, data: Dictionary) -> Node3D:
 	var holder := Node3D.new()
 	game.add_child(holder)
 	holder.position = Vector3(data["pos"][0], 0, data["pos"][1])
