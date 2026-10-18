@@ -183,6 +183,13 @@ static func fmt(value: float, decimals: int = 1) -> String:
 	# Portuguese decimal comma.
 	return (("%." + str(decimals) + "f") % value).replace(".", ",")
 
+## Sets a colour of a control's theme only when it changes: every override
+## relays the control out, and the HUD refreshes every frame.
+static func set_color(node: Control, color: Color, key: String = "font_color") -> void:
+	if node.has_theme_color_override(key) and node.get_theme_color(key) == color:
+		return
+	node.add_theme_color_override(key, color)
+
 ## Whole numbers without decimals, others with one ("8,5", "16").
 static func num(value: float) -> String:
 	return "%d" % roundi(value) if is_equal_approx(value, roundf(value)) else fmt(value)
