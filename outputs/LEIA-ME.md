@@ -1,5 +1,17 @@
 # Dungepm — As Cisternas
 
+## Revisão do código: correções e desempenho (18/10/2026)
+
+- **Golpe andando:** o golpe dado logo depois de começar a andar herdava o ritmo lento da caminhada; a espada chegava em 0,49 s, depois do dano (0,22 s). Agora chega junto. Vale também para a esquiva e para a animação de levar dano.
+- **Tochas:** quase nenhuma iluminava o chão e as paredes em volta (o chão do andar inteiro era um objeto só, e o renderizador ilumina cada objeto com no máximo 8 luzes). Agora chão e paredes vão em blocos por área, e cada tocha ilumina o que está perto dela.
+- **Andares fundos sem travar:** descer para o 7º andar levava uns 23 s só para gerar o labirinto, e o 8º passaria de 3 minutos. Agora o 7º sai em menos de 1 s e o 8º em pouco mais de 1 s, com exatamente o mesmo labirinto para a mesma semente (saves e mapa explorado continuam valendo). Voltar a um andar já visitado não gera de novo.
+- **Textos com os números certos:** "Faminto" dizia que o fôlego recupera 6 em vez de 16 (são 7,8 e 20,8, mais com Destreza); o limite de carga aparecia sempre como 11 e 18 kg (muda com a Força); a esquiva aparecia sempre com 12,5 de fôlego (muda com Agilidade e Acrobacia); os avisos mandavam apertar [2] e [3] mesmo com a ração e a bandagem em outro espaço da barra. Agora tudo vem do aventureiro e da barra de verdade. A janela de condição mostra o dano da arma com o domínio, como o cartão "Em mãos".
+- **Janela de habilidades (T):** às vezes o clique não pegava enquanto você corria ou andava furtivo perto de um monstro, porque ela refazia os botões a cada quadro. Agora só se refaz quando um nível muda.
+- **Arma na mão:** comer, pegar um item ou atirar uma flecha recriava o modelo da arma na mão. Agora ele só muda quando você troca de arma.
+- **Mapa (M):** a roda do mouse dá zoom, arrastar move o mapa e um duplo clique volta ao centro. O mapa é desenhado só quando muda, não a cada quadro.
+- **Desempenho:** monstros longe dormem de verdade (somem e param de animar), cada monstro faz um teste de visão por quadro em vez de dois, saber em que sala você está deixou de percorrer todas as salas, o HUD atualiza a parte pesada 10 vezes por segundo, e as paredes têm cerca de 5 vezes menos colisores. No 6º andar a lógica do jogo caiu de 10 a 16 ms para uns 6 a 8 ms por quadro.
+- **Código:** o jogo tem uma classe com nome (`DungeonGame`) e todos os scripts a recebem com tipo; o Godot não mostra mais nenhum aviso (eram 64); um leitor só para os arquivos de dados, com erro claro quando um JSON quebra; código antigo removido (nomes de animação do rig velho, apelidos de modelos, a cena de estudo de arte).
+
 ## Pegada das armas e jeito de carregar (17/10/2026)
 
 - **A arma fica na mão fechada.** Antes a mão ficava aberta e a arma flutuava do lado (dava para ver na marreta e no machado). Agora o cabo atravessa o punho fechado, com os dedos em volta, e a lâmina ou a cabeça sai do lado do polegar.
