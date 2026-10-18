@@ -4,12 +4,15 @@ class_name Visuals
 static var cache: Dictionary = {}
 static var material_cache: Dictionary = {}
 
+## A model of assets/originais/<id>.glb, scaled by `factor` (scenes cached).
 static func model(id: String, factor: float = 1.0) -> Node3D:
-	var aliases = {"character-human":"aventureiro","character-orc":"corrompido","weapon-sword":"espada","weapon-spear":"lanca","pot":"vaso","potion":"bandagem","rocks":"rochas","stones":"rochas","coin":"moeda","key":"selo"}
-	var path = "res://assets/originais/%s.glb" % aliases.get(id,id)
-	if not cache.has(path):
+	var path: String = "res://assets/originais/%s.glb" % id
+	var first: bool = not cache.has(path)
+	if first:
 		cache[path] = load(path)
 	var instance: Node3D = cache[path].instantiate()
+	if first:
+		_set_loops(instance)
 	instance.scale = Vector3.ONE * factor
 	return instance
 
@@ -59,16 +62,33 @@ static func skeleton(root: Node) -> Skeleton3D:
 			return found
 	return null
 
-static func play(anim: AnimationPlayer, name: String, loop: bool = true, speed: float = 1.0) -> void:
-	name = {"attack-melee-right":"attack","sprint":"walk","holding-both":"idle"}.get(name,name)
-	if anim != null and name in ["hit","die"] and anim.has_animation("mixamo_"+name):
-		name = "mixamo_"+name
-	if anim == null or not anim.has_animation(name):
+## Animations that loop: standing, moving, guard, crouch, block and talking,
+## with their carry variants (idle_duas, walk_haste...). Every other one plays
+## once. Set once per model when it is first loaded: the animations are shared
+## by every copy of the model.
+const LOOPING := ["idle", "walk", "run", "guard", "furtivo", "furtivo_andar", "bloqueio", "falar"]
+const CARRY_SUFFIXES := ["_livre", "_duas", "_haste", "_besta", "_arco"]
+
+static func loops(anim_name: String) -> bool:
+	for suffix in CARRY_SUFFIXES:
+		if anim_name.ends_with(suffix):
+			return anim_name.trim_suffix(suffix) in LOOPING
+	return anim_name in LOOPING
+
+static func _set_loops(root: Node) -> void:
+	var anim: AnimationPlayer = animation(root)
+	if anim == null:
 		return
-	anim.get_animation(name).loop_mode = Animation.LOOP_LINEAR if loop else Animation.LOOP_NONE
+	for anim_name in anim.get_animation_list():
+		anim.get_animation(anim_name).loop_mode = Animation.LOOP_LINEAR if loops(anim_name) else Animation.LOOP_NONE
+
+## Plays an animation if it is not already playing, at `speed` (the walk's pace).
+static func play(anim: AnimationPlayer, anim_name: String, speed: float = 1.0) -> void:
+	if anim == null or not anim.has_animation(anim_name):
+		return
 	anim.speed_scale = speed
-	if anim.current_animation != name or not anim.is_playing():
-		anim.play(name, 0.12)
+	if anim.current_animation != anim_name or not anim.is_playing():
+		anim.play(anim_name, 0.12)
 
 static func collider(parent: Node3D, size: Vector3, pos: Vector3 = Vector3.ZERO) -> StaticBody3D:
 	var body = StaticBody3D.new()
@@ -132,7 +152,7 @@ static func item_model(id: String) -> Node3D:
 		return made
 	if data.has("blocks"):
 		return blocks(data["blocks"])
-	var node := model(str(data.get("model","coin")))
+	var node := model(str(data.get("model","moeda")))
 	if str(data.get("tint","")) != "":
 		tint(node,Color(data["tint"]))
 	return node
