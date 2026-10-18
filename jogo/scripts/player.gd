@@ -7,6 +7,11 @@ const DODGE_AFTER: float = 0.5
 ## Extra wait before the next blow, per kg of the weapon (martelo 6,5 kg: +0,65 s).
 ## Only the next blow waits: no slowdown, the dodge is not held.
 const DELAY_PER_KG: float = 0.1
+## Health lost per second while bleeding and while starving.
+const BLEED_PER_SECOND: float = 0.5
+const STARVE_PER_SECOND: float = 0.2
+## At or below this much food the stamina recovers slowly.
+const HUNGRY: float = 10.0
 var game
 var visual: Node3D
 var animator: AnimationPlayer
@@ -317,8 +322,7 @@ func _physics_process(delta: float) -> void:
 		speed = 5.7
 		stamina = maxf(0,stamina-game.sheet.stamina_rule("corrida",8.0)*delta*game.sheet.sprint_cost_mult())
 	elif attack_timer <= 0 and dodge_timer <= 0 and hurt_timer <= 0:
-		var regen: float = game.sheet.stamina_rule("recuperacao",20.8) if food > 10 else game.sheet.stamina_rule("recuperacao_com_fome",7.8)
-		stamina = minf(max_stamina,stamina+regen*game.sheet.stamina_regen_mult()*(1.0-game.sheet.armor_regen_penalty(armor))*delta)
+		stamina = minf(max_stamina,stamina+stamina_regen(food <= HUNGRY)*delta)
 	if sneaking:
 		speed *= 0.55
 	speed *= 1.0 - game.sheet.armor_speed_penalty(armor)
@@ -363,11 +367,17 @@ func _physics_process(delta: float) -> void:
 		step_time = 0.25 if sprinting else 0.42
 	food = maxf(0,food-delta*(0.07 if sprinting else 0.025)*game.sheet.hunger_mult())
 	if bleeding:
-		health = maxf(0,health-delta*0.5)
+		health = maxf(0,health-delta*BLEED_PER_SECOND)
 	if food <= 0:
-		health = maxf(0,health-delta*0.2)
+		health = maxf(0,health-delta*STARVE_PER_SECOND)
 	if health <= 0:
 		die()
+
+## Stamina recovered per second while resting from blows, fed or hungry, with
+## this adventurer's Destreza and the armor worn (the HUD texts show it too).
+func stamina_regen(hungry: bool) -> float:
+	var base: float = game.sheet.stamina_rule("recuperacao_com_fome",7.8) if hungry else game.sheet.stamina_rule("recuperacao",20.8)
+	return base*game.sheet.stamina_regen_mult()*(1.0-game.sheet.armor_regen_penalty(game.inventory.armor))
 
 ## Normal attack with the weapon in hand, or a technique when `stats` is given
 ## (Techniques.stats: same fields plus hits, dash and recarga).
