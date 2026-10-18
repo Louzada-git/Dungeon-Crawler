@@ -243,6 +243,17 @@ func unassign() -> void:
 			game.techniques.assign(i, "")
 	refresh(true)
 
+## The window shows levels, not raw experience, which grows every frame while
+## running or sneaking near a monster: rebuilding the buttons then would swallow
+## clicks. Levels of every branch and the mastery of the weapon in hand.
+func _levels_signature(weapon: String) -> String:
+	var parts: PackedStringArray = []
+	for branch in ProficiencyTree.DATA:
+		parts.append(str(game.sheet.level(branch)))
+	var path: Array = CharacterSheet.path_of(weapon)
+	parts.append("dominio:%d" % (game.sheet.mastery(path) if not path.is_empty() else 1))
+	return ",".join(parts)
+
 ## What grows this habilidade's slots, in words.
 func _slot_measure() -> String:
 	if Techniques.basic(selected):
@@ -254,7 +265,7 @@ func refresh(force: bool = false) -> void:
 		return
 	var book: TechniqueBook = game.techniques
 	var weapon: String = game.inventory.equipped
-	var sig: String = "%s|%s|%s|%s|%s" % [selected, JSON.stringify(book.snapshot()), weapon, locked(), JSON.stringify(game.sheet.xp)]
+	var sig: String = "%s|%s|%s|%s|%s" % [selected, JSON.stringify(book.snapshot()), weapon, locked(), _levels_signature(weapon)]
 	if sig == _signature and not force:
 		return
 	_signature = sig
