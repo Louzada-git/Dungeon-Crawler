@@ -15,8 +15,7 @@ static var OBJECTS: Dictionary = RAW.get("objetos", {})
 static var RULES: Dictionary = RAW.get("regras", {})
 
 static func _load() -> Dictionary:
-	var raw = JSON.parse_string(FileAccess.get_file_as_string("res://data/tecnicas.json"))
-	return raw if raw is Dictionary else {}
+	return DataFile.read("res://data/tecnicas.json", "formas")
 
 static func rule(key: String, fallback: float) -> float:
 	return float(RULES.get(key, fallback))
@@ -111,6 +110,7 @@ static func slot_step(form_id: String) -> int:
 
 static func open_slots(sheet: CharacterSheet, form_id: String, weapon_id: String) -> int:
 	var lv: int = slot_level(sheet, form_id, weapon_id)
+	@warning_ignore("integer_division")
 	return clampi(1 + maxi(0, lv - start_level(form_id)) / slot_step(form_id), 1, int(FORMS.get(form_id, {}).get("slots", 1)))
 
 ## Level (of the habilidade's own measure) that opens slot n (1-based).
@@ -197,7 +197,10 @@ static func apply(s: Dictionary, effect: Dictionary, style: String) -> void:
 		current *= float(effect["multiplica"])
 	elif effect.has("minimo"):
 		current = maxf(current, float(effect["minimo"]))
-	target[key] = int(roundi(current)) if key in ["targets", "pierce", "hits"] else current
+	if key in ["targets", "pierce", "hits"]:
+		target[key] = roundi(current)
+	else:
+		target[key] = current
 
 ## Short lines describing the result for the editor and tooltips. `held` is
 ## the weapon as it is without the habilidade (to show what changes in the blow).
