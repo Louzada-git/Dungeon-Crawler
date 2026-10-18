@@ -505,6 +505,22 @@ func test_hud() -> void:
 	check(by_id.has("hurt") and by_id["hurt"]["level"] == 2,"Vida 40 mostra nível 2 de ferimento")
 	check(by_id.has("food") and by_id["food"]["level"] == 2,"Saciedade 9 mostra fome com efeito no fôlego")
 	check(by_id.has("stamina") and by_id["stamina"]["title"] == "Ofegante","Fôlego 10 bloqueia esquiva (12,5) e mostra Ofegante")
+	# The texts use this adventurer's numbers, not the ones from when they were written.
+	var hungry_text: String = by_id["food"]["text"]
+	check(hungry_text.contains(UiStyle.fmt(p.stamina_regen(true),1)) and hungry_text.contains(UiStyle.fmt(p.stamina_regen(false),1)) and not hungry_text.contains("em vez de 16"),"Faminto mostra a recuperação de fôlego de verdade: " + hungry_text.get_slice("\n",0))
+	check(by_id["bleeding"]["text"].contains("[%d]" % (game.quick_bar.slot_of("bandage") + 1)) and by_id["hurt"]["text"].contains("restaura %d" % roundi(float(Items.info("bandage")["heal"]) * game.sheet.heal_mult())),"Sangramento aponta a tecla da bandagem na barra e quanto ela cura")
+	var bandage_slot: int = game.quick_bar.slot_of("bandage")
+	game.quick_bar.assign(6,"bandage")
+	var moved: String = game.ui.moodles.compute().filter(func(m): return m["id"] == "bleeding")[0]["text"]
+	game.quick_bar.assign(bandage_slot,"bandage")
+	check(moved.contains("[7]"),"Bandagem trocada de espaço: o texto acompanha a tecla nova")
+	var keep_limits: Vector2 = Vector2(inv.comfort, inv.capacity)
+	inv.comfort = 13.0
+	inv.capacity = 21.0
+	check(UiMoodles.load_rule(game).contains("13 kg") and UiMoodles.load_rule(game).contains("21 kg") and game.ui.status_panel.tip_text("load").contains("21 kg"),"Limites de carga nos textos acompanham a Força")
+	inv.comfort = keep_limits.x
+	inv.capacity = keep_limits.y
+	check(game.ui.dodge_text().contains(UiStyle.num(p.dodge_cost())),"Lista de controles mostra o custo da esquiva deste aventureiro: " + game.ui.dodge_text())
 	p.stamina = 5
 	check(game.ui.moodles.compute().filter(func(m): return m["id"] == "stamina")[0]["title"] == "Exausto","Fôlego abaixo do custo da arma mostra Exausto")
 	inv.add("ore",5)
