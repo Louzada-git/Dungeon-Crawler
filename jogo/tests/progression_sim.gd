@@ -12,8 +12,8 @@ class FakeEnemy:
 		level = l
 		maximum_health = float(EnemyTypes.info(k).get("health", 65.0)) * LabyrinthGenerator.scaling(l)["health"]
 
-func floor_kills(seed: int, floor: int) -> Array:
-	var desc: Dictionary = LabyrinthGenerator.generate(seed, floor)
+func floor_kills(labyrinth_seed: int, floor_number: int) -> Array:
+	var desc: Dictionary = LabyrinthGenerator.generate(labyrinth_seed, floor_number)
 	var regular: Array = []
 	var bosses: Array = []
 	for e in desc["enemies"]:
@@ -23,9 +23,9 @@ func floor_kills(seed: int, floor: int) -> Array:
 			regular.append(e["type"])
 	return regular.slice(0, roundi(regular.size() * 0.7)) + bosses
 
-func play(sheet: CharacterSheet, path: Array, kinds: Array, floor: int) -> void:
+func play(sheet: CharacterSheet, path: Array, kinds: Array, floor_number: int) -> void:
 	for kind in kinds:
-		var e := FakeEnemy.new(kind, floor)
+		var e := FakeEnemy.new(kind, floor_number)
 		sheet.award_damage(e, e.maximum_health, path)
 
 func _initialize() -> void:
@@ -37,19 +37,19 @@ func _initialize() -> void:
 	strong.reset({"forca": 9, "vigor": 4, "agilidade": 4, "destreza": 3})
 	var mixed := CharacterSheet.new()
 	print("SIM andar | " + " | ".join(paths.keys()) + " | Marreta com Força 9 | Espada reta → Sabre no 3º")
-	for floor in range(1, 8):
-		var kills: Array = floor_kills(777, floor)
+	for floor_number in range(1, 8):
+		var kills: Array = floor_kills(777, floor_number)
 		for name in paths:
-			play(sheets[name], paths[name], kills, floor)
-		play(strong, CharacterSheet.path_of("martelo"), kills, floor)
-		play(mixed, CharacterSheet.path_of("sword") if floor < 3 else CharacterSheet.path_of("katana"), kills, floor)
+			play(sheets[name], paths[name], kills, floor_number)
+		play(strong, CharacterSheet.path_of("martelo"), kills, floor_number)
+		play(mixed, CharacterSheet.path_of("sword") if floor_number < 3 else CharacterSheet.path_of("katana"), kills, floor_number)
 		var cells: PackedStringArray = []
 		for name in paths:
 			var s: CharacterSheet = sheets[name]
 			cells.append("%d (+%d%%)" % [s.mastery(paths[name]), roundi((s.damage_mult(paths[name]) - 1) * 100)])
 		cells.append("%d" % strong.mastery(CharacterSheet.path_of("martelo")))
 		cells.append("%d" % mixed.mastery(CharacterSheet.path_of("katana")))
-		print("SIM %d (%d mortes) | %s" % [floor, kills.size(), " | ".join(cells)])
+		print("SIM %d (%d mortes) | %s" % [floor_number, kills.size(), " | ".join(cells)])
 	# Grinding the first floor again and again.
 	var grinder := CharacterSheet.new()
 	var first: Array = floor_kills(777, 1)
