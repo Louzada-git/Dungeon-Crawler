@@ -8,7 +8,7 @@ const SLEEP_DISTANCE := 26.0
 ## How far a monster sees when its type does not say ("sight" in inimigos.json).
 const SIGHT := 7.5
 
-var game
+var game: DungeonGame
 var enemy_id: int
 var uid: String = ""
 var kind: String = "corrompido"
@@ -81,7 +81,7 @@ func _ready() -> void:
 	shape.shape = capsule
 	shape.position.y = capsule.height * 0.5 + 0.01
 	add_child(shape)
-	visual = Visuals.model(stats.get("model", "character-orc"), scale_factor)
+	visual = Visuals.model(stats.get("model", "afogado"), scale_factor)
 	add_child(visual)
 	var tint: String = str(stats.get("tint", ""))
 	if tint != "":
@@ -292,10 +292,10 @@ func receive_damage(amount: float, direction: Vector3 = Vector3.ZERO, hit: Dicti
 	if health <= 0:
 		_die()
 
-func apply_bleed(dps: float, time: float, path: Array = []) -> void:
+func apply_bleed(dps: float, time: float, wound_path: Array = []) -> void:
 	if not alive:
 		return
-	bleed_path = path
+	bleed_path = wound_path
 	bleed_dps = maxf(bleed_dps, dps)
 	bleed_time = maxf(bleed_time, time)
 
@@ -332,6 +332,6 @@ func _die() -> void:
 	telegraph.visible = false
 	if slam_ring:
 		slam_ring.visible = false
-	Visuals.play(animator, "die", false)
+	Visuals.play(animator, "die")
 	Vfx.burst(game, "fumaca_morte", global_position + Vector3(0, 0.7, 0), float(stats.get("scale", 1.0)))
 	game.enemy_defeated(self)
