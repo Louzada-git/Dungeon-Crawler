@@ -184,6 +184,7 @@ func run(target) -> void:
 	game.interact()
 	await frames(3)
 	check(game.floor == 1 and not game.boss_alive(), "Volta ao 1º andar com o chefe ainda derrotado")
+	check(game.floor_descriptions.has(2) and is_same(game.layout.world, game.floor_descriptions[1]), "Andar já visitado não é gerado de novo ao voltar")
 	check(game.merchant != null and game.merchant.position.distance_to(merchant_1) < 0.01 and int(game.shop_stock.get("ration", 0)) == shop_mark, "Mercador do 1º andar no mesmo lugar, com o estoque de antes")
 	check(game.player.position.distance_to(game.layout.to_world(game.stairs_down_cell())) < 3.0, "Chega ao lado da descida ao subir")
 	if chest_id != "":
@@ -259,6 +260,18 @@ func run(target) -> void:
 	var t1 := Time.get_ticks_msec()
 	var d3: Dictionary = LabyrinthGenerator.generate(777, 3)
 	check(LabyrinthGenerator.validate(d3).is_empty() and d3["rooms"].size() == 40, "3º andar gerado e válido (%d ms)" % (Time.get_ticks_msec() - t1))
+	# The same seed gives the same labyrinth as before the faster linking (18/10/2026):
+	# saves and the explored map depend on it.
+	var prints := {[777, 1]: "f895154f9ebcf4db5f26083c5cbc56d1", [777, 2]: "474809895286c87e6be41ea38592503b", [777, 3]: "472b83a722bb015731ecc6b6ad178a35", [4242, 5]: "167dfbcc2fdac91270330dbb564e4617", [123456789, 6]: "357e28f86e31de7566606311144a9345"}
+	var same: Array = []
+	for key in prints:
+		if JSON.stringify(LabyrinthGenerator.generate(key[0], key[1])).md5_text() == prints[key]:
+			same.append(key)
+	check(same.size() == prints.size(), "Mesma semente, mesmo labirinto de antes (%d de %d andares conferidos)" % [same.size(), prints.size()])
+	t1 = Time.get_ticks_msec()
+	var d7: Dictionary = LabyrinthGenerator.generate(4242, 7)
+	var gen7: int = Time.get_ticks_msec() - t1
+	check(d7["rooms"].size() == 400 and gen7 < 5000, "7º andar (400 salas) é gerado em segundos, não em meio minuto (%d ms)" % gen7)
 	# Locked chests across seeds: deeper floors have harder locks, the boss relic is never locked.
 	var locked_by_floor: Dictionary = {1: [], 3: []}
 	var relic_locked: bool = false
