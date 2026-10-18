@@ -15,7 +15,7 @@
    "style": "slash",
    "angle": 55.0,
    "targets": 3,
-   "model": "weapon-sword",
+   "model": "espada",
    "name": "ITEM_SWORD_NOME",
    "description": "ITEM_SWORD_DESC",
    "proficiencias": [
@@ -41,7 +41,7 @@
    "angle": 7.0,
    "width": 0.34,
    "targets": 1,
-   "model": "weapon-spear",
+   "model": "lanca",
    "name": "ITEM_SPEAR_NOME",
    "description": "ITEM_SPEAR_DESC",
    "proficiencias": [
@@ -59,7 +59,7 @@
    "weight": 0.45,
    "food": 35.0,
    "stamina_gain": 12.0,
-   "model": "pot",
+   "model": "vaso",
    "name": "ITEM_RATION_NOME",
    "description": "ITEM_RATION_DESC",
    "valor": 4
@@ -69,7 +69,7 @@
    "weight": 0.15,
    "heal": 18.0,
    "stops_bleeding": true,
-   "model": "potion",
+   "model": "bandagem",
    "name": "ITEM_BANDAGE_NOME",
    "description": "ITEM_BANDAGE_DESC",
    "valor": 6
@@ -77,7 +77,7 @@
   "ore": {
    "tag": "MATERIAL",
    "weight": 1.6,
-   "model": "rocks",
+   "model": "rochas",
    "name": "ITEM_ORE_NOME",
    "description": "ITEM_ORE_DESC",
    "valor": 6
@@ -85,7 +85,7 @@
   "coin": {
    "tag": "TESOURO",
    "weight": 0.0,
-   "model": "coin",
+   "model": "moeda",
    "name": "ITEM_COIN_NOME",
    "description": "ITEM_COIN_DESC",
    "valor": 1
@@ -103,7 +103,7 @@
    "style": "slash",
    "angle": 55.0,
    "targets": 3,
-   "model": "weapon-sword",
+   "model": "espada",
    "tint": "9fb4d6",
    "name": "ITEM_ESPADA_GUARDA_NOME",
    "description": "ITEM_ESPADA_GUARDA_DESC",
@@ -130,7 +130,7 @@
    "angle": 7.0,
    "width": 0.36,
    "targets": 1,
-   "model": "weapon-spear",
+   "model": "lanca",
    "tint": "c9a36b",
    "name": "ITEM_LANCA_LONGA_NOME",
    "description": "ITEM_LANCA_LONGA_DESC",
@@ -149,7 +149,7 @@
    "weight": 0.3,
    "heal": 40.0,
    "stops_bleeding": true,
-   "model": "pot",
+   "model": "vaso",
    "tint": "8fcf8a",
    "name": "ITEM_UNGUENTO_NOME",
    "description": "ITEM_UNGUENTO_DESC",
@@ -160,7 +160,7 @@
    "weight": 0.25,
    "food": 8.0,
    "stamina_gain": 100.0,
-   "model": "pot",
+   "model": "vaso",
    "tint": "8ab4e8",
    "name": "ITEM_TONICO_NOME",
    "description": "ITEM_TONICO_DESC",
@@ -169,7 +169,7 @@
   "gema": {
    "tag": "TESOURO",
    "weight": 0.05,
-   "model": "coin",
+   "model": "moeda",
    "tint": "d26fd0",
    "name": "ITEM_GEMA_NOME",
    "description": "ITEM_GEMA_DESC",
