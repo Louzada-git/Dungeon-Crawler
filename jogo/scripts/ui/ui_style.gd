@@ -211,8 +211,8 @@ static func build_theme() -> Theme:
 	t.set_stylebox("disabled", "Button", box(Color(0.075, 0.074, 0.07, 0.9), Color(0.17, 0.168, 0.16), 1, Vector4(12, 3, 12, 4)))
 	t.set_stylebox("focus", "Button", empty_box())
 	# Tooltips
-	var tip := box(PANEL_SOLID, BORDER, 1, Vector4(10, 7, 10, 8))
-	t.set_stylebox("panel", "TooltipPanel", tip)
+	var tip_box := box(PANEL_SOLID, BORDER, 1, Vector4(10, 7, 10, 8))
+	t.set_stylebox("panel", "TooltipPanel", tip_box)
 	t.set_color("font_color", "TooltipLabel", TEXT)
 	t.set_font_size("font_size", "TooltipLabel", 13)
 	t.set_font("font", "TooltipLabel", font("regular"))
