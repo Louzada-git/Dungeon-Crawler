@@ -1,4 +1,5 @@
 extends Node3D
+class_name DungeonGame
 ## Game root: builds the current floor from its description, owns the
 ## expedition state and wires the systems in scripts/systems/.
 ##
@@ -10,11 +11,11 @@ extends Node3D
 
 const KNOWLEDGE_PATH := "user://conhecimento.json"
 
-var sound
+var sound: GameAudio
 var aim_marker: AimMarker
 var save_path: String = "user://expedicao_v1.json"
 var knowledge_path: String = KNOWLEDGE_PATH
-var inventory = InventoryData.new()
+var inventory := InventoryData.new()
 ## The adventurer of this run: attributes and proficiencies.
 var sheet := CharacterSheet.new()
 ## Habilidades set up by the player (objetos in slots, bar of 4, recharges).
@@ -31,7 +32,7 @@ var camera: Camera3D
 var camera_rig: GameCamera
 ## Third person: whether the cursor should be captured right now (see update_cursor).
 var cursor_captured: bool = false
-var ui
+var ui: DungeonUI
 var world_root: Node3D
 var stairs_sign: Label3D
 var enemies: Array[DungeonEnemy] = []
@@ -48,8 +49,8 @@ var message_time: float = 8.0
 var test_mode: bool = false
 # Labyrinth state
 var generated: bool = false
-var seed: int = 0
-var floor: int = 1
+var labyrinth_seed: int = 0
+var current_floor: int = 1
 var deepest: int = 1
 var floor_states: Dictionary = {}
 ## Floor descriptions already generated in this session (floor -> description):
@@ -92,11 +93,11 @@ func _ready() -> void:
 	if generated:
 		message_text = "Prepare a mochila. A descida fica na sala do capataz."
 		_choose_seed(args)
-		layout = DungeonLayout.new(floor_description(floor))
+		layout = DungeonLayout.new(floor_description(current_floor))
 	else:
 		layout = DungeonLayout.new()
 	camp_position = layout.to_world(layout.camp)
-	sound = preload("res://scripts/game_audio.gd").new()
+	sound = GameAudio.new()
 	add_child(sound)
 	WorldBuilder.environment(self)
 	WorldBuilder.build(self)
@@ -125,9 +126,9 @@ func _ready() -> void:
 	add_child(aim_marker)
 	setup_content()
 	if generated:
-		discovered = knowledge.get(floor, {})
-		knowledge[floor] = discovered
-	ui = preload("res://scripts/ui.gd").new()
+		discovered = knowledge.get(current_floor, {})
+		knowledge[current_floor] = discovered
+	ui = DungeonUI.new()
 	ui.game = self
 	add_child(ui)
 	inventory.changed.connect(on_inventory_changed)
@@ -186,7 +187,7 @@ func third_person() -> bool:
 ## running while the game is paused (inventory, map, pause menu).
 func update_cursor() -> void:
 	cursor_captured = third_person() and not ended and not choosing_character and ui != null and not ui.cursor_needed()
-	var wanted: int = Input.MOUSE_MODE_CAPTURED if cursor_captured else Input.MOUSE_MODE_VISIBLE
+	var wanted: Input.MouseMode = Input.MOUSE_MODE_CAPTURED if cursor_captured else Input.MOUSE_MODE_VISIBLE
 	if Input.mouse_mode != wanted:
 		Input.mouse_mode = wanted
 
@@ -204,19 +205,19 @@ func set_psx(on: bool) -> void:
 func _choose_seed(args: PackedStringArray) -> void:
 	for arg in args:
 		if arg.begins_with("--seed="):
-			seed = int(arg.substr(7))
+			labyrinth_seed = int(arg.substr(7))
 			_skip_load = true
 			return
 	if FileAccess.file_exists(save_path):
 		var raw = JSON.parse_string(FileAccess.get_file_as_string(save_path))
 		if raw is Dictionary and raw.get("version") == SaveSystem.VERSION and raw.get("mode") == "labirinto":
-			seed = int(raw.get("seed", 0))
-			floor = maxi(1, int(raw.get("floor", 1)))
+			labyrinth_seed = int(raw.get("seed", 0))
+			current_floor = maxi(1, int(raw.get("floor", 1)))
 			return
 	if FileAccess.file_exists(knowledge_path):
 		var known = JSON.parse_string(FileAccess.get_file_as_string(knowledge_path))
 		if known is Dictionary and known.has("seed"):
-			seed = int(known["seed"])
+			labyrinth_seed = int(known["seed"])
 			knowledge = SaveSystem.parse_knowledge(known.get("knowledge", {}))
 			deepest = int(known.get("deepest", 1))
 			# How the habilidades were set up is knowledge: the next adventurer remembers it (the bar starts empty).
@@ -225,7 +226,7 @@ func _choose_seed(args: PackedStringArray) -> void:
 			return
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
-	seed = rng.randi_range(1, 999999999)
+	labyrinth_seed = rng.randi_range(1, 999999999)
 
 ## Limits that come from the attributes. fill = start at full health and stamina.
 func apply_attributes(fill: bool) -> void:
@@ -313,15 +314,15 @@ func technique_key_name(slot: int) -> String:
 	return InputSetup.key_name(int(technique_keys[slot])) if slot >= 0 and slot < technique_keys.size() else "?"
 
 func on_dodged(amount: float) -> void:
-	sheet.award("acrobacia", amount * 0.8, floor)
+	sheet.award("acrobacia", amount * 0.8, current_floor)
 
 ## A blow on the adventurer: what the guard held trains Bloqueio, what the armor absorbed trains its branch.
 func on_hit_taken(blocked: float, absorbed: float) -> void:
 	if blocked > 0:
-		sheet.award("bloqueio", blocked * 0.8, floor)
+		sheet.award("bloqueio", blocked * 0.8, current_floor)
 	var branch: String = CharacterSheet.armor_branch(inventory.armor)
 	if absorbed > 0 and branch != "":
-		sheet.award(branch, absorbed, floor)
+		sheet.award(branch, absorbed, current_floor)
 
 ## A monster is hunting the adventurer: techniques cannot be changed now.
 func in_combat() -> bool:
@@ -337,7 +338,7 @@ func on_technique_used(form_id: String) -> void:
 	for id in techniques.objects(form_id):
 		var branch: String = Techniques.object_branch(id)
 		if branch != "":
-			sheet.award(branch, Techniques.rule("xp_por_objeto", 1.5), floor)
+			sheet.award(branch, Techniques.rule("xp_por_objeto", 1.5), current_floor)
 
 ## Running trains Atletismo, mostly when something is chasing.
 func on_sprint(distance: float) -> void:
@@ -348,7 +349,7 @@ func on_sprint(distance: float) -> void:
 		if e.alive and e.aggro:
 			chased = true
 			break
-	sheet.award("atletismo", distance * (0.15 if chased else 0.03), floor)
+	sheet.award("atletismo", distance * (0.15 if chased else 0.03), current_floor)
 
 ## Sneaking close to a monster that has not noticed you trains Furtividade (limited per monster).
 func on_sneak_near(enemy, delta: float) -> void:
@@ -373,10 +374,10 @@ func attempt_lockpick(container: Dictionary, roll: float = -1.0, break_roll: flo
 	var spec: Dictionary = Items.DATA[tool]["arrombar"]
 	var tool_name: String = str(Items.info(tool).get("name", tool))
 	var value: float = randf() if roll < 0 else roll
-	var scale: float = 1.0 + 0.25 * (floor - 1)
+	var depth_scale: float = 1.0 + 0.25 * (current_floor - 1)
 	if value < pick_chance_with(tool, difficulty):
 		container.erase("lock")
-		sheet.award("arrombamento", 12.0 * difficulty * scale, floor)
+		sheet.award("arrombamento", 12.0 * difficulty * depth_scale, current_floor)
 		sound.play_at("loot", player.global_position, 0.7)
 		if spec.get("sempre", false):
 			inventory.remove(tool)
@@ -386,7 +387,7 @@ func attempt_lockpick(container: Dictionary, roll: float = -1.0, break_roll: flo
 		if ui:
 			ui.open_inventory(container)
 		return true
-	sheet.award("arrombamento", 3.0 * difficulty * scale, floor)
+	sheet.award("arrombamento", 3.0 * difficulty * depth_scale, current_floor)
 	var snap: float = randf() if break_roll < 0 else break_roll
 	if snap < sheet.pick_break_chance() * float(spec.get("quebra", 1.0)):
 		inventory.remove(tool)
@@ -419,7 +420,7 @@ func setup_content() -> void:
 ## (a saved stock replaces it afterwards, in apply_floor_state or the save).
 func place_merchant() -> void:
 	merchant = null
-	shop_stock = ShopSystem.roll_stock(seed, floor)
+	shop_stock = ShopSystem.roll_stock(labyrinth_seed, current_floor)
 	var cell: Vector2i = ShopSystem.merchant_cell(self)
 	if cell.x < 0:
 		return
@@ -520,11 +521,17 @@ func boss_alive() -> bool:
 	var b := boss()
 	return b != null and b.alive
 
+## Cell of the stairs down (null on a floor without them).
 func stairs_down_cell() -> Variant:
-	return DungeonLayout.cell(layout.world["stairs_down"]) if layout.world.has("stairs_down") else null
+	if layout.world.has("stairs_down"):
+		return DungeonLayout.cell(layout.world["stairs_down"])
+	return null
 
+## Cell of the stairs up (null on the 1st floor).
 func stairs_up_cell() -> Variant:
-	return DungeonLayout.cell(layout.world["stairs_up"]) if layout.world.get("stairs_up") != null else null
+	if layout.world.get("stairs_up") != null:
+		return DungeonLayout.cell(layout.world["stairs_up"])
+	return null
 
 func _near(cell: Variant, distance: float = 2.3) -> bool:
 	return cell != null and player.position.distance_to(layout.to_world(cell)) < distance
@@ -546,8 +553,8 @@ func objective_text() -> String:
 	if not generated:
 		return "Volte ao abrigo" if fixed_goal_done() else "Derrote o carcereiro"
 	if boss_alive():
-		return "Derrote o capataz do %dº andar" % floor
-	return "Desça ao %dº andar ou volte ao abrigo" % (floor + 1)
+		return "Derrote o capataz do %dº andar" % current_floor
+	return "Desça ao %dº andar ou volte ao abrigo" % (current_floor + 1)
 
 # --- floors ------------------------------------------------------------------------
 
@@ -582,9 +589,9 @@ func change_floor(n: int, going_down: bool) -> void:
 		return
 	if ui:
 		ui.close_all()
-	floor_states[floor] = snapshot_floor()
+	floor_states[current_floor] = snapshot_floor()
 	WorldBuilder.clear(self)
-	floor = n
+	current_floor = n
 	deepest = maxi(deepest, n)
 	layout = DungeonLayout.new(floor_description(n))
 	camp_position = layout.to_world(layout.camp)
@@ -611,7 +618,7 @@ func change_floor(n: int, going_down: bool) -> void:
 ## Description of floor n of this labyrinth, generated once per session.
 func floor_description(n: int) -> Dictionary:
 	if not floor_descriptions.has(n):
-		floor_descriptions[n] = LabyrinthGenerator.generate(seed, n)
+		floor_descriptions[n] = LabyrinthGenerator.generate(labyrinth_seed, n)
 	return floor_descriptions[n]
 
 func _free_neighbour(cell: Vector2i) -> Vector2i:
@@ -669,63 +676,66 @@ func pick_chance_with(tool: String, difficulty: int) -> float:
 		return 1.0
 	return minf(0.98, sheet.pick_chance(difficulty) + float(spec.get("bonus", 0.0)))
 
-func interaction_text() -> String:
+## What E does here, decided in one place for the prompt and for the key:
+## {"action": ..., "text": prompt, "container": ...}; {} when nothing.
+## Actions: casa (fixed world, goal done), descansar, loja, subir, descer,
+## descida_trancada, arrombar, sem_gazua, abrir.
+func interaction() -> Dictionary:
 	if has_shelter() and player.position.distance_to(camp_position) < 1.6:
 		if fixed_goal_done():
-			return "E   VOLTAR PARA CASA"
-		return "E   DESCANSAR E SALVAR NO ABRIGO"
+			return {"action": "casa", "text": "E   VOLTAR PARA CASA"}
+		return {"action": "descansar", "text": "E   DESCANSAR E SALVAR NO ABRIGO"}
 	if near_merchant():
-		return "E   LOJA  ·  comprar e vender com o mercador"
+		return {"action": "loja", "text": "E   LOJA  ·  comprar e vender com o mercador"}
 	if generated:
 		if _near(stairs_up_cell()):
-			return "E   SUBIR  ·  para o %dº andar" % (floor - 1)
+			return {"action": "subir", "text": "E   SUBIR  ·  para o %dº andar" % (current_floor - 1)}
 		if _near(stairs_down_cell()):
-			return ("E   DESCER  ·  trancada até o capataz cair" if boss_alive() else "E   DESCER  ·  para o %dº andar" % (floor + 1))
-	var loot = nearest_container()
-	if not loot.is_empty():
-		var difficulty: int = int(loot.get("lock", 0))
-		if difficulty > 0:
-			var tool: String = lockpick_tool()
-			if tool == "":
-				return "E   TRANCADO  ·  %s  ·  fechadura %s, precisa de gazua" % [loot["name"], LOCK_NAMES[difficulty]]
-			return "E   ARROMBAR  ·  %s  ·  fechadura %s, %d%% de chance" % [loot["name"], LOCK_NAMES[difficulty], roundi(pick_chance_with(tool, difficulty) * 100)]
-		var empty: bool = loot["items"].is_empty()
-		return ("E   ABRIR  ·  " if empty else "E   VASCULHAR  ·  ") + loot["name"] + ("  (vazio)" if empty else "")
-	return ""
+			if boss_alive():
+				return {"action": "descida_trancada", "text": "E   DESCER  ·  trancada até o capataz cair"}
+			return {"action": "descer", "text": "E   DESCER  ·  para o %dº andar" % (current_floor + 1)}
+	var loot: Dictionary = nearest_container()
+	if loot.is_empty():
+		return {}
+	var difficulty: int = int(loot.get("lock", 0))
+	if difficulty > 0:
+		var tool: String = lockpick_tool()
+		if tool == "":
+			return {"action": "sem_gazua", "container": loot, "text": "E   TRANCADO  ·  %s  ·  fechadura %s, precisa de gazua" % [loot["name"], LOCK_NAMES[difficulty]]}
+		return {"action": "arrombar", "container": loot, "text": "E   ARROMBAR  ·  %s  ·  fechadura %s, %d%% de chance" % [loot["name"], LOCK_NAMES[difficulty], roundi(pick_chance_with(tool, difficulty) * 100)]}
+	var empty: bool = loot["items"].is_empty()
+	return {"action": "abrir", "container": loot, "text": ("E   ABRIR  ·  " if empty else "E   VASCULHAR  ·  ") + loot["name"] + ("  (vazio)" if empty else "")}
+
+func interaction_text() -> String:
+	return str(interaction().get("text", ""))
 
 func interact() -> void:
-	if has_shelter() and player.position.distance_to(camp_position) < 1.6:
-		if fixed_goal_done():
+	var what: Dictionary = interaction()
+	match str(what.get("action", "")):
+		"casa":
 			won = true
 			save_game(false)
 			end_run(true)
-			return
-		player.stamina = player.max_stamina
-		save_game(false)
-		message("Expedição salva. Coma e cuide dos ferimentos antes de sair.")
-		return
-	if near_merchant():
-		if ui:
-			ui.open_shop()
-		return
-	if generated:
-		if _near(stairs_up_cell()):
-			change_floor(floor - 1, false)
-			return
-		if _near(stairs_down_cell()):
-			if boss_alive():
-				message("A descida está trancada. Derrote o capataz deste andar.", 3)
-			else:
-				change_floor(floor + 1, true)
-			return
-	var loot = nearest_container()
-	if not loot.is_empty():
-		if int(loot.get("lock", 0)) > 0:
-			attempt_lockpick(loot)
-			return
-		sound.play_at("loot", player.global_position, 0.6)
-		ui.open_inventory(loot)
-		Visuals.play(Visuals.animation(loot["node"]), "open", false)
+		"descansar":
+			player.stamina = player.max_stamina
+			save_game(false)
+			message("Expedição salva. Coma e cuide dos ferimentos antes de sair.")
+		"loja":
+			if ui:
+				ui.open_shop()
+		"subir":
+			change_floor(current_floor - 1, false)
+		"descer":
+			change_floor(current_floor + 1, true)
+		"descida_trancada":
+			message("A descida está trancada. Derrote o capataz deste andar.", 3)
+		"arrombar", "sem_gazua":
+			attempt_lockpick(what["container"])
+		"abrir":
+			var loot: Dictionary = what["container"]
+			sound.play_at("loot", player.global_position, 0.6)
+			ui.open_inventory(loot)
+			Visuals.play(Visuals.animation(loot["node"]), "open")
 
 ## Development tool (pause menu): a chest with every weapon and ammunition.
 ## Remove before release.
@@ -770,7 +780,7 @@ func enemy_defeated(enemy: DungeonEnemy) -> void:
 		if is_instance_valid(stairs_sign):
 			stairs_sign.modulate = Color("9fdc8f")
 		camera_impact(0.2)
-		message("O capataz caiu. A descida para o %dº andar está aberta." % (floor + 1), 6)
+		message("O capataz caiu. A descida para o %dº andar está aberta." % (current_floor + 1), 6)
 	else:
 		message("Área mais segura. E para recolher os pertences.", 3)
 
@@ -814,7 +824,7 @@ func write_knowledge() -> void:
 		return
 	var file := FileAccess.open(knowledge_path, FileAccess.WRITE)
 	if file:
-		file.store_string(JSON.stringify({"version": 1, "seed": seed, "deepest": deepest, "knowledge": SaveSystem.pack_knowledge(knowledge), "tecnicas": {"configs": techniques.configs.duplicate(true)}}))
+		file.store_string(JSON.stringify({"version": 1, "seed": labyrinth_seed, "deepest": deepest, "knowledge": SaveSystem.pack_knowledge(knowledge), "tecnicas": {"configs": techniques.configs.duplicate(true)}}))
 		file.close()
 
 ## After a death: same labyrinth from the start, knowledge kept.
