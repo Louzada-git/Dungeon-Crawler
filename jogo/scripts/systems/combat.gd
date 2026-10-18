@@ -7,7 +7,7 @@ class_name Combat
 ## (unaware monsters), bleed, crush (armored monsters), stagger, knockback and
 ## cura (health back to the adventurer for each blow that lands).
 
-static func resolve_player_attack(game) -> void:
+static func resolve_player_attack(game: DungeonGame) -> void:
 	var player = game.player
 	# Each committed swing resolves once, even if another callback arrives.
 	if player.resolved_serial == player.attack_serial or player.health <= 0:
@@ -46,14 +46,15 @@ static func resolve_player_attack(game) -> void:
 
 ## Where the head of the weapon was when the blow landed (the sample nearest
 ## the middle of the swept window), on the ground.
-static func _head(game, samples: Array) -> Vector3:
+static func _head(game: DungeonGame, samples: Array) -> Vector3:
 	if samples.is_empty():
 		return game.player.position + game.player.attack_facing * 1.0
+	@warning_ignore("integer_division")
 	var tip: Vector3 = samples[samples.size() / 2][1]
 	return Vector3(tip.x, game.player.position.y, tip.z)
 
 ## The heavy head hits the ground: dust, a small shockwave and a shake.
-static func _smash_fx(game, head: Vector3, landed: bool) -> void:
+static func _smash_fx(game: DungeonGame, head: Vector3, landed: bool) -> void:
 	var ring = Visuals.ring(0.7, Color(0.92, 0.78, 0.52, 0.85), 0.12)
 	game.add_child(ring)
 	ring.position = head + Vector3(0, 0.07, 0)
@@ -67,7 +68,7 @@ static func _smash_fx(game, head: Vector3, landed: bool) -> void:
 	game.sound.play_at("hit", head, 0.9 if landed else 0.45)
 
 ## Damage and effects of one hit. Returns a short note for the message line.
-static func apply_hit(game, enemy, weapon: Dictionary, direction: Vector3, damage: float = -1.0) -> String:
+static func apply_hit(game: DungeonGame, enemy, weapon: Dictionary, direction: Vector3, damage: float = -1.0) -> String:
 	var amount: float = float(weapon.get("damage", 9.0)) if damage < 0 else damage
 	var note: String = ""
 	if weapon.has("sneak_mult") and not enemy.aggro:
@@ -107,13 +108,13 @@ static func apply_hit(game, enemy, weapon: Dictionary, direction: Vector3, damag
 	return note
 
 ## Releases a projectile and spends one unit of ammunition.
-static func _shoot(game, weapon: Dictionary) -> void:
+static func _shoot(game: DungeonGame, weapon: Dictionary) -> void:
 	var count: int = maxi(1, int(weapon.get("hits", 1)))
 	for i in count:
 		# Extra shots of a technique fan out a little.
 		_shoot_one(game, weapon, deg_to_rad(5.0) * (i - (count - 1) * 0.5))
 
-static func _shoot_one(game, weapon: Dictionary, spread: float) -> void:
+static func _shoot_one(game: DungeonGame, weapon: Dictionary, spread: float) -> void:
 	var player = game.player
 	var ammo: String = game.ammo_for(weapon)
 	if ammo != "":
