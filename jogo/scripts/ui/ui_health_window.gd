@@ -2,7 +2,7 @@ extends UiWindow
 class_name UiHealthWindow
 ## Condition window (H). Does not pause: it can stay open while exploring.
 
-var game
+var game: DungeonGame
 var ui
 var tabs: Dictionary = {}
 var pages: Dictionary = {}
@@ -196,9 +196,9 @@ func refresh() -> void:
 		info_values["cost"].text = UiStyle.num(float(weapon.get("cost", 10)))
 		info_values["area"].text = game.layout.room_name(p.position)
 		info_values["objective"].text = game.objective_text()
-		info_values["depth"].text = "%dº  (agora no %dº)" % [game.deepest, game.floor] if game.generated else "—"
+		info_values["depth"].text = "%dº  (agora no %dº)" % [game.deepest, game.current_floor] if game.generated else "—"
 		info_values["coins"].text = str(game.inventory.count("coin"))
-		subtitle.text = ("Labirinto %d" % game.seed) if game.generated else "Expedição às cisternas"
+		subtitle.text = ("Labirinto %d" % game.labyrinth_seed) if game.generated else "Expedição às cisternas"
 		info_values["kills"].text = str(game.kills)
 		info_values["hits"].text = str(game.hits_received)
 		info_values["load"].text = "%s de %s kg" % [UiStyle.fmt(game.inventory.weight()), UiStyle.fmt(game.inventory.capacity, 0)]
