@@ -1,15 +1,28 @@
 extends Control
 class_name DungeonMapView
 ## Explored map: only discovered floor is drawn, with wall edges, room names,
-## containers, the shelter and the player's position and facing.
+## containers, the shelter and the player's position and facing. The large map
+## (M) zooms with the wheel, moves by dragging and centres again on a double
+## click. It is drawn when something changes, not every frame, and only the
+## cells inside the window.
 
 var game
 var large: bool = false
+## Large map: zoom over the fitted scale, and how far it was dragged (in cells).
+var zoom: float = 1.0
+var pan: Vector2 = Vector2.ZERO
+const MIN_ZOOM := 0.5
+const MAX_ZOOM := 4.0
+## Scale of the last drawing (pixels per cell), to turn drags into cells.
+var _factor: float = 1.0
 const FLOOR := Color("33433f")
 const FLOOR_NEAR := Color("4f665f")
 const EDGE := Color("b9c2b0")
 var ORIGIN := Vector2(16, 13)
 const MIN_FACTOR := 9.0
+
+func _ready() -> void:
+	resized.connect(queue_redraw)
 
 func _draw() -> void:
 	if game == null or game.player == null:
@@ -23,12 +36,19 @@ func _draw() -> void:
 	if factor < MIN_FACTOR:
 		factor = MIN_FACTOR
 		ORIGIN = Vector2(game.player.position.x / 2.0, game.player.position.z / 2.0)
+	if large:
+		factor *= zoom
+		ORIGIN += pan
+	_factor = factor
 	var here: Vector2i = game.layout.to_cell(game.player.position)
 	var half := Vector2(factor * 0.97, factor * 0.49)
+	var view := Rect2(Vector2.ZERO, size).grow(factor * 2.0)
 	for cell in game.discovered:
 		if not game.layout.is_floor(cell):
 			continue
 		var p: Vector2 = project(Vector2(cell) - ORIGIN, factor) + center
+		if not view.has_point(p):
+			continue
 		var top := p + Vector2(0, -half.y)
 		var right := p + Vector2(half.x, 0)
 		var bottom := p + Vector2(0, half.y)
@@ -102,6 +122,38 @@ func _draw_room_names(factor: float, center: Vector2) -> void:
 		var w: float = f.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x
 		draw_string(f, c + Vector2(-w * 0.5 + 1, 5), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(0, 0, 0, 0.85))
 		draw_string(f, c + Vector2(-w * 0.5, 4), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("e6dfc9"))
+
+## Wheel zooms, a drag moves the map, a double click centres it again.
+func _gui_input(event: InputEvent) -> void:
+	if not large:
+		return
+	if event is InputEventMouseButton and event.pressed:
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			zoom_by(1)
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			zoom_by(-1)
+		elif event.double_click:
+			recenter()
+		accept_event()
+	elif event is InputEventMouseMotion and event.button_mask & (MOUSE_BUTTON_MASK_LEFT | MOUSE_BUTTON_MASK_RIGHT):
+		drag(event.relative)
+		accept_event()
+
+## Steps of zoom (+ closer, − farther).
+func zoom_by(steps: int) -> void:
+	zoom = clampf(zoom * pow(1.25, steps), MIN_ZOOM, MAX_ZOOM)
+	queue_redraw()
+
+## Moves the map with the mouse (screen pixels -> cells of the isometric grid).
+func drag(pixels: Vector2) -> void:
+	var d: Vector2 = pixels / maxf(_factor, 0.01)
+	pan -= Vector2(d.y + d.x * 0.5, d.y - d.x * 0.5)
+	queue_redraw()
+
+func recenter() -> void:
+	zoom = 1.0
+	pan = Vector2.ZERO
+	queue_redraw()
 
 func large_size(value: float) -> float:
 	return value * 1.3 if large else value
