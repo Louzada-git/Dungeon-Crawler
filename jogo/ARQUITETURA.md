@@ -1,6 +1,6 @@
 # Arquitetura do projeto Godot
 
-Mapa rápido de onde cada coisa vive. Atualizado em 16/10/2026 (acerto por toque, loja, itens novos, personagens e animações).
+Mapa rápido de onde cada coisa vive. Atualizado em 18/10/2026 (revisão do código: tipos, desempenho dos andares grandes, iluminação, leitura dos dados).
 
 ## Dados (`data/`)
 
@@ -20,11 +20,13 @@ Mapa rápido de onde cada coisa vive. Atualizado em 16/10/2026 (acerto por toque
 
 A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrinth_generator.gd` produz esse formato a partir de (semente, andar). O mundo fixo `cisternas.json` continua existindo só para a suíte de testes.
 
+Todos esses arquivos são lidos por `DataFile.read` (`data_file.gd`): arquivo ausente ou JSON quebrado aparece no console com a linha e a mensagem do erro, em vez de deixar o catálogo vazio em silêncio. Os saves (`user://`) têm leitura e validação próprias em `SaveSystem`.
+
 ## Labirinto
 
-- **Andares:** 10, 20, 40, 60, 100, 200, 400 salas e depois dobra. Sala 0 é a entrada (abrigo no 1º andar, subida nos outros), com o mercador; a sala mais distante é a do chefe (o capataz), com o relicário (saque) e a descida.
+- **Andares:** 10, 20, 40, 60, 100, 200, 400 salas e depois dobra. A ligação das salas (árvore de Prim mais alguns atalhos) é O(n²) desde 18/10/2026: o 7º andar sai em menos de 1 s (eram 23 s) e o 8º em pouco mais de 1 s. Ela resolve empates do jeito da versão antiga, então cada semente continua com o mesmo labirinto (o teste do labirinto confere as impressões digitais de cinco andares). Um andar gerado fica guardado na sessão (`main.floor_descriptions`) e não é gerado de novo ao voltar. Sala 0 é a entrada (abrigo no 1º andar, subida nos outros), com o mercador; a sala mais distante é a do chefe (o capataz), com o relicário (saque) e a descida.
 - **Tipos de sala:** combate, suprimentos, tesouro (pontas sem saída), covil (guardião de elite) e chefe.
-- **Monstros** (id → nome no jogo): corrompido → Afogado, espreitador → Carniçal (rápido), brutamontes → Inchado (resistente), guardiao → Carcereiro (elite) e chefe → Capataz. Vida +30% e dano +15% por andar. Monstros longe do jogador dormem.
+- **Monstros** (id → nome no jogo): corrompido → Afogado, espreitador → Carniçal (rápido), brutamontes → Inchado (resistente), guardiao → Carcereiro (elite) e chefe → Capataz. Vida +30% e dano +15% por andar. Monstros a mais de 26 m que não estão caçando dormem (`DungeonEnemy.asleep`): somem e param a animação; acordam ao chegar perto, ao levar dano ou ao atacar.
 - **Estado por andar:** baús e monstros de cada andar visitado ficam guardados; o mapa explorado é conhecimento e sobrevive à morte (`user://conhecimento.json`).
 - **Save versão 2:** semente, andar atual, andares visitados, conhecimento, munição escolhida (`municao`) e o estoque do mercador de cada andar (`loja`). Os selos saíram em 16/10/2026: `Items.REMOVED` e `SaveSystem._drop_removed_items` tiram de saves antigos o que não existe mais.
 - **Objetivo do mundo fixo:** o relicário da `camara_guardiao` (`layout.world["guardian"]`, `main.fixed_goal_done`).
@@ -33,9 +35,10 @@ A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrint
 
 | Arquivo | Responsabilidade |
 | --- | --- |
-| `main.gd` | Raiz do jogo: monta o mundo a partir dos dados, guarda o estado da expedição e liga os sistemas. Mantém a API usada pelo HUD e pelos testes. |
-| `layout.gd` | Grade de piso, salas, sala segura e navegação, lidas da descrição do mundo. |
-| `world_builder.gd` | Ambiente, pisos, paredes, tochas, fogueira do abrigo, mobília e recipientes em 3D. |
+| `main.gd` | `DungeonGame`, a raiz do jogo: monta o mundo a partir dos dados, guarda o estado da expedição (`current_floor`, `labyrinth_seed`, `deepest`...) e liga os sistemas. Os outros scripts recebem `game: DungeonGame` tipado, então um nome errado aparece ao abrir o projeto, não no meio do jogo. `interaction()` decide numa função só o que a tecla E faz e o aviso que aparece (`interaction_text()` e `interact()` usam ela). |
+| `layout.gd` | Grade de piso, salas, sala segura e navegação, lidas da descrição do mundo. `room_of_cell` diz a sala de cada célula numa consulta (`room_at`, `is_safe`, `room_name`), em vez de percorrer as salas. |
+| `world_builder.gd` | Ambiente, pisos, paredes, tochas, fogueira do abrigo, mobília e recipientes em 3D. Chão e paredes vão em lotes (`MultiMeshInstance3D`) por área de `CHUNK` × `CHUNK` células: o renderizador de compatibilidade ilumina cada objeto com no máximo 8 luzes, e com um lote só para o andar inteiro quase nenhuma tocha iluminava. As colisões das paredes são caixas retangulares que juntam células vizinhas (`_wall_colliders`). |
+| `data_file.gd` | `DataFile.read`: leitura dos JSON de dados com erro claro. |
 | `items.gd`, `enemy_types.gd` | Leitura dos catálogos; textos traduzidos em `Items.info()`. |
 | `inventory.gd` | Mochila: pilhas, peso, equipar, transferir. |
 | `player.gd`, `enemy.gd` | Personagem e monstros (movimento, golpes, IA). O modelo do personagem é `DungeonPlayer.MODEL`; `MOUNTS` diz em que osso ficam as mãos e o tronco em rigs com outros nomes (Mixamo) e a correção que mantém armas e armaduras no lugar. |
@@ -56,7 +59,9 @@ A descrição do mundo é a fronteira do labirinto procedural: `systems/labyrint
 | `ui/ui_technique_window.gd` | Janela de habilidades (T). |
 | `systems/psx_filter.gd` | Filtro de PlayStation: pós-processamento, materiais com vértices presos à grade e texto do mundo nítido. |
 | `systems/vfx.gd` | Efeitos visuais (`Vfx`): sangue, clarões, faíscas, poeira, fumaça, chamas e o tremor das luzes de fogo. |
-| `ui.gd` + `ui/` | HUD: um arquivo por painel (ver comentários no topo de cada um). |
+| `ui.gd` + `ui/` | `DungeonUI`, o HUD: um arquivo por painel (ver comentários no topo de cada um). `update_hud(true)` roda todo quadro e atualiza barras e recargas; o que olha o andar em volta (indicadores, o que a tecla E faz, o recipiente mais perto, janelas abertas) vai 10 vezes por segundo. Chamado sem argumento, depois de uma mudança, atualiza tudo. Cores de tema mudam só quando mudam (`UiStyle.set_color`). |
+| `map_view.gd` | Mapa explorado. O grande (M) dá zoom com a roda, anda arrastando e volta ao centro num duplo clique; desenha só quando algo muda e só as células dentro da janela. |
+| `game_audio.gd` | `GameAudio`: os sons e as vozes posicionais. |
 
 ## Armas
 
@@ -98,7 +103,8 @@ Desde 16/10/2026 (`systems/hitbox.gd`):
 
 - **Modelos:** aventureiro, mercador e os cinco monstros saem do pacote Characters PSX (rig do Mixamo) por `../arte/fontes/personagem_psx/personagens.gd`, que também grava `data/animacoes.json`.
 - **Animações:** Universal Animation Library (Quaternius) e um golpe do Mixamo, transferidos para o rig; os outros golpes, a garra e a pancada do capataz são poses escritas no script (direção dos membros e da arma, giro, inclinação, pernas, mão esquerda no cabo por IK). No parado, no andar, na corrida e na guarda, `segura` prende o braço da arma numa pose por cima do movimento da biblioteca. Os golpes começam e terminam na pose da guarda.
-- **Tempo:** o golpe do aventureiro dura `windup` / `Animacoes.impact`, e o do monstro toca na velocidade em que o impacto cai no fim do preparo.
+- **Tempo:** o golpe do aventureiro dura `windup` / `Animacoes.impact`, e o do monstro toca na velocidade em que o impacto cai no fim do preparo. A caminhada deixa o ritmo dela em `speed_scale` (mais lento ao acelerar ou com peso); golpe, esquiva e dano voltam esse valor para 1 antes de tocar (`animate_action`), senão o golpe dado andando chegava depois do dano.
+- **Repetição:** quais animações repetem (parado, andar, correr, guarda, agachado, bloqueio, falar, com as variantes de porte) fica em `Visuals.LOOPING` e é aplicado uma vez quando o modelo é carregado; `Visuals.play` só toca.
 - **Pegada (17/10/2026):** a arma fica dentro da mão fechada. `MOUNTS` (e `GRIP` no script dos personagens) põe o cabo no eixo em que os dedos se fecham, com a cabeça ou o gume (+X da arma) para o lado dos nós dos dedos e a origem no meio do punho; `rest_rotation` é zero, a não ser que o item tenha `rotacao_mao`. Os dedos se fecham por trilhas próprias em todas as animações do aventureiro (`FIST`), e a mão esquerda só fecha quando segura algo. As hastes com `alinhar_ao_golpe` apontam na linha do golpe por `DungeonPlayer.aim_held`, que calcula a partir da pose do osso no mesmo quadro.
 - **Jeito de carregar:** `porte` no item (`duas`, `haste`, `besta`, `arco`) escolhe as variantes `_duas`, `_haste`, `_besta` e `_arco` do parado, andar, correr, guarda, agachado e bloqueio; sem arma, `_livre` (braços soltos, guarda de punhos). `DungeonPlayer.locomotion` troca pela variante quando o rig a tem (`carry_suffix`).
 
@@ -172,7 +178,7 @@ Decisões de 15/10/2026: só físicas por enquanto (a magia vem depois); montar 
 
 - **Dois modos** (`GameCamera.mode`, botão "Câmera" na pausa, salvo em `user://configuracoes.cfg`, `[video] camera`): `iso` (ortográfica isométrica, padrão) e `terceira` (perspectiva, atrás do personagem).
 - **Terceira pessoa:** pivô na altura do ombro (1,55 m), giro (`yaw`) e inclinação (`pitch`, de −1,15 a 0,35 rad) pelo mouse, `SpringArm3D` de 2 a 6 m (roda do mouse) que bate nas paredes (camada 1), 0,45 m à direita do ombro. `GameCamera.forward()` e `move_direction()` dão a direção do olhar e do andar; `DungeonPlayer.aim_mouse` vira o personagem para onde a câmera olha, então golpes, tiros e habilidades vão para a mira (`ui.crosshair`).
-- **Paredes da frente:** `WorldBuilder` monta dois lotes (`Lote_parede_frente_baixa` cortado a 19% para a isométrica e `Lote_parede_frente_alta` inteiro) e `WorldBuilder.apply_view` mostra um ou outro. As colisões são as mesmas.
+- **Paredes da frente:** `WorldBuilder` monta, em cada área, dois lotes (`parede_frente_baixa`, cortado a 19% para a isométrica, e `parede_frente_alta`, inteiro; metadado `frente` = `baixa` ou `alta`) e `WorldBuilder.apply_view` mostra um ou outro. As colisões são as mesmas.
 - **Névoa:** o `WorldEnvironment` ("Ambiente") liga uma névoa escura só na terceira pessoa, escondendo o fundo dos corredores e o céu aberto sobre as paredes.
 - **Cursor:** `main.update_cursor` prende o mouse na terceira pessoa e solta quando `ui.cursor_needed()` (mochila, mapa, pausa, janelas H, P e T, fim da run, criação ou Alt).
 - **Texto do mundo** com o filtro PSX: em perspectiva, o tamanho segue a distância e um texto atrás de parede some (raio da câmera até o rótulo).
