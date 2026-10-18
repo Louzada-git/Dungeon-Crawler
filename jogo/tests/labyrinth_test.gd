@@ -165,6 +165,41 @@ func run(target) -> void:
 	var batches: Array = game.world_root.find_children("Lote_*", "MultiMeshInstance3D", false, false)
 	for batch in batches:
 		most = maxi(most, lights_on(batch, torches))
+	# The room of a cell comes from a lookup, the same answer the walk over all rooms gave.
+	var lookup_ok: bool = true
+	for cell in game.layout.floors:
+		var first: Dictionary = {}
+		for room in game.layout.rooms:
+			if room["rect"].has_point(cell):
+				first = room
+				break
+		var at: Vector3 = game.layout.to_world(cell)
+		if game.layout.room_at(at) != first or game.layout.is_safe(at) != first.get("safe", false):
+			lookup_ok = false
+	check(lookup_ok, "Sala de cada célula por consulta direta, igual à busca sala por sala")
+	# Far monsters sleep: hidden and with their animation stopped.
+	await get_tree().create_timer(0.2).timeout
+	var far: Array = game.enemies.filter(func(e): return e.alive and not e.aggro and e.global_position.distance_to(p.global_position) > DungeonEnemy.SLEEP_DISTANCE + 1.0)
+	check(not far.is_empty() and far.all(func(e): return e.asleep and not e.visible and not e.animator.active), "Monstros longe dormem: escondidos e sem animar (%d)" % far.size())
+	check(game.boss() != null and game.boss() == game.boss() and game.boss().boss, "Chefe do andar encontrado uma vez e guardado")
+	# Wall colliders come in rectangular blocks: fewer shapes, the same walls.
+	var wall_cells: Dictionary = {}
+	for cell in game.layout.floors:
+		for d in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
+			if not game.layout.is_floor(cell + d):
+				wall_cells[cell + d] = true
+	var wall_body: StaticBody3D = game.world_root.get_node("Paredes")
+	var space: PhysicsDirectSpaceState3D = game.world_root.get_world_3d().direct_space_state
+	var covered: int = 0
+	for cell in wall_cells:
+		var probe := PhysicsPointQueryParameters3D.new()
+		probe.position = game.layout.to_world(cell) + Vector3(0, 1.5, 0)
+		probe.collision_mask = 1
+		for hit in space.intersect_point(probe, 8):
+			if hit["collider"] == wall_body:
+				covered += 1
+				break
+	check(wall_body.get_child_count() * 2 < wall_cells.size() and covered == wall_cells.size(), "Paredes em blocos retangulares: %d formas para %d células, todas cobertas" % [wall_body.get_child_count(), wall_cells.size()])
 	check(batches.size() > 10 and most <= 7, "Chão e paredes em lotes por área: cada lote recebe no máximo 7 tochas (%d lotes, no máximo %d tochas)" % [batches.size(), most])
 	check(game.layout.is_floor(game.layout.to_cell(p.position)) and game.layout.rooms[0]["rect"].has_point(game.layout.to_cell(p.position)), "Chega na entrada do 2º andar")
 	check(not game.has_shelter() and game.stairs_up_cell() != null, "Andares fundos têm subida e não têm abrigo")
