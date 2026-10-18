@@ -244,7 +244,10 @@ func weapon_stats(item_id: String) -> Dictionary:
 						stats[parts[0]][parts[1]] = float(stats[parts[0]].get(parts[1], 0.0)) + float(mods[key])
 				elif stats.has(key) or key in ["recover_bonus"]:
 					var value: float = float(stats.get(key, 0.0)) + float(mods[key])
-					stats[key] = int(value) if key == "targets" else value
+					if key == "targets":
+						stats[key] = int(value)
+					else:
+						stats[key] = value
 	stats["damage"] = float(stats["damage"]) * damage_mult(path)
 	stats["cost"] = maxf(1.0, float(stats.get("cost", 10.0)) * cost_mult(path))
 	stats["mastery"] = mastery(path)
