@@ -83,6 +83,8 @@ var end_stats: GridContainer
 var _time: float = 0.0
 var _last_hands: String = ""
 var _last_prompt: String = ""
+## When the HUD last refreshed in full (see update_hud).
+var _last_full_ms: int = -1000
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -336,7 +338,7 @@ func _build_map() -> void:
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	legend.add_child(spacer)
-	legend.add_child(UiStyle.label("Só aparece o que você já viu.", 13, UiStyle.DIM))
+	legend.add_child(UiStyle.label("Roda: zoom  ·  arraste: mover  ·  duplo clique: centralizar", 13, UiStyle.DIM))
 	legend.add_child(UiStyle.keycap("M"))
 	legend.add_child(UiStyle.label("fecha", 13, UiStyle.DIM))
 
@@ -469,26 +471,35 @@ func _process(delta: float) -> void:
 	# and the HUD are kept current from here, which always runs.
 	game.update_cursor()
 	if get_tree().paused:
-		update_hud()
+		update_hud(true)
 
-func update_hud() -> void:
+## Brings the HUD up to date. Called after every change, and every frame with
+## every_frame = true: then the parts that look around the floor (indicators,
+## what E does here, the nearest container) refresh ten times a second, and the
+## bars and timers every frame.
+func update_hud(every_frame: bool = false) -> void:
 	if game == null or game.player == null or status_panel == null:
 		return
+	var now: int = Time.get_ticks_msec()
+	var full: bool = not every_frame or now - _last_full_ms >= 100
+	if full:
+		_last_full_ms = now
 	if crosshair:
 		crosshair.visible = game.third_person() and not cursor_needed()
 	status_panel.refresh()
-	moodles.refresh()
+	if full:
+		moodles.refresh()
+		inventory.update_bars()
 	hotbar.refresh()
-	inventory.update_bars()
-	if health_panel.visible:
+	if full and health_panel.visible:
 		health_panel.refresh()
 	sidebar.set_active("inventory", inventory.is_open)
 	sidebar.set_active("health", health_panel.visible)
 	sidebar.set_active("skills", prof_window.visible)
-	if prof_window.visible:
+	if full and prof_window.visible:
 		prof_window.refresh()
 	sidebar.set_active("techniques", tech_window.visible)
-	if tech_window.visible:
+	if full and tech_window.visible:
 		tech_window.refresh()
 	sidebar.set_active("map", map_panel.visible)
 	sidebar.set_active("pause", pause_panel.visible)
@@ -500,10 +511,9 @@ func update_hud() -> void:
 		area_label.text = area
 	objective.text = game.objective_text()
 	boss_bar.refresh()
-	_update_prompt()
+	if full:
+		_update_prompt()
 	_update_toast()
-	if full_map.is_visible_in_tree():
-		full_map.queue_redraw()
 
 func _update_hands() -> void:
 	var id: String = game.inventory.equipped
@@ -779,7 +789,7 @@ func toggle_map() -> void:
 	dim.show()
 	map_panel.show()
 	map_panel.set_title("Mapa explorado  ·  %dº andar" % game.floor if game.generated else "Mapa explorado  ·  As Cisternas")
-	full_map.queue_redraw()
+	full_map.recenter()
 	get_tree().paused = true
 	update_hud()
 
