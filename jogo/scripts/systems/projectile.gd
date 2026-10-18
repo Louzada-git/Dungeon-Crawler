@@ -5,7 +5,7 @@ class_name Projectile
 ## stuck in a monster drops with its belongings; part of what misses can be
 ## picked up from the floor ("recover" in the item data).
 
-var game
+var game: DungeonGame
 var weapon: Dictionary = {}
 var ammo: String = ""
 var direction: Vector3 = Vector3.FORWARD
