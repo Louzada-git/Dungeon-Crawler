@@ -53,8 +53,7 @@ static var _quads: Dictionary = {}
 static var _rng := RandomNumberGenerator.new()
 
 static func _read(path: String) -> Dictionary:
-	var raw = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
-	return raw if raw is Dictionary else {}
+	return DataFile.read(path, "", true)
 
 static func info(id: String) -> Dictionary:
 	return EFFECTS.get(id, {})
@@ -163,7 +162,7 @@ static func body_point(body: Node3D, height: float = 1.15) -> Vector3:
 
 ## A blow landing on a monster: blood (sparks off armour the weapon does not
 ## crush), the flash of the hit and, for strong blows, a bigger burst.
-static func enemy_hit(game, enemy, strong: bool, through_armor: bool) -> void:
+static func enemy_hit(game: Node, enemy, strong: bool, through_armor: bool) -> void:
 	var at: Vector3 = body_point(enemy) + jitter(0.12)
 	if enemy.armored and not through_armor:
 		burst(game, "faisca", at)
@@ -175,14 +174,14 @@ static func enemy_hit(game, enemy, strong: bool, through_armor: bool) -> void:
 		burst(game, "golpe_forte", at)
 
 ## Dust kicked up at the feet (dodge, dash, a blow on the ground).
-static func dust(game, pos: Vector3, count: int = 1, spread: float = 0.25, size: float = 1.0) -> void:
+static func dust(game: Node, pos: Vector3, count: int = 1, spread: float = 0.25, size: float = 1.0) -> void:
 	for i in count:
 		var offset := jitter(spread)
 		offset.y = 0.0
 		burst(game, "poeira", pos + offset + Vector3(0, 0.25, 0), size * _rng.randf_range(0.8, 1.15))
 
 ## Dust all around a circle (Pancada, Golpe esmagador).
-static func dust_ring(game, center: Vector3, radius: float) -> void:
+static func dust_ring(game: Node, center: Vector3, radius: float) -> void:
 	for i in 7:
 		var a: float = TAU * i / 7.0 + _rng.randf_range(-0.2, 0.2)
 		burst(game, "poeira", center + Vector3(sin(a), 0, cos(a)) * radius * 0.75 + Vector3(0, 0.25, 0), _rng.randf_range(0.8, 1.2))
@@ -193,7 +192,7 @@ static var trail_time: float = 0.18
 
 ## Pale trail of the blade over the swept part of the swing (the same capsules
 ## the hitbox used), fading quickly.
-static func swing_trail(game, samples: Array) -> void:
+static func swing_trail(game: Node, samples: Array) -> void:
 	if samples.size() < 2:
 		return
 	var mesh := ImmediateMesh.new()
