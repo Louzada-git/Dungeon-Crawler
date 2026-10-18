@@ -10,11 +10,7 @@ static var DATA: Dictionary = _load()
 static var _resolved: Dictionary = {}
 
 static func _load() -> Dictionary:
-	var raw = JSON.parse_string(FileAccess.get_file_as_string(PATH))
-	if not raw is Dictionary or not raw.get("itens") is Dictionary:
-		push_error("Catálogo de itens inválido: " + PATH)
-		return {}
-	return raw["itens"]
+	return DataFile.read(PATH, "itens").get("itens", {})
 
 ## Item data with text already translated. Treat the result as read-only.
 static func info(id: String) -> Dictionary:
