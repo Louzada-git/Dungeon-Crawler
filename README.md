@@ -70,7 +70,7 @@ Precisa de placa de vídeo com OpenGL 3.3. O jogo é em português. Os créditos
 | Andar agachado | C |
 | Interagir / abrir baú / arrombar / loja | E |
 | Inventário | I ou Tab |
-| Mapa explorado | M |
+| Mapa explorado | M (no mapa: roda dá zoom, arrastar move, duplo clique centraliza) |
 | Condição física | H |
 | Barra rápida (qualquer item) | 1 a 9 |
 | Proficiências | P |
