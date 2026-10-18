@@ -730,6 +730,19 @@ func test_weapons() -> void:
 		check(is_instance_valid(p.held_weapon),"Personagem segura a arma: "+id)
 		inv.remove(id)
 	check(ProficiencyTree.path_text(Items.info("katana")["proficiencias"]) == "Lâminas › Espadas › Sabre","Arma indica o ramo de proficiência que treina")
+	# Eating or shooting changes the backpack, not the weapon: the model in hand stays.
+	inv.add("sword")
+	inv.equip("sword")
+	var in_hand: Node3D = p.held_weapon
+	inv.add("ration")
+	inv.remove("ration")
+	inv.add("bandage", 2)
+	check(p.held_weapon == in_hand and is_instance_valid(in_hand) and not in_hand.is_queued_for_deletion(),"Mudança na mochila sem trocar de arma não recria o modelo na mão")
+	inv.add("adaga")
+	inv.equip("adaga")
+	check(p.held_weapon != in_hand and is_instance_valid(p.held_weapon),"Trocar de arma troca o modelo na mão")
+	inv.remove("adaga")
+	inv.remove("bandage", 2)
 	# The weapon in hand picks how it is carried standing and moving; the natural
 	# grip holds the handle straight through the fist unless the item turns it.
 	var was_sneaking: bool = p.sneaking
@@ -1890,6 +1903,17 @@ func test_balance() -> void:
 	win.select("corte")
 	var order: Array = win.object_order("sword")
 	check(order.size() == Techniques.OBJECTS.size() and Techniques.copies(sheet,order[0]) > 0 and Techniques.copies(sheet,order[-1]) == 0 and win.object_box.get_child_count() == order.size() and win.object_box.get_parent() is ScrollContainer,"Janela lista todos os objetos com rolagem, os que você tem primeiro")
+	# Experience that does not change a level (running, sneaking) keeps the buttons, so clicks land.
+	var button: Node = win.object_box.get_child(0)
+	var saved_xp: Dictionary = sheet.xp.duplicate()
+	sheet.xp["atletismo"] = float(sheet.xp.get("atletismo",0.0)) + 0.5
+	win.refresh()
+	check(win.object_box.get_child(0) == button and not button.is_queued_for_deletion(),"Janela T não refaz os botões quando a experiência cresce sem mudar de nível")
+	var before_level: int = sheet.level("atletismo")
+	sheet.xp["atletismo"] = ProficiencyTree.xp_for_level(before_level + 1) + 1.0
+	win.refresh()
+	check(sheet.level("atletismo") == before_level + 1 and button.is_queued_for_deletion(),"Janela T se refaz quando um nível muda")
+	sheet.xp = saved_xp
 	game.ui.toggle_techniques()
 	# Delay after the blow by weight: heavy weapons keep a long one; the dodge comes back halfway.
 	ready_player(p)
@@ -1897,14 +1921,17 @@ func test_balance() -> void:
 	var w: Dictionary = sheet.weapon_stats("sword")
 	var cycle: float = maxf(float(w["cooldown"]),float(w["windup"])+0.15)
 	p.facing = Vector3.LEFT
+	# Walking slowly leaves the walk's pace on the player (speed_scale); the blow must not inherit it.
+	if p.animator:
+		p.animator.speed_scale = 0.45
 	check(p.attack(),"Golpe para medir o delay")
 	check(is_equal_approx(p.attack_wait,float(w["windup"])) and is_equal_approx(p.cooldown,cycle+float(w["weight"])*0.1) and is_equal_approx(p.attack_timer,cycle*0.9),"Golpe inteiro como nos dados, mais 0,1 s por kg antes do próximo golpe; a lentidão não conta o peso")
 	check(is_equal_approx(p.dodge_lock,float(w["windup"])+(cycle-float(w["windup"]))*0.5),"Esquiva volta na metade do delay depois do golpe")
 	check(not p.dodge(),"Sem esquiva antes da metade do delay")
-	if p.animator and p.animator.is_playing() and p.animator.speed_scale > 0.0:
+	if p.animator and p.animator.is_playing():
 		var anim: Animation = p.animator.get_animation(p.animator.current_animation)
 		var at: float = Animacoes.impact(DungeonPlayer.MODEL,p.animator.current_animation,float(w["impacto"]))
-		check(is_equal_approx(p.animator.get_playing_speed()/p.animator.speed_scale,anim.length/(float(w["windup"])/at)),"Animação do golpe acerta no fim do preparo (dura preparo / impacto da animação)")
+		check(is_equal_approx(p.animator.get_playing_speed(),anim.length/(float(w["windup"])/at)),"Animação do golpe acerta no fim do preparo, mesmo saindo de uma caminhada lenta (dura preparo / impacto da animação)")
 	p.set_physics_process(true)
 	await get_tree().create_timer(p.dodge_lock+0.03).timeout
 	var still_slow: bool = p.attack_timer > 0.0
@@ -2359,11 +2386,12 @@ func test_characters() -> void:
 	check(body != null and ResourceLoader.exists("res://assets/originais/mercador.glb") and anim != null and anim.current_animation == "idle","Mercador tem modelo próprio e fica parado em pé")
 	# A monster's swing lands when its windup ends.
 	var e = game.enemies[0]
+	e.animator.speed_scale = 0.6
 	e._begin_attack(game.player)
 	var playing: String = e.animator.current_animation
 	var length: float = e.animator.get_animation(playing).length
 	var hit_at: float = Animacoes.impact(str(e.stats.get("model","")),playing,0.0) * length
-	check(playing == "attack" and is_equal_approx(e.animator.get_playing_speed() / e.animator.speed_scale,hit_at / e.windup),"Golpe do monstro chega no fim do preparo")
+	check(playing == "attack" and is_equal_approx(e.animator.get_playing_speed(),hit_at / e.windup),"Golpe do monstro chega no fim do preparo")
 	e.windup = 0
 	e.animator.play("idle")
 
