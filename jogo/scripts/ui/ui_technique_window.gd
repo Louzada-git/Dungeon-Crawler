@@ -6,7 +6,7 @@ class_name UiTechniqueWindow
 ## bar (keys chosen by the player, changed here too). Changes apply at once,
 ## only out of combat. Does not pause.
 
-var game
+var game: DungeonGame
 var ui
 var selected: String = ""
 var list_box: VBoxContainer
