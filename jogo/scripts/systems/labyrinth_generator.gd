@@ -31,19 +31,18 @@ const LONG_Z := ["catre"]
 static var _loot: Dictionary = {}
 static var _names: Dictionary = {}
 
-static func room_target(floor: int) -> int:
-	var i: int = floor - 1
+static func room_target(floor_number: int) -> int:
+	var i: int = floor_number - 1
 	if i < ROOMS_PER_FLOOR.size():
 		return ROOMS_PER_FLOOR[i]
 	return ROOMS_PER_FLOOR[-1] * int(pow(2, i - ROOMS_PER_FLOOR.size() + 1))
 
 ## Monster strength by depth.
-static func scaling(floor: int) -> Dictionary:
-	return {"health": 1.0 + 0.3 * (floor - 1), "damage": 1.0 + 0.15 * (floor - 1)}
+static func scaling(floor_number: int) -> Dictionary:
+	return {"health": 1.0 + 0.3 * (floor_number - 1), "damage": 1.0 + 0.15 * (floor_number - 1)}
 
 static func _data(path: String) -> Dictionary:
-	var raw = JSON.parse_string(FileAccess.get_file_as_string(path))
-	return raw if raw is Dictionary else {}
+	return DataFile.read(path)
 
 static func loot_tables() -> Dictionary:
 	if _loot.is_empty():
@@ -55,18 +54,18 @@ static func room_names() -> Dictionary:
 		_names = _data("res://data/salas.json")
 	return _names
 
-static func floor_seed(seed: int, floor: int) -> int:
-	return absi(seed * 1000003 + floor * 7919 + 17)
+static func floor_seed(labyrinth_seed: int, floor_number: int) -> int:
+	return absi(labyrinth_seed * 1000003 + floor_number * 7919 + 17)
 
 # --- public -----------------------------------------------------------------------
 
-static func generate(seed: int, floor: int) -> Dictionary:
+static func generate(labyrinth_seed: int, floor_number: int) -> Dictionary:
 	var rng := RandomNumberGenerator.new()
-	rng.seed = floor_seed(seed, floor)
-	var target: int = room_target(floor)
+	rng.seed = floor_seed(labyrinth_seed, floor_number)
+	var target: int = room_target(floor_number)
 	var placed: Dictionary = _place_rooms(rng, target)
 	var rects: Array = placed["rects"]
-	var edges: Array = _connect(rng, rects, floor)
+	var edges: Array = _connect(rng, rects, floor_number)
 	var corridors: Array = _corridors(rng, rects, edges)
 	var floors: Dictionary = {}
 	for r in rects:
@@ -75,11 +74,11 @@ static func generate(seed: int, floor: int) -> Dictionary:
 		_carve(floors, c)
 	var graph: Array = _graph(rects.size(), edges)
 	var depth: Array = _bfs(graph, 0)
-	var types: Array = _assign_types(rng, rects, graph, depth, floor)
+	var types: Array = _assign_types(rng, rects, graph, depth, floor_number)
 	var boss_index: int = types.find("chefe")
 	var desc := {
-		"versao": 1, "id": "labirinto_%d_%d" % [seed, floor], "name": "MUNDO_LABIRINTO_NOME",
-		"mode": "labirinto", "seed": seed, "floor": floor, "cell_size": 2.0,
+		"versao": 1, "id": "labirinto_%d_%d" % [labyrinth_seed, floor_number], "name": "MUNDO_LABIRINTO_NOME",
+		"mode": "labirinto", "seed": labyrinth_seed, "floor": floor_number, "cell_size": 2.0,
 		"size": [placed["size"].x, placed["size"].y],
 		"rooms": [], "corridors": [], "blocked": [], "furniture": [], "containers": [], "enemies": [],
 	}
@@ -95,16 +94,18 @@ static func generate(seed: int, floor: int) -> Dictionary:
 	desc["spawn"] = [spawn_cell.x, spawn_cell.y]
 	desc["camp"] = [camp_cell.x, camp_cell.y]
 	desc["camp_exit"] = [exit_cell.x, exit_cell.y]
-	desc["has_shelter"] = floor == 1
-	desc["stairs_up"] = [exit_cell.x, exit_cell.y] if floor > 1 else null
+	desc["has_shelter"] = floor_number == 1
+	desc["stairs_up"] = null
+	if floor_number > 1:
+		desc["stairs_up"] = [exit_cell.x, exit_cell.y]
 	for cell in [exit_cell, camp_cell, spawn_cell, spawn_cell + Vector2i(0, 1), camp_cell + Vector2i(1, 0)]:
 		occupied[cell] = true
 	for i in rects.size():
 		var r: Rect2i = rects[i]
 		var kind: String = types[i]
-		var room := {"id": "sala_%d" % i, "name": _room_name(rng, kind, used_names, floor), "rect": [r.position.x, r.position.y, r.size.x, r.size.y], "type": kind, "safe": kind == "abrigo", "depth": depth[i]}
+		var room := {"id": "sala_%d" % i, "name": _room_name(rng, kind, used_names), "rect": [r.position.x, r.position.y, r.size.x, r.size.y], "type": kind, "safe": kind == "abrigo", "depth": depth[i]}
 		desc["rooms"].append(room)
-		_fill_room(rng, desc, i, r, kind, floors, occupied, floor)
+		_fill_room(rng, desc, i, r, kind, floors, occupied, floor_number)
 	var boss_rect: Rect2i = rects[boss_index]
 	var down: Vector2i = _free_edge(rng, boss_rect, floors, occupied, true)
 	occupied[down] = true
@@ -191,6 +192,7 @@ static func _place_rooms(rng: RandomNumberGenerator, target: int) -> Dictionary:
 				var pos := Vector2i(rng.randi_range(2, w - size.x - 2), rng.randi_range(2, h - size.y - 2))
 				if i == 0:
 					# Entrance near the bottom-left, so the floor unfolds away from it.
+					@warning_ignore("integer_division")
 					pos = Vector2i(rng.randi_range(2, maxi(2, w / 5)), rng.randi_range(maxi(2, h - h / 4), h - size.y - 2))
 				var candidate := Rect2i(pos, size)
 				var free: bool = true
@@ -212,6 +214,7 @@ static func _place_rooms(rng: RandomNumberGenerator, target: int) -> Dictionary:
 	return {}
 
 static func _center(r: Rect2i) -> Vector2i:
+	@warning_ignore("integer_division")
 	return r.position + r.size / 2
 
 ## Minimum spanning tree over room centers plus a few loops for shortcuts.
@@ -219,7 +222,7 @@ static func _center(r: Rect2i) -> Vector2i:
 ## the tree. Ties go the way the first version (an O(n³) search) went, to the
 ## room that joined the tree first and then the lowest index, so every seed keeps
 ## the labyrinth it always had (saves and the explored map depend on it).
-static func _connect(rng: RandomNumberGenerator, rects: Array, floor: int) -> Array:
+static func _connect(rng: RandomNumberGenerator, rects: Array, floor_number: int) -> Array:
 	var n: int = rects.size()
 	var centers: Array = []
 	for r in rects:
@@ -254,7 +257,7 @@ static func _connect(rng: RandomNumberGenerator, rects: Array, floor: int) -> Ar
 				if d < best[b]:
 					best[b] = d
 					nearest[b] = pick
-	var loop_chance: float = 0.14 + 0.03 * mini(floor - 1, 4)
+	var loop_chance: float = 0.14 + 0.03 * mini(floor_number - 1, 4)
 	for a in n:
 		var near: Array = _two_nearest(centers, a)
 		for k in mini(2, near.size()):
@@ -351,12 +354,12 @@ static func _bfs(graph: Array, start: int) -> Array:
 
 # --- rooms --------------------------------------------------------------------------
 
-static func _assign_types(rng: RandomNumberGenerator, rects: Array, graph: Array, depth: Array, floor: int) -> Array:
+static func _assign_types(rng: RandomNumberGenerator, rects: Array, graph: Array, depth: Array, floor_number: int) -> Array:
 	var n: int = rects.size()
 	var types: Array = []
 	types.resize(n)
 	types.fill("")
-	types[0] = "abrigo" if floor == 1 else "entrada"
+	types[0] = "abrigo" if floor_number == 1 else "entrada"
 	# Boss: farthest room; among equals, the largest.
 	var boss: int = 1
 	for i in range(1, n):
@@ -371,7 +374,9 @@ static func _assign_types(rng: RandomNumberGenerator, rects: Array, graph: Array
 		var t = order[i]
 		order[i] = order[j]
 		order[j] = t
+	@warning_ignore("integer_division")
 	var treasures: int = maxi(1, n / 8)
+	@warning_ignore("integer_division")
 	var lairs: int = maxi(1, n / 10)
 	for i in order:
 		if types[i] != "":
@@ -391,7 +396,7 @@ static func _assign_types(rng: RandomNumberGenerator, rects: Array, graph: Array
 		types[i] = "suprimentos" if rng.randf() < 0.22 else "combate"
 	return types
 
-static func _room_name(rng: RandomNumberGenerator, kind: String, used: Dictionary, floor: int) -> String:
+static func _room_name(rng: RandomNumberGenerator, kind: String, used: Dictionary) -> String:
 	var data: Dictionary = room_names()
 	var bases: Array = data.get("nomes", {}).get(kind, [["Sala", "f"]])
 	var base: Array = bases[rng.randi_range(0, bases.size() - 1)]
@@ -451,7 +456,7 @@ static func _free_inside(rng: RandomNumberGenerator, r: Rect2i, occupied: Dictio
 			return c
 	return Vector2i(-1, -1)
 
-static func _roll_loot(rng: RandomNumberGenerator, table_id: String, floor: int) -> Dictionary:
+static func _roll_loot(rng: RandomNumberGenerator, table_id: String, floor_number: int) -> Dictionary:
 	var table: Dictionary = loot_tables().get(table_id, {})
 	var items: Dictionary = {}
 	for key in table.get("fixed", {}):
@@ -460,7 +465,7 @@ static func _roll_loot(rng: RandomNumberGenerator, table_id: String, floor: int)
 	var entries: Array = []
 	var total: float = 0.0
 	for e in table.get("entries", []):
-		if floor >= int(e[4]):
+		if floor_number >= int(e[4]):
 			entries.append(e)
 			total += float(e[1])
 	for i in rng.randi_range(int(rolls[0]), int(rolls[1])):
@@ -474,8 +479,8 @@ static func _roll_loot(rng: RandomNumberGenerator, table_id: String, floor: int)
 				break
 	return items
 
-static func _pick_enemy(rng: RandomNumberGenerator, floor: int) -> String:
-	var weights: Dictionary = ENEMY_WEIGHTS[mini(floor - 1, ENEMY_WEIGHTS.size() - 1)]
+static func _pick_enemy(rng: RandomNumberGenerator, floor_number: int) -> String:
+	var weights: Dictionary = ENEMY_WEIGHTS[mini(floor_number - 1, ENEMY_WEIGHTS.size() - 1)]
 	var total: int = 0
 	for k in weights:
 		total += weights[k]
@@ -486,7 +491,7 @@ static func _pick_enemy(rng: RandomNumberGenerator, floor: int) -> String:
 			return k
 	return "corrompido"
 
-static func _fill_room(rng: RandomNumberGenerator, desc: Dictionary, index: int, r: Rect2i, kind: String, floors: Dictionary, occupied: Dictionary, floor: int) -> void:
+static func _fill_room(rng: RandomNumberGenerator, desc: Dictionary, index: int, r: Rect2i, kind: String, floors: Dictionary, occupied: Dictionary, floor_number: int) -> void:
 	var tag := "s%d" % index
 	# Furniture along the walls, away from doorways.
 	var pieces: Array = FURNITURE.get(kind, [])
@@ -544,8 +549,8 @@ static func _fill_room(rng: RandomNumberGenerator, desc: Dictionary, index: int,
 		if occupied.has(cell):
 			continue
 		occupied[cell] = true
-		var entry := {"id": "%s_bau_%d" % [tag, n], "name": chest[1], "cell": [cell.x, cell.y], "items": _roll_loot(rng, chest[0], floor), "chest": true}
-		var lock: int = _roll_lock(int(desc["seed"]), floor, index, n, kind)
+		var entry := {"id": "%s_bau_%d" % [tag, n], "name": chest[1], "cell": [cell.x, cell.y], "items": _roll_loot(rng, chest[0], floor_number), "chest": true}
+		var lock: int = _roll_lock(int(desc["seed"]), floor_number, index, n, kind)
 		if lock > 0:
 			entry["lock"] = lock
 		if kind == "chefe":
@@ -557,21 +562,21 @@ static func _fill_room(rng: RandomNumberGenerator, desc: Dictionary, index: int,
 	var area: int = r.get_area()
 	match kind:
 		"combate":
-			for i in clampi(roundi(area / 28.0 * (1.0 + 0.2 * (floor - 1))), 1, 4):
-				foes.append(_pick_enemy(rng, floor))
+			for i in clampi(roundi(area / 28.0 * (1.0 + 0.2 * (floor_number - 1))), 1, 4):
+				foes.append(_pick_enemy(rng, floor_number))
 		"suprimentos":
 			if rng.randf() < 0.5:
-				foes.append(_pick_enemy(rng, floor))
+				foes.append(_pick_enemy(rng, floor_number))
 		"tesouro":
 			for i in rng.randi_range(1, 2):
-				foes.append(_pick_enemy(rng, floor))
+				foes.append(_pick_enemy(rng, floor_number))
 		"covil":
 			foes.append("guardiao")
 			for i in rng.randi_range(1, 2):
-				foes.append(_pick_enemy(rng, floor))
+				foes.append(_pick_enemy(rng, floor_number))
 		"chefe":
 			foes.append("chefe")
-			if floor >= 3:
+			if floor_number >= 3:
 				foes.append("espreitador")
 				foes.append("espreitador")
 	var m: int = 0
@@ -580,20 +585,21 @@ static func _fill_room(rng: RandomNumberGenerator, desc: Dictionary, index: int,
 		if cell.x < 0:
 			continue
 		occupied[cell] = true
-		desc["enemies"].append({"id": "%s_m%d" % [tag, m], "type": foe, "cell": [cell.x, cell.y], "level": floor})
+		desc["enemies"].append({"id": "%s_m%d" % [tag, m], "type": foe, "cell": [cell.x, cell.y], "level": floor_number})
 		m += 1
 
 ## Locks use their own generator so the rest of the floor stays the same for a seed.
 ## Treasure is usually locked; supplies, lairs and combat rooms sometimes.
-static func _roll_lock(seed: int, floor: int, room: int, chest: int, kind: String) -> int:
+static func _roll_lock(labyrinth_seed: int, floor_number: int, room: int, chest: int, kind: String) -> int:
 	var odds: float = {"tesouro": 0.8, "covil": 0.4, "suprimentos": 0.25, "combate": 0.15}.get(kind, 0.0)
 	if odds <= 0.0:
 		return 0
 	var lr := RandomNumberGenerator.new()
-	lr.seed = floor_seed(seed, floor) ^ (room * 7919 + chest * 104729 + 31)
+	lr.seed = floor_seed(labyrinth_seed, floor_number) ^ (room * 7919 + chest * 104729 + 31)
 	if lr.randf() >= odds:
 		return 0
-	var base: int = 1 + (floor - 1) / 2 + (1 if kind == "tesouro" else 0)
+	@warning_ignore("integer_division")
+	var base: int = 1 + (floor_number - 1) / 2 + (1 if kind == "tesouro" else 0)
 	return clampi(base + lr.randi_range(-1, 1), 1, 4)
 
 static func _flood(floors: Dictionary, solid: Dictionary, start: Vector2i) -> Dictionary:
