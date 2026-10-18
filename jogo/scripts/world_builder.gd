@@ -4,6 +4,12 @@ class_name WorldBuilder
 ## (as MultiMeshes, so floors with hundreds of rooms stay light), colliders,
 ## torches, furniture, shelter (with its campfire), stairs and containers.
 
+## Tiles are batched per area of CHUNK × CHUNK cells. The compatibility renderer
+## lights each object with at most 8 lights: one batch for the whole floor left
+## most torches lighting nothing but themselves. Small batches also drop out of
+## the camera's view when they are far.
+const CHUNK := 6
+
 const FURNITURE_SIZE := {
 	"mesa": Vector3(1.4, 0.8, 0.75), "catre": Vector3(0.85, 0.55, 1.95), "banco": Vector3(1.03, 0.48, 0.38),
 	"pilar": Vector3(0.49, 2.35, 0.49), "rochas": Vector3(0.9, 0.5, 0.9),
@@ -56,34 +62,62 @@ static func clear(game) -> void:
 	for shot in game.get_tree().get_nodes_in_group("projeteis"):
 		shot.queue_free()
 
-## One MultiMeshInstance3D per model for repeated tiles (`model` when the
-## batch has its own name, like the two sets of front walls).
-static func _batch(world: Node3D, id: String, transforms: Array, model: String = "") -> MultiMeshInstance3D:
+static var _tile_meshes: Dictionary = {}
+
+## Mesh, placement and material of a tile model (read once per model).
+static func _tile_mesh(model: String) -> Dictionary:
+	if not _tile_meshes.has(model):
+		var scene: Node3D = Visuals.model(model, 1.0)
+		var found: Dictionary = {}
+		for child in scene.get_children():
+			if child is MeshInstance3D:
+				found = {"mesh": child.mesh, "local": child.transform, "material": child.material_override}
+				break
+		scene.free()
+		_tile_meshes[model] = found
+	return _tile_meshes[model]
+
+## Box an area's tiles can occupy: its cells, plus the walls on their edges
+## (half a cell out, and their thickness), 3 m tall.
+static func area_box(area: Vector2i) -> AABB:
+	var edge: float = DungeonLayout.CELL * 0.5 + 0.5
+	var first := Vector3(area.x * CHUNK, 0, area.y * CHUNK) * DungeonLayout.CELL
+	var span: float = (CHUNK - 1) * DungeonLayout.CELL + 2.0 * edge
+	return AABB(first - Vector3(edge, 0, edge), Vector3(span, 3.0, span))
+
+## Area of the floor a cell belongs to (see CHUNK).
+static func chunk_of(cell: Vector2i) -> Vector2i:
+	return Vector2i(floori(cell.x / float(CHUNK)), floori(cell.y / float(CHUNK)))
+
+## Adds a tile transform to its area's list in `groups` (area -> transforms).
+static func _add_tile(groups: Dictionary, cell: Vector2i, t: Transform3D) -> void:
+	var key: Vector2i = chunk_of(cell)
+	if not groups.has(key):
+		groups[key] = []
+	groups[key].append(t)
+
+## One MultiMeshInstance3D for the tiles of one model in one area (`model` when
+## the batch has its own name, like the two sets of front walls).
+static func _batch(world: Node3D, id: String, transforms: Array, model: String = "", area: Vector2i = Vector2i.ZERO) -> MultiMeshInstance3D:
 	if transforms.is_empty():
 		return null
-	var scene: Node3D = Visuals.model(model if model != "" else id, 1.0)
-	var mesh_node: MeshInstance3D = null
-	for child in scene.get_children():
-		if child is MeshInstance3D:
-			mesh_node = child
-			break
-	if mesh_node == null:
-		scene.free()
+	var tile: Dictionary = _tile_mesh(model if model != "" else id)
+	if tile.is_empty():
 		return null
-	var local: Transform3D = mesh_node.transform
+	var local: Transform3D = tile["local"]
 	var multimesh := MultiMesh.new()
 	multimesh.transform_format = MultiMesh.TRANSFORM_3D
-	multimesh.mesh = mesh_node.mesh
+	multimesh.mesh = tile["mesh"]
 	multimesh.instance_count = transforms.size()
 	for i in transforms.size():
 		multimesh.set_instance_transform(i, transforms[i] * local)
 	var instance := MultiMeshInstance3D.new()
 	instance.multimesh = multimesh
-	instance.name = "Lote_" + id
-	if mesh_node.material_override:
-		instance.material_override = mesh_node.material_override
+	instance.name = "Lote_%s_%d_%d" % [id, area.x, area.y]
+	instance.set_meta("area", area)
+	if tile["material"]:
+		instance.material_override = tile["material"]
 	world.add_child(instance)
-	scene.free()
 	return instance
 
 ## Front walls: cut low for the isometric camera (so the room shows), whole in
@@ -91,12 +125,13 @@ static func _batch(world: Node3D, id: String, transforms: Array, model: String =
 static func apply_view(world: Node3D, third_person: bool) -> void:
 	if not is_instance_valid(world):
 		return
-	var low = world.get_node_or_null("Lote_parede_frente_baixa")
-	var tall = world.get_node_or_null("Lote_parede_frente_alta")
-	if low:
-		low.visible = not third_person
-	if tall:
-		tall.visible = third_person
+	for node in world.get_children():
+		if node.has_meta("frente"):
+			node.visible = (node.get_meta("frente") == "alta") == third_person
+
+## The front-wall batches: "baixa" (cut low) or "alta" (whole).
+static func front_walls(world: Node3D, which: String) -> Array:
+	return world.get_children().filter(func(n): return n.get_meta("frente", "") == which)
 
 static func build(game) -> void:
 	var layout = game.layout
@@ -109,10 +144,11 @@ static func build(game) -> void:
 	world.add_child(flicker)
 	var extent := Vector3(layout.size.x * DungeonLayout.CELL + 8, 1, layout.size.y * DungeonLayout.CELL + 8)
 	Visuals.collider(world, extent, Vector3(extent.x * 0.5 - 4, -0.48, extent.z * 0.5 - 4)).name = "Ground"
-	var tiles := {"piso": [], "piso_b": [], "parede": []}
+	# Tile transforms per model, each split by area (see CHUNK).
+	var tiles := {"piso": {}, "piso_b": {}, "parede": {}}
 	# Front walls in two versions: low (isometric cutaway) and whole (third person).
-	var front_low: Array = []
-	var front_tall: Array = []
+	var front_low: Dictionary = {}
+	var front_tall: Dictionary = {}
 	var walls: Dictionary = {}
 	var room_cells: Dictionary = {}
 	for room in layout.rooms:
@@ -126,7 +162,7 @@ static func build(game) -> void:
 		for x in [-0.5, 0.5]:
 			for z in [-0.5, 0.5]:
 				var id: String = "piso_b" if (cell.x * 13 + cell.y * 7) % 5 == 0 else "piso"
-				tiles[id].append(Transform3D(Basis(), center + Vector3(x, 0, z)))
+				_add_tile(tiles[id], cell, Transform3D(Basis(), center + Vector3(x, 0, z)))
 		for offset in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
 			var adjacent: Vector2i = cell + offset
 			if layout.is_floor(adjacent):
@@ -136,16 +172,19 @@ static func build(game) -> void:
 			var at := center + Vector3(offset.x, 0, offset.y)
 			# Keep foreground cutaways while back walls retain human-scale height.
 			if offset.x > 0 or offset.y > 0:
-				front_low.append(Transform3D(basis.scaled(Vector3(1, 0.19, 1)), at))
-				front_tall.append(Transform3D(basis, at))
+				_add_tile(front_low, cell, Transform3D(basis.scaled(Vector3(1, 0.19, 1)), at))
+				_add_tile(front_tall, cell, Transform3D(basis, at))
 				continue
 			if (cell.x + cell.y) % 5 == 0 and room_cells.has(cell):
 				torch(world, center + Vector3(offset.x * 0.75, 1.24, offset.y * 0.75))
-			tiles["parede"].append(Transform3D(basis, at))
+			_add_tile(tiles["parede"], cell, Transform3D(basis, at))
 	for id in tiles:
-		_batch(world, id, tiles[id])
-	_batch(world, "parede_frente_baixa", front_low, "parede")
-	_batch(world, "parede_frente_alta", front_tall, "parede")
+		for area in tiles[id]:
+			_batch(world, id, tiles[id][area], "", area)
+	for area in front_low:
+		_batch(world, "parede_frente_baixa", front_low[area], "parede", area).set_meta("frente", "baixa")
+	for area in front_tall:
+		_batch(world, "parede_frente_alta", front_tall[area], "parede", area).set_meta("frente", "alta")
 	apply_view(world, game.camera_rig != null and game.camera_rig.third_person())
 	var body := StaticBody3D.new()
 	body.name = "Paredes"
