@@ -49,7 +49,7 @@ func run(target) -> void:
 			DirAccess.remove_absolute(path)
 	await frames(5)
 	var p = game.player
-	check(game.generated and game.seed == 777 and game.floor == 1, "Modo labirinto com a semente pedida")
+	check(game.generated and game.labyrinth_seed == 777 and game.current_floor == 1, "Modo labirinto com a semente pedida")
 	check(game.layout.rooms.size() == 10 and game.layout.world["mode"] == "labirinto", "1º andar tem 10 salas geradas")
 	check(game.is_safe() and game.interaction_text() == "" or game.is_safe(), "Começa no abrigo, área segura")
 	check(LabyrinthGenerator.validate(game.layout.world).is_empty(), "Andar em jogo passa na validação do gerador")
@@ -60,9 +60,9 @@ func run(target) -> void:
 	var boss: DungeonEnemy = game.boss()
 	check(boss != null and boss.alive and boss.maximum_health >= 420, "Chefe presente com vida de chefe")
 	near(game.stairs_down_cell())
-	check(game.interaction_text().contains("trancada"), "Descida aparece trancada com o capataz vivo")
+	check(game.interaction_text().contains("trancada") and game.interaction()["action"] == "descida_trancada", "Descida aparece trancada com o capataz vivo")
 	game.interact()
-	check(game.floor == 1, "Não desce enquanto o chefe vive")
+	check(game.current_floor == 1, "Não desce enquanto o chefe vive")
 	# Boss slam hits around it, even behind; fury below half life.
 	p.position = boss.position + Vector3(-2.4, 0, 0)
 	p.health = 100
@@ -154,7 +154,7 @@ func run(target) -> void:
 	var build_ms: int = Time.get_ticks_msec() - t0
 	check(flying == 1 and get_tree().get_nodes_in_group("projeteis").is_empty(), "Flecha em voo some ao trocar de andar")
 	game.inventory.equip("sword")
-	check(game.floor == 2 and game.layout.rooms.size() == 20, "Escada leva ao 2º andar, com 20 salas")
+	check(game.current_floor == 2 and game.layout.rooms.size() == 20, "Escada leva ao 2º andar, com 20 salas")
 	check(game.world_root.get_node_or_null("Fogueira") == null and game.world_root.get_node_or_null("LuzesTremulas").lights.size() > 3, "2º andar sem abrigo não tem fogueira; luzes das tochas tremem")
 	check(build_ms < 4000, "Andar 2 monta em menos de 4 s (%d ms)" % build_ms)
 	# The renderer lights each object with at most 8 lights: chão e paredes go in
@@ -239,7 +239,7 @@ func run(target) -> void:
 	check(game.interaction_text().contains("1º andar"), "Subida leva de volta ao 1º andar")
 	game.interact()
 	await frames(3)
-	check(game.floor == 1 and not game.boss_alive(), "Volta ao 1º andar com o chefe ainda derrotado")
+	check(game.current_floor == 1 and not game.boss_alive(), "Volta ao 1º andar com o chefe ainda derrotado")
 	check(game.floor_descriptions.has(2) and is_same(game.layout.world, game.floor_descriptions[1]), "Andar já visitado não é gerado de novo ao voltar")
 	check(game.merchant != null and game.merchant.position.distance_to(merchant_1) < 0.01 and int(game.shop_stock.get("ration", 0)) == shop_mark, "Mercador do 1º andar no mesmo lugar, com o estoque de antes")
 	check(game.player.position.distance_to(game.layout.to_world(game.stairs_down_cell())) < 3.0, "Chega ao lado da descida ao subir")
@@ -286,7 +286,7 @@ func run(target) -> void:
 	game.interact()
 	await frames(3)
 	game.player.position = game.camp_position
-	check(game.interaction_text().contains("SALVAR"), "Abrigo oferece descansar e salvar")
+	check(game.interaction_text().contains("SALVAR") and game.interaction()["action"] == "descansar", "Abrigo oferece descansar e salvar (o aviso e a tecla E vêm da mesma decisão)")
 	DirAccess.remove_absolute(game.save_path)
 	game.interact()
 	check(not game.ended and FileAccess.file_exists(game.save_path), "Descansar no abrigo salva e a expedição continua")
@@ -318,12 +318,12 @@ func run(target) -> void:
 	check(LabyrinthGenerator.validate(d3).is_empty() and d3["rooms"].size() == 40, "3º andar gerado e válido (%d ms)" % (Time.get_ticks_msec() - t1))
 	# The same seed gives the same labyrinth as before the faster linking (18/10/2026):
 	# saves and the explored map depend on it.
-	var prints := {[777, 1]: "f895154f9ebcf4db5f26083c5cbc56d1", [777, 2]: "474809895286c87e6be41ea38592503b", [777, 3]: "472b83a722bb015731ecc6b6ad178a35", [4242, 5]: "167dfbcc2fdac91270330dbb564e4617", [123456789, 6]: "357e28f86e31de7566606311144a9345"}
-	var same: Array = []
-	for key in prints:
-		if JSON.stringify(LabyrinthGenerator.generate(key[0], key[1])).md5_text() == prints[key]:
-			same.append(key)
-	check(same.size() == prints.size(), "Mesma semente, mesmo labirinto de antes (%d de %d andares conferidos)" % [same.size(), prints.size()])
+	var fingerprints := {[777, 1]: "f895154f9ebcf4db5f26083c5cbc56d1", [777, 2]: "474809895286c87e6be41ea38592503b", [777, 3]: "472b83a722bb015731ecc6b6ad178a35", [4242, 5]: "167dfbcc2fdac91270330dbb564e4617", [123456789, 6]: "357e28f86e31de7566606311144a9345"}
+	var matched: Array = []
+	for key in fingerprints:
+		if JSON.stringify(LabyrinthGenerator.generate(key[0], key[1])).md5_text() == fingerprints[key]:
+			matched.append(key)
+	check(matched.size() == fingerprints.size(), "Mesma semente, mesmo labirinto de antes (%d de %d andares conferidos)" % [matched.size(), fingerprints.size()])
 	t1 = Time.get_ticks_msec()
 	var d7: Dictionary = LabyrinthGenerator.generate(4242, 7)
 	var gen7: int = Time.get_ticks_msec() - t1
