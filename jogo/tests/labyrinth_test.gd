@@ -25,6 +25,18 @@ func frames(n: int) -> void:
 	for i in n:
 		await get_tree().physics_frame
 
+## Lights whose reach touches a tile batch (its box grown by each light's range).
+func lights_on(batch: MultiMeshInstance3D, lights: Array) -> int:
+	# The headless tests run without a renderer, which keeps no tile positions.
+	var box: AABB = WorldBuilder.area_box(batch.get_meta("area"))
+	var n: int = 0
+	for light in lights:
+		var at: Vector3 = light.global_position
+		var closest := Vector3(clampf(at.x, box.position.x, box.end.x), clampf(at.y, box.position.y, box.end.y), clampf(at.z, box.position.z, box.end.z))
+		if closest.distance_to(at) < light.omni_range:
+			n += 1
+	return n
+
 func near(cell: Vector2i) -> void:
 	game.player.position = game.layout.to_world(game._free_neighbour(cell))
 	game.player.reset_transients()
@@ -145,6 +157,15 @@ func run(target) -> void:
 	check(game.floor == 2 and game.layout.rooms.size() == 20, "Escada leva ao 2º andar, com 20 salas")
 	check(game.world_root.get_node_or_null("Fogueira") == null and game.world_root.get_node_or_null("LuzesTremulas").lights.size() > 3, "2º andar sem abrigo não tem fogueira; luzes das tochas tremem")
 	check(build_ms < 4000, "Andar 2 monta em menos de 4 s (%d ms)" % build_ms)
+	# The renderer lights each object with at most 8 lights: chão e paredes go in
+	# batches per area, so every torch lights the tiles around it (one light is
+	# left for the adventurer's own).
+	var torches: Array = game.world_root.find_children("*", "OmniLight3D", true, false)
+	var most: int = 0
+	var batches: Array = game.world_root.find_children("Lote_*", "MultiMeshInstance3D", false, false)
+	for batch in batches:
+		most = maxi(most, lights_on(batch, torches))
+	check(batches.size() > 10 and most <= 7, "Chão e paredes em lotes por área: cada lote recebe no máximo 7 tochas (%d lotes, no máximo %d tochas)" % [batches.size(), most])
 	check(game.layout.is_floor(game.layout.to_cell(p.position)) and game.layout.rooms[0]["rect"].has_point(game.layout.to_cell(p.position)), "Chega na entrada do 2º andar")
 	check(not game.has_shelter() and game.stairs_up_cell() != null, "Andares fundos têm subida e não têm abrigo")
 	var corrupt: DungeonEnemy = null
