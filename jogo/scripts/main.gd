@@ -52,6 +52,10 @@ var seed: int = 0
 var floor: int = 1
 var deepest: int = 1
 var floor_states: Dictionary = {}
+## Floor descriptions already generated in this session (floor -> description):
+## going back up or down does not generate them again. Never changed after
+## generation, so they are kept as they are.
+var floor_descriptions: Dictionary = {}
 var knowledge: Dictionary = {}
 ## Fractions of missed ammunition still owed to the floor (see Projectile._fall).
 var ammo_recovery: Dictionary = {}
@@ -88,7 +92,7 @@ func _ready() -> void:
 	if generated:
 		message_text = "Prepare a mochila. A descida fica na sala do capataz."
 		_choose_seed(args)
-		layout = DungeonLayout.new(LabyrinthGenerator.generate(seed, floor))
+		layout = DungeonLayout.new(floor_description(floor))
 	else:
 		layout = DungeonLayout.new()
 	camp_position = layout.to_world(layout.camp)
@@ -574,7 +578,7 @@ func change_floor(n: int, going_down: bool) -> void:
 	WorldBuilder.clear(self)
 	floor = n
 	deepest = maxi(deepest, n)
-	layout = DungeonLayout.new(LabyrinthGenerator.generate(seed, n))
+	layout = DungeonLayout.new(floor_description(n))
 	camp_position = layout.to_world(layout.camp)
 	WorldBuilder.build(self)
 	setup_content()
@@ -595,6 +599,12 @@ func change_floor(n: int, going_down: bool) -> void:
 		message("%dº andar. %s" % [n, "A descida fica na sala do capataz." if boss_alive() else "Este andar já foi vencido."], 5)
 	else:
 		message("De volta ao %dº andar." % n, 3)
+
+## Description of floor n of this labyrinth, generated once per session.
+func floor_description(n: int) -> Dictionary:
+	if not floor_descriptions.has(n):
+		floor_descriptions[n] = LabyrinthGenerator.generate(seed, n)
+	return floor_descriptions[n]
 
 func _free_neighbour(cell: Vector2i) -> Vector2i:
 	for d in [Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP]:
