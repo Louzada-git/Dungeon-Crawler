@@ -4,7 +4,7 @@ class_name UiStatusPanel
 
 signal open_requested
 
-var game
+var game: DungeonGame
 var cells: Dictionary = {}
 
 ## [id, icon, title]; the tooltip text comes from tip_text, with this adventurer's numbers.
@@ -28,7 +28,7 @@ func tip_text(id: String) -> String:
 			return "Peso na mochila. " + UiMoodles.load_rule(game)
 	return ""
 
-func _init(game_ref) -> void:
+func _init(game_ref: DungeonGame) -> void:
 	game = game_ref
 	custom_minimum_size = Vector2(320, 0)
 	add_theme_stylebox_override("panel", UiStyle.box(UiStyle.PANEL, UiStyle.BORDER_SOFT, 1, Vector4(8, 5, 8, 7)))
