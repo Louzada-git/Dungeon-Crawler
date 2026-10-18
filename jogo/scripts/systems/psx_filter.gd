@@ -308,14 +308,15 @@ func _process(_delta: float) -> void:
 	if _labels.is_empty():
 		return
 	var camera: Camera3D = get_viewport().get_camera_3d()
-	for key in _labels.keys():
+	var stale: Array = []
+	for key in _labels:
 		var entry: Dictionary = _labels[key]
 		var label = entry["label"]
 		var flat: Label = entry["flat"]
 		if not is_instance_valid(label):
-			flat.queue_free()
-			_labels.erase(key)
+			stale.append(key)
 			continue
+		# Big floors have hundreds of hidden labels (sleeping monsters): skip them first.
 		var show: bool = enabled and camera != null and label.is_visible_in_tree() and label.text != "" and not camera.is_position_behind(label.global_position)
 		# Third person (perspective): a wall between the camera and the text hides it.
 		if show and camera.projection != Camera3D.PROJECTION_ORTHOGONAL:
@@ -330,7 +331,11 @@ func _process(_delta: float) -> void:
 			flat.add_theme_font_size_override("font_size", px)
 			flat.add_theme_constant_override("outline_size", maxi(1, roundi(px * float(label.outline_size) / maxf(label.font_size, 1.0))))
 		flat.text = label.text
-		flat.add_theme_color_override("font_color", label.modulate)
-		flat.add_theme_color_override("font_outline_color", label.outline_modulate)
+		# Theme overrides relayout the label: set them only when they change.
+		UiStyle.set_color(flat, label.modulate)
+		UiStyle.set_color(flat, label.outline_modulate, "font_outline_color")
 		flat.size = flat.get_combined_minimum_size()
 		flat.position = (camera.unproject_position(label.global_position) - flat.size * 0.5).round()
+	for key in stale:
+		_labels[key]["flat"].queue_free()
+		_labels.erase(key)
