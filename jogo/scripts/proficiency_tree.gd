@@ -10,11 +10,7 @@ static var ATTRIBUTES: Dictionary = RAW.get("atributos", {})
 const ATTRIBUTE_ORDER := ["forca", "vigor", "agilidade", "destreza"]
 
 static func _load() -> Dictionary:
-	var raw = JSON.parse_string(FileAccess.get_file_as_string(PATH))
-	if not raw is Dictionary or not raw.get("ramos") is Dictionary:
-		push_error("Árvore de proficiências inválida: " + PATH)
-		return {}
-	return raw
+	return DataFile.read(PATH, "ramos")
 
 static func section(key: String) -> Dictionary:
 	return RAW.get(key, {})
