@@ -6,7 +6,7 @@ class_name SaveSystem
 
 const VERSION := 2
 
-static func write(game, notify_user: bool = true) -> bool:
+static func write(game: DungeonGame, notify_user: bool = true) -> bool:
 	if game.ended and not game.won:
 		return false
 	var loot_data: Array = []
@@ -19,7 +19,7 @@ static func write(game, notify_user: bool = true) -> bool:
 	for cell in game.discovered:
 		explored.append([cell.x, cell.y])
 	var p = game.player
-	var data := {"sheet": game.sheet.snapshot(), "version": VERSION, "mode": "labirinto" if game.generated else "fixo", "seed": game.seed, "floor": game.floor, "deepest": game.deepest, "floors": _pack_floors(game), "knowledge": pack_knowledge(game.knowledge), "world": game.layout.world.get("id", ""), "inventory": game.inventory.snapshot(), "tecnicas": game.techniques.snapshot(), "barra_rapida": game.quick_bar.snapshot(), "municao": game.chosen_ammo, "loja": game.shop_stock, "player": {"pos": [p.position.x, p.position.z], "health": p.health, "stamina": p.stamina, "food": p.food, "bleeding": p.bleeding}, "containers": loot_data, "enemies": enemy_data, "explored": explored, "kills": game.kills, "hits": game.hits_received, "won": game.won}
+	var data := {"sheet": game.sheet.snapshot(), "version": VERSION, "mode": "labirinto" if game.generated else "fixo", "seed": game.labyrinth_seed, "floor": game.current_floor, "deepest": game.deepest, "floors": _pack_floors(game), "knowledge": pack_knowledge(game.knowledge), "world": game.layout.world.get("id", ""), "inventory": game.inventory.snapshot(), "tecnicas": game.techniques.snapshot(), "barra_rapida": game.quick_bar.snapshot(), "municao": game.chosen_ammo, "loja": game.shop_stock, "player": {"pos": [p.position.x, p.position.z], "health": p.health, "stamina": p.stamina, "food": p.food, "bleeding": p.bleeding}, "containers": loot_data, "enemies": enemy_data, "explored": explored, "kills": game.kills, "hits": game.hits_received, "won": game.won}
 	var file := FileAccess.open(game.save_path + ".tmp", FileAccess.WRITE)
 	if file == null:
 		game.message("Não foi possível salvar a expedição.")
@@ -33,7 +33,7 @@ static func write(game, notify_user: bool = true) -> bool:
 		game.message("Expedição salva.")
 	return true
 
-static func read(game) -> bool:
+static func read(game: DungeonGame) -> bool:
 	var raw = JSON.parse_string(FileAccess.get_file_as_string(game.save_path))
 	_drop_removed_items(raw)
 	if not valid(game, raw):
@@ -83,9 +83,9 @@ static func read(game) -> bool:
 		game.floor_states = _parse_floors(raw.get("floors", {}))
 		var known: Dictionary = parse_knowledge(raw.get("knowledge", {}))
 		for f in known:
-			if f != game.floor:
+			if f != game.current_floor:
 				game.knowledge[f] = known[f]
-		game.deepest = maxi(int(raw.get("deepest", 1)), game.floor)
+		game.deepest = maxi(int(raw.get("deepest", 1)), game.current_floor)
 	game.discovered.clear()
 	for cell in raw["explored"]:
 		game.discovered[Vector2i(cell[0], cell[1])] = true
@@ -117,7 +117,7 @@ static func restore_enemy(enemy, data: Dictionary) -> void:
 				enemy.stuck[key] = int(stuck[key])
 	if not enemy.alive:
 		enemy.health_label.visible = false
-		Visuals.play(enemy.animator, "die", false)
+		Visuals.play(enemy.animator, "die")
 
 static func pack_knowledge(knowledge: Dictionary) -> Dictionary:
 	var out: Dictionary = {}
@@ -141,10 +141,10 @@ static func parse_knowledge(raw) -> Dictionary:
 		out[int(key)] = cells
 	return out
 
-static func _pack_floors(game) -> Dictionary:
+static func _pack_floors(game: DungeonGame) -> Dictionary:
 	var out: Dictionary = {}
 	for f in game.floor_states:
-		if f != game.floor:
+		if f != game.current_floor:
 			out[str(f)] = game.floor_states[f]
 	return out
 
@@ -157,7 +157,7 @@ static func _parse_floors(raw) -> Dictionary:
 	return out
 
 ## Saves written before containers had ids: match the world description by position.
-static func _legacy_id(game, data: Dictionary) -> String:
+static func _legacy_id(game: DungeonGame, data: Dictionary) -> String:
 	var cell: Vector2i = game.layout.to_cell(Vector3(data["pos"][0], 0, data["pos"][1]))
 	if data.get("chest", true):
 		for entry in game.layout.world["containers"]:
@@ -184,7 +184,7 @@ static func _drop_removed_items(raw) -> void:
 		if chest is Dictionary:
 			Items.drop_removed(chest.get("items"))
 
-static func valid(game, raw) -> bool:
+static func valid(game: DungeonGame, raw) -> bool:
 	if not raw is Dictionary or raw.get("version") != VERSION:
 		return false
 	for key in ["inventory", "player"]:
@@ -195,7 +195,7 @@ static func valid(game, raw) -> bool:
 			return false
 	if raw["enemies"].size() != game.enemies.size():
 		return false
-	if game.generated and (int(raw.get("seed", -1)) != game.seed or int(raw.get("floor", -1)) != game.floor):
+	if game.generated and (int(raw.get("seed", -1)) != game.labyrinth_seed or int(raw.get("floor", -1)) != game.current_floor):
 		return false
 	var p: Dictionary = raw["player"]
 	if not valid_pos(game, p.get("pos")):
@@ -237,7 +237,7 @@ static func valid(game, raw) -> bool:
 		check.capacity = sheet.capacity()
 	return check.restore(raw["inventory"])
 
-static func valid_pos(game, pos) -> bool:
+static func valid_pos(game: DungeonGame, pos) -> bool:
 	if not pos is Array or pos.size() != 2:
 		return false
 	for value in pos:
